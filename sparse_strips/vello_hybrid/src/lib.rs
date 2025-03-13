@@ -37,4 +37,5 @@ pub use render::{Config, GpuStrip, RenderData, RenderParams, Renderer, RendererO
 pub use scene::Scene;
 pub use util::DimensionConstraints;
 pub use vello_common::pixmap::Pixmap;
+pub use peniko;
 pub use peniko::kurbo;
