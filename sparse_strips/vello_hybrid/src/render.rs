@@ -223,6 +223,8 @@ impl Renderer {
             });
 
             let max_texture_dimension_2d = device.limits().max_texture_dimension_2d;
+            // Assert max texture dimension is a power of 2
+            assert!(max_texture_dimension_2d.is_power_of_two(), "Max texture dimension must be a power of 2");
             let alpha_len = render_data.alphas.len();
             // 4 alpha values u32 each per texel
             let alpha_texture_height =
@@ -295,8 +297,7 @@ impl Renderer {
             // Prepare alpha data for the texture with 4 alpha values per texel
             let texture_width = resources.alphas_texture.width();
             let texture_height = resources.alphas_texture.height();
-            let mut alpha_data = vec![0_u32; render_data.alphas.len()];
-            alpha_data[..].copy_from_slice(&render_data.alphas);
+            let mut alpha_data = render_data.alphas.clone();
             alpha_data.resize((texture_width * texture_height * 4) as usize, 0);
 
             queue.write_texture(
@@ -311,7 +312,7 @@ impl Renderer {
                     offset: 0,
                     // 16 bytes per RGBA32Uint texel (4 u32s × 4 bytes each)
                     bytes_per_row: Some(texture_width * 16),
-                    rows_per_image: Some(texture_height),
+                    rows_per_image: None,
                 },
                 wgpu::Extent3d {
                     width: texture_width,
