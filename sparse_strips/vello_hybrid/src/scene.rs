@@ -37,17 +37,40 @@ pub struct Scene {
     pub(crate) blend_mode: BlendMode,
 }
 
+/// A render state which contains the style properties for path rendering and
+/// the current transform.
+#[derive(Debug)]
+struct RenderState {
+    pub(crate) paint: Paint,
+    pub(crate) stroke: Stroke,
+    pub(crate) transform: Affine,
+    pub(crate) fill_rule: Fill,
+    pub(crate) blend_mode: BlendMode,
+}
+
+
 impl Scene {
     /// Create a new render context with the given width and height in pixels.
     pub fn new(width: u16, height: u16) -> Self {
-        // TODO: Use u16 for width/height everywhere else, too.
-        let wide = Wide::new(width.into(), height.into());
+        let render_state = Self::default_render_state();
+        Self {
+            width: width as usize,
+            height: height as usize,
+            wide: Wide::new(width as usize, height as usize),
+            alphas: vec![],
+            line_buf: vec![],
+            tiles: Tiles::new(),
+            strip_buf: vec![],
+            paint: render_state.paint,
+            stroke: render_state.stroke,
+            transform: render_state.transform,
+            fill_rule: render_state.fill_rule,
+            blend_mode: render_state.blend_mode,
+        }
+    }
 
-        let alphas = vec![];
-        let line_buf = vec![];
-        let tiles = Tiles::new();
-        let strip_buf = vec![];
-
+    /// Create default rendering state.
+    fn default_render_state() -> RenderState {
         let transform = Affine::IDENTITY;
         let fill_rule = Fill::NonZero;
         let paint = BLACK.into();
@@ -59,18 +82,10 @@ impl Scene {
             ..Default::default()
         };
         let blend_mode = BlendMode::new(Mix::Normal, Compose::SrcOver);
-
-        Self {
-            width: width.into(),
-            height: height.into(),
-            wide,
-            alphas,
-            line_buf,
-            tiles,
-            strip_buf,
+        RenderState {
             transform,
-            paint,
             fill_rule,
+            paint,
             stroke,
             blend_mode,
         }
@@ -128,9 +143,19 @@ impl Scene {
         self.transform = Affine::IDENTITY;
     }
 
-    /// Reset all rendering state to default values.
     pub fn reset(&mut self) {
         self.wide.reset();
+        self.alphas.clear();
+        self.line_buf.clear();
+        self.tiles.reset();
+        self.strip_buf.clear();
+
+        let render_state = Self::default_render_state();
+        self.transform = render_state.transform;
+        self.fill_rule = render_state.fill_rule;
+        self.paint = render_state.paint;
+        self.stroke = render_state.stroke;
+        self.blend_mode = render_state.blend_mode;
     }
 
     /// Get the width of the render context.
