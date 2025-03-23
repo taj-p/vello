@@ -1,16 +1,23 @@
-/// This integration test ensures that `vello_hybrid` can be used in a browser environment targetting WebGL2.
+/// This integration test ensures that `vello_hybrid` can be used in a browser environment 
+/// targetting WebGL2.
+///
+/// In order to run this locally, you need to have [`wasm-pack`] installed. Install it using
+/// the steps found in https://rustwasm.github.io/wasm-pack/installer/.
+///
+/// Thereafter, you can run this test with `wasm-pack test --chrome --headless`. This assumes
+/// you have chrome installed on your system.
+///
+/// [`wasm-pack`]: https://rustwasm.github.io/wasm-pack/
 
-// Only run on wasm32-unknown-unknown
 #[cfg(target_arch = "wasm32")]
 mod wasm {
     use wasm_bindgen::prelude::*;
-    use wasm_bindgen_futures::JsFuture;
     use wasm_bindgen_test::*;
 
     wasm_bindgen_test_configure!(run_in_browser);
     use vello_common::peniko::{
         color::palette,
-        kurbo::{BezPath, Stroke},
+        kurbo::BezPath,
     };
 
     #[wasm_bindgen]
@@ -28,6 +35,7 @@ mod wasm {
             let width = canvas.width();
             let height = canvas.height();
             let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+                // Target WebGL2
                 backends: wgpu::Backends::GL,
                 ..Default::default()
             });
@@ -100,10 +108,8 @@ mod wasm {
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .unwrap();
 
-        canvas.set_width(100);
-        canvas.set_height(100);
-        canvas.style().set_property("width", "100px").unwrap();
-        canvas.style().set_property("height", "100px").unwrap();
+        canvas.set_width(200);
+        canvas.set_height(200);
 
         // Add canvas to body
         web_sys::Window::document(&web_sys::window().unwrap())
@@ -121,7 +127,7 @@ mod wasm {
             surface,
         } = RendererWrapper::new(canvas).await;
 
-        draw_simple_scene(&mut scene);
+        draw_triangle(&mut scene);
 
         let params = vello_hybrid::RenderParams {
             width: 100,
@@ -161,13 +167,13 @@ mod wasm {
         surface_texture.present();
     }
 
-    fn draw_simple_scene(ctx: &mut vello_hybrid::Scene) {
+    fn draw_triangle(ctx: &mut vello_hybrid::Scene) {
         let mut path = BezPath::new();
-        path.move_to((10.0, 10.0));
-        path.line_to((180.0, 20.0));
-        path.line_to((30.0, 40.0));
+        path.move_to((30.0, 40.0));
+        path.line_to((50.0, 20.0));
+        path.line_to((70.0, 40.0));
         path.close_path();
-        ctx.set_paint(palette::css::REBECCA_PURPLE.into());
+        ctx.set_paint(palette::css::BLUE.into());
         ctx.fill_path(&path);
     }
 }
