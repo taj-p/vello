@@ -55,7 +55,12 @@ mod wasm {
                     &wgpu::DeviceDescriptor {
                         label: None,
                         required_features: wgpu::Features::empty(),
-                        required_limits: wgpu::Limits::downlevel_webgl2_defaults(),
+                        required_limits: wgpu::Limits {
+                            // WGPU's downlevel defaults use a generous number of color attachments
+                            // (8). Some devices (including CI) support only up to 4.
+                            max_color_attachments: 4,
+                            ..wgpu::Limits::downlevel_webgl2_defaults()
+                        },
                         ..Default::default()
                     },
                     None,
