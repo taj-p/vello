@@ -277,6 +277,12 @@ jobs:
   test-stable-wasm:
     name: cargo test (wasm32)
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            gpu: 'yes'
     steps:
       - uses: actions/checkout@v4
 
@@ -292,7 +298,7 @@ jobs:
           save-if: ${{ github.event_name != 'merge_group' }}
 
       # TODO: Find a way to make tests work. Until then the tests are merely compiled.
-      - name: cargo test
+      - name: cargo test compile
         run: cargo test --workspace ${{ env.NO_WASM_PKGS }} --locked --target wasm32-unknown-unknown --all-features --no-run
 
       - uses: browser-actions/setup-chrome@v1
