@@ -301,7 +301,7 @@ jobs:
       - name: cargo test compile
         run: cargo test --workspace ${{ env.NO_WASM_PKGS }} --locked --target wasm32-unknown-unknown --all-features --no-run
 
-      - uses: browser-actions/setup-chrome@v1
+      # - uses: browser-actions/setup-chrome@v1
 
         # Install wasm-pack
       - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
