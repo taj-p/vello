@@ -45,9 +45,8 @@ mod wasm {
 
             let adapter = instance
                 .request_adapter(&wgpu::RequestAdapterOptions {
-                    power_preference: wgpu::PowerPreference::default(),
                     compatible_surface: Some(&surface),
-                    force_fallback_adapter: true,
+                    ..Default::default()
                 })
                 .await
                 .expect("Adapter to be valid");
