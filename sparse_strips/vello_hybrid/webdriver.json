@@ -1,7 +1,9 @@
 {
   "goog:chromeOptions": {
     "args": [
-      "--enable-gpu"
+      "--enable-gpu",
+      "--use-angle=vulkan",
+      "--use-gl=egl"
     ]
   }
 }
