@@ -2738,7 +2738,9 @@ version = "0.4.0"
 dependencies = [
  "bytemuck",
  "console_error_panic_hook",
+ "console_log",
  "js-sys",
+ "log",
  "png",
  "pollster",
  "roxmltree",

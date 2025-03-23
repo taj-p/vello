@@ -25,7 +25,6 @@ mod wasm {
     #[wasm_bindgen]
     impl RendererWrapper {
         pub async fn new(canvas: web_sys::HtmlCanvasElement) -> Self {
-
             let width = canvas.width();
             let height = canvas.height();
             let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
@@ -93,12 +92,18 @@ mod wasm {
     #[wasm_bindgen_test]
     async fn test_renders_triangle() {
         console_error_panic_hook::set_once();
+        console_log::init_with_level(log::Level::Debug).unwrap();
         let canvas = web_sys::Window::document(&web_sys::window().unwrap())
             .unwrap()
             .create_element("canvas")
             .unwrap()
             .dyn_into::<web_sys::HtmlCanvasElement>()
             .unwrap();
+
+        canvas.set_width(100);
+        canvas.set_height(100);
+        canvas.style().set_property("width", "100px").unwrap();
+        canvas.style().set_property("height", "100px").unwrap();
 
         // Add canvas to body
         web_sys::Window::document(&web_sys::window().unwrap())
@@ -107,9 +112,6 @@ mod wasm {
             .unwrap()
             .append_child(&canvas)
             .unwrap();
-
-        canvas.set_width(100);
-        canvas.set_height(100);
 
         let RendererWrapper {
             mut renderer,
