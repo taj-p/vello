@@ -25,7 +25,6 @@ mod wasm {
     #[wasm_bindgen]
     impl RendererWrapper {
         pub async fn new(canvas: web_sys::HtmlCanvasElement) -> Self {
-            console_error_panic_hook::set_once();
 
             let width = canvas.width();
             let height = canvas.height();
@@ -93,6 +92,7 @@ mod wasm {
 
     #[wasm_bindgen_test]
     async fn test_renders_triangle() {
+        console_error_panic_hook::set_once();
         let canvas = web_sys::Window::document(&web_sys::window().unwrap())
             .unwrap()
             .create_element("canvas")
