@@ -2,6 +2,7 @@
   "goog:chromeOptions": {
     "args": [
       "--enable-gpu",
+      "--no-sandbox",
       "--use-angle=vulkan",
       "--use-gl=egl"
     ]
