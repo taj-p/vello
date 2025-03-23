@@ -17,7 +17,7 @@ workspace = true
 [dependencies]
 vello_common = { workspace = true }
 bytemuck = { workspace = true, features = ["derive"] }
-wgpu = { workspace = true }
+wgpu = { workspace = true, features = ["webgl"] }
 
 [dev-dependencies]
 console_error_panic_hook = "0.1.6"

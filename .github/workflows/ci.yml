@@ -306,7 +306,7 @@ jobs:
         # Install wasm-pack
       - run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
-      - run: wasm-pack test --headless --chrome
+      - run: wasm-pack test --headless --firefox
         working-directory: sparse_strips/vello_hybrid
 
   #  check-stable-android:

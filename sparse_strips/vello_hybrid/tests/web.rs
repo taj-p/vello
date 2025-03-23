@@ -35,7 +35,6 @@ mod wasm {
             let width = canvas.width();
             let height = canvas.height();
             let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
-                // Target WebGL2
                 backends: wgpu::Backends::GL,
                 ..Default::default()
             });
@@ -54,10 +53,10 @@ mod wasm {
             let (device, queue) = adapter
                 .request_device(
                     &wgpu::DeviceDescriptor {
-                        label: Some("Primary device"),
+                        label: None,
                         required_features: wgpu::Features::empty(),
                         required_limits: wgpu::Limits::downlevel_webgl2_defaults(),
-                        memory_hints: wgpu::MemoryHints::MemoryUsage,
+                        ..Default::default()
                     },
                     None,
                 )
