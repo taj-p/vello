@@ -556,6 +556,22 @@ fn stroked_glyphs() {
     check_ref(&ctx, "stroked_glyphs");
 }
 
+#[test]
+fn skewed_glyphs() {
+    let mut ctx = get_ctx(300, 70, false);
+    let font_size: f32 = 50_f32;
+    let (font, glyphs) = layout_glyphs("Hello, world!", font_size);
+
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(REBECCA_PURPLE.with_alpha(0.5).into());
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .glyph_transform(Affine::skew(-20_f64.to_radians().tan(), 0.0))
+        .fill_glyphs(glyphs.iter());
+
+    check_ref(&ctx, "skewed_glyphs");
+}
+
 fn layout_glyphs(text: &str, font_size: f32) -> (Font, Vec<Glyph>) {
     const ROBOTO_FONT: &[u8] = include_bytes!("../../../examples/assets/roboto/Roboto-Regular.ttf");
     let font = Font::new(Blob::new(Arc::new(ROBOTO_FONT)), 0);
