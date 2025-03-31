@@ -149,7 +149,7 @@ const HINTING_OPTIONS: HintingOptions = HintingOptions {
 
 struct OutlinePath(BezPath);
 
-// Flips the y-axis to match our coordinate system.
+// Note that we flip the y-axis to match our coordinate system.
 impl OutlinePen for OutlinePath {
     #[inline]
     fn move_to(&mut self, x: f32, y: f32) {
