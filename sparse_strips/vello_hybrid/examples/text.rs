@@ -186,7 +186,8 @@ fn draw_text(ctx: &mut Scene) {
     };
     let axes = font_ref.axes();
     let size = 52_f32;
-    let font_size = skrifa::instance::Size::new(size);
+    let scale = 2.0;
+    let font_size = skrifa::instance::Size::new(size * scale);
     let variations: Vec<(&str, f32)> = vec![];
     let var_loc = axes.location(variations.as_slice());
     let charmap = font_ref.charmap();
@@ -220,7 +221,8 @@ fn draw_text(ctx: &mut Scene) {
         .collect::<Vec<_>>();
 
     ctx.set_paint(palette::css::WHITE.into());
-    let transform = Affine::scale(2.0).then_translate((0., f64::from(size) * 2.0).into());
+    let transform =
+        Affine::scale(f64::from(scale)).then_translate((0., f64::from(size) * 2.0).into());
     ctx.set_transform(transform);
 
     // Fill the text
