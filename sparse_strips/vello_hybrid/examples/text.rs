@@ -193,6 +193,12 @@ fn draw_text(ctx: &mut Scene) {
 
     let text = "Hello, world!";
 
+    // A Vec of Glyphs:
+    // Vec<Glyph {
+    //     id: GlyphId,
+    //     x: f32,
+    //     y: f32,
+    // }>
     let glyphs = text
         .chars()
         .filter_map(|ch| {
@@ -218,6 +224,7 @@ fn draw_text(ctx: &mut Scene) {
     ctx.set_transform(transform);
 
     ctx.draw_glyphs(&font)
+        .normalized_coords(vec![])
         .font_size(size)
         .hint(true)
         .fill_glyphs(glyphs.iter());
