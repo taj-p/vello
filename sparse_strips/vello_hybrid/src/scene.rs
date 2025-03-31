@@ -117,7 +117,7 @@ impl Scene {
 
     /// Creates a builder for drawing a run of glyphs that have the same attributes.
     pub fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self> {
-        GlyphRunBuilder::new(font.clone(), self)
+        GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
     /// Set the blend mode for subsequent rendering operations.
@@ -272,8 +272,7 @@ impl GlyphRenderer for Scene {
         for glyph in glyphs {
             match glyph {
                 PreparedGlyph::Outline(glyph) => {
-                    let transform = self.transform * glyph.local_transform;
-                    flatten::fill(&glyph.path, transform, &mut self.line_buf);
+                    flatten::fill(&glyph.path, glyph.transform, &mut self.line_buf);
                     self.render_path(Fill::NonZero, self.paint.clone());
                 }
             }
@@ -284,8 +283,12 @@ impl GlyphRenderer for Scene {
         for glyph in glyphs {
             match glyph {
                 PreparedGlyph::Outline(glyph) => {
-                    let transform = self.transform * glyph.local_transform;
-                    flatten::stroke(&glyph.path, &self.stroke, transform, &mut self.line_buf);
+                    flatten::stroke(
+                        &glyph.path,
+                        &self.stroke,
+                        glyph.transform,
+                        &mut self.line_buf,
+                    );
                     self.render_path(Fill::NonZero, self.paint.clone());
                 }
             }

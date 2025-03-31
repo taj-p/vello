@@ -27,8 +27,8 @@ pub enum PreparedGlyph {
 pub struct OutlineGlyph {
     /// The path of the glyph.
     pub path: BezPath,
-    /// The local transform of the glyph.
-    pub local_transform: Affine,
+    /// The global transform of the glyph.
+    pub transform: Affine,
 }
 
 /// Trait for types that can render glyphs.
@@ -49,11 +49,12 @@ pub struct GlyphRunBuilder<'a, T: GlyphRenderer + 'a> {
 
 impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     /// Creates a new builder for drawing glyphs.
-    pub fn new(font: Font, renderer: &'a mut T) -> Self {
+    pub fn new(font: Font, transform: Affine, renderer: &'a mut T) -> Self {
         Self {
             run: GlyphRun {
                 font,
                 font_size: 16.0,
+                transform,
                 glyph_transform: None,
                 hint: true,
                 normalized_coords: &[],
@@ -104,13 +105,20 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     ) -> impl Iterator<Item = PreparedGlyph> {
         let font = skrifa::FontRef::from_index(run.font.data.as_ref(), run.font.index).unwrap();
         let outlines = font.outline_glyphs();
-        let size = Size::new(run.font_size);
-        let hinting_instance = if run.hint {
-            // TODO: Cache hinting instance.
-            HintingInstance::new(&outlines, size, run.normalized_coords, HINTING_OPTIONS).ok()
+        let (transform, size, hinting_instance) = if run.hint {
+            let (size, transform) =
+                if let Some((scale, transform)) = take_uniform_scale(run.transform) {
+                    (Size::new(run.font_size * scale as f32), transform)
+                } else {
+                    (Size::new(run.font_size), run.transform)
+                };
+            let hinting_instance =
+                HintingInstance::new(&outlines, size, run.normalized_coords, HINTING_OPTIONS).ok();
+            (transform, size, hinting_instance)
         } else {
-            None
+            (run.transform, Size::new(run.font_size), None)
         };
+
         glyphs.filter_map(move |glyph| {
             let draw_settings = if let Some(hinting_instance) = &hinting_instance {
                 DrawSettings::hinted(hinting_instance, false)
@@ -120,15 +128,30 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             let outline = outlines.get(GlyphId::new(glyph.id))?;
             let mut path = OutlinePath(BezPath::new());
             outline.draw(draw_settings, &mut path).ok()?;
-            let mut transform = Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
+            let mut transform =
+                transform * Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
             if let Some(glyph_transform) = run.glyph_transform {
                 transform *= glyph_transform;
             }
             Some(PreparedGlyph::Outline(OutlineGlyph {
                 path: path.0,
-                local_transform: transform,
+                transform,
             }))
         })
+    }
+}
+
+/// If `transform` has a uniform scale without rotation, return the scale factor and the
+/// transform with the scale factored out. Translation remains unchanged.
+fn take_uniform_scale(transform: Affine) -> Option<(f64, Affine)> {
+    let [a, b, c, d, e, f] = transform.as_coeffs();
+    if a == d && b == 0.0 && c == 0.0 {
+        let scale = a;
+        let transform_without_scale = Affine::new([1.0, 0.0, 0.0, 1.0, e, f]);
+
+        Some((scale, transform_without_scale))
+    } else {
+        None
     }
 }
 
@@ -139,6 +162,8 @@ struct GlyphRun<'a> {
     pub font: Font,
     /// Size of the font in pixels per em.
     pub font_size: f32,
+    /// Global transform for the run.
+    pub transform: Affine,
     /// Per-glyph transform. Can be used to apply skew to simulate italic text.
     pub glyph_transform: Option<Affine>,
     /// Normalized variation coordinates for variable fonts.
@@ -205,4 +230,75 @@ mod tests {
 
     const _NORMALISED_COORD_SIZE_MATCHES: () =
         assert!(size_of::<skrifa::instance::NormalizedCoord>() == size_of::<NormalizedCoord>());
+
+    mod take_uniform_scale {
+        use super::*;
+
+        #[test]
+        fn identity_transform() {
+            let identity = Affine::IDENTITY;
+            let result = take_uniform_scale(identity);
+            assert!(result.is_some());
+            let (scale, transform) = result.unwrap();
+            assert!((scale - 1.0).abs() < 1e-10);
+            assert!(transform == Affine::IDENTITY);
+        }
+
+        #[test]
+        fn pure_uniform_scale() {
+            let scale_transform = Affine::scale(2.5);
+            let result = take_uniform_scale(scale_transform);
+            assert!(result.is_some());
+            let (scale, transform) = result.unwrap();
+            assert!((scale - 2.5).abs() < 1e-10);
+            assert!(transform == Affine::IDENTITY);
+        }
+
+        #[test]
+        fn scale_with_translation() {
+            let scale_translate = Affine::scale(3.0).then_translate(Vec2::new(10.0, 20.0));
+            let result = take_uniform_scale(scale_translate);
+            assert!(result.is_some());
+            let (scale, transform) = result.unwrap();
+            assert!((scale - 3.0).abs() < 1e-10);
+            // The translation should be adjusted by the scale factor
+            assert!(transform == Affine::translate(Vec2::new(10.0, 20.0)));
+        }
+
+        #[test]
+        fn pure_translation() {
+            let translation = Affine::translate(Vec2::new(5.0, 7.0));
+            let result = take_uniform_scale(translation);
+            assert!(result.is_some());
+            let (scale, transform) = result.unwrap();
+            assert!((scale - 1.0).abs() < 1e-10);
+            assert!(transform == translation);
+        }
+
+        #[test]
+        fn non_uniform_scale() {
+            let non_uniform = Affine::scale_non_uniform(2.0, 3.0);
+            assert!(take_uniform_scale(non_uniform).is_none());
+        }
+
+        #[test]
+        fn rotation_transform() {
+            let rotation = Affine::rotate(std::f64::consts::PI / 4.0);
+            assert!(take_uniform_scale(rotation).is_none());
+        }
+
+        #[test]
+        fn skew_transform() {
+            let skew = Affine::skew(0.5, 0.0);
+            assert!(take_uniform_scale(skew).is_none());
+        }
+
+        #[test]
+        fn complex_transform() {
+            let complex = Affine::translate(Vec2::new(10.0, 20.0))
+                .then_rotate(std::f64::consts::PI / 6.0)
+                .then_scale(2.0);
+            assert!(take_uniform_scale(complex).is_none());
+        }
+    }
 }
