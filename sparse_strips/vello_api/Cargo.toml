@@ -13,7 +13,6 @@ publish = false
 
 [dependencies]
 peniko = { workspace = true }
-skrifa = { workspace = true }
 
 [features]
 default = ["std"]

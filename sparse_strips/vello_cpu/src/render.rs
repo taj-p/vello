@@ -6,9 +6,10 @@
 use crate::fine::Fine;
 use vello_common::coarse::Wide;
 use vello_common::flatten::Line;
-use vello_common::glyph::{iter_renderable_glyphs, GlyphRun, PreparedGlyph};
+use vello_common::glyph::{DrawGlyphs, GlyphRenderer, GlyphRun, PreparedGlyph};
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
 use vello_common::paint::Paint;
+use vello_common::peniko::Font;
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
 use vello_common::pixmap::Pixmap;
@@ -94,30 +95,9 @@ impl RenderContext {
         self.stroke_path(&rect.to_path(DEFAULT_TOLERANCE));
     }
 
-    /// Fills a glyph run with the current paint and fill rule.
-    pub fn fill_glyphs(&mut self, run: &GlyphRun) {
-        for glyph in iter_renderable_glyphs(run) {
-            match glyph {
-                PreparedGlyph::Contour((path, transform)) => {
-                    let transform = self.transform * transform;
-                    flatten::fill(&path, transform, &mut self.line_buf);
-                    self.render_path(self.fill_rule, self.paint.clone());
-                }
-            }
-        }
-    }
-
-    /// Strokes a glyph run with the current paint and fill rule.
-    pub fn stroke_glyphs(&mut self, run: &GlyphRun) {
-        for glyph in iter_renderable_glyphs(run) {
-            match glyph {
-                PreparedGlyph::Contour((path, transform)) => {
-                    let transform = self.transform * transform;
-                    flatten::stroke(&path, &self.stroke, transform, &mut self.line_buf);
-                    self.render_path(Fill::NonZero, self.paint.clone());
-                }
-            }
-        }
+    /// Create a builder for drawing glyphs.
+    pub fn draw_glyphs(&mut self, font: &Font) -> DrawGlyphs<'_, Self> {
+        DrawGlyphs::new(font.clone(), self)
     }
 
     /// Set the current blend mode.
@@ -199,5 +179,31 @@ impl RenderContext {
         );
 
         self.wide.generate(&self.strip_buf, fill_rule, paint);
+    }
+}
+
+impl GlyphRenderer for RenderContext {
+    fn fill_glyphs(&mut self, glyphs: impl Iterator<Item = PreparedGlyph>) {
+        for glyph in glyphs {
+            match glyph {
+                PreparedGlyph::Contour((path, transform)) => {
+                    let transform = self.transform * transform;
+                    flatten::fill(&path, transform, &mut self.line_buf);
+                    self.render_path(self.fill_rule, self.paint.clone());
+                }
+            }
+        }
+    }
+
+    fn stroke_glyphs(&mut self, glyphs: impl Iterator<Item = PreparedGlyph>) {
+        for glyph in glyphs {
+            match glyph {
+                PreparedGlyph::Contour((path, transform)) => {
+                    let transform = self.transform * transform;
+                    flatten::stroke(&path, &self.stroke, transform, &mut self.line_buf);
+                    self.render_path(Fill::NonZero, self.paint.clone());
+                }
+            }
+        }
     }
 }

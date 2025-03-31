@@ -10,9 +10,9 @@ use skrifa::raw::FileRef;
 use skrifa::{FontRef, MetadataProvider};
 use std::sync::Arc;
 use vello_common::glyph::{Glyph, GlyphRun};
-use vello_common::kurbo::Affine;
-use vello_common::peniko::{Blob, Font};
+use vello_common::kurbo::{Affine, Rect};
 use vello_common::peniko::color::palette;
+use vello_common::peniko::{Blob, Font};
 use vello_hybrid::{RenderParams, Renderer, Scene};
 use wgpu::RenderPassDescriptor;
 use winit::{
@@ -214,25 +214,20 @@ fn draw_text(ctx: &mut Scene) {
         .collect::<Vec<_>>();
 
     ctx.set_paint(palette::css::WHITE.into());
-    ctx.set_transform(Affine::translate((0., f64::from(size))));
+    let transform = Affine::scale(2.0).then_translate((0., f64::from(size) * 2.0).into());
+    ctx.set_transform(transform);
 
-    ctx.fill_glyphs(&GlyphRun {
-        glyphs: glyphs.clone(),
-        font: font.clone(),
-        font_size: size,
-        transform: Affine::default(),
-        normalized_coords: vec![],
-        hint: true,
-    });
+    ctx.draw_glyphs(&font)
+        .font_size(size)
+        .hint(true)
+        .fill_glyphs(glyphs.iter());
 
-    ctx.stroke_glyphs(&GlyphRun {
-        glyphs,
-        font,
-        font_size: size,
-        transform: Affine::translate((0., 2. * f64::from(size))),
-        normalized_coords: vec![],
-        hint: true,
-    });
+    ctx.set_transform(transform.then_translate((0., f64::from(size) * 2.0).into()));
+
+    ctx.draw_glyphs(&font)
+        .font_size(size)
+        .hint(true)
+        .stroke_glyphs(glyphs.iter());
 }
 
 fn to_font_ref(font: &Font) -> Option<FontRef<'_>> {

@@ -3020,7 +3020,6 @@ name = "vello_api"
 version = "0.4.0"
 dependencies = [
  "peniko",
- "skrifa",
 ]
 
 [[package]]
