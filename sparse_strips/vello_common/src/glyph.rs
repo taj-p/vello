@@ -134,7 +134,10 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
             let mut path = OutlinePath(BezPath::new());
             outline.draw(draw_settings, &mut path).ok()?;
             let transform = Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
-            Some(PreparedGlyph::Contour((path.0, transform)))
+            Some(PreparedGlyph::Contour(ContourGlyph {
+                path: path.0,
+                local_transform: transform,
+            }))
         })
     }
 }
