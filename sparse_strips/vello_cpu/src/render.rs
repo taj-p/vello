@@ -95,7 +95,7 @@ impl RenderContext {
         self.stroke_path(&rect.to_path(DEFAULT_TOLERANCE));
     }
 
-    /// Create a builder for drawing glyphs.
+    /// Creates a builder for drawing a run of glyphs that have the same attributes.
     pub fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self> {
         GlyphRunBuilder::new(font.clone(), self)
     }
