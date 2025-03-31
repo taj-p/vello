@@ -7,6 +7,7 @@ use crate::render::{GpuStrip, RenderData};
 use vello_common::coarse::{Wide, WideTile};
 use vello_common::color::PremulRgba8;
 use vello_common::flatten::Line;
+use vello_common::glyph::{GlyphRun, PreparedGlyph, iter_renderable_glyphs};
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
 use vello_common::paint::Paint;
 use vello_common::peniko::color::palette::css::BLACK;
@@ -106,6 +107,32 @@ impl Scene {
     /// Fill a rectangle with the current paint and fill rule.
     pub fn fill_rect(&mut self, rect: &Rect) {
         self.fill_path(&rect.to_path(DEFAULT_TOLERANCE));
+    }
+
+    /// Fills a glyph run with the current paint and fill rule.
+    pub fn fill_glyphs(&mut self, run: &GlyphRun) {
+        for glyph in iter_renderable_glyphs(run) {
+            match glyph {
+                PreparedGlyph::Contour((path, transform)) => {
+                    let transform = self.transform * transform;
+                    flatten::fill(&path, transform, &mut self.line_buf);
+                    self.render_path(self.fill_rule, self.paint.clone());
+                }
+            }
+        }
+    }
+
+    /// Strokes a glyph run with the current paint and fill rule.
+    pub fn stroke_glyphs(&mut self, run: &GlyphRun) {
+        for glyph in iter_renderable_glyphs(run) {
+            match glyph {
+                PreparedGlyph::Contour((path, transform)) => {
+                    let transform = self.transform * transform;
+                    flatten::stroke(&path, &self.stroke, transform, &mut self.line_buf);
+                    self.render_path(Fill::NonZero, self.paint.clone());
+                }
+            }
+        }
     }
 
     /// Stroke a rectangle with the current paint and stroke settings.

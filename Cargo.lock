@@ -3020,6 +3020,7 @@ name = "vello_api"
 version = "0.4.0"
 dependencies = [
  "peniko",
+ "skrifa",
 ]
 
 [[package]]
@@ -3038,6 +3039,7 @@ name = "vello_common"
 version = "0.4.0"
 dependencies = [
  "roxmltree",
+ "skrifa",
  "vello_api",
 ]
 
@@ -3069,6 +3071,7 @@ dependencies = [
  "png",
  "pollster",
  "roxmltree",
+ "skrifa",
  "vello_common",
  "wgpu",
  "winit",
