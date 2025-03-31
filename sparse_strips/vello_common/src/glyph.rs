@@ -42,12 +42,12 @@ pub trait GlyphRenderer {
 
 /// A builder for configuring and drawing glyphs.
 #[derive(Debug)]
-pub struct DrawGlyphs<'a, T: GlyphRenderer + 'a> {
+pub struct GlyphRunBuilder<'a, T: GlyphRenderer + 'a> {
     run: GlyphRun,
     renderer: &'a mut T,
 }
 
-impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
+impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     /// Creates a new builder for drawing glyphs.
     pub fn new(font: Font, renderer: &'a mut T) -> Self {
         Self {

@@ -6,7 +6,7 @@
 use crate::fine::Fine;
 use vello_common::coarse::Wide;
 use vello_common::flatten::Line;
-use vello_common::glyph::{DrawGlyphs, GlyphRenderer, PreparedGlyph};
+use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder, PreparedGlyph};
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
 use vello_common::paint::Paint;
 use vello_common::peniko::Font;
@@ -96,8 +96,8 @@ impl RenderContext {
     }
 
     /// Create a builder for drawing glyphs.
-    pub fn draw_glyphs(&mut self, font: &Font) -> DrawGlyphs<'_, Self> {
-        DrawGlyphs::new(font.clone(), self)
+    pub fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self> {
+        GlyphRunBuilder::new(font.clone(), self)
     }
 
     /// Set the current blend mode.

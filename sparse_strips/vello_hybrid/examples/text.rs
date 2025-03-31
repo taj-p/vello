@@ -223,7 +223,7 @@ fn draw_text(ctx: &mut Scene) {
     let transform = Affine::scale(2.0).then_translate((0., f64::from(size) * 2.0).into());
     ctx.set_transform(transform);
 
-    ctx.draw_glyphs(&font)
+    ctx.glyph_run(&font)
         .normalized_coords(vec![])
         .font_size(size)
         .hint(true)
@@ -231,7 +231,7 @@ fn draw_text(ctx: &mut Scene) {
 
     ctx.set_transform(transform.then_translate((0., f64::from(size) * 2.0).into()));
 
-    ctx.draw_glyphs(&font)
+    ctx.glyph_run(&font)
         .font_size(size)
         .hint(true)
         .stroke_glyphs(glyphs.iter());
