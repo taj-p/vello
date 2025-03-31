@@ -3048,6 +3048,7 @@ version = "0.4.0"
 dependencies = [
  "image",
  "oxipng",
+ "skrifa",
  "vello_common",
 ]
 
