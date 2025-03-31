@@ -240,7 +240,7 @@ fn draw_text(ctx: &mut Scene) {
 fn to_font_ref(font: &Font) -> Option<FontRef<'_>> {
     let file_ref = FileRef::new(font.data.as_ref()).ok()?;
     match file_ref {
-        FileRef::Font(font) => Some(font),
+        FileRef::Font(f) => Some(f),
         FileRef::Collection(collection) => collection.get(font.index).ok(),
     }
 }
