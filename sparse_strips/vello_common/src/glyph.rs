@@ -105,7 +105,11 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
         let normalized_coords = run.normalized_coords.as_slice();
         let hinting_instance = if run.hint {
             // TODO: Cache hinting instance.
-            Some(HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).unwrap())
+            if let Some(instance) = HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).ok() {
+                Some(instance)
+            } else {
+                None
+            }
         } else {
             None
         };
