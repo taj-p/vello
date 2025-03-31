@@ -31,19 +31,6 @@ pub struct ContourGlyph {
     pub local_transform: Affine,
 }
 
-/// A sequence of glyphs with shared rendering properties.
-#[derive(Clone, Debug)]
-pub struct GlyphRun {
-    /// Font for all glyphs in the run.
-    pub font: Font,
-    /// Size of the font in pixels per em.
-    pub font_size: f32,
-    /// Normalized variation coordinates for variable fonts.
-    pub normalized_coords: Vec<NormalizedCoord>,
-    /// Controls whether font hinting is enabled.
-    pub hint: bool,
-}
-
 /// Trait for types that can render glyphs.
 pub trait GlyphRenderer {
     /// Fill glyphs with the current paint and fill rule.
@@ -140,6 +127,19 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
             }))
         })
     }
+}
+
+/// A sequence of glyphs with shared rendering properties.
+#[derive(Clone, Debug)]
+struct GlyphRun {
+    /// Font for all glyphs in the run.
+    pub font: Font,
+    /// Size of the font in pixels per em.
+    pub font_size: f32,
+    /// Normalized variation coordinates for variable fonts.
+    pub normalized_coords: Vec<NormalizedCoord>,
+    /// Controls whether font hinting is enabled.
+    pub hint: bool,
 }
 
 // TODO: Although these are sane defaults, we might want to make them
