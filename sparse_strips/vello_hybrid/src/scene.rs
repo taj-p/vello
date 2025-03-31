@@ -271,7 +271,7 @@ impl GlyphRenderer for Scene {
     fn fill_glyphs(&mut self, glyphs: impl Iterator<Item = PreparedGlyph>) {
         for glyph in glyphs {
             match glyph {
-                PreparedGlyph::Contour(glyph) => {
+                PreparedGlyph::Outline(glyph) => {
                     let transform = self.transform * glyph.local_transform;
                     flatten::fill(&glyph.path, transform, &mut self.line_buf);
                     self.render_path(self.fill_rule, self.paint.clone());
@@ -283,7 +283,7 @@ impl GlyphRenderer for Scene {
     fn stroke_glyphs(&mut self, glyphs: impl Iterator<Item = PreparedGlyph>) {
         for glyph in glyphs {
             match glyph {
-                PreparedGlyph::Contour(glyph) => {
+                PreparedGlyph::Outline(glyph) => {
                     let transform = self.transform * glyph.local_transform;
                     flatten::stroke(&glyph.path, &self.stroke, transform, &mut self.line_buf);
                     self.render_path(Fill::NonZero, self.paint.clone());

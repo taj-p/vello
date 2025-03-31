@@ -17,14 +17,14 @@ pub use vello_api::glyph::*;
 /// A glyph prepared for rendering.
 #[derive(Debug)]
 pub enum PreparedGlyph {
-    /// A contour glyph.
-    Contour(ContourGlyph),
+    /// A glyph defined by its outline.
+    Outline(OutlineGlyph),
     // TODO: Image and Colr variants.
 }
 
 /// A glyph defined by a path (its outline) and a local transform.
 #[derive(Debug)]
-pub struct ContourGlyph {
+pub struct OutlineGlyph {
     /// The path of the glyph.
     pub path: BezPath,
     /// The local transform of the glyph.
@@ -121,7 +121,7 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
             let mut path = OutlinePath(BezPath::new());
             outline.draw(draw_settings, &mut path).ok()?;
             let transform = Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
-            Some(PreparedGlyph::Contour(ContourGlyph {
+            Some(PreparedGlyph::Outline(OutlineGlyph {
                 path: path.0,
                 local_transform: transform,
             }))
