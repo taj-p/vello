@@ -6,8 +6,8 @@
 mod common;
 
 use common::{RenderContext, RenderSurface, create_vello_renderer, create_winit_window};
+use skrifa::MetadataProvider;
 use skrifa::raw::FileRef;
-use skrifa::{FontRef, MetadataProvider};
 use std::sync::Arc;
 use vello_common::glyph::Glyph;
 use vello_common::kurbo::Affine;
