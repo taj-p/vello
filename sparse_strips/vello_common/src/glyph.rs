@@ -101,19 +101,13 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
         let normalized_coords = run.normalized_coords.as_slice();
         let hinting_instance = if run.hint {
             // TODO: Cache hinting instance.
-            if let Some(instance) =
-                HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).ok()
-            {
-                Some(instance)
-            } else {
-                None
-            }
+            HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).ok()
         } else {
             None
         };
         glyphs.filter_map(move |glyph| {
             let draw_settings = if let Some(hinting_instance) = &hinting_instance {
-                DrawSettings::hinted(&hinting_instance, false)
+                DrawSettings::hinted(hinting_instance, false)
             } else {
                 DrawSettings::unhinted(size, normalized_coords)
             };
