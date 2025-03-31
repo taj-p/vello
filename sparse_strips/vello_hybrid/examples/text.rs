@@ -9,8 +9,8 @@ use common::{RenderContext, RenderSurface, create_vello_renderer, create_winit_w
 use skrifa::raw::FileRef;
 use skrifa::{FontRef, MetadataProvider};
 use std::sync::Arc;
-use vello_common::glyph::{Glyph, GlyphRun};
-use vello_common::kurbo::{Affine, Rect};
+use vello_common::glyph::Glyph;
+use vello_common::kurbo::Affine;
 use vello_common::peniko::color::palette;
 use vello_common::peniko::{Blob, Font};
 use vello_hybrid::{RenderParams, Renderer, Scene};
