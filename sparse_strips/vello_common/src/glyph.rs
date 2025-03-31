@@ -78,6 +78,7 @@ impl OutlinePen for OutlinePath {
     }
 }
 
+// TODO: Make this configurable.
 const HINTING_OPTIONS: HintingOptions = HintingOptions {
     engine: skrifa::outline::Engine::AutoFallback,
     target: skrifa::outline::Target::Smooth {

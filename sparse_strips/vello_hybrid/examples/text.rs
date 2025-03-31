@@ -12,10 +12,7 @@ use std::sync::Arc;
 use vello_common::glyph::{Glyph, GlyphRun};
 use vello_common::kurbo::Affine;
 use vello_common::peniko::{Blob, Font};
-use vello_common::peniko::{
-    color::palette,
-    kurbo::{BezPath, Stroke},
-};
+use vello_common::peniko::color::palette;
 use vello_hybrid::{RenderParams, Renderer, Scene};
 use wgpu::RenderPassDescriptor;
 use winit::{
@@ -27,10 +24,8 @@ use winit::{
 
 const ROBOTO_FONT: &[u8] = include_bytes!("../../../examples/assets/roboto/Roboto-Regular.ttf");
 
-/// Main entry point for the simple GPU renderer example.
-/// Creates a window and continuously renders a simple scene using the hybrid CPU/GPU renderer.
 fn main() {
-    let mut app = SimpleVelloApp {
+    let mut app = App {
         context: RenderContext::new(),
         renderers: vec![],
         state: RenderState::Suspended(None),
@@ -52,14 +47,14 @@ enum RenderState<'s> {
     Suspended(Option<Arc<Window>>),
 }
 
-struct SimpleVelloApp<'s> {
+struct App<'s> {
     context: RenderContext,
     renderers: Vec<Option<Renderer>>,
     state: RenderState<'s>,
     scene: Scene,
 }
 
-impl ApplicationHandler for SimpleVelloApp<'_> {
+impl ApplicationHandler for App<'_> {
     fn suspended(&mut self, _event_loop: &ActiveEventLoop) {
         if let RenderState::Active { window, .. } = &self.state {
             self.state = RenderState::Suspended(Some(window.clone()));
@@ -180,7 +175,6 @@ impl ApplicationHandler for SimpleVelloApp<'_> {
     }
 }
 
-/// Draws a simple scene with shapes
 fn draw_text(ctx: &mut Scene) {
     let font = Font::new(Blob::new(Arc::new(ROBOTO_FONT)), 0);
     let font_ref = to_font_ref(&font).unwrap();
@@ -193,6 +187,7 @@ fn draw_text(ctx: &mut Scene) {
     let metrics = font_ref.metrics(font_size, &var_loc);
     let line_height = metrics.ascent - metrics.descent + metrics.leading;
     let glyph_metrics = font_ref.glyph_metrics(font_size, &var_loc);
+
     let mut pen_x = 0_f32;
     let mut pen_y = 0_f32;
 
