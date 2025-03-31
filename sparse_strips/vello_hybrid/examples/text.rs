@@ -177,7 +177,13 @@ impl ApplicationHandler for App<'_> {
 
 fn draw_text(ctx: &mut Scene) {
     let font = Font::new(Blob::new(Arc::new(ROBOTO_FONT)), 0);
-    let font_ref = to_font_ref(&font).unwrap();
+    let font_ref = {
+        let file_ref = FileRef::new(font.data.as_ref()).unwrap();
+        match file_ref {
+            FileRef::Font(f) => f,
+            FileRef::Collection(collection) => collection.get(font.index).unwrap(),
+        }
+    };
     let axes = font_ref.axes();
     let size = 52_f32;
     let font_size = skrifa::instance::Size::new(size);
@@ -193,12 +199,6 @@ fn draw_text(ctx: &mut Scene) {
 
     let text = "Hello, world!";
 
-    // A Vec of Glyphs:
-    // Vec<Glyph {
-    //     id: GlyphId,
-    //     x: f32,
-    //     y: f32,
-    // }>
     let glyphs = text
         .chars()
         .filter_map(|ch| {
@@ -235,12 +235,4 @@ fn draw_text(ctx: &mut Scene) {
         .font_size(size)
         .hint(true)
         .stroke_glyphs(glyphs.iter());
-}
-
-fn to_font_ref(font: &Font) -> Option<FontRef<'_>> {
-    let file_ref = FileRef::new(font.data.as_ref()).ok()?;
-    match file_ref {
-        FileRef::Font(f) => Some(f),
-        FileRef::Collection(collection) => collection.get(font.index).ok(),
-    }
 }
