@@ -18,8 +18,17 @@ pub use vello_api::glyph::*;
 #[derive(Debug)]
 pub enum PreparedGlyph {
     /// A contour glyph.
-    Contour((BezPath, Affine)),
+    Contour(ContourGlyph),
     // TODO: Image and Colr variants.
+}
+
+/// A glyph defined by a path (its outline) and a local transform.
+#[derive(Debug)]
+pub struct ContourGlyph {
+    /// The path of the glyph.
+    pub path: BezPath,
+    /// The local transform of the glyph.
+    pub local_transform: Affine,
 }
 
 /// A sequence of glyphs with shared rendering properties.
@@ -105,7 +114,9 @@ impl<'a, T: GlyphRenderer + 'a> DrawGlyphs<'a, T> {
         let normalized_coords = run.normalized_coords.as_slice();
         let hinting_instance = if run.hint {
             // TODO: Cache hinting instance.
-            if let Some(instance) = HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).ok() {
+            if let Some(instance) =
+                HintingInstance::new(&outlines, size, normalized_coords, HINTING_OPTIONS).ok()
+            {
                 Some(instance)
             } else {
                 None
