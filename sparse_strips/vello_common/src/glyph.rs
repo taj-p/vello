@@ -54,6 +54,7 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             run: GlyphRun {
                 font,
                 font_size: 16.0,
+                glyph_transform: None,
                 hint: true,
                 normalized_coords: Vec::new(),
             },
@@ -64,6 +65,12 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     /// Set the font size in pixels per em.
     pub fn font_size(mut self, size: f32) -> Self {
         self.run.font_size = size;
+        self
+    }
+
+    /// Set the per-glyph transform. Can be used to apply skew to simulate italic text.
+    pub fn glyph_transform(mut self, transform: Affine) -> Self {
+        self.run.glyph_transform = Some(transform);
         self
     }
 
@@ -114,7 +121,10 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             let outline = outlines.get(GlyphId::new(glyph.id))?;
             let mut path = OutlinePath(BezPath::new());
             outline.draw(draw_settings, &mut path).ok()?;
-            let transform = Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
+            let mut transform = Affine::translate(Vec2::new(glyph.x as f64, glyph.y as f64));
+            if let Some(glyph_transform) = run.glyph_transform {
+                transform *= glyph_transform;
+            }
             Some(PreparedGlyph::Outline(OutlineGlyph {
                 path: path.0,
                 local_transform: transform,
@@ -130,6 +140,8 @@ struct GlyphRun {
     pub font: Font,
     /// Size of the font in pixels per em.
     pub font_size: f32,
+    /// Per-glyph transform. Can be used to apply skew to simulate italic text.
+    pub glyph_transform: Option<Affine>,
     /// Normalized variation coordinates for variable fonts.
     pub normalized_coords: Vec<NormalizedCoord>,
     /// Controls whether font hinting is enabled.
