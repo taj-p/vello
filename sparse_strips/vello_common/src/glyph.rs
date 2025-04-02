@@ -88,16 +88,16 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     }
 
     /// Consumes the builder and fills the glyphs with the current configuration.
-    pub fn fill_glyphs(self, glyphs: impl Iterator<Item = &'a Glyph>) {
+    pub fn fill_glyphs(self, glyphs: impl Iterator<Item = Glyph>) {
         self.render(glyphs, Style::Fill);
     }
 
     /// Consumes the builder and strokes the glyphs with the current configuration.
-    pub fn stroke_glyphs(self, glyphs: impl Iterator<Item = &'a Glyph>) {
+    pub fn stroke_glyphs(self, glyphs: impl Iterator<Item = Glyph>) {
         self.render(glyphs, Style::Stroke);
     }
 
-    fn render(self, glyphs: impl Iterator<Item = &'a Glyph>, style: Style) {
+    fn render(self, glyphs: impl Iterator<Item = Glyph>, style: Style) {
         let font =
             skrifa::FontRef::from_index(self.run.font.data.as_ref(), self.run.font.index).unwrap();
         let outlines = font.outline_glyphs();
@@ -124,10 +124,9 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             Style::Fill => GlyphRenderer::fill_glyph,
             Style::Stroke => GlyphRenderer::stroke_glyph,
         };
-        // Re-use the same `path` allocation for each glyph.
+        // Reuse the same `path` allocation for each glyph.
         let mut path = OutlinePath(BezPath::new());
         for glyph in glyphs {
-            path.0.truncate(0);
             let draw_settings = if let Some(hinting_instance) = &hinting_instance {
                 DrawSettings::hinted(hinting_instance, false)
             } else {
@@ -136,6 +135,7 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             let Some(outline) = outlines.get(GlyphId::new(glyph.id)) else {
                 continue;
             };
+            path.0.truncate(0);
             if outline.draw(draw_settings, &mut path).is_err() {
                 continue;
             }
@@ -165,17 +165,17 @@ enum Style {
 #[derive(Clone, Debug)]
 struct GlyphRun<'a> {
     /// Font for all glyphs in the run.
-    pub font: Font,
+    font: Font,
     /// Size of the font in pixels per em.
-    pub font_size: f32,
+    font_size: f32,
     /// Global transform.
-    pub transform: Affine,
+    transform: Affine,
     /// Per-glyph transform. Can be used to apply skew to simulate italic text.
-    pub glyph_transform: Option<Affine>,
+    glyph_transform: Option<Affine>,
     /// Normalized variation coordinates for variable fonts.
-    pub normalized_coords: &'a [skrifa::instance::NormalizedCoord],
+    normalized_coords: &'a [skrifa::instance::NormalizedCoord],
     /// Controls whether font hinting is enabled.
-    pub hint: bool,
+    hint: bool,
 }
 
 /// If `transform` has a uniform scale without rotation or skew, return the scale factor and the
