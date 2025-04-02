@@ -4,6 +4,7 @@
 //! Processing and drawing glyphs.
 
 use crate::peniko::Font;
+use skrifa::OutlineGlyphCollection;
 use skrifa::instance::Size;
 use skrifa::outline::DrawSettings;
 use skrifa::{
@@ -98,26 +99,27 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
     }
 
     fn render(self, glyphs: impl Iterator<Item = Glyph>, style: Style) {
-        let font =
-            skrifa::FontRef::from_index(self.run.font.data.as_ref(), self.run.font.index).unwrap();
+        let run = self.run;
+        let font = skrifa::FontRef::from_index(run.font.data.as_ref(), run.font.index).unwrap();
         let outlines = font.outline_glyphs();
-        let (transform, size, scale, hinting_instance) = if self.run.hint {
-            let (transform, size, scale) =
-                if let Some((scale, transform)) = take_uniform_scale(self.run.transform) {
-                    (
-                        transform,
-                        Size::new(self.run.font_size * scale as f32),
-                        scale,
-                    )
-                } else {
-                    (self.run.transform, Size::new(self.run.font_size), 1.0)
-                };
-            let hinting_instance =
-                HintingInstance::new(&outlines, size, self.run.normalized_coords, HINTING_OPTIONS)
-                    .ok();
-            (transform, size, scale, hinting_instance)
+        let (transform, size, scale, hinting_instance) = if run.hint {
+            // Hinting doesn't make sense if we later scale the glyphs via `transform`. So, if this glyph can be
+            // scaled uniformly, we scale its font size and use that for hinting. If the glyph is rotated or skewed,
+            // hinting is not applicable.
+            if let Some((scale, transform)) = take_uniform_scale(run.transform) {
+                let size = Size::new(run.font_size * scale as f32);
+                (
+                    transform,
+                    size,
+                    scale,
+                    HintingInstance::new(&outlines, size, run.normalized_coords, HINTING_OPTIONS)
+                        .ok(),
+                )
+            } else {
+                (run.transform, Size::new(run.font_size), 1.0, None)
+            }
         } else {
-            (self.run.transform, Size::new(self.run.font_size), 1.0, None)
+            (run.transform, Size::new(run.font_size), 1.0, None)
         };
 
         let render_glyph = match style {
@@ -130,7 +132,7 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             let draw_settings = if let Some(hinting_instance) = &hinting_instance {
                 DrawSettings::hinted(hinting_instance, false)
             } else {
-                DrawSettings::unhinted(size, self.run.normalized_coords)
+                DrawSettings::unhinted(size, run.normalized_coords)
             };
             let Some(outline) = outlines.get(GlyphId::new(glyph.id)) else {
                 continue;
@@ -141,7 +143,7 @@ impl<'a, T: GlyphRenderer + 'a> GlyphRunBuilder<'a, T> {
             }
             let mut local_transform =
                 Affine::translate(Vec2::new(glyph.x as f64 * scale, glyph.y as f64 * scale));
-            if let Some(glyph_transform) = self.run.glyph_transform {
+            if let Some(glyph_transform) = run.glyph_transform {
                 local_transform *= glyph_transform;
             }
 
@@ -179,7 +181,7 @@ struct GlyphRun<'a> {
 }
 
 /// If `transform` has a uniform scale without rotation or skew, return the scale factor and the
-/// transform with the scale factored out. Translation remains unchanged.
+/// transform with the scale factored out. Translation is unchanged.
 fn take_uniform_scale(transform: Affine) -> Option<(f64, Affine)> {
     let [a, b, c, d, e, f] = transform.as_coeffs();
     if a == d && b == 0.0 && c == 0.0 {
