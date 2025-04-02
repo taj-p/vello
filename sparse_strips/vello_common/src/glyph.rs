@@ -4,7 +4,6 @@
 //! Processing and drawing glyphs.
 
 use crate::peniko::Font;
-use skrifa::OutlineGlyphCollection;
 use skrifa::instance::Size;
 use skrifa::outline::DrawSettings;
 use skrifa::{
