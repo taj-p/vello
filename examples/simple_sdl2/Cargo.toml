@@ -14,4 +14,4 @@ workspace = true
 # remove the path property of the following Vello dependency requirement.
 vello = { version = "0.4.0", path = "../../vello" }
 pollster = "0.4.0"
-sdl2 = { version = "0.37.0", features = ["raw-window-handle", "bundled"] }
+sdl2 = { git = "https://github.com/taj-p/rust-sdl2.git", rev = "1bd2d178d355e82b8165a125be8a455737889664", features = ["raw-window-handle", "bundled"] }
