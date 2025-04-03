@@ -11,17 +11,17 @@ mod common;
 
 use std::sync::Arc;
 
-use common::{create_vello_renderer, create_winit_window, render_svg};
-use peniko::color::palette;
-use vello_common::pico_svg::PicoSvg;
-use vello_hybrid::{
-    RenderParams, Renderer, Scene,
-    util::{RenderContext, RenderSurface},
+use common::{
+    RenderContext, RenderSurface, create_vello_renderer, create_winit_window, render_svg,
 };
+use vello_common::pico_svg::PicoSvg;
+use vello_hybrid::{RenderParams, Renderer, Scene};
+use wgpu::RenderPassDescriptor;
 use winit::{
     application::ApplicationHandler,
-    event::WindowEvent,
+    event::{ElementState, KeyEvent, MouseScrollDelta, WindowEvent},
     event_loop::{ActiveEventLoop, EventLoop},
+    keyboard::{Key, NamedKey},
     window::{Window, WindowId},
 };
 
@@ -33,6 +33,8 @@ fn main() {
         renderers: vec![],
         state: RenderState::Suspended(None),
         scene: Scene::new(1600, 1200),
+        render_scale: 5.0,
+        parsed_svg: None,
     };
 
     let event_loop = EventLoop::new().expect("Couldn't create event loop");
@@ -40,6 +42,11 @@ fn main() {
         .run_app(&mut app)
         .expect("Couldn't run event loop");
 }
+
+// Constants for zoom behavior
+const MIN_SCALE: f64 = 0.1;
+const MAX_SCALE: f64 = 20.0;
+const ZOOM_STEP: f64 = 0.5;
 
 #[derive(Debug)]
 enum RenderState<'s> {
@@ -68,13 +75,22 @@ struct SvgVelloApp<'s> {
     // description a scene to be drawn (with paths, fills, images, text, etc)
     // which is then passed to a renderer for rendering
     scene: Scene,
+
+    // The scale factor for the rendered SVG
+    render_scale: f64,
+
+    // The parsed SVG
+    parsed_svg: Option<PicoSvg>,
+}
+
+impl SvgVelloApp<'_> {
+    /// Adjust the render scale by the given delta, clamping to min/max values
+    fn adjust_scale(&mut self, delta: f64) {
+        self.render_scale = (self.render_scale + delta).clamp(MIN_SCALE, MAX_SCALE);
+    }
 }
 
 impl ApplicationHandler for SvgVelloApp<'_> {
-    #[allow(
-        clippy::cast_possible_truncation,
-        reason = "Width and height are expected to fit within u16 range"
-    )]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let RenderState::Suspended(cached_window) = &mut self.state else {
             return;
@@ -83,8 +99,8 @@ impl ApplicationHandler for SvgVelloApp<'_> {
         let window = cached_window.take().unwrap_or_else(|| {
             create_winit_window(
                 event_loop,
-                self.scene.width() as u32,
-                self.scene.height() as u32,
+                self.scene.width().into(),
+                self.scene.height().into(),
                 true,
             )
         });
@@ -104,25 +120,9 @@ impl ApplicationHandler for SvgVelloApp<'_> {
         self.renderers[surface.dev_id]
             .get_or_insert_with(|| create_vello_renderer(&self.context, &surface));
 
-        self.scene.reset();
-
-        let render_scale = 5.0;
         let svg_filename = std::env::args().nth(1).expect("svg filename is first arg");
         let svg: String = std::fs::read_to_string(svg_filename).expect("error reading file");
-        let parsed_svg = PicoSvg::load(&svg, 1.0).expect("error parsing SVG");
-        render_svg(&mut self.scene, render_scale, &parsed_svg.items);
-        let device_handle = &self.context.devices[surface.dev_id];
-        self.renderers[surface.dev_id].as_mut().unwrap().prepare(
-            &device_handle.device,
-            &device_handle.queue,
-            &self.scene,
-            &RenderParams {
-                base_color: Some(palette::css::BLACK),
-                width: surface.config.width,
-                height: surface.config.height,
-                strip_height: 4,
-            },
-        );
+        self.parsed_svg = Some(PicoSvg::load(&svg, 1.0).expect("error parsing SVG"));
 
         self.state = RenderState::Active {
             surface: Box::new(surface),
@@ -160,10 +160,62 @@ impl ApplicationHandler for SvgVelloApp<'_> {
                     .resize_surface(surface, size.width, size.height);
             }
 
+            WindowEvent::MouseWheel {
+                delta: MouseScrollDelta::PixelDelta(pos),
+                ..
+            } => {
+                // Convert pixel delta to a scale adjustment
+                // Divide by a factor to make the zoom less sensitive
+                self.adjust_scale(pos.y * ZOOM_STEP / 50.0);
+            }
+
+            WindowEvent::PinchGesture { delta, .. } => {
+                self.adjust_scale(delta * ZOOM_STEP);
+            }
+
+            WindowEvent::KeyboardInput {
+                event:
+                    KeyEvent {
+                        logical_key,
+                        state: ElementState::Pressed,
+                        ..
+                    },
+                ..
+            } => {
+                match logical_key {
+                    Key::Character(c) => match c.as_str() {
+                        "+" | "=" => self.adjust_scale(ZOOM_STEP),
+                        "-" | "_" => self.adjust_scale(-ZOOM_STEP),
+                        // Reset to original scale
+                        "0" => {
+                            self.render_scale = 5.0;
+                        }
+                        _ => {}
+                    },
+                    Key::Named(NamedKey::Escape) => event_loop.exit(),
+                    _ => {}
+                }
+            }
+
             WindowEvent::RedrawRequested => {
-                let width = surface.config.width;
-                let height = surface.config.height;
+                self.scene.reset();
+
+                if let Some(parsed_svg) = &self.parsed_svg {
+                    render_svg(&mut self.scene, self.render_scale, &parsed_svg.items);
+                }
+
                 let device_handle = &self.context.devices[surface.dev_id];
+                let render_params = RenderParams {
+                    width: surface.config.width,
+                    height: surface.config.height,
+                };
+                self.renderers[surface.dev_id].as_mut().unwrap().prepare(
+                    &device_handle.device,
+                    &device_handle.queue,
+                    &self.scene,
+                    &render_params,
+                );
+
                 let surface_texture = surface
                     .surface
                     .get_current_texture()
@@ -171,22 +223,35 @@ impl ApplicationHandler for SvgVelloApp<'_> {
                 let view = surface_texture
                     .texture
                     .create_view(&wgpu::TextureViewDescriptor::default());
-                self.renderers[surface.dev_id]
-                    .as_mut()
-                    .unwrap()
-                    .render_to_texture(
-                        &device_handle.device,
-                        &device_handle.queue,
+                // Copy texture to buffer
+                let mut encoder =
+                    device_handle
+                        .device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("Vello Render To Buffer"),
+                        });
+                {
+                    let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
+                        label: Some("Render Pass"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &view,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                                store: wgpu::StoreOp::Store,
+                            },
+                        })],
+                        depth_stencil_attachment: None,
+                        occlusion_query_set: None,
+                        timestamp_writes: None,
+                    });
+                    self.renderers[surface.dev_id].as_mut().unwrap().render(
                         &self.scene,
-                        &view,
-                        &RenderParams {
-                            base_color: Some(palette::css::BLACK), // Background color
-                            width,
-                            height,
-                            strip_height: 4,
-                        },
+                        &mut pass,
+                        &render_params,
                     );
-
+                }
+                device_handle.queue.submit([encoder.finish()]);
                 surface_texture.present();
                 window.request_redraw();
             }

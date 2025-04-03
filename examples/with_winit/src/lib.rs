@@ -273,7 +273,7 @@ impl ApplicationHandler<UserEvent> for VelloApp<'_> {
                         }
                         Key::Character(char) => {
                             // TODO: Have a more principled way of handling modifiers on keypress
-                            // see e.g. https://xi.zulipchat.com/#narrow/stream/351333-glazier/topic/Keyboard.20shortcuts
+                            // see e.g. https://xi.zulipchat.com/#narrow/channel/351333-glazier/topic/Keyboard.20shortcuts/with/403538769
                             let char = char.to_lowercase();
                             match char.as_str() {
                                 "q" | "e" => {
@@ -548,7 +548,7 @@ impl ApplicationHandler<UserEvent> for VelloApp<'_> {
                 let render_span = tracing::trace_span!("Dispatching render").entered();
                 // Note: we don't run the async/"robust" pipeline on web, as
                 // it requires more async wiring for the readback. See
-                // [#gpu > async on wasm](https://xi.zulipchat.com/#narrow/stream/197075-gpu/topic/async.20on.20wasm)
+                // [#vello > async on wasm](https://xi.zulipchat.com/#narrow/channel/197075-vello/topic/async.20on.20wasm/with/396685264)
                 #[expect(
                     deprecated,
                     reason = "We still want to use the async pipeline for the debug layers"
@@ -913,7 +913,7 @@ fn parse_arguments() -> Args {
     // We allow baking in arguments at compile time. This is especially useful for
     // Android and WASM.
     // This is used on desktop platforms to allow debugging the same settings
-    let args = if let Some(args) = option_env!("VELLO_STATIC_ARGS") {
+    if let Some(args) = option_env!("VELLO_STATIC_ARGS") {
         // We split by whitespace here to allow passing multiple arguments
         // In theory, we could do more advanced parsing/splitting (e.g. using quotes),
         // but that would require a lot more effort
@@ -924,8 +924,7 @@ fn parse_arguments() -> Args {
         Args::parse_from(std::iter::once("with_winit").chain(args.split_ascii_whitespace()))
     } else {
         Args::parse()
-    };
-    args
+    }
 }
 
 #[cfg(target_os = "android")]

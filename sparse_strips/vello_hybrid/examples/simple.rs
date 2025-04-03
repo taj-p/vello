@@ -9,17 +9,15 @@
 
 mod common;
 
-use common::{create_vello_renderer, create_winit_window};
-use kurbo::Affine;
-use peniko::{
+use common::{RenderContext, RenderSurface, create_vello_renderer, create_winit_window};
+use std::sync::Arc;
+use vello_common::kurbo::Affine;
+use vello_common::peniko::{
     color::palette,
     kurbo::{BezPath, Stroke},
 };
-use std::sync::Arc;
-use vello_hybrid::{
-    RenderParams, Renderer, Scene,
-    util::{RenderContext, RenderSurface},
-};
+use vello_hybrid::{RenderParams, Renderer, Scene};
+use wgpu::RenderPassDescriptor;
 use winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -66,10 +64,6 @@ impl ApplicationHandler for SimpleVelloApp<'_> {
         }
     }
 
-    #[allow(
-        clippy::cast_possible_truncation,
-        reason = "Width and height are expected to fit within u16 range"
-    )]
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
         let RenderState::Suspended(cached_window) = &mut self.state else {
             return;
@@ -78,8 +72,8 @@ impl ApplicationHandler for SimpleVelloApp<'_> {
         let window = cached_window.take().unwrap_or_else(|| {
             create_winit_window(
                 event_loop,
-                self.scene.width() as u32,
-                self.scene.height() as u32,
+                self.scene.width().into(),
+                self.scene.height().into(),
                 true,
             )
         });
@@ -97,21 +91,6 @@ impl ApplicationHandler for SimpleVelloApp<'_> {
             .resize_with(self.context.devices.len(), || None);
         self.renderers[surface.dev_id]
             .get_or_insert_with(|| create_vello_renderer(&self.context, &surface));
-
-        self.scene.reset();
-        draw_simple_scene(&mut self.scene);
-        let device_handle = &self.context.devices[surface.dev_id];
-        self.renderers[surface.dev_id].as_mut().unwrap().prepare(
-            &device_handle.device,
-            &device_handle.queue,
-            &self.scene,
-            &RenderParams {
-                base_color: Some(palette::css::BLACK),
-                width: surface.config.width,
-                height: surface.config.height,
-                strip_height: 4,
-            },
-        );
 
         self.state = RenderState::Active {
             surface: Box::new(surface),
@@ -137,45 +116,58 @@ impl ApplicationHandler for SimpleVelloApp<'_> {
                     .resize_surface(surface, size.width, size.height);
             }
             WindowEvent::RedrawRequested => {
-                let width = surface.config.width;
-                let height = surface.config.height;
-                let device_handle = &self.context.devices[surface.dev_id];
+                self.scene.reset();
 
-                self.renderers[surface.dev_id]
-                    .as_mut()
-                    .unwrap()
-                    .render_to_texture(
-                        &device_handle.device,
-                        &device_handle.queue,
-                        &self.scene,
-                        &surface.target_view,
-                        &RenderParams {
-                            base_color: Some(palette::css::BLACK),
-                            width,
-                            height,
-                            strip_height: 4,
-                        },
-                    );
+                draw_simple_scene(&mut self.scene);
+                let device_handle = &self.context.devices[surface.dev_id];
+                let render_params = RenderParams {
+                    width: surface.config.width,
+                    height: surface.config.height,
+                };
+                self.renderers[surface.dev_id].as_mut().unwrap().prepare(
+                    &device_handle.device,
+                    &device_handle.queue,
+                    &self.scene,
+                    &render_params,
+                );
 
                 let surface_texture = surface
                     .surface
                     .get_current_texture()
                     .expect("failed to get surface texture");
 
+                let texture_view = surface_texture
+                    .texture
+                    .create_view(&wgpu::TextureViewDescriptor::default());
+
                 let mut encoder =
                     device_handle
                         .device
                         .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                            label: Some("Surface Blit"),
+                            label: Some("Vello Render to Surface pass"),
                         });
-                surface.blitter.copy(
-                    &device_handle.device,
-                    &mut encoder,
-                    &surface.target_view,
-                    &surface_texture
-                        .texture
-                        .create_view(&wgpu::TextureViewDescriptor::default()),
-                );
+                {
+                    let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
+                        label: Some("Render to Texture Pass"),
+                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
+                            view: &texture_view,
+                            resolve_target: None,
+                            ops: wgpu::Operations {
+                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                                store: wgpu::StoreOp::Store,
+                            },
+                        })],
+                        depth_stencil_attachment: None,
+                        occlusion_query_set: None,
+                        timestamp_writes: None,
+                    });
+                    self.renderers[surface.dev_id].as_mut().unwrap().render(
+                        &self.scene,
+                        &mut pass,
+                        &render_params,
+                    );
+                }
+
                 device_handle.queue.submit([encoder.finish()]);
                 surface_texture.present();
 

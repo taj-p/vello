@@ -3,65 +3,15 @@
 
 //! Tests for basic functionality.
 
-use crate::util::{check_ref, get_ctx, render_pixmap};
+use crate::util::{
+    check_ref, circular_star, crossed_line_star, get_ctx, miter_stroke_2,
+};
 use std::f64::consts::PI;
 use vello_common::color::palette::css::{
-    BEIGE, BLUE, DARK_GREEN, GREEN, LIME, MAROON, REBECCA_PURPLE, RED, YELLOW,
+    BEIGE, BLUE, DARK_BLUE, GREEN, LIME, MAROON, REBECCA_PURPLE, RED,
 };
 use vello_common::kurbo::{Affine, BezPath, Circle, Join, Point, Rect, Shape, Stroke};
-use vello_common::peniko;
-use vello_common::peniko::Compose;
-use vello_cpu::RenderContext;
-
-mod util;
-
-#[test]
-fn empty_1x1() {
-    let ctx = get_ctx(1, 1, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_5x1() {
-    let ctx = get_ctx(5, 1, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_1x5() {
-    let ctx = get_ctx(1, 5, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_3x10() {
-    let ctx = get_ctx(3, 10, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_23x45() {
-    let ctx = get_ctx(23, 45, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_50x50() {
-    let ctx = get_ctx(50, 50, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_463x450() {
-    let ctx = get_ctx(463, 450, true);
-    render_pixmap(&ctx);
-}
-
-#[test]
-fn empty_1134x1376() {
-    let ctx = get_ctx(1134, 1376, true);
-    render_pixmap(&ctx);
-}
+use vello_common::peniko::Fill;
 
 #[test]
 fn full_cover_1() {
@@ -121,6 +71,28 @@ fn filled_circle() {
     ctx.fill_path(&circle.to_path(0.1));
 
     check_ref(&ctx, "filled_circle");
+}
+
+#[test]
+fn filled_overflowing_circle() {
+    let mut ctx = get_ctx(100, 100, false);
+    let circle = Circle::new((50.0, 50.0), 50.0 + 1.0);
+
+    ctx.set_paint(LIME.into());
+    ctx.fill_path(&circle.to_path(0.1));
+
+    check_ref(&ctx, "filled_overflowing_circle");
+}
+
+#[test]
+fn filled_fully_overflowing_circle() {
+    let mut ctx = get_ctx(100, 100, false);
+    let circle = Circle::new((50.0, 50.0), 80.0);
+
+    ctx.set_paint(LIME.into());
+    ctx.fill_path(&circle.to_path(0.1));
+
+    check_ref(&ctx, "filled_fully_overflowing_circle");
 }
 
 #[test]
@@ -206,22 +178,10 @@ fn rectangle_left_of_viewport() {
     check_ref(&ctx, "rectangle_left_of_viewport");
 }
 
-fn star_path() -> BezPath {
-    let mut path = BezPath::new();
-    path.move_to((50.0, 10.0));
-    path.line_to((75.0, 90.0));
-    path.line_to((10.0, 40.0));
-    path.line_to((90.0, 40.0));
-    path.line_to((25.0, 90.0));
-    path.line_to((50.0, 10.0));
-
-    path
-}
-
 #[test]
 fn filling_nonzero_rule() {
     let mut ctx = get_ctx(100, 100, false);
-    let star = star_path();
+    let star = crossed_line_star();
 
     ctx.set_paint(MAROON.into());
     ctx.fill_path(&star);
@@ -232,10 +192,10 @@ fn filling_nonzero_rule() {
 #[test]
 fn filling_evenodd_rule() {
     let mut ctx = get_ctx(100, 100, false);
-    let star = star_path();
+    let star = crossed_line_star();
 
     ctx.set_paint(MAROON.into());
-    ctx.set_fill_rule(peniko::Fill::EvenOdd);
+    ctx.set_fill_rule(Fill::EvenOdd);
     ctx.fill_path(&star);
 
     check_ref(&ctx, "filling_evenodd_rule");
@@ -500,49 +460,21 @@ fn filled_vertical_hairline_rect_2() {
     check_ref(&ctx, "filled_vertical_hairline_rect_2");
 }
 
-fn miter_stroke_2() -> Stroke {
-    Stroke {
-        width: 2.0,
-        join: Join::Miter,
-        ..Default::default()
-    }
-}
-
-fn bevel_stroke_2() -> Stroke {
-    Stroke {
-        width: 2.0,
-        join: Join::Bevel,
-        ..Default::default()
-    }
-}
-
-fn compose_destination() -> RenderContext {
-    let mut ctx = get_ctx(50, 50, true);
-    let rect = Rect::new(4.5, 4.5, 35.5, 35.5);
-    ctx.set_paint(YELLOW.with_alpha(0.35).into());
-    ctx.set_stroke(bevel_stroke_2());
-    ctx.fill_rect(&rect);
-
-    ctx
-}
-
-fn compose_source(ctx: &mut RenderContext) {
-    let rect = Rect::new(14.5, 14.5, 45.5, 45.5);
-    ctx.set_paint(DARK_GREEN.with_alpha(0.8).into());
-    ctx.fill_rect(&rect);
-}
-
-macro_rules! compose_impl {
-    ($mode:path, $name:expr) => {
-        let mut ctx = compose_destination();
-        ctx.set_blend_mode(peniko::BlendMode::new(peniko::Mix::Normal, $mode));
-        compose_source(&mut ctx);
-
-        check_ref(&ctx, $name);
-    };
-}
-
 #[test]
-fn compose_solid_src_over() {
-    compose_impl!(Compose::SrcOver, "compose_solid_src_over");
+fn oversized_star() {
+    let mut ctx = get_ctx(100, 100, true);
+
+    // Create a star path that extends beyond the render context boundaries
+    // Center it in the middle of the viewport
+    let star_path = circular_star(Point::new(50., 50.), 10, 30., 90.);
+
+    ctx.set_paint(REBECCA_PURPLE.into());
+    ctx.fill_path(&star_path);
+
+    let stroke = Stroke::new(2.0);
+    ctx.set_paint(DARK_BLUE.into());
+    ctx.set_stroke(stroke);
+    ctx.stroke_path(&star_path);
+
+    check_ref(&ctx, "oversized_star");
 }
