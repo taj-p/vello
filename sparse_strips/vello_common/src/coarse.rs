@@ -108,7 +108,7 @@ impl Wide {
     pub fn new(width: u16, height: u16) -> Self {
         let width_tiles = width.div_ceil(WideTile::WIDTH);
         let height_tiles = height.div_ceil(Tile::HEIGHT);
-        let mut tiles = Vec::with_capacity(usize::from(width_tiles * height_tiles));
+        let mut tiles = Vec::with_capacity(usize::from(width_tiles) * usize::from(height_tiles));
 
         for w in 0..width_tiles {
             for h in 0..height_tiles {
@@ -244,6 +244,7 @@ impl Wide {
             // Generate alpha fill commands for each wide tile intersected by this strip
             for wtile_x in wtile_x0..wtile_x1 {
                 let x_wtile_rel = x % WideTile::WIDTH;
+                // Restrict the width of the fill to the width of the wide tile
                 let width = x1.min((wtile_x + 1) * WideTile::WIDTH) - x;
                 let cmd = CmdAlphaFill {
                     x: x_wtile_rel,
@@ -266,7 +267,8 @@ impl Wide {
             // If region should be filled and both strips are on the same row,
             // generate fill commands for the region between them
             if active_fill && strip_y == next_strip.strip_y() {
-                x = x1;
+                // Clamp the fill to the clip bounding box
+                x = x1.max(bbox.x0() * WideTile::WIDTH);
                 let x2 = next_strip
                     .x
                     .min(self.width.next_multiple_of(WideTile::WIDTH));
