@@ -643,6 +643,8 @@ impl RendererJunk<'_> {
         let load = if round == 0 {
             wgpu::LoadOp::Clear(wgpu::Color::BLACK)
         } else {
+            // TODO: Can clear if all slots can be cleared.
+            // TODO: Can also use a render pass to draw a clear quad.
             wgpu::LoadOp::Load
         };
         let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {

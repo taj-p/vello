@@ -1,5 +1,109 @@
+// TODO:
+// - Upload clip fills and clip strips to clip texture on GPU.
+// - Get something rendered.
+// - Fix all TODOs.
+// - Refactor and remove original implementation.
+
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
+
+//! Schedule
+//!
+//! - Draw commands are either issued to the final target or slots in a clip texture.
+//! - Rounds represent a draw in up to 3 render targets (two clip textures and a final target).
+//! - The clip texture stores slots for many clip depths. Once our clip textures are full,
+//!   we flush rounds (i.e. execute render passes) to free up space. Note that a slot refers
+//!   to 1 wide tile's worth of pixels in the clip texture.
+//! - The `free` vector contains the indices of the slots that are available for use in the two clip textures.
+//!
+//! ## Simple Scene Example
+//!
+//! Take a simple scene with the following commands:
+//!
+//! Draw(Rect 1)
+//!  Clip(Diamond)                                                                                                                                
+//!    Draw(Rect 2)                                                                                                                                 
+//!
+//! If, in this scene and render target, there exist only 1 wide tile (for simplicity), then:
+//!     1. We will allocate a slot (which represents a wide tile's worth of pixels) in
+//!        one clip texture to draw the `Draw(Rect 2)` command of the `Clip(Diamond)` block.
+//!     2. We will use a render pass to draw the `Draw(Rect 2)` command to the clip texture.
+//!     3. When rendering to the render target, in a second render pass, we will:
+//!         - [`Cmd::ClipFill`] and [`Cmd::ClipStrip`] commands will be used to sample the
+//!           pixels from the clip texture to the render target (Rect 2 (clipped)).
+//!         - Draw `Draw(Rect 1)`.
+//!
+//! ```txt
+//!        Clip Texture 1                                   Render Target                                                   
+//!     ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐                                                 
+//!     │┌────────┐       │     │        •        │     │                 │                                                 
+//!     ││        │       │     │      •   •      │     │       //│       │                                                 
+//!     ││ Rect 2 │       │     │    •       •    │     │     // ◀─────────── Rect 2 (clipped)                              
+//!     ││        │       │     │  •           •  │     │   //    │       │                                                 
+//!     │└────────┘       │ ──▶ │•               •│ ──▶ │ /───────┘──────┐│                                                 
+//!     │                 │     │  •           •  │     │       │        ││                                                 
+//!     │                 │     │    •       •    │     │       │ Rect 1 ││                                                 
+//!     │                 │     │      •   •      │     │       │        ││                                                 
+//!     │                 │     │        •        │     │       └────────┘│                                                 
+//!     └─────────────────┘     └─────────────────┘     └─────────────────┘                                                 
+//!                                 Clip Diamond                                                                            
+//!     ◀─────────────────▶      ◀───────────────────────────────────────▶                                                  
+//!        Render Pass 1                      Render Pass 2                                                                 
+//! ```
+//!
+//! Note that the `Clip(Diamond)` command, although shown in the above diagram, is for illustrative
+//! purposes only. Its outline is used to generate [`Cmd::ClipFill`] and [`Cmd::ClipStrip`] commands.
+//!
+//! Edit/view: https://cascii.app/95dc2
+//!
+//! ## Complex Scene Example
+//!
+//! As scenes become more complex, the scheduler must allocate more slots in the clip textures and
+//! assign draw calls to later rounds. A round represents a draw in up to 3 render targets; two for
+//! intermediate clip/blend buffers, and the third for the actual render target. The two clip
+//! buffers are for even and odd clip depths.
+//!
+//! So, for a scene with 3 clip regions, the scheduler will need to allocate 3 slots in the clip
+//! textures. Two slots in the odd buffer and one in the even buffer. Let's say our 3 nested clip
+//! regions contain the following commands:
+//!
+//! Clip 1 Commands:
+//!  Draw(Rect 1)
+//!  <Clip 2 Commands>
+//!  [`Cmd::ClipFill`] from clip 2
+//!
+//! Clip 2 Commands:
+//!  Draw(Rect 2)
+//!  <Clip 3 Commands>
+//!  [`Cmd::ClipFill`] from clip 3
+//!
+//! Clip 3 Commands:
+//!  Draw(Rect 3)
+//!
+//! Then, the scheduler will assign each command to a given render pass of a round:
+//!
+//! TODO: Check this is right.
+//!
+//! Round 1:
+//!  Render Pass 1:
+//!     Clear even buffer
+//!     Draw(Rect 2) to even buffer
+//!  Render Pass 2:
+//!     Clear odd buffer
+//!     Draw(Rect 1) to odd buffer
+//!     [`Cmd::ClipFill`] from even buffer to odd buffer
+//!
+//! Round 2:
+//!  Render Pass 1:
+//!     Clear even buffer
+//!     Draw(Rect 3) to even buffer
+//!  Render Pass 2:
+//!     [`Cmd::ClipFill`] from even buffer to odd buffer
+//!
+//! Some comments:
+//! - You may wonder how transfer commands like [`Cmd::ClipFill`] and [`Cmd::ClipStrip`] can be run
+//!   before all the draw commands of a subsequent clip region is drawn. Preceding [`Cmd::ClipFill`] and
+//!   [`Cmd::ClipStrip`] commands are only associated to the clip region being currently popped.
 
 use std::collections::VecDeque;
 
@@ -15,7 +119,8 @@ pub(crate) struct Schedule {
     /// Index of the current round
     round: usize,
     free: [Vec<usize>; 2],
-    rounds: VecDeque<Round>,
+    /// Rounds are enqueued on push clip commands and dequeued on flush.
+    rounds_queue: VecDeque<Round>,
 }
 
 /// A "round" is a coarse scheduling quantum.
@@ -25,6 +130,7 @@ pub(crate) struct Schedule {
 /// clip buffers are for even and odd clip depths.
 #[derive(Default)]
 struct Round {
+    /// [even clip depth, odd depth, final target] draw calls
     draws: [Draw; 3],
     /// Slots that will be freed after the draws
     free: [Vec<usize>; 2],
@@ -52,12 +158,12 @@ impl Schedule {
         let free0: Vec<_> = (0..n_slots).collect();
         let free1 = free0.clone();
         let free = [free0, free1];
-        let mut rounds = VecDeque::new();
-        rounds.push_back(Round::default());
+        let mut rounds_queue = VecDeque::new();
+        rounds_queue.push_back(Round::default());
         Self {
             round: 0,
             free,
-            rounds,
+            rounds_queue,
         }
     }
 
@@ -65,17 +171,18 @@ impl Schedule {
         let mut state = TileState::default();
         let wide_tiles_per_row = (scene.width).div_ceil(WideTile::WIDTH);
         let wide_tiles_per_col = (scene.height).div_ceil(Tile::HEIGHT);
+
+        // Left to right, top to bottom iteration over wide tiles.
         for wide_tile_row in 0..wide_tiles_per_col {
             for wide_tile_col in 0..wide_tiles_per_row {
-                let wide_tile_idx = usize::from(wide_tile_row) * usize::from(wide_tiles_per_row)
-                    + usize::from(wide_tile_col);
+                let wide_tile_idx = usize::from(wide_tile_row * wide_tiles_per_row + wide_tile_col);
                 let wide_tile = &scene.wide.tiles[wide_tile_idx];
                 let wide_tile_x = wide_tile_col * WideTile::WIDTH;
                 let wide_tile_y = wide_tile_row * Tile::HEIGHT;
                 self.do_tile(junk, wide_tile_x, wide_tile_y, wide_tile, &mut state);
             }
         }
-        while !self.rounds.is_empty() {
+        while !self.rounds_queue.is_empty() {
             self.flush(junk);
         }
     }
@@ -84,7 +191,7 @@ impl Schedule {
     ///
     /// The rounds queue must not be empty.
     fn flush(&mut self, junk: &mut RendererJunk<'_>) {
-        let round = self.rounds.pop_front().unwrap();
+        let round = self.rounds_queue.pop_front().unwrap();
         for (i, draw) in round.draws.iter().enumerate() {
             if !draw.0.is_empty() {
                 junk.do_render_pass(&draw.0, self.round, i);
@@ -96,6 +203,25 @@ impl Schedule {
         self.round += 1;
     }
 
+    // Find the appropriate draw call for rendering.
+    fn draw_mut(&mut self, el_round: usize, clip_depth: usize) -> &mut Draw {
+        let ix = if clip_depth == 1 {
+            // We can draw to the final target
+            2
+        } else {
+            // Clip depth even => draw to index 1
+            // Clip depth odd => draw to index 0
+            // Clip depth starts at 1, so even `clip_depth` represents an odd "real" clip depth.
+            1 - clip_depth % 2
+        };
+        let rel_round = el_round.saturating_sub(self.round);
+        if self.rounds_queue.len() == rel_round {
+            self.rounds_queue.push_back(Round::default());
+        }
+        &mut self.rounds_queue[rel_round].draws[ix]
+    }
+
+    /// Iterates over wide tile commands and schedules them for rendering.
     #[allow(clippy::todo, reason = "still working on this")]
     fn do_tile(
         &mut self,
@@ -106,12 +232,15 @@ impl Schedule {
         state: &mut TileState,
     ) {
         state.stack.clear();
+        // Sentinel `TileEl` to indicate the end of the stack where we draw all
+        // commands to the final target.
         state.stack.push(TileEl {
             slot_ix: !0,
             round: self.round,
         });
         let bg = tile.bg.to_u32();
-        if bg >= 0x1_00_00_00 {
+        // If the background has a non-zero alpha then we need to render it.
+        if has_non_zero_alpha(bg) {
             let draw = self.draw_mut(self.round, 1);
             draw.0.push(GpuStrip {
                 x: wide_tile_x,
@@ -124,6 +253,8 @@ impl Schedule {
         }
         for cmd in &tile.cmds {
             // Note: this starts at 1 (for the final target)
+            // TODO: Maybe change this to be the "real" clip depth after we have this all working?
+            // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
             match cmd {
                 Cmd::Fill(fill) => {
@@ -135,7 +266,7 @@ impl Schedule {
                     };
                     let rgba = color.to_u32();
                     // color fields with 0 alpha are reserved for clipping
-                    if rgba >= 0x1_00_00_00 {
+                    if has_non_zero_alpha(rgba) {
                         // TODO: x and y base coordinates are from wide_tile if
                         // clip depth is 1, otherwise point to slot ix
                         draw.0.push(GpuStrip {
@@ -157,9 +288,9 @@ impl Schedule {
                     };
                     let rgba = color.to_u32();
                     // color fields with 0 alpha are reserved for clipping
-                    if rgba >= 0x1_00_00_00 {
+                    if has_non_zero_alpha(rgba) {
                         // msg is a variable here to work around rustfmt failure
-                        let msg = "GpuStrip fields use u32 and values are expected to fit within that range";
+                        const MSG: &str = "GpuStrip fields use u32 and values are expected to fit within that range";
                         draw.0.push(GpuStrip {
                             x: wide_tile_x + alpha_fill.x,
                             y: wide_tile_y,
@@ -167,7 +298,7 @@ impl Schedule {
                             dense_width: alpha_fill.width,
                             col: (alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
                                 .try_into()
-                                .expect(msg),
+                                .expect(MSG),
                             rgba,
                         });
                     }
@@ -175,14 +306,14 @@ impl Schedule {
                 Cmd::PushClip => {
                     let ix = clip_depth % 2;
                     while self.free[ix].is_empty() {
-                        if self.rounds.is_empty() {
+                        if self.rounds_queue.is_empty() {
                             // Probably should return error here
                             panic!("failed to allocate slot");
                         }
                         self.flush(junk);
                     }
                     let slot_ix = self.free[ix].pop().unwrap();
-                    // Note: the allocated slot will need to get cleared before
+                    // TODO: the allocated slot will need to get cleared before
                     // drawing, maybe add it to a clear list. Of course, if all slots
                     // can be cleared, then do clear with `LoadOp::Clear` instead.
                     state.stack.push(TileEl {
@@ -193,18 +324,25 @@ impl Schedule {
                 Cmd::PopClip => {
                     let tos = state.stack.pop().unwrap();
                     let nos = state.stack.last_mut().unwrap();
+                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
+                    // then we need to schedule these commands for the next round and preserve the slot's
+                    // contents.
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     nos.round = round;
                     // free slot after draw
                     // TODO: ensure round exists
                     // TODO: saturating_sub here, or do we have guarantee round >= self.round?
-                    self.rounds[round - self.round].free[1 - clip_depth % 2].push(tos.slot_ix);
+                    self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
+                        .push(tos.slot_ix);
                 }
                 Cmd::ClipFill(_cmd_clip_fill) => {
-                    let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
+                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
+                    // then we need to schedule these commands for the next round and preserve the slot's
+                    // contents.
+                    let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     let _draw = self.draw_mut(round, clip_depth - 1);
                     // TODO: push GpuStrip; use `tos.slot_x` for rgba field
@@ -213,18 +351,9 @@ impl Schedule {
             }
         }
     }
+}
 
-    // Find the appropriate draw call for rendering.
-    fn draw_mut(&mut self, el_round: usize, clip_depth: usize) -> &mut Draw {
-        let rel_round = el_round.saturating_sub(self.round);
-        let ix = if clip_depth == 1 {
-            2
-        } else {
-            1 - clip_depth % 2
-        };
-        if self.rounds.len() == rel_round {
-            self.rounds.push_back(Round::default());
-        }
-        &mut self.rounds[rel_round].draws[ix]
-    }
+#[inline(always)]
+fn has_non_zero_alpha(rgba: u32) -> bool {
+    rgba >= 0x1_00_00_00
 }
