@@ -12,7 +12,8 @@
 //! The hybrid approach combines CPU-side path processing with efficient GPU rendering
 //! to balance flexibility and performance.
 
-use std::fmt::Debug;
+use alloc::vec::Vec;
+use core::fmt::Debug;
 
 use bytemuck::{Pod, Zeroable};
 use vello_common::{coarse::WideTile, tile::Tile};
@@ -308,7 +309,7 @@ impl Renderer {
             multiview: None,
             cache: None,
         });
-        let clip_texture_views = std::array::from_fn(|_| {
+        let clip_texture_views = core::array::from_fn(|_| {
             device
                 .create_texture(&wgpu::TextureDescriptor {
                     label: Some("clip temp texture"),

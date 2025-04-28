@@ -106,7 +106,8 @@
 //!   before all the draw commands of a subsequent clip region is drawn. Preceding [`Cmd::ClipFill`] and
 //!   [`Cmd::ClipStrip`] commands are only associated to the clip region being currently popped.
 
-use std::collections::VecDeque;
+use alloc::collections::VecDeque;
+use alloc::vec::Vec;
 
 use vello_common::{
     coarse::{Cmd, WideTile},
@@ -116,6 +117,8 @@ use vello_common::{
 };
 
 use crate::{GpuStrip, Scene, render::RendererJunk};
+
+const DEBUG: bool = true;
 
 pub(crate) struct Schedule {
     /// Index of the current round
@@ -220,7 +223,9 @@ impl Schedule {
         if self.rounds_queue.len() == rel_round {
             self.rounds_queue.push_back(Round::default());
         }
-        //println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
+        if DEBUG {
+            println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
+        }
         &mut self.rounds_queue[rel_round].draws[ix]
     }
 
@@ -241,7 +246,7 @@ impl Schedule {
             slot_ix: !0,
             round: self.round,
         });
-        let bg = tile.bg.to_u32();
+        let bg = tile.bg.as_premul_rgba8().to_u32();
         // If the background has a non-zero alpha then we need to render it.
         if has_non_zero_alpha(bg) {
             let draw = self.draw_mut(self.round, 1);
@@ -259,7 +264,9 @@ impl Schedule {
             // TODO: Maybe change this to be the "real" clip depth after we have this all working?
             // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
-            //println!("CMD: {:?}", cmd);
+            if DEBUG {
+                println!("CMD: {:?}", cmd);
+            }
             match cmd {
                 Cmd::Fill(fill) => {
                     let el = state.stack.last().unwrap();
@@ -268,7 +275,7 @@ impl Schedule {
                         Paint::Solid(color) => color,
                         Paint::Indexed(_) => unimplemented!(),
                     };
-                    let rgba = color.to_u32();
+                    let rgba = color.as_premul_rgba8().to_u32();
                     // color fields with 0 alpha are reserved for clipping
                     // TODO: Is this an assert or a conditional?
                     assert!(has_non_zero_alpha(rgba));
@@ -295,7 +302,7 @@ impl Schedule {
                         Paint::Solid(color) => color,
                         Paint::Indexed(_) => unimplemented!(),
                     };
-                    let rgba = color.to_u32();
+                    let rgba = color.as_premul_rgba8().to_u32();
                     // color fields with 0 alpha are reserved for clipping
                     if has_non_zero_alpha(rgba) {
                         let (x, y) = if clip_depth == 1 {
@@ -318,7 +325,7 @@ impl Schedule {
                         });
                     }
                 }
-                Cmd::PushClip => {
+                Cmd::PushBuf => {
                     let ix = clip_depth % 2;
                     while self.free[ix].is_empty() {
                         if self.rounds_queue.is_empty() {
@@ -336,7 +343,7 @@ impl Schedule {
                         round: self.round,
                     });
                 }
-                Cmd::PopClip => {
+                Cmd::PopBuf => {
                     let tos = state.stack.pop().unwrap();
                     let nos = state.stack.last_mut().unwrap();
                     // If the pixels for the slot we are sampling from won't be drawn until the next round,
@@ -377,10 +384,12 @@ impl Schedule {
                         // TODO: Check this is right.
                         rgba: tos.slot_ix as u32,
                     });
-                    //println!(
-                    //    "\t Cmd::ClipFill: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
-                    //    clip_depth, x, y, tos.slot_ix, nos.slot_ix
-                    //);
+                    if DEBUG {
+                        println!(
+                            "\t Cmd::ClipFill: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
+                            clip_depth, x, y, tos.slot_ix, nos.slot_ix
+                        );
+                    }
                 }
                 Cmd::ClipStrip(cmd_clip_alpha_fill) => {
                     let tos = &state.stack[clip_depth - 1];
@@ -413,11 +422,14 @@ impl Schedule {
                         // TODO: Check this is right.
                         rgba: tos.slot_ix as u32,
                     });
-                    //println!(
-                    //    "\t Cmd::ClipStrip: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
-                    //    clip_depth, x, y, tos.slot_ix, nos.slot_ix
-                    //);
+                    if DEBUG {
+                        println!(
+                            "\t Cmd::ClipStrip: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
+                            clip_depth, x, y, tos.slot_ix, nos.slot_ix
+                        );
+                    }
                 }
+                _ => unimplemented!(),
             }
         }
     }
