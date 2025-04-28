@@ -7,11 +7,11 @@
 //! It takes an input SVG file and renders it to a PNG file using the hybrid CPU/GPU renderer.
 
 use std::io::BufWriter;
-use vello_common::kurbo::{Affine, Stroke};
+use vello_common::color::palette::css::{BLACK, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE, RED};
+use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::pico_svg::{Item, PicoSvg};
 use vello_common::pixmap::Pixmap;
 use vello_hybrid::{DimensionConstraints, Scene};
-use wgpu::RenderPassDescriptor;
 
 /// Main entry point for the headless rendering example.
 /// Takes two command line arguments:
@@ -21,6 +21,38 @@ use wgpu::RenderPassDescriptor;
 /// Renders the SVG using the hybrid CPU/GPU renderer and saves the output as a PNG file.
 fn main() {
     pollster::block_on(run());
+}
+
+/// Draws a simple scene with shapes
+pub fn render(ctx: &mut Scene) {
+    // Create first clipping region - a rectangle on the left side
+    let clip_rect = Rect::new(10.0, 30.0, 50.0, 70.0);
+
+    // Then a filled rectangle that covers most of the canvas
+    let large_rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+
+    let stroke = Stroke::new(10.0);
+    ctx.set_paint(DARK_BLUE.into());
+    ctx.set_stroke(stroke);
+    ctx.stroke_rect(&clip_rect);
+
+    ctx.clip(&clip_rect.to_path(0.1));
+    ctx.set_paint(RED.into());
+    ctx.fill_rect(&large_rect);
+    ctx.finish();
+}
+
+pub(crate) fn circular_star(center: Point, n: usize, inner: f64, outer: f64) -> BezPath {
+    let mut path = BezPath::new();
+    let start_angle = -std::f64::consts::FRAC_PI_2;
+    path.move_to(center + outer * Vec2::from_angle(start_angle));
+    for i in 1..n * 2 {
+        let th = start_angle + i as f64 * std::f64::consts::PI / n as f64;
+        let r = if i % 2 == 0 { outer } else { inner };
+        path.line_to(center + r * Vec2::from_angle(th));
+    }
+    path.close_path();
+    path
 }
 
 async fn run() {
@@ -40,7 +72,8 @@ async fn run() {
     let height = DimensionConstraints::convert_dimension(height);
 
     let mut scene = Scene::new(width, height);
-    render_svg(&mut scene, &parsed.items, Affine::scale(render_scale));
+    render(&mut scene);
+    //render_svg(&mut scene, &parsed.items, Affine::scale(render_scale));
 
     // Initialize wgpu device and queue for GPU rendering
     let instance = wgpu::Instance::default();
@@ -91,28 +124,21 @@ async fn run() {
         width: width.into(),
         height: height.into(),
     };
-    let render_data = scene.prepare_render_data();
-    renderer.prepare(&device, &queue, &render_data, &render_size);
+    //let render_data = scene.prepare_render_data();
+    //renderer.prepare(&device, &queue, &render_data, &render_size);
     // Copy texture to buffer
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("Vello Render To Buffer"),
     });
     {
-        let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
-            label: Some("Render Pass"),
-            color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                view: &texture_view,
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
-                    store: wgpu::StoreOp::Store,
-                },
-            })],
-            depth_stencil_attachment: None,
-            occlusion_query_set: None,
-            timestamp_writes: None,
-        });
-        renderer.render(&render_data, &mut pass);
+        renderer.render2(
+            &scene,
+            &device,
+            &queue,
+            &mut encoder,
+            &render_size,
+            &texture_view,
+        );
     }
 
     // Create a buffer to copy the texture data

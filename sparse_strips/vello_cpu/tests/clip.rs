@@ -5,8 +5,8 @@
 
 use crate::util::{check_ref, circular_star, crossed_line_star, get_ctx};
 use std::f64::consts::PI;
-use vello_common::color::palette::css::{BLACK, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE};
-use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke};
+use vello_common::color::palette::css::{BLACK, BLUE, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE, RED};
+use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::peniko::Fill;
 use vello_cpu::RenderContext;
 
@@ -72,6 +72,56 @@ fn clip_rectangle_with_star_evenodd() {
     ctx.finish();
 
     check_ref(&ctx, "clip_rectangle_with_star_evenodd");
+}
+
+#[test]
+fn clip_test() {
+    let mut ctx = get_ctx(300, 200, true);
+
+    let clip_rect = Rect::new(10.0, 30.0, 50.0, 70.0);
+
+    let stroke = Stroke::new(10.0);
+    ctx.set_paint(DARK_BLUE);
+    ctx.set_stroke(stroke);
+    ctx.stroke_rect(&clip_rect);
+
+    ctx.save();
+    ctx.clip(&clip_rect.to_path(0.1));
+
+    // Make a checkerboard pattern of 10x10 squares
+    ctx.set_paint(RED);
+    for i in 0..100 {
+        for j in 0..100 {
+            ctx.fill_rect(&Rect::new(i as f64 * 10.0, j as f64 * 10.0, 10.0, 10.0));
+        }
+    }
+    ctx.set_paint(BLUE);
+    ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
+
+    ctx.restore();
+
+    ctx.set_transform(Affine::translate(Vec2::new(100.0, 0.0)));
+
+    let mut triangle_path = BezPath::new();
+    triangle_path.move_to((10.0, 10.0));
+    triangle_path.line_to((90.0, 20.0));
+    triangle_path.line_to((20.0, 90.0));
+    triangle_path.close_path();
+
+    let stroke = Stroke::new(3.0);
+    ctx.set_paint(DARK_BLUE);
+    ctx.set_stroke(stroke);
+    ctx.stroke_path(&triangle_path);
+
+    let star_path = circular_star(Point::new(50., 50.), 13, 25., 45.);
+
+    ctx.clip(&star_path);
+    ctx.set_paint(REBECCA_PURPLE);
+    ctx.fill_path(&triangle_path);
+
+    ctx.finish();
+
+    check_ref(&ctx, "clip_test_3");
 }
 
 #[test]

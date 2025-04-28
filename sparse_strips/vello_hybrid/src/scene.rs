@@ -4,7 +4,7 @@
 //! Basic render operations.
 
 use crate::render::{GpuStrip, RenderData};
-use vello_common::coarse::{Wide, WideTile};
+use vello_common::coarse::{SceneState, Wide, WideTile};
 use vello_common::color::PremulRgba8;
 use vello_common::flatten::Line;
 use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder, PreparedGlyph};
@@ -120,6 +120,33 @@ impl Scene {
         GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
+    /// Save the current scene state.
+    pub fn save(&mut self) {
+        self.wide.state_stack.push(SceneState { n_clip: 0 });
+    }
+
+    /// Restore the previous scene state.
+    pub fn restore(&mut self) {
+        self.wide.pop_clips();
+        self.wide.state_stack.pop();
+    }
+
+    /// Clip a path.
+    pub fn clip(&mut self, path: &BezPath) {
+        flatten::fill(path, self.transform, &mut self.line_buf);
+        self.make_strips(self.fill_rule);
+        let strips = core::mem::take(&mut self.strip_buf);
+        self.wide.push_clip(strips, self.fill_rule);
+    }
+
+    /// Finish the coarse rasterization prior to fine rendering.
+    ///
+    /// This method is called when the render context is finished with rendering.
+    /// It pops all the clips from the wide tiles.
+    pub fn finish(&mut self) {
+        self.wide.pop_clips();
+    }
+
     /// Set the blend mode for subsequent rendering operations.
     pub fn set_blend_mode(&mut self, blend_mode: BlendMode) {
         self.blend_mode = blend_mode;
@@ -178,6 +205,11 @@ impl Scene {
 
     // Assumes that `line_buf` contains the flattened path.
     fn render_path(&mut self, fill_rule: Fill, paint: Paint) {
+        self.make_strips(fill_rule);
+        self.wide.generate(&self.strip_buf, fill_rule, paint);
+    }
+
+    fn make_strips(&mut self, fill_rule: Fill) {
         self.tiles
             .make_tiles(&self.line_buf, self.width, self.height);
         self.tiles.sort_tiles();
@@ -189,8 +221,6 @@ impl Scene {
             fill_rule,
             &self.line_buf,
         );
-
-        self.wide.generate(&self.strip_buf, fill_rule, paint);
     }
 }
 

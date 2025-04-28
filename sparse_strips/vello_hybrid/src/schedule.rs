@@ -1,8 +1,9 @@
 // TODO:
-// - Upload clip fills and clip strips to clip texture on GPU.
-// - Get something rendered.
-// - Fix all TODOs.
-// - Refactor and remove original implementation.
+// - [-] Upload clip fills and clip strips to clip texture on GPU.
+// - [ ] Get something rendered.
+// - [ ] Clear slots when they are used (use `LoadOp::Clear` if all slots can be cleared).
+// - [ ] Fix all TODOs.
+// - [ ] Refactor and remove original implementation.
 
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
@@ -109,6 +110,7 @@ use std::collections::VecDeque;
 
 use vello_common::{
     coarse::{Cmd, WideTile},
+    color::PremulRgba8,
     paint::Paint,
     tile::Tile,
 };
@@ -218,6 +220,7 @@ impl Schedule {
         if self.rounds_queue.len() == rel_round {
             self.rounds_queue.push_back(Round::default());
         }
+        //println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
         &mut self.rounds_queue[rel_round].draws[ix]
     }
 
@@ -256,6 +259,7 @@ impl Schedule {
             // TODO: Maybe change this to be the "real" clip depth after we have this all working?
             // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
+            //println!("CMD: {:?}", cmd);
             match cmd {
                 Cmd::Fill(fill) => {
                     let el = state.stack.last().unwrap();
@@ -266,12 +270,17 @@ impl Schedule {
                     };
                     let rgba = color.to_u32();
                     // color fields with 0 alpha are reserved for clipping
+                    // TODO: Is this an assert or a conditional?
+                    assert!(has_non_zero_alpha(rgba));
                     if has_non_zero_alpha(rgba) {
-                        // TODO: x and y base coordinates are from wide_tile if
-                        // clip depth is 1, otherwise point to slot ix
+                        let (x, y) = if clip_depth == 1 {
+                            (wide_tile_x + fill.x, wide_tile_y)
+                        } else {
+                            (fill.x, el.slot_ix as u16 * Tile::HEIGHT)
+                        };
                         draw.0.push(GpuStrip {
-                            x: wide_tile_x + fill.x,
-                            y: wide_tile_y,
+                            x,
+                            y,
                             width: fill.width,
                             dense_width: 0,
                             col: 0,
@@ -289,11 +298,17 @@ impl Schedule {
                     let rgba = color.to_u32();
                     // color fields with 0 alpha are reserved for clipping
                     if has_non_zero_alpha(rgba) {
+                        let (x, y) = if clip_depth == 1 {
+                            (wide_tile_x + alpha_fill.x, wide_tile_y)
+                        } else {
+                            (alpha_fill.x, el.slot_ix as u16 * Tile::HEIGHT)
+                        };
+
                         // msg is a variable here to work around rustfmt failure
                         const MSG: &str = "GpuStrip fields use u32 and values are expected to fit within that range";
                         draw.0.push(GpuStrip {
-                            x: wide_tile_x + alpha_fill.x,
-                            y: wide_tile_y,
+                            x,
+                            y,
                             width: alpha_fill.width,
                             dense_width: alpha_fill.width,
                             col: (alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
@@ -333,10 +348,12 @@ impl Schedule {
                     // free slot after draw
                     // TODO: ensure round exists
                     // TODO: saturating_sub here, or do we have guarantee round >= self.round?
+                    assert!(round >= self.round);
+                    assert!(round - self.round < self.rounds_queue.len());
                     self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
                         .push(tos.slot_ix);
                 }
-                Cmd::ClipFill(_cmd_clip_fill) => {
+                Cmd::ClipFill(cmd_clip_fill) => {
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
                     // If the pixels for the slot we are sampling from won't be drawn until the next round,
@@ -344,10 +361,63 @@ impl Schedule {
                     // contents.
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
-                    let _draw = self.draw_mut(round, clip_depth - 1);
-                    // TODO: push GpuStrip; use `tos.slot_x` for rgba field
+                    let draw = self.draw_mut(round, clip_depth - 1);
+                    let (x, y) = if clip_depth <= 2 {
+                        (wide_tile_x + cmd_clip_fill.x as u16, wide_tile_y)
+                    } else {
+                        // TODO: Is this right?
+                        (cmd_clip_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
+                    };
+                    draw.0.push(GpuStrip {
+                        x,
+                        y,
+                        width: cmd_clip_fill.width as u16,
+                        dense_width: cmd_clip_fill.width as u16,
+                        col: 0,
+                        // TODO: Check this is right.
+                        rgba: tos.slot_ix as u32,
+                    });
+                    //println!(
+                    //    "\t Cmd::ClipFill: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
+                    //    clip_depth, x, y, tos.slot_ix, nos.slot_ix
+                    //);
                 }
-                Cmd::ClipStrip(_cmd_clip_alpha_fill) => todo!(),
+                Cmd::ClipStrip(cmd_clip_alpha_fill) => {
+                    let tos = &state.stack[clip_depth - 1];
+                    let nos = &state.stack[clip_depth - 2];
+                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
+                    // then we need to schedule these commands for the next round and preserve the slot's
+                    // contents.
+                    let next_round = clip_depth % 2 == 0 && clip_depth > 2;
+                    let round = nos.round.max(tos.round + next_round as usize);
+                    let draw = self.draw_mut(round, clip_depth - 1);
+                    let (x, y) = if clip_depth <= 2 {
+                        (wide_tile_x + cmd_clip_alpha_fill.x as u16, wide_tile_y)
+                    } else {
+                        (
+                            cmd_clip_alpha_fill.x as u16,
+                            // TODO: Is this right?
+                            nos.slot_ix as u16 * Tile::HEIGHT,
+                        )
+                    };
+                    const MSG: &str =
+                        "GpuStrip fields use u32 and values are expected to fit within that range";
+                    draw.0.push(GpuStrip {
+                        x,
+                        y,
+                        width: cmd_clip_alpha_fill.width as u16,
+                        dense_width: cmd_clip_alpha_fill.width as u16,
+                        col: (cmd_clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
+                            .try_into()
+                            .expect(MSG),
+                        // TODO: Check this is right.
+                        rgba: tos.slot_ix as u32,
+                    });
+                    //println!(
+                    //    "\t Cmd::ClipStrip: clip_depth={}, x={}, y={}, rgba(tos.slot_ix)={}, nos.slot_ix={}",
+                    //    clip_depth, x, y, tos.slot_ix, nos.slot_ix
+                    //);
+                }
             }
         }
     }

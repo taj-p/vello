@@ -3,6 +3,7 @@
 
 //! Example scenes for Vello Hybrid.
 
+pub mod clip;
 pub mod simple;
 pub mod svg;
 pub mod text;
@@ -50,6 +51,7 @@ impl AnyScene {
 #[cfg(not(target_arch = "wasm32"))]
 pub fn get_example_scenes(svg_paths: Option<Vec<&str>>) -> Box<[AnyScene]> {
     let mut scenes = Vec::new();
+    scenes.push(AnyScene::new(clip::ClipScene::new()));
 
     // Create SVG scenes for each provided path
     if let Some(paths) = svg_paths {
@@ -64,7 +66,6 @@ pub fn get_example_scenes(svg_paths: Option<Vec<&str>>) -> Box<[AnyScene]> {
 
     scenes.push(AnyScene::new(text::TextScene::new("Hello, Vello!")));
     scenes.push(AnyScene::new(simple::SimpleScene::new()));
-
     scenes.into_boxed_slice()
 }
 
