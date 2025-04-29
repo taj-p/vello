@@ -724,8 +724,8 @@ impl RendererJunk<'_> {
         self.renderer.upload_strips(self.device, self.queue, strips);
         let load = if round == 0 {
             let color = match ix {
-                0 => wgpu::Color::RED,
-                1 => wgpu::Color::GREEN,
+                0 => wgpu::Color::TRANSPARENT,
+                1 => wgpu::Color::TRANSPARENT,
                 2 => wgpu::Color::WHITE,
                 3 => wgpu::Color::BLACK,
                 _ => unreachable!(),

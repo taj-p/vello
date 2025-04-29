@@ -1,8 +1,8 @@
 // TODO:
-// - [-] Upload clip fills and clip strips to clip texture on GPU.
-// - [ ] Get something rendered.
+// - [x] Upload clip fills and clip strips to clip texture on GPU.
+// - [x] Get something rendered.
 // - [ ] Clear slots when they are used (use `LoadOp::Clear` if all slots can be cleared).
-// - [ ] Fix all TODOs.
+// - [x] Fix all TODOs.
 // - [ ] Refactor and remove original implementation.
 
 // Copyright 2025 the Vello Authors
@@ -83,7 +83,7 @@
 //!
 //! Then, the scheduler will assign each command to a given render pass of a round:
 //!
-//! TODO: Check this is right.
+//! TODO(taj-p): Check this is right.
 //!
 //! Round 1:
 //!  Render Pass 1:
@@ -111,7 +111,6 @@ use alloc::vec::Vec;
 
 use vello_common::{
     coarse::{Cmd, WideTile},
-    color::PremulRgba8,
     paint::Paint,
     tile::Tile,
 };
@@ -369,6 +368,7 @@ impl Schedule {
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     let draw = self.draw_mut(round, clip_depth - 1);
+                    // At clip depth 2, we're drawing to the final target, so use the wide tile coords.
                     let (x, y) = if clip_depth <= 2 {
                         (wide_tile_x + cmd_clip_fill.x as u16, wide_tile_y)
                     } else {
@@ -379,7 +379,7 @@ impl Schedule {
                         x,
                         y,
                         width: cmd_clip_fill.width as u16,
-                        dense_width: cmd_clip_fill.width as u16,
+                        dense_width: 0,
                         col: 0,
                         // TODO: Check this is right.
                         rgba: tos.slot_ix as u32,

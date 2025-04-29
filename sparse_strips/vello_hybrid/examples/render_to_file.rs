@@ -29,6 +29,7 @@ enum SceneType {
 }
 
 const SCENE_TYPE: SceneType = SceneType::Star;
+//const SCENE_TYPE: SceneType = SceneType::Rect;
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene) {

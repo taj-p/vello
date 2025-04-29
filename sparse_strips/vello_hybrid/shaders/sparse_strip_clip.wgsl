@@ -120,36 +120,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     if alpha_byte != 0 {
         return alpha * unpack4x8unorm(in.color);
     } else {
-        //return vec4f(1., 1., 0., 1.);
         // in.color encodes a slot in the source clip texture
-        //let clip_x = u32(in.position.x) & 0xFFu;
-        //let clip_y = (u32(in.position.y) & 3) + in.color * config.strip_height;
-        //let clip_in_color = textureLoad(clip_input_texture, vec2(clip_x, clip_y), 0);
-        //return alpha * clip_in_color;
-
-        let clip_texture_dimensions = textureDimensions(clip_input_texture);
-        let clip_width = clip_texture_dimensions.x;
-        let clip_height = clip_texture_dimensions.y;
-
-        let pix_x = in.pixel_coord & 0xffffu;
-        let pix_y = in.pixel_coord >> 16u;
-
-        let clip_x = pix_x % clip_width;
-        let clip_y = (pix_y % 4) + in.color * config.strip_height;
+        let clip_x = u32(in.position.x) & 0xFFu;
+        let clip_y = (u32(in.position.y) & 3) + in.color * config.strip_height;
         let clip_in_color = textureLoad(clip_input_texture, vec2(clip_x, clip_y), 0);
-        return clip_in_color;
-        //return vec4<f32>(f32(clip_x), f32(clip_y), 0., 1.);
-
-        //let clip_x = u32(floor(in.tex_coord.x)) / 256;
-        //let clip_y = (u32(floor(in.tex_coord.y)) % 4) + in.color * config.strip_height;
-        //let clip_in_color = textureLoad(clip_input_texture, vec2(clip_x, clip_y), 0);
-        ////return vec4f(clip_in_color.r, clip_in_color.g, clip_in_color.b, 1.);
-        //return vec4f(clip_in_color.r, clip_in_color.g, clip_in_color.b, 1.);
-
-        // let clip_x = 0;
-        // let clip_y = 0;
-        // let clip_in_color = textureLoad(clip_input_texture, vec2(clip_x, clip_y), 0);
-        // return vec4f(clip_in_color.r, clip_in_color.g, clip_in_color.b, 1.);
+        return alpha * clip_in_color;
     }
 }
 
