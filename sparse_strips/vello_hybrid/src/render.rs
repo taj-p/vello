@@ -78,6 +78,8 @@ pub struct Renderer {
     pub clip_bind_group_layout: BindGroupLayout,
     /// Pipeline for rendering clip draws
     pub clip_pipeline: RenderPipeline,
+    /// Clip textures
+    pub clip_textures: [Texture; 2],
     /// Clip texture views
     pub clip_texture_views: [TextureView; 2],
     /// GPU resources for rendering (created during prepare)
@@ -142,6 +144,7 @@ pub(crate) struct RendererJunk<'a> {
     queue: &'a Queue,
     encoder: &'a mut CommandEncoder,
     view: &'a TextureView,
+    debug_buffers: Option<&'a mut Vec<(String, wgpu::Buffer)>>,
 }
 
 impl GpuStrip {
@@ -309,28 +312,31 @@ impl Renderer {
             multiview: None,
             cache: None,
         });
-        let clip_texture_views = core::array::from_fn(|_| {
-            device
-                .create_texture(&wgpu::TextureDescriptor {
-                    label: Some("clip temp texture"),
-                    size: wgpu::Extent3d {
-                        // TODO: Allow for more than 1 column of slots?
-                        // TODO: Make configurable
-                        width: WideTile::WIDTH as u32,
-                        height: Tile::HEIGHT as u32 * Self::N_SLOTS as u32,
-                        depth_or_array_layers: 1,
-                    },
-                    mip_level_count: 1,
-                    sample_count: 1,
-                    dimension: wgpu::TextureDimension::D2,
-                    // TODO: Is this correct or need it be RGBA8Unorm?
-                    format: render_target_config.format,
-                    usage: wgpu::TextureUsages::TEXTURE_BINDING
-                        | wgpu::TextureUsages::RENDER_ATTACHMENT,
-                    view_formats: &[],
-                })
-                .create_view(&wgpu::TextureViewDescriptor::default())
+        let clip_textures = core::array::from_fn(|_| {
+            device.create_texture(&wgpu::TextureDescriptor {
+                label: Some("clip temp texture"),
+                size: wgpu::Extent3d {
+                    // TODO: Allow for more than 1 column of slots?
+                    // TODO: Make configurable
+                    width: WideTile::WIDTH as u32,
+                    height: Tile::HEIGHT as u32 * Self::N_SLOTS as u32,
+                    depth_or_array_layers: 1,
+                },
+                mip_level_count: 1,
+                sample_count: 1,
+                dimension: wgpu::TextureDimension::D2,
+                // TODO: Is this correct or need it be RGBA8Unorm?
+                format: render_target_config.format,
+                usage: wgpu::TextureUsages::TEXTURE_BINDING
+                    | wgpu::TextureUsages::RENDER_ATTACHMENT
+                    | wgpu::TextureUsages::COPY_SRC,
+                view_formats: &[],
+            })
         });
+        let clip_texture_views = [
+            clip_textures[0].create_view(&wgpu::TextureViewDescriptor::default()),
+            clip_textures[1].create_view(&wgpu::TextureViewDescriptor::default()),
+        ];
 
         println!("Texture for clip: {:?}", render_target_config.format);
         println!(
@@ -350,6 +356,7 @@ impl Renderer {
                 width: render_target_config.width,
                 height: render_target_config.height,
             },
+            clip_textures,
             clip_texture_views,
         }
     }
@@ -520,6 +527,7 @@ impl Renderer {
                 self.make_clip_bind_group(
                     device,
                     &alphas_texture,
+                    // The third bind group renders into the render target, so we use the config buffer for rendering.
                     &config_buffer,
                     &self.clip_texture_views[1],
                 ),
@@ -674,7 +682,8 @@ impl Renderer {
         render_pass.draw(0..4, 0..u32::try_from(strips_to_draw).unwrap());
     }
 
-    const N_SLOTS: usize = 100; // TODO: make configurable
+    // TODO: Make private
+    pub const N_SLOTS: usize = 100; // TODO: make configurable
 
     /// Render `scene` into the provided command encoder.
     ///
@@ -688,19 +697,21 @@ impl Renderer {
         encoder: &mut CommandEncoder,
         render_size: &RenderSize,
         view: &TextureView,
+        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer)>>,
     ) {
         // TODO: Estimate strip count.
         //let render_data = scene.prepare_render_data();
         // For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
         // buffer fills.
-        self.prepare_alphas(device, queue, &scene.alphas, render_size, 300_000);
+        self.prepare_alphas(device, queue, &scene.alphas, render_size, 30_000);
         let mut junk = RendererJunk {
             renderer: self,
             device,
             queue,
             encoder,
             view,
+            debug_buffers,
         };
         let mut schedule = Schedule::new(Self::N_SLOTS);
         schedule.do_scene(&mut junk, scene);
@@ -720,6 +731,7 @@ impl RendererJunk<'_> {
                 _ => unreachable!(),
             };
             wgpu::LoadOp::Clear(color)
+            //wgpu::LoadOp::Load
         } else {
             // TODO: Can clear if all slots can be cleared.
             // TODO: Can also use a render pass to draw a clear quad.
@@ -755,6 +767,68 @@ impl RendererJunk<'_> {
         let strips_to_draw = strips.len();
         println!("strips_to_draw: {}", strips_to_draw);
         render_pass.draw(0..4, 0..u32::try_from(strips_to_draw).unwrap());
+
+        // After rendering to a clip texture, capture its state for debugging
+        if let Some(debug_buffers) = &mut self.debug_buffers {
+            // We need to end the current render pass to perform the copy
+            drop(render_pass);
+
+            // Only capture clip textures (ix 0 or 1), not the final target (ix 2)
+            if ix < 2 {
+                let clip_texture_width = vello_common::coarse::WideTile::WIDTH as u32;
+                let clip_texture_height =
+                    vello_common::tile::Tile::HEIGHT as u32 * Renderer::N_SLOTS as u32;
+                let clip_texture_bytes_per_row = 256 * 4; // 256 bytes alignment as required by wgpu
+
+                // Create a buffer to copy the texture data
+                let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+                    label: Some(&format!(
+                        "Debug Clip Texture Buffer - round {} ix {}",
+                        round, ix
+                    )),
+                    size: u64::from(clip_texture_bytes_per_row) * u64::from(clip_texture_height),
+                    usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+                    mapped_at_creation: false,
+                });
+
+                // Copy texture to buffer
+                self.encoder.copy_texture_to_buffer(
+                    wgpu::TexelCopyTextureInfo {
+                        texture: &self.renderer.clip_textures[ix],
+                        mip_level: 0,
+                        origin: wgpu::Origin3d::ZERO,
+                        aspect: wgpu::TextureAspect::All,
+                    },
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: &debug_buffer,
+                        layout: wgpu::TexelCopyBufferLayout {
+                            offset: 0,
+                            bytes_per_row: Some(clip_texture_bytes_per_row),
+                            rows_per_image: None,
+                        },
+                    },
+                    wgpu::Extent3d {
+                        width: clip_texture_width,
+                        height: clip_texture_height,
+                        depth_or_array_layers: 1,
+                    },
+                );
+
+                // Submit commands and wait for completion
+                let old_encoder = std::mem::replace(
+                    self.encoder,
+                    self.device
+                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                            label: Some("Debug Texture Capture Encoder"),
+                        }),
+                );
+
+                self.queue.submit(std::iter::once(old_encoder.finish()));
+
+                // Add buffer to debug buffers
+                debug_buffers.push((format!("round_{}_ix_{}", round, ix), debug_buffer));
+            }
+        }
     }
 
     pub(crate) fn do_render_pass2(&mut self, strips: &[GpuStrip], round: usize, ix: usize) {
@@ -772,6 +846,7 @@ impl RendererJunk<'_> {
                 _ => unreachable!(),
             };
             wgpu::LoadOp::Clear(color)
+            //wgpu::LoadOp::Load
         } else {
             // TODO: Can clear if all slots can be cleared.
             // TODO: Can also use a render pass to draw a clear quad.

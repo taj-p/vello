@@ -122,14 +122,6 @@ impl Scene {
         GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
-    /// Clip a path.
-    pub fn clip(&mut self, path: &BezPath) {
-        flatten::fill(path, self.transform, &mut self.line_buf);
-        self.make_strips(self.fill_rule);
-        let strips = core::mem::take(&mut self.strip_buf);
-        self.wide.push_clip(strips, self.fill_rule);
-    }
-
     /// Push a new layer with the given properties.
     ///
     /// Note that the mask, if provided, needs to have the same size as the render context. Otherwise,

@@ -118,7 +118,7 @@ use vello_common::{
 
 use crate::{GpuStrip, Scene, render::RendererJunk};
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub(crate) struct Schedule {
     /// Index of the current round
