@@ -36,20 +36,34 @@ impl Default for ClipScene {
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene, root_transform: Affine) {
-    // Create first clipping region - a rectangle on the left side
-    let clip_rect = Rect::new(10.0, 30.0, 50.0, 70.0);
+    fn circular_star(center: Point, n: usize, inner: f64, outer: f64) -> BezPath {
+        let mut path = BezPath::new();
+        let start_angle = -std::f64::consts::FRAC_PI_2;
+        path.move_to(center + outer * Vec2::from_angle(start_angle));
+        for i in 1..n * 2 {
+            let th = start_angle + i as f64 * std::f64::consts::PI / n as f64;
+            let r = if i % 2 == 0 { outer } else { inner };
+            path.line_to(center + r * Vec2::from_angle(th));
+        }
+        path.close_path();
+        path
+    }
+    let mut triangle_path = BezPath::new();
+    triangle_path.move_to((10.0, 10.0));
+    triangle_path.line_to((90.0, 20.0));
+    triangle_path.line_to((20.0, 90.0));
+    triangle_path.close_path();
 
-    // Then a filled rectangle that covers most of the canvas
-    let large_rect = Rect::new(0.0, 0.0, 100.0, 100.0);
-
-    let stroke = Stroke::new(10.0);
+    let stroke = Stroke::new(1.0);
     ctx.set_paint(DARK_BLUE.into());
     ctx.set_stroke(stroke);
-    ctx.stroke_rect(&clip_rect);
+    ctx.stroke_path(&triangle_path);
 
-    ctx.push_clip_layer(&clip_rect.to_path(0.1));
-    ctx.set_paint(RED.into());
-    ctx.fill_rect(&large_rect);
+    let star_path = circular_star(Point::new(50., 50.), 13, 25., 45.);
+
+    ctx.push_clip_layer(&star_path);
+    ctx.set_paint(REBECCA_PURPLE.into());
+    ctx.fill_path(&triangle_path);
     ctx.pop_layer();
 
     //let clip_rect = Rect::new(0.0, 0.0, 400.0, 400.0);

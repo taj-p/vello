@@ -98,8 +98,8 @@ async fn run() {
     let svg_height = parsed.size.height * render_scale;
     let (width, height) = constraints.calculate_dimensions(svg_width, svg_height);
 
-    let width = 400 as u16;
-    let height = 400 as u16;
+    let width = width as u16;
+    let height = height as u16;
 
     let mut scene = Scene::new(width, height);
     render(&mut scene);

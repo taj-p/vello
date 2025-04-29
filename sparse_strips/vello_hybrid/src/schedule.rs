@@ -2,6 +2,8 @@
 // - [x] Upload clip fills and clip strips to clip texture on GPU.
 // - [x] Get something rendered.
 // - [ ] Clear slots when they are used (use `LoadOp::Clear` if all slots can be cleared).
+// - [ ] Need to submit render passes.
+// - [ ] Use a different pipeline for writing to destination? GhostTiger in winit is wrong.
 // - [x] Fix all TODOs.
 // - [ ] Refactor and remove original implementation.
 

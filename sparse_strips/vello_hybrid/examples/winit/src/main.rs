@@ -287,6 +287,7 @@ impl ApplicationHandler for App<'_> {
                             label: Some("Vello Render to Surface pass"),
                         });
                 {
+                    let mut debugs = Vec::new();
                     self.renderers[surface.dev_id].as_mut().unwrap().render2(
                         &self.scene,
                         &device_handle.device,
@@ -294,6 +295,7 @@ impl ApplicationHandler for App<'_> {
                         &mut encoder,
                         &render_size,
                         &texture_view,
+                        Some(&mut debugs),
                     );
                 }
 
