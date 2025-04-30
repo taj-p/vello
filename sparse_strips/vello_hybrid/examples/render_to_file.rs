@@ -9,6 +9,7 @@
 use std::io::BufWriter;
 use vello_common::color::palette::css::{BLACK, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE, RED};
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
+use vello_common::paint::Paint;
 use vello_common::pico_svg::{Item, PicoSvg};
 use vello_common::pixmap::Pixmap;
 use vello_hybrid::{DimensionConstraints, Scene};
@@ -26,9 +27,10 @@ fn main() {
 enum SceneType {
     Rect,
     Star,
+    NestedRect,
 }
 
-const SCENE_TYPE: SceneType = SceneType::Star;
+const SCENE_TYPE: SceneType = SceneType::NestedRect;
 //const SCENE_TYPE: SceneType = SceneType::Rect;
 
 /// Draws a simple scene with shapes
@@ -51,7 +53,7 @@ pub fn render(ctx: &mut Scene) {
             ctx.fill_rect(&large_rect);
             ctx.pop_layer();
         }
-        _ => {
+        SceneType::Star => {
             fn circular_star(center: Point, n: usize, inner: f64, outer: f64) -> BezPath {
                 let mut path = BezPath::new();
                 let start_angle = -std::f64::consts::FRAC_PI_2;
@@ -82,6 +84,51 @@ pub fn render(ctx: &mut Scene) {
             ctx.fill_path(&triangle_path);
             ctx.pop_layer();
         }
+        SceneType::NestedRect => {
+            // Create a series of 10 nested rectangles with clipping
+            let colors: [Paint; 10] = [
+                RED.into(),
+                DARK_BLUE.into(),
+                DARK_GREEN.into(),
+                REBECCA_PURPLE.into(),
+                BLACK.into(),
+                RED.into(),
+                DARK_BLUE.into(),
+                DARK_GREEN.into(),
+                REBECCA_PURPLE.into(),
+                BLACK.into(),
+            ];
+
+            // Start with a large rectangle (100x100) and decrease by 10 each time
+            let mut size = 100.0;
+            let mut offset = 0.0;
+
+            const COUNT: usize = 2;
+
+            for i in 0..COUNT {
+                // Create a rectangle for clipping
+                let clip_rect = Rect::new(offset, offset, size, size);
+                ctx.set_paint(BLACK.into());
+                // visualise clip
+                ctx.stroke_rect(&clip_rect);
+                // Draw a filled rectangle with current color
+                ctx.set_paint(colors[i].clone());
+
+                // Push clip layer
+                ctx.push_clip_layer(&clip_rect.to_path(0.1));
+
+                ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
+
+                // Decrease size and increase offset for next iteration
+                size -= 10.0;
+                offset += 5.0;
+            }
+
+            // Pop all clip layers
+            for _ in 0..COUNT {
+                ctx.pop_layer();
+            }
+        }
     }
 }
 
@@ -98,8 +145,8 @@ async fn run() {
     let svg_height = parsed.size.height * render_scale;
     let (width, height) = constraints.calculate_dimensions(svg_width, svg_height);
 
-    let width = width as u16;
-    let height = height as u16;
+    let width = 100 as u16;
+    let height = 100 as u16;
 
     let mut scene = Scene::new(width, height);
     render(&mut scene);

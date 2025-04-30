@@ -72,6 +72,16 @@ pub struct Renderer {
     pub clip_bind_group_layout: BindGroupLayout,
     /// Pipeline for rendering clip draws
     pub clip_pipeline: RenderPipeline,
+    /// Bind group layout for clear slot operations
+    pub clear_bind_group_layout: BindGroupLayout,
+    /// Pipeline for clearing slots in clip textures
+    pub clear_pipeline: RenderPipeline,
+    /// Buffer containing config for clear slots operation
+    pub clear_config_buffer: Buffer,
+    /// Bind group for clear slots operation
+    pub clear_bind_group: BindGroup,
+    /// Buffer for slot indices used in clear_slots
+    pub slot_indices_buffer: Buffer,
     /// Clip textures
     pub clip_textures: [Texture; 2],
     /// Clip texture views
@@ -194,17 +204,52 @@ impl Renderer {
                     },
                 ],
             });
+
+        // Create bind group layout for clearing slots
+        let clear_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("Clear Slots Bind Group Layout"),
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: wgpu::ShaderStages::VERTEX,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Uniform,
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+            });
+
         let clip_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Clip Shader"),
             source: wgpu::ShaderSource::Wgsl(
                 include_str!("../shaders/sparse_strip_clip.wgsl").into(),
             ),
         });
+
+        // Create shader module for clearing slots
+        let clear_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+            label: Some("Clear Slots Shader"),
+            source: wgpu::ShaderSource::Wgsl(
+                include_str!("../shaders/sparse_strip_clear_slots.wgsl").into(),
+            ),
+        });
+
         let clip_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Clip Pipeline Layout"),
             bind_group_layouts: &[&clip_bind_group_layout],
             push_constant_ranges: &[],
         });
+
+        // Create pipeline layout for clearing slots
+        let clear_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Clear Slots Pipeline Layout"),
+                bind_group_layouts: &[&clear_bind_group_layout],
+                push_constant_ranges: &[],
+            });
+
         let clip_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Clip Pipeline"),
             layout: Some(&clip_pipeline_layout),
@@ -237,6 +282,46 @@ impl Renderer {
             multiview: None,
             cache: None,
         });
+
+        // Create pipeline for clearing slots
+        let clear_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: Some("Clear Slots Pipeline"),
+            layout: Some(&clear_pipeline_layout),
+            vertex: wgpu::VertexState {
+                module: &clear_shader,
+                entry_point: Some("vs_main"),
+                buffers: &[wgpu::VertexBufferLayout {
+                    array_stride: size_of::<u32>() as u64,
+                    step_mode: wgpu::VertexStepMode::Instance,
+                    attributes: &[wgpu::VertexAttribute {
+                        format: wgpu::VertexFormat::Uint32,
+                        offset: 0,
+                        shader_location: 0,
+                    }],
+                }],
+                compilation_options: PipelineCompilationOptions::default(),
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &clear_shader,
+                entry_point: Some("fs_main"),
+                targets: &[Some(ColorTargetState {
+                    format: render_target_config.format,
+                    // No blending needed for clearing
+                    blend: None,
+                    write_mask: ColorWrites::ALL,
+                })],
+                compilation_options: PipelineCompilationOptions::default(),
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleStrip,
+                ..Default::default()
+            },
+            depth_stencil: None,
+            multisample: wgpu::MultisampleState::default(),
+            multiview: None,
+            cache: None,
+        });
+
         let clip_textures = core::array::from_fn(|_| {
             device.create_texture(&wgpu::TextureDescriptor {
                 label: Some("clip temp texture"),
@@ -270,9 +355,45 @@ impl Renderer {
             Tile::HEIGHT * Self::N_SLOTS as u16
         );
 
+        // Create clear config buffer
+        let clear_config_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: Some("Clear Slots Config Buffer"),
+            contents: bytemuck::bytes_of(&ClearSlotsConfig {
+                slot_width: WideTile::WIDTH as u32,
+                slot_height: Tile::HEIGHT as u32,
+                texture_height: Tile::HEIGHT as u32 * Self::N_SLOTS as u32,
+                _padding: 0,
+            }),
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
+        });
+
+        // Create clear bind group
+        let clear_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("Clear Slots Bind Group"),
+            layout: &clear_bind_group_layout,
+            entries: &[wgpu::BindGroupEntry {
+                binding: 0,
+                resource: clear_config_buffer.as_entire_binding(),
+            }],
+        });
+
+        // Create slot indices buffer with initial capacity for 64 slots
+        // This can store up to 64 slot indices (adjust size if needed)
+        let slot_indices_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Slot Indices Buffer"),
+            size: Self::N_SLOTS as u64 * size_of::<u32>() as u64,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        });
+
         Self {
             clip_bind_group_layout,
             clip_pipeline,
+            clear_bind_group_layout,
+            clear_pipeline,
+            clear_config_buffer,
+            clear_bind_group,
+            slot_indices_buffer,
             resources: None,
             alpha_data: Vec::new(),
             render_size: RenderSize {
@@ -536,7 +657,7 @@ impl Renderer {
     }
 
     // TODO: Make private
-    pub const N_SLOTS: usize = 100; // TODO: make configurable
+    pub const N_SLOTS: usize = 50; // TODO: make configurable
 
     /// Render `scene` into the provided command encoder.
     ///
@@ -572,24 +693,15 @@ impl Renderer {
 }
 
 impl RendererJunk<'_> {
-    pub(crate) fn do_render_pass(&mut self, strips: &[GpuStrip], round: usize, ix: usize) {
+    pub(crate) fn do_clip_render_pass(
+        &mut self,
+        strips: &[GpuStrip],
+        round: usize,
+        ix: usize,
+        load: wgpu::LoadOp<wgpu::Color>,
+    ) {
         println!("do_render_pass: round={}, ix={}", round, ix);
         self.renderer.upload_strips(self.device, self.queue, strips);
-        let load = if round == 0 {
-            let color = match ix {
-                0 => wgpu::Color::TRANSPARENT,
-                1 => wgpu::Color::TRANSPARENT,
-                2 => wgpu::Color::WHITE,
-                3 => wgpu::Color::BLACK,
-                _ => unreachable!(),
-            };
-            wgpu::LoadOp::Clear(color)
-            //wgpu::LoadOp::Load
-        } else {
-            // TODO: Can clear if all slots can be cleared.
-            // TODO: Can also use a render pass to draw a clear quad.
-            wgpu::LoadOp::Load
-        };
         let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("Render to Texture Pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
@@ -683,4 +795,49 @@ impl RendererJunk<'_> {
             }
         }
     }
+
+    /// Clear specific slots in a clip texture
+    pub(crate) fn clear_slots(&mut self, ix: usize, slot_indices: &[u32]) {
+        // Write slot indices to the buffer
+        self.queue.write_buffer(
+            &self.renderer.slot_indices_buffer,
+            0,
+            bytemuck::cast_slice(slot_indices),
+        );
+
+        let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
+            label: Some("Clear Slots Render Pass"),
+            color_attachments: &[Some(RenderPassColorAttachment {
+                view: &self.renderer.clip_texture_views[ix],
+                resolve_target: None,
+                ops: wgpu::Operations {
+                    // Don't clear the entire texture, just specific slots
+                    load: wgpu::LoadOp::Load,
+                    store: wgpu::StoreOp::Store,
+                },
+            })],
+            depth_stencil_attachment: None,
+            occlusion_query_set: None,
+            timestamp_writes: None,
+        });
+
+        render_pass.set_pipeline(&self.renderer.clear_pipeline);
+        render_pass.set_bind_group(0, &self.renderer.clear_bind_group, &[]);
+        render_pass.set_vertex_buffer(0, self.renderer.slot_indices_buffer.slice(..));
+        render_pass.draw(0..4, 0..slot_indices.len() as u32);
+    }
+}
+
+/// Config for the clear slots pipeline
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Pod, Zeroable)]
+struct ClearSlotsConfig {
+    /// Width of a slot
+    pub slot_width: u32,
+    /// Height of a slot
+    pub slot_height: u32,
+    /// Total height of the texture
+    pub texture_height: u32,
+    /// Padding for 16-byte alignment
+    pub _padding: u32,
 }

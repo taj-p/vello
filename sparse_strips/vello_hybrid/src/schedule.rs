@@ -3,7 +3,7 @@
 // - [x] Get something rendered.
 // - [ ] Clear slots when they are used (use `LoadOp::Clear` if all slots can be cleared).
 // - [ ] Need to submit render passes.
-// - [ ] Use a different pipeline for writing to destination? GhostTiger in winit is wrong.
+// - [ ] Use a different pipeline for writing to destination? GhostTiger in winit is wrong (but correct when rendering to file?!)
 // - [x] Fix all TODOs.
 // - [ ] Refactor and remove original implementation.
 
@@ -124,7 +124,10 @@ const DEBUG: bool = false;
 pub(crate) struct Schedule {
     /// Index of the current round
     round: usize,
+    total_slots: usize,
     free: [Vec<usize>; 2],
+    /// Slots that require clearing before subsequent draws.
+    clear: [Vec<u32>; 2],
     /// Rounds are enqueued on push clip commands and dequeued on flush.
     rounds_queue: VecDeque<Round>,
 }
@@ -160,15 +163,18 @@ struct TileEl {
 struct Draw(Vec<GpuStrip>);
 
 impl Schedule {
-    pub(crate) fn new(n_slots: usize) -> Self {
-        let free0: Vec<_> = (0..n_slots).collect();
+    pub(crate) fn new(total_slots: usize) -> Self {
+        let free0: Vec<_> = (0..total_slots).collect();
         let free1 = free0.clone();
         let free = [free0, free1];
+        let clear = [Vec::new(), Vec::new()];
         let mut rounds_queue = VecDeque::new();
         rounds_queue.push_back(Round::default());
         Self {
             round: 0,
+            total_slots,
             free,
+            clear,
             rounds_queue,
         }
     }
@@ -200,7 +206,25 @@ impl Schedule {
         let round = self.rounds_queue.pop_front().unwrap();
         for (i, draw) in round.draws.iter().enumerate() {
             if !draw.0.is_empty() {
-                junk.do_render_pass(&draw.0, self.round, i);
+                if self.round == 0 || i == 2 {
+                    // In the first round, we know no slots are dirty. When we're rendering to the final target,
+                    // we know we can't clear (the client may have already drawn something). Thus, we can
+                    // `wgpu::LoadOp::Load`.
+                    junk.do_clip_render_pass(&draw.0, self.round, i, wgpu::LoadOp::Load);
+                } else {
+                    let load = if self.clear[i].len() + self.free[i].len() == self.total_slots {
+                        // All our slots need to be cleared or are unoccupied, so we can simply clear.
+                        self.clear[i].clear();
+                        wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
+                    } else {
+                        // At least one slot is occupied and required for later rounds, so we need fine-grained
+                        // clearing of `self.clear[i]` slots.
+                        junk.clear_slots(i, &self.clear[i].as_slice());
+                        self.clear[i].clear();
+                        wgpu::LoadOp::Load
+                    };
+                    junk.do_clip_render_pass(&draw.0, self.round, i, load);
+                }
             }
         }
         for i in 0..1 {
@@ -336,9 +360,7 @@ impl Schedule {
                         self.flush(junk);
                     }
                     let slot_ix = self.free[ix].pop().unwrap();
-                    // TODO: the allocated slot will need to get cleared before
-                    // drawing, maybe add it to a clear list. Of course, if all slots
-                    // can be cleared, then do clear with `LoadOp::Clear` instead.
+                    self.clear[ix].push(slot_ix as u32);
                     state.stack.push(TileEl {
                         slot_ix,
                         round: self.round,
