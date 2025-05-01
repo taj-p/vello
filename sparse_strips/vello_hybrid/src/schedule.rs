@@ -120,7 +120,7 @@ use vello_common::{
 
 use crate::{GpuStrip, Scene, render::RendererJunk};
 
-const DEBUG: bool = false;
+const DEBUG: bool = true;
 
 pub(crate) struct Schedule {
     /// Index of the current round
@@ -322,6 +322,10 @@ impl Schedule {
             }
 
             if self.round == 0 || i == 2 {
+                if i != 2 && !self.clear[i].is_empty() {
+                    junk.clear_slots(i, &self.clear[i].as_slice());
+                    self.clear[i].clear();
+                }
                 // In the first round, we know no slots are dirty. When we're rendering to the final target,
                 // we know we can't clear (the client may have already drawn something). Thus, we can
                 // `wgpu::LoadOp::Load`.
@@ -418,6 +422,7 @@ impl Schedule {
             let clip_depth = state.stack.len();
             if DEBUG {
                 println!("CMD: {:?}", cmd);
+                println!("clip_depth: {}", clip_depth);
             }
             match cmd {
                 Cmd::Fill(fill) => {
@@ -487,7 +492,7 @@ impl Schedule {
                         self.flush(junk);
                     }
                     let slot_ix = self.free[ix].pop().unwrap();
-                    //self.clear[ix].push(slot_ix as u32);
+                    self.clear[ix].push(slot_ix as u32);
                     state.stack.push(TileEl {
                         slot_ix,
                         round: self.round,

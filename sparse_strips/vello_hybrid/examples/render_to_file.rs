@@ -33,8 +33,7 @@ enum SceneType {
     ThreeDepthCase,
 }
 
-const SCENE_TYPE: SceneType = SceneType::ThreeDepthCase;
-//const SCENE_TYPE: SceneType = SceneType::Rect;
+const SCENE_TYPE: SceneType = SceneType::NestedRect;
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene) {
@@ -106,7 +105,7 @@ pub fn render(ctx: &mut Scene) {
             let mut size = 100.0;
             let mut offset = 0.0;
 
-            const COUNT: usize = 3;
+            const COUNT: usize = 10;
 
             for i in 0..COUNT {
                 // Create a rectangle for clipping
@@ -136,24 +135,18 @@ pub fn render(ctx: &mut Scene) {
             // Create a series of 10 nested rectangles with clipping
             {
                 let overlap_rect = Rect::new(0.0, 0.0, 100.0, 3.0);
-                //ctx.set_paint(BLACK.into());
-                //ctx.stroke_rect(&overlap_rect);
                 ctx.push_clip_layer(&overlap_rect.to_path(0.1));
                 ctx.set_paint(RED.into());
                 ctx.fill_rect(&overlap_rect);
             }
             {
                 let overlap_rect = Rect::new(5.0, 0.0, 100.0, 3.0);
-                //ctx.set_paint(BLACK.into());
-                //ctx.stroke_rect(&overlap_rect);
                 ctx.push_clip_layer(&overlap_rect.to_path(0.1));
                 ctx.set_paint(GREEN.into());
                 ctx.fill_rect(&overlap_rect);
             }
             {
                 let overlap_rect = Rect::new(10.0, 0.0, 100.0, 3.0);
-                //ctx.set_paint(BLACK.into());
-                //ctx.stroke_rect(&overlap_rect);
                 ctx.push_clip_layer(&overlap_rect.to_path(0.1));
                 ctx.set_paint(BLUE.into());
                 ctx.fill_rect(&overlap_rect);

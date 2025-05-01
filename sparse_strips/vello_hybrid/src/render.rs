@@ -659,7 +659,7 @@ impl Renderer {
     }
 
     // TODO: Make private
-    pub const N_SLOTS: usize = 50; // TODO: make configurable
+    pub const N_SLOTS: usize = 100; // TODO: make configurable
 
     /// Render `scene` into the provided command encoder.
     ///
@@ -842,26 +842,38 @@ impl RendererJunk<'_> {
             bytemuck::cast_slice(slot_indices),
         );
 
-        let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
-            label: Some("Clear Slots Render Pass"),
-            color_attachments: &[Some(RenderPassColorAttachment {
-                view: &self.renderer.clip_texture_views[ix],
-                resolve_target: None,
-                ops: wgpu::Operations {
-                    // Don't clear the entire texture, just specific slots
-                    load: wgpu::LoadOp::Load,
-                    store: wgpu::StoreOp::Store,
-                },
-            })],
-            depth_stencil_attachment: None,
-            occlusion_query_set: None,
-            timestamp_writes: None,
-        });
+        {
+            let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
+                label: Some("Clear Slots Render Pass"),
+                color_attachments: &[Some(RenderPassColorAttachment {
+                    view: &self.renderer.clip_texture_views[ix],
+                    resolve_target: None,
+                    ops: wgpu::Operations {
+                        // Don't clear the entire texture, just specific slots
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
+                })],
+                depth_stencil_attachment: None,
+                occlusion_query_set: None,
+                timestamp_writes: None,
+            });
 
-        render_pass.set_pipeline(&self.renderer.clear_pipeline);
-        render_pass.set_bind_group(0, &self.renderer.clear_bind_group, &[]);
-        render_pass.set_vertex_buffer(0, self.renderer.slot_indices_buffer.slice(..));
-        render_pass.draw(0..4, 0..slot_indices.len() as u32);
+            render_pass.set_pipeline(&self.renderer.clear_pipeline);
+            render_pass.set_bind_group(0, &self.renderer.clear_bind_group, &[]);
+            render_pass.set_vertex_buffer(0, self.renderer.slot_indices_buffer.slice(..));
+            render_pass.draw(0..4, 0..slot_indices.len() as u32);
+        }
+
+        // Submit commands and wait for completion
+        let old_encoder = std::mem::replace(
+            self.encoder,
+            self.device
+                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                    label: Some("Clear Slots Encoder"),
+                }),
+        );
+        self.queue.submit(std::iter::once(old_encoder.finish()));
     }
 }
 
