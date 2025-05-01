@@ -148,7 +148,9 @@ pub(crate) struct RendererJunk<'a> {
     queue: &'a Queue,
     encoder: &'a mut CommandEncoder,
     view: &'a TextureView,
-    debug_buffers: Option<&'a mut Vec<(String, wgpu::Buffer)>>,
+    view_texture: &'a Texture,
+    render_size: &'a RenderSize,
+    debug_buffers: Option<&'a mut Vec<(String, wgpu::Buffer, u32, u32)>>,
 }
 
 impl GpuStrip {
@@ -671,7 +673,8 @@ impl Renderer {
         encoder: &mut CommandEncoder,
         render_size: &RenderSize,
         view: &TextureView,
-        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer)>>,
+        view_texture: &Texture,
+        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
     ) {
         // TODO: Estimate strip count.
         //let render_data = scene.prepare_render_data();
@@ -685,6 +688,8 @@ impl Renderer {
             queue,
             encoder,
             view,
+            view_texture,
+            render_size,
             debug_buffers,
         };
         let mut schedule = Schedule::new(Self::N_SLOTS);
@@ -700,7 +705,6 @@ impl RendererJunk<'_> {
         ix: usize,
         load: wgpu::LoadOp<wgpu::Color>,
     ) {
-        println!("do_render_pass: round={}, ix={}", round, ix);
         self.renderer.upload_strips(self.device, self.queue, strips);
         let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("Render to Texture Pass"),
@@ -730,7 +734,6 @@ impl RendererJunk<'_> {
         render_pass.set_bind_group(0, &resources.clip_bind_groups[ix], &[]);
         render_pass.set_vertex_buffer(0, resources.strips_buffer.slice(..));
         let strips_to_draw = strips.len();
-        println!("strips_to_draw: {}", strips_to_draw);
         render_pass.draw(0..4, 0..u32::try_from(strips_to_draw).unwrap());
 
         // After rendering to a clip texture, capture its state for debugging
@@ -738,61 +741,95 @@ impl RendererJunk<'_> {
             // We need to end the current render pass to perform the copy
             drop(render_pass);
 
-            // Only capture clip textures (ix 0 or 1), not the final target (ix 2)
-            if ix != 2 {
-                let clip_texture_width = vello_common::coarse::WideTile::WIDTH as u32;
-                let clip_texture_height =
-                    vello_common::tile::Tile::HEIGHT as u32 * Renderer::N_SLOTS as u32;
-                let clip_texture_bytes_per_row = 256 * 4; // 256 bytes alignment as required by wgpu
+            let (width, height, bytes_per_row) = if ix == 2 {
+                (
+                    self.render_size.width,
+                    self.render_size.height,
+                    self.render_size.width * 4,
+                )
+            } else {
+                (
+                    self.renderer.clip_textures[ix].width(),
+                    self.renderer.clip_textures[ix].height(),
+                    self.renderer.clip_textures[ix].width() * 4,
+                )
+            };
+            // Submit previous commands
+            let old_encoder = std::mem::replace(
+                self.encoder,
+                self.device
+                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                        label: Some("Debug Texture Capture Encoder"),
+                    }),
+            );
+            self.queue.submit(std::iter::once(old_encoder.finish()));
 
-                // Create a buffer to copy the texture data
-                let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
-                    label: Some(&format!(
-                        "Debug Clip Texture Buffer - round {} ix {}",
-                        round, ix
-                    )),
-                    size: u64::from(clip_texture_bytes_per_row) * u64::from(clip_texture_height),
-                    usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-                    mapped_at_creation: false,
-                });
+            // Create a buffer to copy the texture data
+            let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+                label: Some(&format!(
+                    "Debug Clip Texture Buffer - round {} ix {}",
+                    round, ix
+                )),
+                size: u64::from(bytes_per_row) * u64::from(height),
+                usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+                mapped_at_creation: false,
+            });
 
-                // Copy texture to buffer
-                self.encoder.copy_texture_to_buffer(
-                    wgpu::TexelCopyTextureInfo {
-                        texture: &self.renderer.clip_textures[ix],
-                        mip_level: 0,
-                        origin: wgpu::Origin3d::ZERO,
-                        aspect: wgpu::TextureAspect::All,
+            // Copy texture to buffer
+            self.encoder.copy_texture_to_buffer(
+                wgpu::TexelCopyTextureInfo {
+                    texture: if ix == 2 {
+                        self.view_texture
+                    } else {
+                        &self.renderer.clip_textures[ix]
                     },
-                    wgpu::TexelCopyBufferInfo {
-                        buffer: &debug_buffer,
-                        layout: wgpu::TexelCopyBufferLayout {
-                            offset: 0,
-                            bytes_per_row: Some(clip_texture_bytes_per_row),
-                            rows_per_image: None,
-                        },
+                    mip_level: 0,
+                    origin: wgpu::Origin3d::ZERO,
+                    aspect: wgpu::TextureAspect::All,
+                },
+                wgpu::TexelCopyBufferInfo {
+                    buffer: &debug_buffer,
+                    layout: wgpu::TexelCopyBufferLayout {
+                        offset: 0,
+                        bytes_per_row: Some(bytes_per_row),
+                        rows_per_image: None,
                     },
-                    wgpu::Extent3d {
-                        width: clip_texture_width,
-                        height: clip_texture_height,
-                        depth_or_array_layers: 1,
-                    },
-                );
+                },
+                wgpu::Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+            );
 
-                // Submit commands and wait for completion
-                let old_encoder = std::mem::replace(
-                    self.encoder,
-                    self.device
-                        .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                            label: Some("Debug Texture Capture Encoder"),
-                        }),
-                );
+            // Submit commands and wait for completion
+            let old_encoder = std::mem::replace(
+                self.encoder,
+                self.device
+                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                        label: Some("Debug Texture Capture Encoder"),
+                    }),
+            );
 
-                self.queue.submit(std::iter::once(old_encoder.finish()));
+            self.queue.submit(std::iter::once(old_encoder.finish()));
 
-                // Add buffer to debug buffers
-                debug_buffers.push((format!("round_{}_ix_{}", round, ix), debug_buffer));
-            }
+            // Add buffer to debug buffers
+            debug_buffers.push((
+                format!(
+                    "round_{}_ix_{}_sample_from_{}",
+                    round,
+                    ix,
+                    match ix {
+                        0 => "1",
+                        1 => "0",
+                        2 => "1",
+                        _ => unreachable!(),
+                    }
+                ),
+                debug_buffer,
+                width,
+                height,
+            ));
         }
     }
 

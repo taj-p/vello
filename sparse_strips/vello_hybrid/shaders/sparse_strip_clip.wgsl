@@ -142,6 +142,7 @@ fn unpack_alphas_from_channel(rgba: vec4<u32>, channel_index: u32) -> u32 {
 // Polyfills `unpack4x8unorm`.
 //
 // Downlevel targets do not support native WGSL `unpack4x8unorm`.
+// TODO: Remove once we upgrade to WGPU 25.
 fn unpack4x8unorm(rgba_packed: u32) -> vec4<f32> {
     // Extract each byte and convert to float in range [0,1]
     return vec4<f32>(

@@ -7,7 +7,9 @@
 //! It takes an input SVG file and renders it to a PNG file using the hybrid CPU/GPU renderer.
 
 use std::io::BufWriter;
-use vello_common::color::palette::css::{BLACK, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE, RED};
+use vello_common::color::palette::css::{
+    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
+};
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::paint::Paint;
 use vello_common::pico_svg::{Item, PicoSvg};
@@ -28,9 +30,10 @@ enum SceneType {
     Rect,
     Star,
     NestedRect,
+    ThreeDepthCase,
 }
 
-const SCENE_TYPE: SceneType = SceneType::NestedRect;
+const SCENE_TYPE: SceneType = SceneType::ThreeDepthCase;
 //const SCENE_TYPE: SceneType = SceneType::Rect;
 
 /// Draws a simple scene with shapes
@@ -103,7 +106,7 @@ pub fn render(ctx: &mut Scene) {
             let mut size = 100.0;
             let mut offset = 0.0;
 
-            const COUNT: usize = 2;
+            const COUNT: usize = 3;
 
             for i in 0..COUNT {
                 // Create a rectangle for clipping
@@ -129,6 +132,37 @@ pub fn render(ctx: &mut Scene) {
                 ctx.pop_layer();
             }
         }
+        SceneType::ThreeDepthCase => {
+            // Create a series of 10 nested rectangles with clipping
+            {
+                let overlap_rect = Rect::new(0.0, 0.0, 100.0, 3.0);
+                //ctx.set_paint(BLACK.into());
+                //ctx.stroke_rect(&overlap_rect);
+                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+                ctx.set_paint(RED.into());
+                ctx.fill_rect(&overlap_rect);
+            }
+            {
+                let overlap_rect = Rect::new(5.0, 0.0, 100.0, 3.0);
+                //ctx.set_paint(BLACK.into());
+                //ctx.stroke_rect(&overlap_rect);
+                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+                ctx.set_paint(GREEN.into());
+                ctx.fill_rect(&overlap_rect);
+            }
+            {
+                let overlap_rect = Rect::new(10.0, 0.0, 100.0, 3.0);
+                //ctx.set_paint(BLACK.into());
+                //ctx.stroke_rect(&overlap_rect);
+                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+                ctx.set_paint(BLUE.into());
+                ctx.fill_rect(&overlap_rect);
+            }
+
+            ctx.pop_layer();
+            ctx.pop_layer();
+            ctx.pop_layer();
+        }
     }
 }
 
@@ -145,7 +179,7 @@ async fn run() {
     let svg_height = parsed.size.height * render_scale;
     let (width, height) = constraints.calculate_dimensions(svg_width, svg_height);
 
-    let width = 100 as u16;
+    let width = 256 as u16;
     let height = 100 as u16;
 
     let mut scene = Scene::new(width, height);
@@ -219,6 +253,7 @@ async fn run() {
             &mut encoder,
             &render_size,
             &texture_view,
+            &texture,
             Some(&mut debug_buffers),
         );
     }
@@ -272,7 +307,7 @@ async fn run() {
         });
 
     // Map all debug buffers for reading
-    for (_, buffer) in &debug_buffers {
+    for (_, buffer, _, _) in &debug_buffers {
         buffer
             .slice(..)
             .map_async(wgpu::MapMode::Read, move |result| {
@@ -303,37 +338,35 @@ async fn run() {
     // Copy the main texture data to the pixmap
     let main_width = width as usize;
     let main_height = height as usize;
-    for y in 0..main_height {
-        let src_offset = y * bytes_per_row as usize;
-        let dst_offset = y * (total_width as usize * 4);
-        for x in 0..main_width {
-            let src_pixel_offset = src_offset + x * 4;
-            let dst_pixel_offset = dst_offset + x * 4;
-            if src_pixel_offset + 3 < main_data.len() && dst_pixel_offset + 3 < pixmap.buf.len() {
-                pixmap.buf[dst_pixel_offset] = main_data[src_pixel_offset];
-                pixmap.buf[dst_pixel_offset + 1] = main_data[src_pixel_offset + 1];
-                pixmap.buf[dst_pixel_offset + 2] = main_data[src_pixel_offset + 2];
-                pixmap.buf[dst_pixel_offset + 3] = main_data[src_pixel_offset + 3];
-            }
-        }
-    }
+    //for y in 0..main_height {
+    //    let src_offset = y * bytes_per_row as usize;
+    //    let dst_offset = y * (total_width as usize * 4);
+    //    for x in 0..main_width {
+    //        let src_pixel_offset = src_offset + x * 4;
+    //        let dst_pixel_offset = dst_offset + x * 4;
+    //        if src_pixel_offset + 3 < main_data.len() && dst_pixel_offset + 3 < pixmap.buf.len() {
+    //            pixmap.buf[dst_pixel_offset] = main_data[src_pixel_offset];
+    //            pixmap.buf[dst_pixel_offset + 1] = main_data[src_pixel_offset + 1];
+    //            pixmap.buf[dst_pixel_offset + 2] = main_data[src_pixel_offset + 2];
+    //            pixmap.buf[dst_pixel_offset + 3] = main_data[src_pixel_offset + 3];
+    //        }
+    //    }
+    //}
 
     // Copy all debug buffers to the pixmap
-    let clip_texture_bytes_per_row = 256 * 4;
-    for (i, (label, buffer)) in debug_buffers.iter().enumerate() {
+    for (i, (label, buffer, width, height)) in debug_buffers.iter().enumerate() {
         let debug_data = buffer.slice(..).get_mapped_range();
         println!("Adding debug texture: {}", label);
+        let width = *width as usize;
+        let height = *height as usize;
 
-        let clip_width = clip_texture_width as usize;
-        let clip_height = clip_texture_height.min(pixmap.height() as u32) as usize;
+        let x_offset = main_width + (i * width);
 
-        let x_offset = main_width + (i * clip_width);
-
-        for y in 0..clip_height {
-            let src_offset = y * clip_texture_bytes_per_row as usize;
+        for y in 0..height {
+            let src_offset = y * width * 4;
             let dst_offset = y * (total_width as usize * 4) + x_offset * 4;
 
-            for x in 0..clip_width {
+            for x in 0..width {
                 let src_pixel_offset = src_offset + x * 4;
                 let dst_pixel_offset = dst_offset + x * 4;
 
@@ -352,7 +385,7 @@ async fn run() {
     // Unmap the buffers
     drop(main_data);
     texture_copy_buffer.unmap();
-    for (_, buffer) in &debug_buffers {
+    for (_, buffer, _, _) in &debug_buffers {
         drop(buffer.slice(..).get_mapped_range());
     }
 

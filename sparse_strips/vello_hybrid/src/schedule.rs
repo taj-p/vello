@@ -108,6 +108,7 @@
 //!   before all the draw commands of a subsequent clip region is drawn. Preceding [`Cmd::ClipFill`] and
 //!   [`Cmd::ClipStrip`] commands are only associated to the clip region being currently popped.
 
+use alloc::collections::BTreeMap;
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 
@@ -205,26 +206,152 @@ impl Schedule {
     fn flush(&mut self, junk: &mut RendererJunk<'_>) {
         let round = self.rounds_queue.pop_front().unwrap();
         for (i, draw) in round.draws.iter().enumerate() {
+            println!("Flushing round {}, ix {}", self.round, i);
+            if draw.0.is_empty() {
+                continue;
+            }
+            //if i == 1 && self.round == 0 {
+            //    println!("Commands: {:?}", draw.0);
+            //}
+
+            // TODO: Write print statement here
             if !draw.0.is_empty() {
-                if self.round == 0 || i == 2 {
-                    // In the first round, we know no slots are dirty. When we're rendering to the final target,
-                    // we know we can't clear (the client may have already drawn something). Thus, we can
-                    // `wgpu::LoadOp::Load`.
-                    junk.do_clip_render_pass(&draw.0, self.round, i, wgpu::LoadOp::Load);
-                } else {
-                    let load = if self.clear[i].len() + self.free[i].len() == self.total_slots {
-                        // All our slots need to be cleared or are unoccupied, so we can simply clear.
-                        self.clear[i].clear();
-                        wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
-                    } else {
-                        // At least one slot is occupied and required for later rounds, so we need fine-grained
-                        // clearing of `self.clear[i]` slots.
-                        junk.clear_slots(i, &self.clear[i].as_slice());
-                        self.clear[i].clear();
-                        wgpu::LoadOp::Load
-                    };
-                    junk.do_clip_render_pass(&draw.0, self.round, i, load);
+                println!("---- Flush: Round {}, target {} ----", self.round, i);
+
+                // Print header information about the render target
+                if i == 2 {
+                    println!("  Rendering to final target (target 2)");
+                    println!("  If sampling, will sample from clip texture 1");
+                } else if i == 1 {
+                    println!("  Rendering to clip texture 1");
+                    println!("  If sampling, will sample from clip texture 0");
+                } else if i == 0 {
+                    println!("  Rendering to clip texture 0");
+                    println!("  If sampling, will sample from clip texture 1");
                 }
+
+                // First pass: Group strips by their operation type (drawing vs sampling)
+                // and collect them in the original order they appear
+                let mut operations = Vec::new();
+                let mut current_op_type = None;
+                let mut current_group = Vec::new();
+
+                for (index, strip) in draw.0.iter().enumerate() {
+                    let is_color = has_non_zero_alpha(strip.rgba);
+                    let op_type = if is_color { "color" } else { "sample" };
+
+                    // If this is a different operation type than the current group, start a new group
+                    if current_op_type.map_or(true, |t| t != op_type) {
+                        if !current_group.is_empty() {
+                            operations.push((current_op_type.unwrap(), current_group));
+                            current_group = Vec::new();
+                        }
+                        current_op_type = Some(op_type);
+                    }
+
+                    current_group.push((index, strip));
+                }
+
+                // Don't forget the last group
+                if !current_group.is_empty() && current_op_type.is_some() {
+                    operations.push((current_op_type.unwrap(), current_group));
+                }
+
+                // Second pass: Print each operation group in sequence
+                for (op_type, strips) in operations {
+                    if op_type == "color" {
+                        // Group color strips by RGBA value
+                        let mut colors = BTreeMap::new();
+                        for (_, strip) in &strips {
+                            *colors.entry(strip.rgba).or_insert(0) += 1;
+                        }
+
+                        println!("  Color draws ({} rectangles):", strips.len());
+                        for (rgba, count) in colors {
+                            // Extract RGB components
+                            let r = rgba & 0xFF;
+                            let g = (rgba >> 8) & 0xFF;
+                            let b = (rgba >> 16) & 0xFF;
+                            let a = (rgba >> 24) & 0xFF;
+
+                            println!(
+                                "    RGBA({}, {}, {}, {}) - {} rectangles",
+                                r, g, b, a, count
+                            );
+                        }
+                    } else {
+                        // This is a sampling operation group
+                        println!("  Sampling operations ({} samples):", strips.len());
+
+                        // Determine source texture based on target index
+                        let source_texture = match i {
+                            0 => 1, // Target 0 samples from texture 1
+                            1 => 0, // Target 1 samples from texture 0
+                            2 => 1, // Target 2 samples from texture 1
+                            _ => panic!("Unexpected target index"),
+                        };
+
+                        println!("    All sampled from clip texture {}", source_texture);
+
+                        // Print information about each sampling operation
+                        for (_, strip) in &strips {
+                            println!(
+                                "    Slot {} at position ({}, {}), width={}, dense_width={}",
+                                strip.rgba, strip.x, strip.y, strip.width, strip.dense_width
+                            );
+                        }
+
+                        // Provide information about potential rounds where slots were created
+                        if self.round > 0 {
+                            println!(
+                                "    Note: These slots were likely created in round {} or earlier",
+                                self.round - 1
+                            );
+                        } else {
+                            println!("    Note: These are initial slots (round 0)");
+                        }
+                    }
+                }
+
+                println!("----------------------------");
+            } else {
+                println!(
+                    "---- Flush: Round {}, target {} - EMPTY DRAW ----",
+                    self.round, i
+                );
+            }
+
+            if self.round == 0 || i == 2 {
+                // In the first round, we know no slots are dirty. When we're rendering to the final target,
+                // we know we can't clear (the client may have already drawn something). Thus, we can
+                // `wgpu::LoadOp::Load`.
+                junk.do_clip_render_pass(&draw.0, self.round, i, wgpu::LoadOp::Load);
+            } else {
+                // TODO: Clear logic isn't correct.
+                //println!(
+                //    "clear[i].len() + free[i].len() = {}",
+                //    self.clear[i].len() + self.free[i].len()
+                //);
+                //println!("total_slots = {}", self.total_slots);
+                // Maybe use below logic to determine if we can clear all slots via wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT);
+                //let load = if self.clear[i].len() + self.free[i].len() == self.total_slots {
+                let load = if 1 == 0 {
+                    println!("\t Executing clear on all slots");
+                    // All our slots need to be cleared or are unoccupied, so we can simply clear.
+                    self.clear[i].clear();
+                    wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
+                } else {
+                    println!(
+                        "\t Executing fine grained clearing on slots: {:?}",
+                        self.clear[i]
+                    );
+                    // At least one slot is occupied and required for later rounds, so we need fine-grained
+                    // clearing of `self.clear[i]` slots.
+                    junk.clear_slots(i, &self.clear[i].as_slice());
+                    self.clear[i].clear();
+                    wgpu::LoadOp::Load
+                };
+                junk.do_clip_render_pass(&draw.0, self.round, i, load);
             }
         }
         for i in 0..1 {
@@ -360,7 +487,7 @@ impl Schedule {
                         self.flush(junk);
                     }
                     let slot_ix = self.free[ix].pop().unwrap();
-                    self.clear[ix].push(slot_ix as u32);
+                    //self.clear[ix].push(slot_ix as u32);
                     state.stack.push(TileEl {
                         slot_ix,
                         round: self.round,
@@ -383,7 +510,7 @@ impl Schedule {
                     self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
                         .push(tos.slot_ix);
                 }
-                Cmd::ClipFill(cmd_clip_fill) => {
+                Cmd::ClipFill(clip_fill) => {
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
                     // If the pixels for the slot we are sampling from won't be drawn until the next round,
@@ -394,18 +521,16 @@ impl Schedule {
                     let draw = self.draw_mut(round, clip_depth - 1);
                     // At clip depth 2, we're drawing to the final target, so use the wide tile coords.
                     let (x, y) = if clip_depth <= 2 {
-                        (wide_tile_x + cmd_clip_fill.x as u16, wide_tile_y)
+                        (wide_tile_x + clip_fill.x as u16, wide_tile_y)
                     } else {
-                        // TODO: Is this right?
-                        (cmd_clip_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
+                        (clip_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
                     };
                     draw.0.push(GpuStrip {
                         x,
                         y,
-                        width: cmd_clip_fill.width as u16,
+                        width: clip_fill.width as u16,
                         dense_width: 0,
                         col: 0,
-                        // TODO: Check this is right.
                         rgba: tos.slot_ix as u32,
                     });
                     if DEBUG {
@@ -415,7 +540,7 @@ impl Schedule {
                         );
                     }
                 }
-                Cmd::ClipStrip(cmd_clip_alpha_fill) => {
+                Cmd::ClipStrip(clip_alpha_fill) => {
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
                     // If the pixels for the slot we are sampling from won't be drawn until the next round,
@@ -425,25 +550,20 @@ impl Schedule {
                     let round = nos.round.max(tos.round + next_round as usize);
                     let draw = self.draw_mut(round, clip_depth - 1);
                     let (x, y) = if clip_depth <= 2 {
-                        (wide_tile_x + cmd_clip_alpha_fill.x as u16, wide_tile_y)
+                        (wide_tile_x + clip_alpha_fill.x as u16, wide_tile_y)
                     } else {
-                        (
-                            cmd_clip_alpha_fill.x as u16,
-                            // TODO: Is this right?
-                            nos.slot_ix as u16 * Tile::HEIGHT,
-                        )
+                        (clip_alpha_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
                     };
                     const MSG: &str =
                         "GpuStrip fields use u32 and values are expected to fit within that range";
                     draw.0.push(GpuStrip {
                         x,
                         y,
-                        width: cmd_clip_alpha_fill.width as u16,
-                        dense_width: cmd_clip_alpha_fill.width as u16,
-                        col: (cmd_clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
+                        width: clip_alpha_fill.width as u16,
+                        dense_width: clip_alpha_fill.width as u16,
+                        col: (clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
                             .try_into()
                             .expect(MSG),
-                        // TODO: Check this is right.
                         rgba: tos.slot_ix as u32,
                     });
                     if DEBUG {

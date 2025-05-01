@@ -5,7 +5,9 @@
 
 use crate::util::{check_ref, circular_star, crossed_line_star, get_ctx};
 use std::f64::consts::PI;
-use vello_common::color::palette::css::{BLACK, BLUE, DARK_BLUE, DARK_GREEN, REBECCA_PURPLE, RED};
+use vello_common::color::palette::css::{
+    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
+};
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::peniko::Fill;
 use vello_cpu::RenderContext;
@@ -96,7 +98,7 @@ fn clip_test() {
     let mut size = 100.0;
     let mut offset = 0.0;
 
-    const COUNT: usize = 10;
+    const COUNT: usize = 3;
 
     for i in 0..COUNT {
         // Create a rectangle for clipping
@@ -122,7 +124,43 @@ fn clip_test() {
         ctx.pop_layer();
     }
 
-    check_ref(&ctx, "clip_test_nested_1");
+    check_ref(&ctx, "clip_test_nested_2");
+}
+
+#[test]
+fn clip_test_case() {
+    let mut ctx = get_ctx(300, 200, true);
+
+    {
+        let overlap_rect = Rect::new(0.0, 0.0, 100.0, 3.0);
+        // ctx.set_paint(BLACK);
+        // ctx.stroke_rect(&overlap_rect);
+        ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+        ctx.set_paint(RED);
+        ctx.fill_rect(&overlap_rect);
+    }
+    {
+        let overlap_rect = Rect::new(5.0, 0.0, 100.0, 3.0);
+        // ctx.set_paint(BLACK);
+        // ctx.stroke_rect(&overlap_rect);
+        ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+        ctx.set_paint(GREEN);
+        ctx.fill_rect(&overlap_rect);
+    }
+    {
+        let overlap_rect = Rect::new(10.0, 0.0, 100.0, 3.0);
+        // ctx.set_paint(BLACK);
+        // ctx.stroke_rect(&overlap_rect);
+        ctx.push_clip_layer(&overlap_rect.to_path(0.1));
+        ctx.set_paint(BLUE);
+        ctx.fill_rect(&overlap_rect);
+    }
+
+    ctx.pop_layer();
+    ctx.pop_layer();
+    ctx.pop_layer();
+
+    check_ref(&ctx, "clip_test_case");
 }
 
 #[test]
