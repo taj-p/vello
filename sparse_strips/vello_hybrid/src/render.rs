@@ -659,7 +659,7 @@ impl Renderer {
     }
 
     // TODO: Make private
-    pub const N_SLOTS: usize = 100; // TODO: make configurable
+    pub const N_SLOTS: usize = 500; // TODO: make configurable
 
     /// Render `scene` into the provided command encoder.
     ///

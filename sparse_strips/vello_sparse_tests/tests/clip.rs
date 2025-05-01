@@ -7,6 +7,7 @@ use crate::renderer::Renderer;
 use crate::util::{circular_star, crossed_line_star};
 use std::f64::consts::PI;
 use vello_api::color::palette::css::{BLACK, BLUE, GREEN, RED};
+use vello_api::peniko::Color;
 use vello_common::color::palette::css::{DARK_BLUE, DARK_GREEN, REBECCA_PURPLE};
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke};
 use vello_common::peniko::Fill;
@@ -67,48 +68,47 @@ fn clip_rectangle_with_star_evenodd(ctx: &mut impl Renderer) {
     ctx.pop_layer();
 }
 
-#[v_test(width = 300, height = 300)]
-fn clip_nested_rectangles(ctx: &mut impl Renderer) {
-    // Create a series of 10 nested rectangles with clipping
-    let colors = [
+#[v_test(threshold = 1)]
+fn clip_deeply_nested_circles(ctx: &mut impl Renderer) {
+    const INITIAL_RADIUS: f64 = 48.0;
+    const RADIUS_DECREMENT: f64 = 2.5;
+    const INNER_COUNT: usize = 10;
+    // `.ceil()` is not constant-evaluatable, so we have to do this at runtime.
+    let outer_count: usize =
+        (INITIAL_RADIUS / RADIUS_DECREMENT / INNER_COUNT as f64).ceil() as usize;
+    const COLORS: [Color; INNER_COUNT] = [
         RED,
         DARK_BLUE,
         DARK_GREEN,
         REBECCA_PURPLE,
         BLACK,
+        BLUE,
+        GREEN,
         RED,
         DARK_BLUE,
         DARK_GREEN,
-        REBECCA_PURPLE,
-        BLACK,
     ];
 
-    // Start with a large rectangle (100x100) and decrease by 10 each time
-    let mut size = 100.0;
-    let mut offset = 0.0;
+    const COVER_RECT: Rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+    const CENTER: Point = Point::new(50.0, 50.0);
+    let mut radius = INITIAL_RADIUS;
 
-    for i in 0..colors.len() {
-        // Create a rectangle for clipping
-        let clip_rect = Rect::new(offset, offset, size, size);
-        ctx.set_paint(BLACK);
-        // visualise clip
-        ctx.stroke_rect(&clip_rect);
-        // Draw a filled rectangle with current color
-        ctx.set_paint(colors[i].clone());
+    for _ in 0..outer_count {
+        for i in 0..INNER_COUNT {
+            let clip_circle = Circle::new(CENTER, radius).to_path(0.1);
+            draw_clipping_outline(ctx, &clip_circle);
+            ctx.push_clip_layer(&clip_circle);
 
-        // Push clip layer
-        ctx.push_clip_layer(&clip_rect.to_path(0.1));
+            ctx.set_paint(COLORS[i]);
+            ctx.fill_rect(&COVER_RECT);
 
-        ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
-
-        // Decrease size and increase offset for next iteration
-        size -= 10.0;
-        offset += 5.0;
+            radius -= RADIUS_DECREMENT;
+        }
     }
-
-    // Pop all clip layers
-    for _ in 0..colors.len() {
-        ctx.pop_layer();
+    for _ in 0..outer_count {
+        for _ in 0..INNER_COUNT {
+            ctx.pop_layer();
+        }
     }
 }
 
