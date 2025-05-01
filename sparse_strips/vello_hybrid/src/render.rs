@@ -764,43 +764,43 @@ impl RendererJunk<'_> {
             );
             self.queue.submit(std::iter::once(old_encoder.finish()));
 
-            // Create a buffer to copy the texture data
-            let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
-                label: Some(&format!(
-                    "Debug Clip Texture Buffer - round {} ix {}",
-                    round, ix
-                )),
-                size: u64::from(bytes_per_row) * u64::from(height),
-                usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-                mapped_at_creation: false,
-            });
+            //// Create a buffer to copy the texture data
+            //let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+            //    label: Some(&format!(
+            //        "Debug Clip Texture Buffer - round {} ix {}",
+            //        round, ix
+            //    )),
+            //    size: u64::from(bytes_per_row) * u64::from(height),
+            //    usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            //    mapped_at_creation: false,
+            //});
 
-            // Copy texture to buffer
-            self.encoder.copy_texture_to_buffer(
-                wgpu::TexelCopyTextureInfo {
-                    texture: if ix == 2 {
-                        self.view_texture
-                    } else {
-                        &self.renderer.clip_textures[ix]
-                    },
-                    mip_level: 0,
-                    origin: wgpu::Origin3d::ZERO,
-                    aspect: wgpu::TextureAspect::All,
-                },
-                wgpu::TexelCopyBufferInfo {
-                    buffer: &debug_buffer,
-                    layout: wgpu::TexelCopyBufferLayout {
-                        offset: 0,
-                        bytes_per_row: Some(bytes_per_row),
-                        rows_per_image: None,
-                    },
-                },
-                wgpu::Extent3d {
-                    width,
-                    height,
-                    depth_or_array_layers: 1,
-                },
-            );
+            //// Copy texture to buffer
+            //self.encoder.copy_texture_to_buffer(
+            //    wgpu::TexelCopyTextureInfo {
+            //        texture: if ix == 2 {
+            //            self.view_texture
+            //        } else {
+            //            &self.renderer.clip_textures[ix]
+            //        },
+            //        mip_level: 0,
+            //        origin: wgpu::Origin3d::ZERO,
+            //        aspect: wgpu::TextureAspect::All,
+            //    },
+            //    wgpu::TexelCopyBufferInfo {
+            //        buffer: &debug_buffer,
+            //        layout: wgpu::TexelCopyBufferLayout {
+            //            offset: 0,
+            //            bytes_per_row: Some(bytes_per_row),
+            //            rows_per_image: None,
+            //        },
+            //    },
+            //    wgpu::Extent3d {
+            //        width,
+            //        height,
+            //        depth_or_array_layers: 1,
+            //    },
+            //);
 
             // Submit commands and wait for completion
             let old_encoder = std::mem::replace(
@@ -814,22 +814,22 @@ impl RendererJunk<'_> {
             self.queue.submit(std::iter::once(old_encoder.finish()));
 
             // Add buffer to debug buffers
-            debug_buffers.push((
-                format!(
-                    "round_{}_ix_{}_sample_from_{}",
-                    round,
-                    ix,
-                    match ix {
-                        0 => "1",
-                        1 => "0",
-                        2 => "1",
-                        _ => unreachable!(),
-                    }
-                ),
-                debug_buffer,
-                width,
-                height,
-            ));
+            //debug_buffers.push((
+            //    format!(
+            //        "round_{}_ix_{}_sample_from_{}",
+            //        round,
+            //        ix,
+            //        match ix {
+            //            0 => "1",
+            //            1 => "0",
+            //            2 => "1",
+            //            _ => unreachable!(),
+            //        }
+            //    ),
+            //    debug_buffer,
+            //    width,
+            //    height,
+            //));
         }
     }
 
