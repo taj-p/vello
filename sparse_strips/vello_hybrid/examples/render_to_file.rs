@@ -33,7 +33,7 @@ enum SceneType {
     ThreeDepthCase,
 }
 
-const SCENE_TYPE: SceneType = SceneType::NestedRect;
+const SCENE_TYPE: SceneType = SceneType::ThreeDepthCase;
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene) {

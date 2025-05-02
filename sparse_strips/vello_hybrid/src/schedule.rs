@@ -120,7 +120,7 @@ use vello_common::{
 
 use crate::{GpuStrip, Scene, render::RendererJunk};
 
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 pub(crate) struct Schedule {
     /// Index of the current round
@@ -198,6 +198,15 @@ impl Schedule {
         while !self.rounds_queue.is_empty() {
             self.flush(junk);
         }
+        if cfg!(debug_assertions) {
+            for i in 0..self.total_slots {
+                debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
+                debug_assert!(self.free[1].contains(&i), "free[1] is missing slot {}", i);
+            }
+        }
+        debug_assert!(self.rounds_queue.is_empty());
+        debug_assert!(self.clear[0].len() == 0);
+        debug_assert!(self.clear[1].len() == 0);
     }
 
     /// Flush one round.
@@ -206,117 +215,6 @@ impl Schedule {
     fn flush(&mut self, junk: &mut RendererJunk<'_>) {
         let round = self.rounds_queue.pop_front().unwrap();
         for (i, draw) in round.draws.iter().enumerate() {
-            //if i == 1 && self.round == 0 {
-            //    println!("Commands: {:?}", draw.0);
-            //}
-
-            // TODO: Write print statement here
-            //if !draw.0.is_empty() {
-            //    println!("---- Flush: Round {}, target {} ----", self.round, i);
-
-            //    // Print header information about the render target
-            //    if i == 2 {
-            //        println!("  Rendering to final target (target 2)");
-            //        println!("  If sampling, will sample from clip texture 1");
-            //    } else if i == 1 {
-            //        println!("  Rendering to clip texture 1");
-            //        println!("  If sampling, will sample from clip texture 0");
-            //    } else if i == 0 {
-            //        println!("  Rendering to clip texture 0");
-            //        println!("  If sampling, will sample from clip texture 1");
-            //    }
-
-            //    // First pass: Group strips by their operation type (drawing vs sampling)
-            //    // and collect them in the original order they appear
-            //    let mut operations = Vec::new();
-            //    let mut current_op_type = None;
-            //    let mut current_group = Vec::new();
-
-            //    for (index, strip) in draw.0.iter().enumerate() {
-            //        let is_color = has_non_zero_alpha(strip.rgba);
-            //        let op_type = if is_color { "color" } else { "sample" };
-
-            //        // If this is a different operation type than the current group, start a new group
-            //        if current_op_type.map_or(true, |t| t != op_type) {
-            //            if !current_group.is_empty() {
-            //                operations.push((current_op_type.unwrap(), current_group));
-            //                current_group = Vec::new();
-            //            }
-            //            current_op_type = Some(op_type);
-            //        }
-
-            //        current_group.push((index, strip));
-            //    }
-
-            //    // Don't forget the last group
-            //    if !current_group.is_empty() && current_op_type.is_some() {
-            //        operations.push((current_op_type.unwrap(), current_group));
-            //    }
-
-            //    // Second pass: Print each operation group in sequence
-            //    for (op_type, strips) in operations {
-            //        if op_type == "color" {
-            //            // Group color strips by RGBA value
-            //            let mut colors = BTreeMap::new();
-            //            for (_, strip) in &strips {
-            //                *colors.entry(strip.rgba).or_insert(0) += 1;
-            //            }
-
-            //            println!("  Color draws ({} rectangles):", strips.len());
-            //            for (rgba, count) in colors {
-            //                // Extract RGB components
-            //                let r = rgba & 0xFF;
-            //                let g = (rgba >> 8) & 0xFF;
-            //                let b = (rgba >> 16) & 0xFF;
-            //                let a = (rgba >> 24) & 0xFF;
-
-            //                println!(
-            //                    "    RGBA({}, {}, {}, {}) - {} rectangles",
-            //                    r, g, b, a, count
-            //                );
-            //            }
-            //        } else {
-            //            // This is a sampling operation group
-            //            println!("  Sampling operations ({} samples):", strips.len());
-
-            //            // Determine source texture based on target index
-            //            let source_texture = match i {
-            //                0 => 1, // Target 0 samples from texture 1
-            //                1 => 0, // Target 1 samples from texture 0
-            //                2 => 1, // Target 2 samples from texture 1
-            //                _ => panic!("Unexpected target index"),
-            //            };
-
-            //            println!("    All sampled from clip texture {}", source_texture);
-
-            //            // Print information about each sampling operation
-            //            for (_, strip) in &strips {
-            //                println!(
-            //                    "    Slot {} at position ({}, {}), width={}, dense_width={}",
-            //                    strip.rgba, strip.x, strip.y, strip.width, strip.dense_width
-            //                );
-            //            }
-
-            //            // Provide information about potential rounds where slots were created
-            //            if self.round > 0 {
-            //                println!(
-            //                    "    Note: These slots were likely created in round {} or earlier",
-            //                    self.round - 1
-            //                );
-            //            } else {
-            //                println!("    Note: These are initial slots (round 0)");
-            //            }
-            //        }
-            //    }
-
-            //    println!("----------------------------");
-            //} else {
-            //    println!(
-            //        "---- Flush: Round {}, target {} - EMPTY DRAW ----",
-            //        self.round, i
-            //    );
-            //}
-
             if draw.0.is_empty() {
                 continue;
             }
@@ -343,7 +241,7 @@ impl Schedule {
 
             junk.do_clip_render_pass(&draw.0, self.round, i, load);
         }
-        for i in 0..1 {
+        for i in 0..2 {
             self.free[i].extend(&round.free[i]);
         }
         self.round += 1;
@@ -460,7 +358,7 @@ impl Schedule {
                         dense_width: alpha_fill.width,
                         col: (alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
                             .try_into()
-                            .expect("By design, sparse strips fit into u32 range"),
+                            .expect("Sparse strips are bound to u32 range"),
                         rgba,
                     });
                 }
@@ -489,9 +387,9 @@ impl Schedule {
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     nos.round = round;
+                    // free slot after draw
                     debug_assert!(round >= self.round);
                     debug_assert!(round - self.round < self.rounds_queue.len());
-                    // free slot after draw
                     self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
                         .push(tos.slot_ix);
                 }
@@ -540,7 +438,7 @@ impl Schedule {
                         dense_width: clip_alpha_fill.width as u16,
                         col: (clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
                             .try_into()
-                            .expect("By design, sparse strips fit into u32 range"),
+                            .expect("Sparse strips are bound to u32 range"),
                         rgba: tos.slot_ix as u32,
                     });
                 }
