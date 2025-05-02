@@ -733,7 +733,6 @@ impl RendererJunk<'_> {
                     resolve_target: None,
                     ops: wgpu::Operations {
                         load,
-                        // TODO: May need to clear.
                         store: wgpu::StoreOp::Store,
                     },
                 })],
