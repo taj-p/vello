@@ -288,7 +288,7 @@ impl ApplicationHandler for App<'_> {
                         });
                 {
                     let mut debugs = Vec::new();
-                    self.renderers[surface.dev_id].as_mut().unwrap().render2(
+                    self.renderers[surface.dev_id].as_mut().unwrap().render(
                         &self.scene,
                         &device_handle.device,
                         &device_handle.queue,

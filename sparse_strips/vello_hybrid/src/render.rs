@@ -665,7 +665,7 @@ impl Renderer {
     ///
     /// This method creates GPU resources as needed, and schedules potentially multiple
     /// render passes.
-    pub fn render2(
+    pub fn render(
         &mut self,
         scene: &Scene,
         device: &Device,

@@ -258,7 +258,7 @@ impl Renderer for Scene {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Vello Render To Buffer"),
         });
-        renderer.render2(
+        renderer.render(
             self,
             &device,
             &queue,

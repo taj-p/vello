@@ -239,7 +239,7 @@ async fn run() {
     let mut debug_buffers = Vec::new();
 
     {
-        renderer.render2(
+        renderer.render(
             &scene,
             &device,
             &queue,
