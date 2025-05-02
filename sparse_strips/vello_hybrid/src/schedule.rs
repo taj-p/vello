@@ -198,6 +198,9 @@ impl Schedule {
         while !self.rounds_queue.is_empty() {
             self.flush(junk);
         }
+
+        // When a scene ends, state should return to its initial state for reuse.
+        self.round = 0;
         if cfg!(debug_assertions) {
             for i in 0..self.total_slots {
                 debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
@@ -230,15 +233,13 @@ impl Schedule {
                         self.clear[i].clear();
                         wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
                     } else {
-                        // Some slots need to be preserved, so we must clear only the dirty slots
-                        // via a dedicated render pass.
+                        // Some slots need to be preserved, so clear only the dirty slots.
                         junk.clear_slots(i, &self.clear[i].as_slice());
                         self.clear[i].clear();
                         wgpu::LoadOp::Load
                     }
                 }
             };
-
             junk.do_clip_render_pass(&draw.0, self.round, i, load);
         }
         for i in 0..2 {
