@@ -690,6 +690,10 @@ impl Programs {
 
     /// Upload the strip data
     fn upload_strips(&mut self, device: &Device, queue: &Queue, strips: &[GpuStrip]) {
+        if strips.len() == 0 {
+            return;
+        }
+
         let required_strips_size = size_of_val(strips) as u64;
 
         if required_strips_size > self.resources.as_ref().unwrap().strips_buffer.size() {
