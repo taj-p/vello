@@ -181,10 +181,6 @@ impl Scheduler {
         }
     }
 
-    pub(crate) fn total_slots(&self) -> usize {
-        self.total_slots
-    }
-
     pub(crate) fn do_scene(&mut self, junk: &mut RendererJunk<'_>, scene: &Scene) {
         let mut state = TileState::default();
         let wide_tiles_per_row = (scene.width).div_ceil(WideTile::WIDTH);

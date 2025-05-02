@@ -38,7 +38,7 @@ mod scene;
 mod schedule;
 pub mod util;
 
-pub use render::{Config, GpuStrip, RenderData, RenderSize, RenderTargetConfig, Renderer};
+pub use render::{Config, GpuStrip, RenderSize, RenderTargetConfig, Renderer};
 pub use scene::Scene;
 pub use util::DimensionConstraints;
 pub use vello_common::pixmap::Pixmap;

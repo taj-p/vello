@@ -72,6 +72,55 @@ pub struct Renderer {
     scheduler: Scheduler,
 }
 
+impl Renderer {
+    /// Creates a new renderer
+    ///
+    /// The target parameter determines if we render to a window or headless
+    pub fn new(device: &Device, render_target_config: &RenderTargetConfig) -> Self {
+        let slot_count = (device.limits().max_texture_dimension_2d / Tile::HEIGHT as u32) as usize;
+
+        Self {
+            programs: Programs::new(device, render_target_config, slot_count),
+            scheduler: Scheduler::new(slot_count),
+        }
+    }
+
+    /// Render `scene` into the provided command encoder.
+    ///
+    /// This method creates GPU resources as needed, and schedules potentially multiple
+    /// render passes.
+    pub fn render(
+        &mut self,
+        scene: &Scene,
+        device: &Device,
+        queue: &Queue,
+        encoder: &mut CommandEncoder,
+        render_size: &RenderSize,
+        view: &TextureView,
+        view_texture: &Texture,
+        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
+    ) {
+        // For the time being, we upload the entire alpha buffer as one big chunk. As a future
+        // refinement, we could have a bounded alpha buffer, and break draws when the alpha
+        // buffer fills.
+        // TODO: Estimate strip count.
+        self.programs
+            .prepare_alphas(device, queue, &scene.alphas, render_size, 30_000);
+        let mut junk = RendererJunk {
+            programs: &mut self.programs,
+            device,
+            queue,
+            encoder,
+            view,
+            view_texture,
+            render_size,
+            debug_buffers,
+        };
+        self.scheduler.do_scene(&mut junk, scene);
+    }
+}
+
+/// Defines the GPU resources and pipelines for rendering.
 #[derive(Debug)]
 struct Programs {
     /// Pipeline for rendering clip draws
@@ -97,15 +146,6 @@ struct Programs {
     clear_bind_group: BindGroup,
     /// Buffer for slot indices used in clear_slots
     slot_indices_buffer: Buffer,
-}
-
-/// Contains the data needed for rendering
-#[derive(Debug, Default)]
-pub struct RenderData {
-    /// GPU strips to be rendered
-    pub strips: Vec<GpuStrip>,
-    /// Alpha values used in rendering
-    pub alphas: Vec<u8>,
 }
 
 /// Configuration for the GPU renderer
@@ -179,54 +219,6 @@ impl GpuStrip {
             2 => Uint32,
             3 => Uint32,
         ]
-    }
-}
-
-impl Renderer {
-    /// Creates a new renderer
-    ///
-    /// The target parameter determines if we render to a window or headless
-    pub fn new(device: &Device, render_target_config: &RenderTargetConfig) -> Self {
-        let slot_count = (device.limits().max_texture_dimension_2d / Tile::HEIGHT as u32) as usize;
-
-        Self {
-            programs: Programs::new(device, render_target_config, slot_count),
-            scheduler: Scheduler::new(slot_count),
-        }
-    }
-
-    /// Render `scene` into the provided command encoder.
-    ///
-    /// This method creates GPU resources as needed, and schedules potentially multiple
-    /// render passes.
-    pub fn render(
-        &mut self,
-        scene: &Scene,
-        device: &Device,
-        queue: &Queue,
-        encoder: &mut CommandEncoder,
-        render_size: &RenderSize,
-        view: &TextureView,
-        view_texture: &Texture,
-        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
-    ) {
-        // For the time being, we upload the entire alpha buffer as one big chunk. As a future
-        // refinement, we could have a bounded alpha buffer, and break draws when the alpha
-        // buffer fills.
-        // TODO: Estimate strip count.
-        self.programs
-            .prepare_alphas(device, queue, &scene.alphas, render_size, 30_000);
-        let mut junk = RendererJunk {
-            programs: &mut self.programs,
-            device,
-            queue,
-            encoder,
-            view,
-            view_texture,
-            render_size,
-            debug_buffers,
-        };
-        self.scheduler.do_scene(&mut junk, scene);
     }
 }
 

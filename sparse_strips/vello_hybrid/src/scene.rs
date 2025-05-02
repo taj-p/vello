@@ -3,10 +3,9 @@
 
 //! Basic render operations.
 
-use crate::render::{GpuStrip, RenderData};
 use alloc::vec;
 use alloc::vec::Vec;
-use vello_common::coarse::{Wide, WideTile};
+use vello_common::coarse::Wide;
 use vello_common::flatten::Line;
 use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder, PreparedGlyph};
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
@@ -257,82 +256,6 @@ impl Scene {
             fill_rule,
             &self.line_buf,
         );
-    }
-}
-
-impl Scene {
-    /// Prepares render data from the current context for GPU rendering
-    ///
-    /// This method converts the rendering context's state into a format
-    /// suitable for GPU rendering, including strips and alpha values.
-    pub fn prepare_render_data(&self) -> RenderData {
-        let mut strips: Vec<GpuStrip> = Vec::new();
-        let wide_tiles_per_row = (self.width).div_ceil(WideTile::WIDTH);
-        let wide_tiles_per_col = (self.height).div_ceil(Tile::HEIGHT);
-        for wide_tile_row in 0..wide_tiles_per_col {
-            for wide_tile_col in 0..wide_tiles_per_row {
-                let wide_tile_idx = usize::from(wide_tile_row) * usize::from(wide_tiles_per_row)
-                    + usize::from(wide_tile_col);
-                let wide_tile = &self.wide.tiles[wide_tile_idx];
-                let wide_tile_x = wide_tile_col * WideTile::WIDTH;
-                let wide_tile_y = wide_tile_row * Tile::HEIGHT;
-                let bg = wide_tile.bg.as_premul_rgba8().to_u32();
-                if bg != 0 {
-                    strips.push(GpuStrip {
-                        x: wide_tile_x,
-                        y: wide_tile_y,
-                        width: WideTile::WIDTH,
-                        dense_width: 0,
-                        col: 0,
-                        rgba: bg,
-                    });
-                }
-                for cmd in &wide_tile.cmds {
-                    match cmd {
-                        vello_common::coarse::Cmd::Fill(fill) => {
-                            let rgba = match &fill.paint {
-                                Paint::Solid(color) => color.as_premul_rgba8().to_u32(),
-                                Paint::Indexed(_) => unimplemented!(),
-                            };
-                            strips.push(GpuStrip {
-                                x: wide_tile_x + fill.x,
-                                y: wide_tile_y,
-                                width: fill.width,
-                                dense_width: 0,
-                                col: 0,
-                                rgba,
-                            });
-                        }
-                        vello_common::coarse::Cmd::AlphaFill(cmd_strip) => {
-                            let rgba = match &cmd_strip.paint {
-                                Paint::Solid(color) => color.as_premul_rgba8().to_u32(),
-                                Paint::Indexed(_) => unimplemented!(),
-                            };
-
-                            // msg is a variable here to work around rustfmt failure
-                            let msg = "GpuStrip fields use u16 and values are expected to fit within that range";
-                            strips.push(GpuStrip {
-                                x: wide_tile_x + cmd_strip.x,
-                                y: wide_tile_y,
-                                width: cmd_strip.width,
-                                dense_width: cmd_strip.width,
-                                col: (cmd_strip.alpha_idx / usize::from(Tile::HEIGHT))
-                                    .try_into()
-                                    .expect(msg),
-                                rgba,
-                            });
-                        }
-                        _ => {
-                            unimplemented!("unsupported command: {:?}", cmd);
-                        }
-                    }
-                }
-            }
-        }
-        RenderData {
-            strips,
-            alphas: self.alphas.clone(),
-        }
     }
 }
 
