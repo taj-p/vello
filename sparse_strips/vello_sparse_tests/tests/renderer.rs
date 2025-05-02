@@ -258,20 +258,16 @@ impl Renderer for Scene {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Vello Render To Buffer"),
         });
-        // Create a vector to hold debug buffers from render passes
-        let mut debug_buffers = Vec::new();
-        {
-            renderer.render2(
-                self,
-                &device,
-                &queue,
-                &mut encoder,
-                &render_size,
-                &texture_view,
-                &texture,
-                Some(&mut debug_buffers),
-            );
-        }
+        renderer.render2(
+            self,
+            &device,
+            &queue,
+            &mut encoder,
+            &render_size,
+            &texture_view,
+            &texture,
+            None,
+        );
 
         // Create a buffer to copy the texture data
         let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
