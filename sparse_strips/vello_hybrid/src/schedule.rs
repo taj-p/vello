@@ -122,7 +122,8 @@ use crate::{GpuStrip, Scene, render::RendererJunk};
 
 const DEBUG: bool = false;
 
-pub(crate) struct Schedule {
+#[derive(Debug)]
+pub(crate) struct Scheduler {
     /// Index of the current round
     round: usize,
     total_slots: usize,
@@ -138,7 +139,7 @@ pub(crate) struct Schedule {
 /// It represents draws in up to three render targets; two for intermediate
 /// clip/blend buffers, and the third for the actual render target. The two
 /// clip buffers are for even and odd clip depths.
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct Round {
     /// [even clip depth, odd depth, final target] draw calls
     draws: [Draw; 3],
@@ -160,10 +161,10 @@ struct TileEl {
     round: usize,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct Draw(Vec<GpuStrip>);
 
-impl Schedule {
+impl Scheduler {
     pub(crate) fn new(total_slots: usize) -> Self {
         let free0: Vec<_> = (0..total_slots).collect();
         let free1 = free0.clone();
@@ -178,6 +179,10 @@ impl Schedule {
             clear,
             rounds_queue,
         }
+    }
+
+    pub(crate) fn total_slots(&self) -> usize {
+        self.total_slots
     }
 
     pub(crate) fn do_scene(&mut self, junk: &mut RendererJunk<'_>, scene: &Scene) {
