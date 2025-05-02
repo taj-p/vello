@@ -1,6 +1,10 @@
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+// TODO:
+// - Keep a limit on buffer pools.
+// - Refactor and re-read
+
 //! GPU rendering module for the sparse strips CPU/GPU rendering engine.
 //!
 //! This module provides the GPU-side implementation of the hybrid rendering system.
@@ -13,6 +17,7 @@
 //! to balance flexibility and performance.
 
 use alloc::vec::Vec;
+use alloc::{string::String, vec};
 use core::fmt::Debug;
 
 use bytemuck::{Pod, Zeroable};
@@ -43,23 +48,6 @@ pub struct RenderTargetConfig {
     pub width: u32,
     /// Height of the rendering target
     pub height: u32,
-}
-
-/// Contains all GPU resources needed for rendering
-///
-/// This struct contains the GPU resources that may be reallocated depending
-/// on the scene. Resources that are created once at startup are simply in
-/// `Renderer`.
-#[derive(Debug)]
-struct GpuResources {
-    /// Buffer for strip data
-    pub strips_buffer: Buffer,
-    /// Texture for alpha values
-    pub alphas_texture: Texture,
-    /// Buffer for config data
-    pub config_buffer: Buffer,
-    // Bind groups for rendering with clip buffers
-    pub clip_bind_groups: [BindGroup; 3],
 }
 
 /// GPU renderer for the hybrid rendering system
@@ -100,23 +88,31 @@ impl Renderer {
         view_texture: &Texture,
         debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
     ) {
+        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("Render Encoder"),
+        });
         // For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
         // buffer fills.
         // TODO: Estimate strip count.
         self.programs
-            .prepare_alphas(device, queue, &scene.alphas, render_size, 30_000);
+            .prepare_alphas(device, queue, &scene.alphas, render_size);
+
+        // Reset buffer offsets at the start of each frame
+        self.programs.reset_buffer_offsets();
+
         let mut junk = RendererJunk {
             programs: &mut self.programs,
             device,
             queue,
-            encoder,
+            encoder: &mut encoder,
             view,
             view_texture,
             render_size,
             debug_buffers,
         };
         self.scheduler.do_scene(&mut junk, scene);
+        queue.submit(core::iter::once(encoder.finish()));
     }
 }
 
@@ -134,7 +130,7 @@ struct Programs {
     /// Clip config buffer
     clip_config_buffer: Buffer,
     /// GPU resources for rendering (created during prepare)
-    resources: Option<GpuResources>,
+    resources: GpuResources,
     /// Scratch buffer for staging alpha texture data.
     alpha_data: Vec<u8>,
     /// Dimensions of the rendering target
@@ -144,8 +140,33 @@ struct Programs {
     clear_pipeline: RenderPipeline,
     /// Bind group for clear slots operation
     clear_bind_group: BindGroup,
+}
+
+/// Contains all GPU resources needed for rendering
+///
+/// This struct contains the GPU resources that may be reallocated depending
+/// on the scene. Resources that are created once at startup are simply in
+/// `Renderer`.
+#[derive(Debug)]
+struct GpuResources {
+    /// Current main buffer for strip data
+    strips_buffer: Buffer,
+    /// Current offset in the strips buffer for appending new strips
+    strips_buffer_offset: u64,
+    /// Pool of strips buffers for reuse
+    strips_buffer_pool: Vec<Buffer>,
+    /// Texture for alpha values
+    alphas_texture: Texture,
+    /// Buffer for config data
+    config_buffer: Buffer,
+    // Bind groups for rendering with clip buffers
+    clip_bind_groups: [BindGroup; 3],
+    /// Slot indices buffer with current offset
+    slot_indices_offset: u64,
     /// Buffer for slot indices used in clear_slots
     slot_indices_buffer: Buffer,
+    /// Pool of slot index buffers for reuse
+    slot_indices_buffer_pool: Vec<Buffer>,
 }
 
 /// Configuration for the GPU renderer
@@ -404,8 +425,6 @@ impl Programs {
             clip_textures[1].create_view(&wgpu::TextureViewDescriptor::default()),
         ];
 
-        println!("Texture for clip: {:?}", render_target_config.format);
-
         // Create clear config buffer
         let clear_config_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Clear Slots Config Buffer"),
@@ -430,12 +449,8 @@ impl Programs {
 
         // Create slot indices buffer with initial capacity for 64 slots
         // This can store up to 64 slot indices (adjust size if needed)
-        let slot_indices_buffer = device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Slot Indices Buffer"),
-            size: slot_count as u64 * size_of::<u32>() as u64,
-            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
+        let slot_indices_buffer =
+            Self::make_slot_indices_buffer(device, slot_count as u64 * size_of::<u32>() as u64);
 
         let clip_config_buffer = Self::make_config_buffer(
             device,
@@ -446,14 +461,64 @@ impl Programs {
             device.limits().max_texture_dimension_2d,
         );
 
+        let max_texture_dimension_2d = device.limits().max_texture_dimension_2d;
+        let alpha_texture_height = 2;
+        let alphas_texture =
+            Self::make_alphas_texture(device, max_texture_dimension_2d, alpha_texture_height);
+        let alpha_data = vec![0; (max_texture_dimension_2d * alpha_texture_height * 16) as usize];
+        let config_buffer = Self::make_config_buffer(
+            device,
+            &RenderSize {
+                width: render_target_config.width,
+                height: render_target_config.height,
+            },
+            max_texture_dimension_2d,
+        );
+
+        let clip_bind_groups = [
+            Self::make_clip_bind_group(
+                device,
+                &clip_bind_group_layout,
+                &alphas_texture,
+                &clip_config_buffer,
+                &clip_texture_views[1],
+            ),
+            Self::make_clip_bind_group(
+                device,
+                &clip_bind_group_layout,
+                &alphas_texture,
+                &clip_config_buffer,
+                &clip_texture_views[0],
+            ),
+            Self::make_clip_bind_group(
+                device,
+                &clip_bind_group_layout,
+                &alphas_texture,
+                &config_buffer,
+                &clip_texture_views[1],
+            ),
+        ];
+
+        let resources = GpuResources {
+            strips_buffer: Self::make_strips_buffer(device, 0),
+            strips_buffer_offset: 0,
+            strips_buffer_pool: Vec::new(),
+            slot_indices_buffer,
+            slot_indices_buffer_pool: Vec::new(),
+            slot_indices_offset: 0,
+            alphas_texture,
+            clip_bind_groups,
+            config_buffer,
+        };
+
         Self {
             clip_pipeline,
             clip_bind_group_layout,
             clip_textures,
             clip_texture_views,
             clip_config_buffer,
-            resources: None,
-            alpha_data: Vec::new(),
+            resources,
+            alpha_data,
             render_size: RenderSize {
                 width: render_target_config.width,
                 height: render_target_config.height,
@@ -461,7 +526,6 @@ impl Programs {
 
             clear_pipeline,
             clear_bind_group,
-            slot_indices_buffer,
         }
     }
 
@@ -469,6 +533,15 @@ impl Programs {
         device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Strips Buffer"),
             size: required_strips_size,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
+            mapped_at_creation: false,
+        })
+    }
+
+    fn make_slot_indices_buffer(device: &Device, required_size: u64) -> Buffer {
+        device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Slot Indices Buffer"),
+            size: required_size,
             usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
             mapped_at_creation: false,
         })
@@ -513,8 +586,8 @@ impl Programs {
     }
 
     fn make_clip_bind_group(
-        &self,
         device: &Device,
+        clip_bind_group_layout: &BindGroupLayout,
         alphas_texture: &Texture,
         config_buffer: &Buffer,
         clip_texture_view: &TextureView,
@@ -523,7 +596,7 @@ impl Programs {
             alphas_texture.create_view(&wgpu::TextureViewDescriptor::default());
         device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Clip Bind Group"),
-            layout: &self.clip_bind_group_layout,
+            layout: clip_bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
@@ -550,63 +623,10 @@ impl Programs {
         queue: &Queue,
         alphas: &[u8],
         new_render_size: &RenderSize,
-        est_strip_count: usize,
     ) {
-        let required_strips_size = size_of::<GpuStrip>() as u64 * est_strip_count as u64;
         let max_texture_dimension_2d = device.limits().max_texture_dimension_2d;
-        if self.resources.is_none() {
-            let strips_buffer = Self::make_strips_buffer(device, required_strips_size);
-            let alpha_len = alphas.len();
-            // There are 16 1-byte alpha values per texel.
-            let alpha_texture_height =
-                (u32::try_from(alpha_len).unwrap()).div_ceil(max_texture_dimension_2d * 16);
-
-            assert!(
-                alpha_texture_height <= max_texture_dimension_2d,
-                "Alpha texture height exceeds max texture dimensions"
-            );
-
-            // Resize the alpha texture staging buffer.
-            self.alpha_data.resize(
-                (max_texture_dimension_2d * alpha_texture_height * 16) as usize,
-                0,
-            );
-            // The alpha texture encodes 16 1-byte alpha values per texel, with 4 alpha values packed in each channel
-            let alphas_texture =
-                Self::make_alphas_texture(device, max_texture_dimension_2d, alpha_texture_height);
-            let config_buffer =
-                Self::make_config_buffer(device, new_render_size, max_texture_dimension_2d);
-
-            let clip_bind_groups = [
-                self.make_clip_bind_group(
-                    device,
-                    &alphas_texture,
-                    &self.clip_config_buffer,
-                    &self.clip_texture_views[1],
-                ),
-                self.make_clip_bind_group(
-                    device,
-                    &alphas_texture,
-                    &self.clip_config_buffer,
-                    &self.clip_texture_views[0],
-                ),
-                self.make_clip_bind_group(
-                    device,
-                    &alphas_texture,
-                    // The third bind group renders into the render target, so we use the config buffer for rendering.
-                    &config_buffer,
-                    &self.clip_texture_views[1],
-                ),
-            ];
-
-            self.resources = Some(GpuResources {
-                strips_buffer,
-                alphas_texture,
-                config_buffer,
-                clip_bind_groups,
-            });
-        } else {
-            // Update existing resources as needed
+        // Update existing resources as needed
+        {
             let alpha_len = alphas.len();
             // There are 16 1-byte alpha values per texel.
             let required_alpha_height =
@@ -614,7 +634,7 @@ impl Programs {
             let required_alpha_size = max_texture_dimension_2d * required_alpha_height * 16;
 
             let current_alpha_size = {
-                let alphas_texture = &self.resources.as_ref().unwrap().alphas_texture;
+                let alphas_texture = &self.resources.alphas_texture;
                 alphas_texture.width() * alphas_texture.height() * 16
             };
             if required_alpha_size > current_alpha_size {
@@ -634,13 +654,9 @@ impl Programs {
                     max_texture_dimension_2d,
                     required_alpha_height,
                 );
-                let resources = self.resources.as_mut().unwrap();
-                resources.alphas_texture = alphas_texture;
+                self.resources.alphas_texture = alphas_texture;
             }
         }
-
-        // Resources have been created by now.
-        let resources = self.resources.as_ref().unwrap();
 
         // Update config buffer if dimensions changed.
         // We don't need to initialize a new config buffer because it's fixed size (uniform buffer).
@@ -651,13 +667,17 @@ impl Programs {
                 strip_height: Tile::HEIGHT.into(),
                 alphas_tex_width_bits: max_texture_dimension_2d.trailing_zeros(),
             };
-            queue.write_buffer(&resources.config_buffer, 0, bytemuck::bytes_of(&config));
+            queue.write_buffer(
+                &self.resources.config_buffer,
+                0,
+                bytemuck::bytes_of(&config),
+            );
             self.render_size = new_render_size.clone();
         }
 
         // Prepare alpha data for the texture with 16 1-byte alpha values per texel (4 per channel)
-        let texture_width = resources.alphas_texture.width();
-        let texture_height = resources.alphas_texture.height();
+        let texture_width = self.resources.alphas_texture.width();
+        let texture_height = self.resources.alphas_texture.height();
         assert!(
             alphas.len() <= (texture_width * texture_height * 16) as usize,
             "Alpha texture dimensions are too small to fit the alpha data"
@@ -668,7 +688,7 @@ impl Programs {
 
         queue.write_texture(
             wgpu::TexelCopyTextureInfo {
-                texture: &resources.alphas_texture,
+                texture: &self.resources.alphas_texture,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
@@ -688,27 +708,71 @@ impl Programs {
         );
     }
 
-    /// Upload the strip data
-    fn upload_strips(&mut self, device: &Device, queue: &Queue, strips: &[GpuStrip]) {
-        if strips.len() == 0 {
-            return;
+    /// Upload the strip data by appending to the buffer
+    /// Returns the buffer and the range of the uploaded strips
+    fn upload_strips(&mut self, device: &Device, queue: &Queue, strips: &[GpuStrip]) -> (u64, u64) {
+        if strips.is_empty() {
+            return (0, 0);
         }
 
         let required_strips_size = size_of_val(strips) as u64;
 
-        if required_strips_size > self.resources.as_ref().unwrap().strips_buffer.size() {
-            self.resources.as_mut().unwrap().strips_buffer =
-                Self::make_strips_buffer(device, required_strips_size);
+        // Check if we need to switch to a new buffer
+        let current_buffer_size = self.resources.strips_buffer.size();
+        let current_offset = self.resources.strips_buffer_offset;
+
+        // If this upload won't fit in the remaining space, try to find a buffer from the pool
+        // or create a new one if necessary
+        if current_offset + required_strips_size > current_buffer_size {
+            // First try to find a suitable buffer in the pool
+            let needed_size = required_strips_size.max(current_buffer_size * 2);
+            let suitable_buffer_idx = self
+                .resources
+                .strips_buffer_pool
+                .iter()
+                .position(|buffer| buffer.size() >= needed_size);
+
+            if let Some(idx) = suitable_buffer_idx {
+                // Found a suitable buffer in the pool, swap it with the current one
+                let new_buffer = self.resources.strips_buffer_pool.remove(idx);
+                self.resources
+                    .strips_buffer_pool
+                    .push(self.resources.strips_buffer.clone());
+                self.resources.strips_buffer = new_buffer;
+            } else {
+                // No suitable buffer found, create a new one and put the old one in the pool
+                let new_buffer = Self::make_strips_buffer(device, needed_size);
+                self.resources
+                    .strips_buffer_pool
+                    .push(self.resources.strips_buffer.clone());
+                self.resources.strips_buffer = new_buffer;
+            }
+
+            // Reset the offset for the new buffer
+            self.resources.strips_buffer_offset = 0;
         }
 
+        // Append strips to the buffer at the current offset
+        let offset = self.resources.strips_buffer_offset;
         let mut buffer = queue
             .write_buffer_with(
-                &self.resources.as_ref().unwrap().strips_buffer,
-                0,
+                &self.resources.strips_buffer,
+                offset,
                 required_strips_size.try_into().unwrap(),
             )
             .expect("Has capacity for strips per above condition");
         buffer.copy_from_slice(bytemuck::cast_slice(strips));
+
+        // Update the offset for next upload
+        self.resources.strips_buffer_offset += required_strips_size;
+
+        (offset, required_strips_size)
+    }
+
+    /// Reset buffer offsets to start appending from the beginning again
+    fn reset_buffer_offsets(&mut self) {
+        self.resources.strips_buffer_offset = 0;
+        self.resources.slot_indices_offset = 0;
     }
 }
 
@@ -716,11 +780,12 @@ impl RendererJunk<'_> {
     pub(crate) fn do_clip_render_pass(
         &mut self,
         strips: &[GpuStrip],
-        round: usize,
         ix: usize,
         load: wgpu::LoadOp<wgpu::Color>,
     ) {
-        self.programs.upload_strips(self.device, self.queue, strips);
+        // Upload strips and get the offset, size, and buffer reference
+        let (offset, size) = self.programs.upload_strips(self.device, self.queue, strips);
+
         {
             let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
                 label: Some("Render to Texture Pass"),
@@ -740,118 +805,66 @@ impl RendererJunk<'_> {
                 occlusion_query_set: None,
                 timestamp_writes: None,
             });
-            let resources = self
-                .programs
-                .resources
-                .as_ref()
-                .expect("`prepare` should be called before `render`");
             render_pass.set_pipeline(&self.programs.clip_pipeline);
-            render_pass.set_bind_group(0, &resources.clip_bind_groups[ix], &[]);
-            render_pass.set_vertex_buffer(0, resources.strips_buffer.slice(..));
+            render_pass.set_bind_group(0, &self.programs.resources.clip_bind_groups[ix], &[]);
+
+            // Use the specific slice of the buffer for this draw call
+            render_pass.set_vertex_buffer(
+                0,
+                self.programs
+                    .resources
+                    .strips_buffer
+                    .slice(offset..(offset + size)),
+            );
+
             let strips_to_draw = strips.len();
             render_pass.draw(0..4, 0..u32::try_from(strips_to_draw).unwrap());
-        }
-
-        // Submit previous commands
-        let old_encoder = std::mem::replace(
-            self.encoder,
-            self.device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Debug Texture Capture Encoder"),
-                }),
-        );
-        self.queue.submit(std::iter::once(old_encoder.finish()));
-
-        // After rendering to a clip texture, capture its state for debugging
-        if let Some(debug_buffers) = &mut self.debug_buffers {
-            let (width, height, bytes_per_row) = if ix == 2 {
-                (
-                    self.render_size.width,
-                    self.render_size.height,
-                    self.render_size.width * 4,
-                )
-            } else {
-                (
-                    self.programs.clip_textures[ix].width(),
-                    self.programs.clip_textures[ix].height(),
-                    self.programs.clip_textures[ix].width() * 4,
-                )
-            };
-
-            // Create a buffer to copy the texture data
-            let debug_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
-                label: Some(&format!(
-                    "Debug Clip Texture Buffer - round {} ix {}",
-                    round, ix
-                )),
-                size: u64::from(bytes_per_row) * u64::from(height),
-                usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-                mapped_at_creation: false,
-            });
-
-            // Copy texture to buffer
-            self.encoder.copy_texture_to_buffer(
-                wgpu::TexelCopyTextureInfo {
-                    texture: if ix == 2 {
-                        self.view_texture
-                    } else {
-                        &self.programs.clip_textures[ix]
-                    },
-                    mip_level: 0,
-                    origin: wgpu::Origin3d::ZERO,
-                    aspect: wgpu::TextureAspect::All,
-                },
-                wgpu::TexelCopyBufferInfo {
-                    buffer: &debug_buffer,
-                    layout: wgpu::TexelCopyBufferLayout {
-                        offset: 0,
-                        bytes_per_row: Some(bytes_per_row),
-                        rows_per_image: None,
-                    },
-                },
-                wgpu::Extent3d {
-                    width,
-                    height,
-                    depth_or_array_layers: 1,
-                },
-            );
-
-            // Submit commands and wait for completion
-            let old_encoder = std::mem::replace(
-                self.encoder,
-                self.device
-                    .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                        label: Some("Debug Texture Capture Encoder"),
-                    }),
-            );
-
-            self.queue.submit(std::iter::once(old_encoder.finish()));
-
-            debug_buffers.push((
-                format!(
-                    "round_{}_ix_{}_sample_from_{}",
-                    round,
-                    ix,
-                    match ix {
-                        0 => "1",
-                        1 => "0",
-                        2 => "1",
-                        _ => unreachable!(),
-                    }
-                ),
-                debug_buffer,
-                width,
-                height,
-            ));
         }
     }
 
     /// Clear specific slots in a clip texture
     pub(crate) fn clear_slots(&mut self, ix: usize, slot_indices: &[u32]) {
-        // Write slot indices to the buffer
+        if slot_indices.is_empty() {
+            return;
+        }
+
+        let resources = &mut self.programs.resources;
+        let required_size = (size_of::<u32>() * slot_indices.len()) as u64;
+        let current_offset = resources.slot_indices_offset;
+
+        // Check if we need to reset or find a new buffer
+        if current_offset + required_size > resources.slot_indices_buffer.size() {
+            // Try to find a suitable buffer in the pool
+            let needed_size = required_size.max(resources.slot_indices_buffer.size() * 2);
+            let suitable_buffer_idx = resources
+                .slot_indices_buffer_pool
+                .iter()
+                .position(|buffer| buffer.size() >= needed_size);
+
+            if let Some(idx) = suitable_buffer_idx {
+                // Found a suitable buffer in the pool, swap it with the current one
+                let new_buffer = resources.slot_indices_buffer_pool.remove(idx);
+                resources
+                    .slot_indices_buffer_pool
+                    .push(resources.slot_indices_buffer.clone());
+                resources.slot_indices_buffer = new_buffer;
+            } else {
+                // No suitable buffer found, create a new one and put the old one in the pool
+                let new_buffer = Programs::make_slot_indices_buffer(self.device, needed_size);
+                resources
+                    .slot_indices_buffer_pool
+                    .push(resources.slot_indices_buffer.clone());
+                resources.slot_indices_buffer = new_buffer;
+            }
+
+            resources.slot_indices_offset = 0;
+        }
+
+        // Write slot indices to the buffer at the current offset
+        let offset = resources.slot_indices_offset;
         self.queue.write_buffer(
-            &self.programs.slot_indices_buffer,
-            0,
+            &resources.slot_indices_buffer,
+            offset,
             bytemuck::cast_slice(slot_indices),
         );
 
@@ -874,8 +887,19 @@ impl RendererJunk<'_> {
 
             render_pass.set_pipeline(&self.programs.clear_pipeline);
             render_pass.set_bind_group(0, &self.programs.clear_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, self.programs.slot_indices_buffer.slice(..));
+
+            // Use the specific slice of the buffer for this draw call
+            render_pass.set_vertex_buffer(
+                0,
+                resources
+                    .slot_indices_buffer
+                    .slice(offset..(offset + required_size)),
+            );
+
             render_pass.draw(0..4, 0..slot_indices.len() as u32);
         }
+
+        // Update offset for next upload
+        resources.slot_indices_offset += required_size;
     }
 }

@@ -241,7 +241,7 @@ impl Scheduler {
                     }
                 }
             };
-            junk.do_clip_render_pass(&draw.0, self.round, i, load);
+            junk.do_clip_render_pass(&draw.0, i, load);
         }
         for i in 0..2 {
             self.free[i].extend(&round.free[i]);
@@ -265,7 +265,7 @@ impl Scheduler {
             self.rounds_queue.push_back(Round::default());
         }
         if DEBUG {
-            println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
+            //println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
         }
         &mut self.rounds_queue[rel_round].draws[ix]
     }
@@ -306,8 +306,8 @@ impl Scheduler {
             // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
             if DEBUG {
-                println!("CMD: {:?}", cmd);
-                println!("clip_depth: {}", clip_depth);
+                //println!("CMD: {:?}", cmd);
+                //println!("clip_depth: {}", clip_depth);
             }
             match cmd {
                 Cmd::Fill(fill) => {
