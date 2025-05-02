@@ -697,12 +697,14 @@ impl Programs {
                 Self::make_strips_buffer(device, required_strips_size);
         }
 
-        // TODO: Explore using `write_buffer_with` to avoid copying the data twice
-        queue.write_buffer(
-            &self.resources.as_ref().unwrap().strips_buffer,
-            0,
-            bytemuck::cast_slice(strips),
-        );
+        let mut buffer = queue
+            .write_buffer_with(
+                &self.resources.as_ref().unwrap().strips_buffer,
+                0,
+                required_strips_size.try_into().unwrap(),
+            )
+            .expect("Has capacity for strips per above condition");
+        buffer.copy_from_slice(bytemuck::cast_slice(strips));
     }
 }
 
