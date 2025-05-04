@@ -8,7 +8,7 @@
 
 use std::io::BufWriter;
 use vello_common::color::palette::css::{
-    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
+    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, LIME, REBECCA_PURPLE, RED
 };
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::paint::Paint;
@@ -31,9 +31,10 @@ enum SceneType {
     Star,
     NestedRect,
     ThreeDepthCase,
+    Basic,
 }
 
-const SCENE_TYPE: SceneType = SceneType::NestedRect;
+const SCENE_TYPE: SceneType = SceneType::Basic;
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene) {
@@ -155,6 +156,21 @@ pub fn render(ctx: &mut Scene) {
             ctx.pop_layer();
             ctx.pop_layer();
             ctx.pop_layer();
+        }
+        SceneType::Basic => {
+            let path = {
+                let mut path = BezPath::new();
+                path.move_to((5.0, 5.0));
+                path.line_to((95.0, 50.0));
+                path.line_to((5.0, 95.0));
+                path.close_path();
+
+                path
+            };
+
+            ctx.set_stroke(Stroke::new(3.0));
+            ctx.set_paint(LIME.into());
+            ctx.stroke_path(&path);
         }
     }
 }

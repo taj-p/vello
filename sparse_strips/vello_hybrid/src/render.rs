@@ -470,29 +470,14 @@ impl Programs {
             max_texture_dimension_2d,
         );
 
-        let clip_bind_groups = [
-            Self::make_clip_bind_group(
-                device,
-                &clip_bind_group_layout,
-                &alphas_texture,
-                &clip_config_buffer,
-                &clip_texture_views[1],
-            ),
-            Self::make_clip_bind_group(
-                device,
-                &clip_bind_group_layout,
-                &alphas_texture,
-                &clip_config_buffer,
-                &clip_texture_views[0],
-            ),
-            Self::make_clip_bind_group(
-                device,
-                &clip_bind_group_layout,
-                &alphas_texture,
-                &config_buffer,
-                &clip_texture_views[1],
-            ),
-        ];
+        let clip_bind_groups = Self::make_clip_bind_groups(
+            device,
+            &clip_bind_group_layout,
+            &alphas_texture,
+            &clip_config_buffer,
+            &config_buffer,
+            &clip_texture_views,
+        );
 
         let resources = GpuResources {
             strips_buffer: Self::make_strips_buffer(device, 0),
@@ -580,6 +565,39 @@ impl Programs {
         })
     }
 
+    fn make_clip_bind_groups(
+        device: &Device,
+        clip_bind_group_layout: &BindGroupLayout,
+        alphas_texture: &Texture,
+        clip_config_buffer: &Buffer,
+        config_buffer: &Buffer,
+        clip_texture_views: &[TextureView],
+    ) -> [BindGroup; 3] {
+        [
+            Self::make_clip_bind_group(
+                device,
+                clip_bind_group_layout,
+                alphas_texture,
+                clip_config_buffer,
+                &clip_texture_views[1],
+            ),
+            Self::make_clip_bind_group(
+                device,
+                clip_bind_group_layout,
+                alphas_texture,
+                clip_config_buffer,
+                &clip_texture_views[0],
+            ),
+            Self::make_clip_bind_group(
+                device,
+                clip_bind_group_layout,
+                alphas_texture,
+                config_buffer,
+                &clip_texture_views[1],
+            ),
+        ]
+    }
+
     fn make_clip_bind_group(
         device: &Device,
         clip_bind_group_layout: &BindGroupLayout,
@@ -624,9 +642,11 @@ impl Programs {
         {
             let alpha_len = alphas.len();
             // There are 16 1-byte alpha values per texel.
-            let required_alpha_height =
-                (u32::try_from(alpha_len).unwrap()).div_ceil(max_texture_dimension_2d * 16);
-            let required_alpha_size = max_texture_dimension_2d * required_alpha_height * 16;
+            let required_alpha_height = u32::try_from(alpha_len)
+                .unwrap()
+                .div_ceil(max_texture_dimension_2d * 16);
+            let width = max_texture_dimension_2d;
+            let required_alpha_size = width * required_alpha_height * 16;
 
             let current_alpha_size = {
                 let alphas_texture = &self.resources.alphas_texture;
@@ -650,6 +670,16 @@ impl Programs {
                     required_alpha_height,
                 );
                 self.resources.alphas_texture = alphas_texture;
+
+                // Since the alpha texture has changed, we need to update the clip bind groups.
+                self.resources.clip_bind_groups = Self::make_clip_bind_groups(
+                    device,
+                    &self.clip_bind_group_layout,
+                    &self.resources.alphas_texture,
+                    &self.clip_config_buffer,
+                    &self.resources.config_buffer,
+                    &self.clip_texture_views,
+                );
             }
         }
 
