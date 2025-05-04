@@ -8,7 +8,7 @@
 
 use std::io::BufWriter;
 use vello_common::color::palette::css::{
-    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, LIME, REBECCA_PURPLE, RED
+    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, LIME, REBECCA_PURPLE, RED,
 };
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
 use vello_common::paint::Paint;
@@ -260,14 +260,11 @@ async fn run() {
         &mut encoder,
         &render_size,
         &texture_view,
-        &texture,
-        None,
     );
 
     // Get clip texture dimensions
     let clip_texture_width = vello_common::coarse::WideTile::WIDTH as u32;
-    let clip_texture_height =
-        device.limits().max_texture_dimension_2d / 4;
+    let clip_texture_height = device.limits().max_texture_dimension_2d / 4;
 
     // Create buffer for the main texture
     let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
@@ -311,7 +308,7 @@ async fn run() {
                 panic!("Failed to map texture for reading");
             }
         });
-        device.poll(wgpu::Maintain::Wait);
+    device.poll(wgpu::Maintain::Wait);
 
     // Calculate the total width needed for the full debug output
     // Main texture + all debug buffers

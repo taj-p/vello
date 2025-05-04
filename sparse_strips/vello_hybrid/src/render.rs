@@ -85,8 +85,6 @@ impl Renderer {
         encoder: &mut CommandEncoder,
         render_size: &RenderSize,
         view: &TextureView,
-        view_texture: &Texture,
-        debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
     ) {
         // For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
@@ -103,9 +101,6 @@ impl Renderer {
             queue,
             encoder,
             view,
-            view_texture,
-            render_size,
-            debug_buffers,
         };
         self.scheduler.do_scene(&mut junk, scene);
     }
@@ -118,8 +113,6 @@ struct Programs {
     clip_pipeline: RenderPipeline,
     /// Bind group layout for clip draws
     clip_bind_group_layout: BindGroupLayout,
-    /// Clip textures
-    clip_textures: [Texture; 2],
     /// Clip texture views
     clip_texture_views: [TextureView; 2],
     /// Clip config buffer
@@ -221,9 +214,6 @@ pub(crate) struct RendererJunk<'a> {
     queue: &'a Queue,
     encoder: &'a mut CommandEncoder,
     view: &'a TextureView,
-    view_texture: &'a Texture,
-    render_size: &'a RenderSize,
-    debug_buffers: Option<&'a mut Vec<(String, wgpu::Buffer, u32, u32)>>,
 }
 
 impl GpuStrip {
@@ -394,31 +384,27 @@ impl Programs {
             cache: None,
         });
 
-        let clip_textures = core::array::from_fn(|_| {
-            device.create_texture(&wgpu::TextureDescriptor {
-                label: Some("clip temp texture"),
-                size: wgpu::Extent3d {
-                    // TODO: Allow for more than 1 column of slots?
-                    // TODO: Make configurable
-                    width: WideTile::WIDTH as u32,
-                    height: Tile::HEIGHT as u32 * slot_count as u32,
-                    depth_or_array_layers: 1,
-                },
-                mip_level_count: 1,
-                sample_count: 1,
-                dimension: wgpu::TextureDimension::D2,
-                // TODO: Is this correct or need it be RGBA8Unorm?
-                format: render_target_config.format,
-                usage: wgpu::TextureUsages::TEXTURE_BINDING
-                    | wgpu::TextureUsages::RENDER_ATTACHMENT
-                    | wgpu::TextureUsages::COPY_SRC,
-                view_formats: &[],
-            })
+        let clip_texture_views: [TextureView; 2] = core::array::from_fn(|_| {
+            device
+                .create_texture(&wgpu::TextureDescriptor {
+                    label: Some("clip temp texture"),
+                    size: wgpu::Extent3d {
+                        width: WideTile::WIDTH as u32,
+                        height: Tile::HEIGHT as u32 * slot_count as u32,
+                        depth_or_array_layers: 1,
+                    },
+                    mip_level_count: 1,
+                    sample_count: 1,
+                    dimension: wgpu::TextureDimension::D2,
+                    // TODO: Is this correct or need it be RGBA8Unorm?
+                    format: render_target_config.format,
+                    usage: wgpu::TextureUsages::TEXTURE_BINDING
+                        | wgpu::TextureUsages::RENDER_ATTACHMENT
+                        | wgpu::TextureUsages::COPY_SRC,
+                    view_formats: &[],
+                })
+                .create_view(&wgpu::TextureViewDescriptor::default())
         });
-        let clip_texture_views = [
-            clip_textures[0].create_view(&wgpu::TextureViewDescriptor::default()),
-            clip_textures[1].create_view(&wgpu::TextureViewDescriptor::default()),
-        ];
 
         // Create clear config buffer
         let clear_config_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -494,7 +480,6 @@ impl Programs {
         Self {
             clip_pipeline,
             clip_bind_group_layout,
-            clip_textures,
             clip_texture_views,
             clip_config_buffer,
             resources,

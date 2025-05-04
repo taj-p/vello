@@ -283,8 +283,6 @@ impl Renderer for Scene {
             &mut encoder,
             &render_size,
             &texture_view,
-            &texture,
-            None,
         );
 
         // Create a buffer to copy the texture data

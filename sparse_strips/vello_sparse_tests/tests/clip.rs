@@ -6,7 +6,8 @@
 use crate::renderer::Renderer;
 use crate::util::{circular_star, crossed_line_star};
 use std::f64::consts::PI;
-use vello_api::color::palette::css::BLACK;
+use vello_api::color::palette::css::{BLACK, BLUE, GREEN, RED};
+use vello_api::peniko::Color;
 use vello_common::color::palette::css::{DARK_BLUE, DARK_GREEN, REBECCA_PURPLE};
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke};
 use vello_common::peniko::Fill;
