@@ -241,7 +241,7 @@ impl Scheduler {
                     }
                 }
             };
-            junk.do_clip_render_pass(&draw.0, i, load);
+            junk.do_strip_render_pass(&draw.0, i, load);
         }
         for i in 0..2 {
             self.free[i].extend(&round.free[i]);

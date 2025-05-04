@@ -110,13 +110,13 @@ impl Renderer {
 #[derive(Debug)]
 struct Programs {
     /// Pipeline for rendering wide tile commands.
-    clip_pipeline: RenderPipeline,
+    strip_pipeline: RenderPipeline,
     /// Bind group layout for clip draws
-    clip_bind_group_layout: BindGroupLayout,
+    strip_bind_group_layout: BindGroupLayout,
     /// Clip texture views
-    clip_texture_views: [TextureView; 2],
+    strip_texture_views: [TextureView; 2],
     /// Clip config buffer
-    clip_config_buffer: Buffer,
+    strip_config_buffer: Buffer,
     /// GPU resources for rendering (created during prepare)
     resources: GpuResources,
     /// Scratch buffer for staging alpha texture data.
@@ -128,6 +128,23 @@ struct Programs {
     clear_pipeline: RenderPipeline,
     /// Bind group for clear slots operation
     clear_bind_group: BindGroup,
+}
+
+struct Pipelines {
+    wide_tile: RenderPipeline,
+    clear_slots: RenderPipeline,
+}
+
+struct Textures {
+    wide_tile: [TextureView; 2],
+    alphas: Texture,
+    alpha_data: Vec<u8>,
+}
+
+struct Buffers {
+    strips: Buffer,
+    slot_indices: Buffer,
+    config: Buffer,
 }
 
 /// Contains all GPU resources needed for rendering
@@ -148,7 +165,7 @@ struct GpuResources {
     /// Buffer for config data
     config_buffer: Buffer,
     // Bind groups for rendering with clip buffers
-    clip_bind_groups: [BindGroup; 3],
+    strip_bind_groups: [BindGroup; 3],
     /// Slot indices buffer with current offset
     slot_indices_offset: u64,
     /// Buffer for slot indices used in clear_slots
@@ -230,7 +247,7 @@ impl GpuStrip {
 
 impl Programs {
     fn new(device: &Device, render_target_config: &RenderTargetConfig, slot_count: usize) -> Self {
-        let clip_bind_group_layout =
+        let strip_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
                 label: Some("Clip Bind Group Layout"),
                 entries: &[
@@ -283,7 +300,7 @@ impl Programs {
                 }],
             });
 
-        let clip_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
+        let strip_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Clip Shader"),
             source: wgpu::ShaderSource::Wgsl(
                 include_str!("../shaders/sparse_strip_clip.wgsl").into(),
@@ -298,9 +315,9 @@ impl Programs {
             ),
         });
 
-        let clip_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+        let strip_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("Clip Pipeline Layout"),
-            bind_group_layouts: &[&clip_bind_group_layout],
+            bind_group_layouts: &[&strip_bind_group_layout],
             push_constant_ranges: &[],
         });
 
@@ -312,11 +329,11 @@ impl Programs {
                 push_constant_ranges: &[],
             });
 
-        let clip_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        let strip_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Clip Pipeline"),
-            layout: Some(&clip_pipeline_layout),
+            layout: Some(&strip_pipeline_layout),
             vertex: wgpu::VertexState {
-                module: &clip_shader,
+                module: &strip_shader,
                 entry_point: Some("vs_main"),
                 buffers: &[wgpu::VertexBufferLayout {
                     array_stride: size_of::<GpuStrip>() as u64,
@@ -326,7 +343,7 @@ impl Programs {
                 compilation_options: PipelineCompilationOptions::default(),
             },
             fragment: Some(wgpu::FragmentState {
-                module: &clip_shader,
+                module: &strip_shader,
                 entry_point: Some("fs_main"),
                 targets: &[Some(ColorTargetState {
                     format: render_target_config.format,
@@ -384,7 +401,7 @@ impl Programs {
             cache: None,
         });
 
-        let clip_texture_views: [TextureView; 2] = core::array::from_fn(|_| {
+        let strip_texture_views: [TextureView; 2] = core::array::from_fn(|_| {
             device
                 .create_texture(&wgpu::TextureDescriptor {
                     label: Some("clip temp texture"),
@@ -433,7 +450,7 @@ impl Programs {
         let slot_indices_buffer =
             Self::make_slot_indices_buffer(device, slot_count as u64 * size_of::<u32>() as u64);
 
-        let clip_config_buffer = Self::make_config_buffer(
+        let strip_config_buffer = Self::make_config_buffer(
             device,
             &RenderSize {
                 width: WideTile::WIDTH as u32,
@@ -456,13 +473,13 @@ impl Programs {
             max_texture_dimension_2d,
         );
 
-        let clip_bind_groups = Self::make_clip_bind_groups(
+        let strip_bind_groups = Self::make_strip_bind_groups(
             device,
-            &clip_bind_group_layout,
+            &strip_bind_group_layout,
             &alphas_texture,
-            &clip_config_buffer,
+            &strip_config_buffer,
             &config_buffer,
-            &clip_texture_views,
+            &strip_texture_views,
         );
 
         let resources = GpuResources {
@@ -473,15 +490,15 @@ impl Programs {
             slot_indices_buffer_pool: Vec::new(),
             slot_indices_offset: 0,
             alphas_texture,
-            clip_bind_groups,
+            strip_bind_groups,
             config_buffer,
         };
 
         Self {
-            clip_pipeline,
-            clip_bind_group_layout,
-            clip_texture_views,
-            clip_config_buffer,
+            strip_pipeline,
+            strip_bind_group_layout,
+            strip_texture_views,
+            strip_config_buffer,
             resources,
             alpha_data,
             render_size: RenderSize {
@@ -550,51 +567,51 @@ impl Programs {
         })
     }
 
-    fn make_clip_bind_groups(
+    fn make_strip_bind_groups(
         device: &Device,
-        clip_bind_group_layout: &BindGroupLayout,
+        strip_bind_group_layout: &BindGroupLayout,
         alphas_texture: &Texture,
-        clip_config_buffer: &Buffer,
+        strip_config_buffer: &Buffer,
         config_buffer: &Buffer,
-        clip_texture_views: &[TextureView],
+        strip_texture_views: &[TextureView],
     ) -> [BindGroup; 3] {
         [
-            Self::make_clip_bind_group(
+            Self::make_strip_bind_group(
                 device,
-                clip_bind_group_layout,
+                strip_bind_group_layout,
                 alphas_texture,
-                clip_config_buffer,
-                &clip_texture_views[1],
+                strip_config_buffer,
+                &strip_texture_views[1],
             ),
-            Self::make_clip_bind_group(
+            Self::make_strip_bind_group(
                 device,
-                clip_bind_group_layout,
+                strip_bind_group_layout,
                 alphas_texture,
-                clip_config_buffer,
-                &clip_texture_views[0],
+                strip_config_buffer,
+                &strip_texture_views[0],
             ),
-            Self::make_clip_bind_group(
+            Self::make_strip_bind_group(
                 device,
-                clip_bind_group_layout,
+                strip_bind_group_layout,
                 alphas_texture,
                 config_buffer,
-                &clip_texture_views[1],
+                &strip_texture_views[1],
             ),
         ]
     }
 
-    fn make_clip_bind_group(
+    fn make_strip_bind_group(
         device: &Device,
-        clip_bind_group_layout: &BindGroupLayout,
+        strip_bind_group_layout: &BindGroupLayout,
         alphas_texture: &Texture,
         config_buffer: &Buffer,
-        clip_texture_view: &TextureView,
+        strip_texture_view: &TextureView,
     ) -> BindGroup {
         let alphas_texture_view =
             alphas_texture.create_view(&wgpu::TextureViewDescriptor::default());
         device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Clip Bind Group"),
-            layout: clip_bind_group_layout,
+            layout: strip_bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
@@ -606,7 +623,7 @@ impl Programs {
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
-                    resource: wgpu::BindingResource::TextureView(clip_texture_view),
+                    resource: wgpu::BindingResource::TextureView(strip_texture_view),
                 },
             ],
         })
@@ -657,13 +674,13 @@ impl Programs {
                 self.resources.alphas_texture = alphas_texture;
 
                 // Since the alpha texture has changed, we need to update the clip bind groups.
-                self.resources.clip_bind_groups = Self::make_clip_bind_groups(
+                self.resources.strip_bind_groups = Self::make_strip_bind_groups(
                     device,
-                    &self.clip_bind_group_layout,
+                    &self.strip_bind_group_layout,
                     &self.resources.alphas_texture,
-                    &self.clip_config_buffer,
+                    &self.strip_config_buffer,
                     &self.resources.config_buffer,
-                    &self.clip_texture_views,
+                    &self.strip_texture_views,
                 );
             }
         }
@@ -787,7 +804,7 @@ impl Programs {
 }
 
 impl RendererJunk<'_> {
-    pub(crate) fn do_clip_render_pass(
+    pub(crate) fn do_strip_render_pass(
         &mut self,
         strips: &[GpuStrip],
         ix: usize,
@@ -803,7 +820,7 @@ impl RendererJunk<'_> {
                     view: if ix == 2 {
                         self.view
                     } else {
-                        &self.programs.clip_texture_views[ix]
+                        &self.programs.strip_texture_views[ix]
                     },
                     resolve_target: None,
                     ops: wgpu::Operations {
@@ -815,8 +832,8 @@ impl RendererJunk<'_> {
                 occlusion_query_set: None,
                 timestamp_writes: None,
             });
-            render_pass.set_pipeline(&self.programs.clip_pipeline);
-            render_pass.set_bind_group(0, &self.programs.resources.clip_bind_groups[ix], &[]);
+            render_pass.set_pipeline(&self.programs.strip_pipeline);
+            render_pass.set_bind_group(0, &self.programs.resources.strip_bind_groups[ix], &[]);
 
             // Use the specific slice of the buffer for this draw call
             render_pass.set_vertex_buffer(
@@ -882,7 +899,7 @@ impl RendererJunk<'_> {
             let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
                 label: Some("Clear Slots Render Pass"),
                 color_attachments: &[Some(RenderPassColorAttachment {
-                    view: &self.programs.clip_texture_views[ix],
+                    view: &self.programs.strip_texture_views[ix],
                     resolve_target: None,
                     ops: wgpu::Operations {
                         // Don't clear the entire texture, just specific slots
