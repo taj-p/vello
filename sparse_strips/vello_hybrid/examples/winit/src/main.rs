@@ -295,6 +295,7 @@ impl ApplicationHandler for App<'_> {
                         &mut encoder,
                         &render_size,
                         &texture_view,
+                        &surface_texture.texture,
                         Some(&mut debugs),
                     );
                 }

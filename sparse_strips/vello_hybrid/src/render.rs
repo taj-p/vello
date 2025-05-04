@@ -88,13 +88,9 @@ impl Renderer {
         view_texture: &Texture,
         debug_buffers: Option<&mut Vec<(String, wgpu::Buffer, u32, u32)>>,
     ) {
-        let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Render Encoder"),
-        });
         // For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
         // buffer fills.
-        // TODO: Estimate strip count.
         self.programs
             .prepare_alphas(device, queue, &scene.alphas, render_size);
 
@@ -105,14 +101,13 @@ impl Renderer {
             programs: &mut self.programs,
             device,
             queue,
-            encoder: &mut encoder,
+            encoder,
             view,
             view_texture,
             render_size,
             debug_buffers,
         };
         self.scheduler.do_scene(&mut junk, scene);
-        queue.submit(core::iter::once(encoder.finish()));
     }
 }
 

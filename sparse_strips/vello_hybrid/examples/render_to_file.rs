@@ -33,7 +33,7 @@ enum SceneType {
     ThreeDepthCase,
 }
 
-const SCENE_TYPE: SceneType = SceneType::ThreeDepthCase;
+const SCENE_TYPE: SceneType = SceneType::NestedRect;
 
 /// Draws a simple scene with shapes
 pub fn render(ctx: &mut Scene) {
@@ -172,12 +172,14 @@ async fn run() {
     let svg_height = parsed.size.height * render_scale;
     let (width, height) = constraints.calculate_dimensions(svg_width, svg_height);
 
-    let width = 256 as u16;
-    let height = 100 as u16;
+    // let width = 256 as u16;
+    // let height = 100 as u16;
+    let width = width as u16;
+    let height = height as u16;
 
     let mut scene = Scene::new(width, height);
-    render(&mut scene);
-    //render_svg(&mut scene, &parsed.items, Affine::scale(render_scale));
+    // render(&mut scene);
+    render_svg(&mut scene, &parsed.items, Affine::scale(render_scale));
 
     // Initialize wgpu device and queue for GPU rendering
     let instance = wgpu::Instance::default();
@@ -235,26 +237,21 @@ async fn run() {
         label: Some("Vello Render To Buffer"),
     });
 
-    // Create a vector to hold debug buffers from render passes
-    let mut debug_buffers = Vec::new();
-
-    {
-        renderer.render(
-            &scene,
-            &device,
-            &queue,
-            &mut encoder,
-            &render_size,
-            &texture_view,
-            &texture,
-            Some(&mut debug_buffers),
-        );
-    }
+    renderer.render(
+        &scene,
+        &device,
+        &queue,
+        &mut encoder,
+        &render_size,
+        &texture_view,
+        &texture,
+        None,
+    );
 
     // Get clip texture dimensions
     let clip_texture_width = vello_common::coarse::WideTile::WIDTH as u32;
     let clip_texture_height =
-        vello_common::tile::Tile::HEIGHT as u32 * vello_hybrid::Renderer::N_SLOTS as u32;
+        device.limits().max_texture_dimension_2d / 4;
 
     // Create buffer for the main texture
     let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
@@ -298,23 +295,11 @@ async fn run() {
                 panic!("Failed to map texture for reading");
             }
         });
-
-    // Map all debug buffers for reading
-    for (_, buffer, _, _) in &debug_buffers {
-        buffer
-            .slice(..)
-            .map_async(wgpu::MapMode::Read, move |result| {
-                if result.is_err() {
-                    panic!("Failed to map debug texture for reading");
-                }
-            });
-    }
-
-    device.poll(wgpu::Maintain::Wait);
+        device.poll(wgpu::Maintain::Wait);
 
     // Calculate the total width needed for the full debug output
     // Main texture + all debug buffers
-    let debug_buffer_count = debug_buffers.len();
+    let debug_buffer_count = 0;
     let total_width = width as u32 + (clip_texture_width * debug_buffer_count as u32);
 
     // Create a new pixmap that can fit all textures side by side
@@ -331,56 +316,23 @@ async fn run() {
     // Copy the main texture data to the pixmap
     let main_width = width as usize;
     let main_height = height as usize;
-    //for y in 0..main_height {
-    //    let src_offset = y * bytes_per_row as usize;
-    //    let dst_offset = y * (total_width as usize * 4);
-    //    for x in 0..main_width {
-    //        let src_pixel_offset = src_offset + x * 4;
-    //        let dst_pixel_offset = dst_offset + x * 4;
-    //        if src_pixel_offset + 3 < main_data.len() && dst_pixel_offset + 3 < pixmap.buf.len() {
-    //            pixmap.buf[dst_pixel_offset] = main_data[src_pixel_offset];
-    //            pixmap.buf[dst_pixel_offset + 1] = main_data[src_pixel_offset + 1];
-    //            pixmap.buf[dst_pixel_offset + 2] = main_data[src_pixel_offset + 2];
-    //            pixmap.buf[dst_pixel_offset + 3] = main_data[src_pixel_offset + 3];
-    //        }
-    //    }
-    //}
-
-    // Copy all debug buffers to the pixmap
-    for (i, (label, buffer, width, height)) in debug_buffers.iter().enumerate() {
-        let debug_data = buffer.slice(..).get_mapped_range();
-        println!("Adding debug texture: {}", label);
-        let width = *width as usize;
-        let height = *height as usize;
-
-        let x_offset = main_width + (i * width);
-
-        for y in 0..height {
-            let src_offset = y * width * 4;
-            let dst_offset = y * (total_width as usize * 4) + x_offset * 4;
-
-            for x in 0..width {
-                let src_pixel_offset = src_offset + x * 4;
-                let dst_pixel_offset = dst_offset + x * 4;
-
-                if src_pixel_offset + 3 < debug_data.len()
-                    && dst_pixel_offset + 3 < pixmap.buf.len()
-                {
-                    pixmap.buf[dst_pixel_offset] = debug_data[src_pixel_offset];
-                    pixmap.buf[dst_pixel_offset + 1] = debug_data[src_pixel_offset + 1];
-                    pixmap.buf[dst_pixel_offset + 2] = debug_data[src_pixel_offset + 2];
-                    pixmap.buf[dst_pixel_offset + 3] = debug_data[src_pixel_offset + 3];
-                }
+    for y in 0..main_height {
+        let src_offset = y * bytes_per_row as usize;
+        let dst_offset = y * (total_width as usize * 4);
+        for x in 0..main_width {
+            let src_pixel_offset = src_offset + x * 4;
+            let dst_pixel_offset = dst_offset + x * 4;
+            if src_pixel_offset + 3 < main_data.len() && dst_pixel_offset + 3 < pixmap.buf.len() {
+                pixmap.buf[dst_pixel_offset] = main_data[src_pixel_offset];
+                pixmap.buf[dst_pixel_offset + 1] = main_data[src_pixel_offset + 1];
+                pixmap.buf[dst_pixel_offset + 2] = main_data[src_pixel_offset + 2];
+                pixmap.buf[dst_pixel_offset + 3] = main_data[src_pixel_offset + 3];
             }
         }
     }
 
     // Unmap the buffers
     drop(main_data);
-    texture_copy_buffer.unmap();
-    for (_, buffer, _, _) in &debug_buffers {
-        drop(buffer.slice(..).get_mapped_range());
-    }
 
     pixmap.unpremultiply();
 
