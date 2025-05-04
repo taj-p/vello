@@ -35,7 +35,7 @@ impl Default for ClipScene {
 }
 
 /// Draws a simple scene with shapes
-pub fn render(ctx: &mut Scene, root_transform: Affine) {
+pub fn render(ctx: &mut Scene, _root_transform: Affine) {
     fn circular_star(center: Point, n: usize, inner: f64, outer: f64) -> BezPath {
         let mut path = BezPath::new();
         let start_angle = -std::f64::consts::FRAC_PI_2;
@@ -48,6 +48,7 @@ pub fn render(ctx: &mut Scene, root_transform: Affine) {
         path.close_path();
         path
     }
+
     let mut triangle_path = BezPath::new();
     triangle_path.move_to((10.0, 10.0));
     triangle_path.line_to((90.0, 20.0));
