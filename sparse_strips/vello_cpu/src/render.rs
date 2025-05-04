@@ -6,6 +6,7 @@
 use crate::fine::Fine;
 use alloc::vec;
 use alloc::vec::Vec;
+use vello_common::blurred_rounded_rect::BlurredRoundedRectangle;
 use vello_common::coarse::Wide;
 use vello_common::encode::{EncodeExt, EncodedPaint};
 use vello_common::flatten::Line;
@@ -33,6 +34,7 @@ pub struct RenderContext {
     pub(crate) tiles: Tiles,
     pub(crate) strip_buf: Vec<Strip>,
     pub(crate) paint: PaintType,
+    pub(crate) paint_transform: Affine,
     pub(crate) stroke: Stroke,
     pub(crate) transform: Affine,
     pub(crate) fill_rule: Fill,
@@ -52,6 +54,7 @@ impl RenderContext {
         let transform = Affine::IDENTITY;
         let fill_rule = Fill::NonZero;
         let paint = BLACK.into();
+        let paint_transform = Affine::IDENTITY;
         let stroke = Stroke {
             width: 1.0,
             join: Join::Bevel,
@@ -71,6 +74,7 @@ impl RenderContext {
             strip_buf,
             transform,
             paint,
+            paint_transform,
             fill_rule,
             stroke,
             encoded_paints,
@@ -80,15 +84,17 @@ impl RenderContext {
     fn encode_current_paint(&mut self) -> Paint {
         match self.paint.clone() {
             PaintType::Solid(s) => s.into(),
-            PaintType::Gradient(mut g) => {
+            PaintType::Gradient(g) => {
                 // TODO: Add caching?
-                g.transform = self.transform * g.transform;
-                g.encode_into(&mut self.encoded_paints)
+                g.encode_into(
+                    &mut self.encoded_paints,
+                    self.transform * self.paint_transform,
+                )
             }
-            PaintType::Image(mut i) => {
-                i.transform = self.transform * i.transform;
-                i.encode_into(&mut self.encoded_paints)
-            }
+            PaintType::Image(i) => i.encode_into(
+                &mut self.encoded_paints,
+                self.transform * self.paint_transform,
+            ),
         }
     }
 
@@ -109,6 +115,37 @@ impl RenderContext {
     /// Fill a rectangle.
     pub fn fill_rect(&mut self, rect: &Rect) {
         self.fill_path(&rect.to_path(DEFAULT_TOLERANCE));
+    }
+
+    /// Fill a blurred rectangle with the given radius and standard deviation.
+    ///
+    /// Note that this only works properly if the current paint is set to a solid color.
+    /// If not, it will fall back to using black as the fill color.
+    pub fn fill_blurred_rounded_rect(&mut self, rect: &Rect, radius: f32, std_dev: f32) {
+        let color = match self.paint {
+            PaintType::Solid(s) => s,
+            // Fallback to black when attempting to blur a rectangle with an image/gradient paint
+            _ => BLACK,
+        };
+
+        let blurred_rect = BlurredRoundedRectangle {
+            rect: *rect,
+            color,
+            radius,
+            std_dev,
+        };
+
+        // The actual rectangle we paint needs to be larger so that the blurring effect
+        // is not cut off.
+        // The impulse response of a gaussian filter is infinite.
+        // For performance reason we cut off the filter at some extent where the response is close to zero.
+        let kernel_size = 2.5 * std_dev;
+        let inflated_rect = rect.inflate(kernel_size as f64, kernel_size as f64);
+        let transform = self.transform * self.paint_transform;
+
+        let paint = blurred_rect.encode_into(&mut self.encoded_paints, transform);
+        flatten::fill(&inflated_rect.to_path(0.1), transform, &mut self.line_buf);
+        self.render_path(Fill::NonZero, paint);
     }
 
     /// Stroke a rectangle.
@@ -196,6 +233,20 @@ impl RenderContext {
         self.paint = paint.into();
     }
 
+    /// Set the current paint transform.
+    ///
+    /// The paint transform is applied to the paint after the transform of the geometry the paint
+    /// is drawn in, i.e., the paint transform is applied after the global transform. This allows
+    /// transforming the paint independently from the drawn geometry.
+    pub fn set_paint_transform(&mut self, paint_transform: Affine) {
+        self.paint_transform = paint_transform;
+    }
+
+    /// Reset the current paint transform.
+    pub fn reset_paint_transform(&mut self) {
+        self.paint_transform = Affine::IDENTITY;
+    }
+
     /// Set the current fill rule.
     pub fn set_fill_rule(&mut self, fill_rule: Fill) {
         self.fill_rule = fill_rule;
@@ -220,14 +271,23 @@ impl RenderContext {
         self.wide.reset();
     }
 
-    /// Render the current context into a pixmap.
-    pub fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
+    /// Render the current context into a buffer.
+    /// The buffer is expected to be in premultiplied RGBA8 format with length `width * height * 4`
+    pub fn render_to_buffer(&self, buffer: &mut [u8], width: u16, height: u16) {
         assert!(
             !self.wide.has_layers(),
             "some layers haven't been popped yet"
         );
+        assert_eq!(
+            buffer.len(),
+            (width as usize) * (height as usize) * 4,
+            "provided width ({}) and height ({}) do not match buffer size ({})",
+            width,
+            height,
+            buffer.len(),
+        );
 
-        let mut fine = Fine::new(pixmap.width, pixmap.height);
+        let mut fine = Fine::new(width, height);
 
         let width_tiles = self.wide.width_tiles();
         let height_tiles = self.wide.height_tiles();
@@ -240,9 +300,14 @@ impl RenderContext {
                 for cmd in &wtile.cmds {
                     fine.run_cmd(cmd, &self.alphas, &self.encoded_paints);
                 }
-                fine.pack(&mut pixmap.buf);
+                fine.pack(buffer);
             }
         }
+    }
+
+    /// Render the current context into a pixmap.
+    pub fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
+        self.render_to_buffer(&mut pixmap.buf, pixmap.width, pixmap.height);
     }
 
     /// Return the width of the pixmap.
