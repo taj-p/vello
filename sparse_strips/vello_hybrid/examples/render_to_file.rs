@@ -7,11 +7,7 @@
 //! It takes an input SVG file and renders it to a PNG file using the hybrid CPU/GPU renderer.
 
 use std::io::BufWriter;
-use vello_common::color::palette::css::{
-    BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, LIME, REBECCA_PURPLE, RED,
-};
-use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke, Vec2};
-use vello_common::paint::Paint;
+use vello_common::kurbo::{Affine, Stroke};
 use vello_common::pico_svg::{Item, PicoSvg};
 use vello_common::pixmap::Pixmap;
 use vello_hybrid::{DimensionConstraints, Scene};
@@ -24,155 +20,6 @@ use vello_hybrid::{DimensionConstraints, Scene};
 /// Renders the SVG using the hybrid CPU/GPU renderer and saves the output as a PNG file.
 fn main() {
     pollster::block_on(run());
-}
-
-enum SceneType {
-    Rect,
-    Star,
-    NestedRect,
-    ThreeDepthCase,
-    Basic,
-}
-
-const SCENE_TYPE: SceneType = SceneType::Basic;
-
-/// Draws a simple scene with shapes
-pub fn render(ctx: &mut Scene) {
-    match SCENE_TYPE {
-        SceneType::Rect => {
-            // Create first clipping region - a rectangle on the left side
-            let clip_rect = Rect::new(10.0, 30.0, 50.0, 70.0);
-
-            // Then a filled rectangle that covers most of the canvas
-            let large_rect = Rect::new(0.0, 0.0, 100.0, 100.0);
-
-            let stroke = Stroke::new(10.0);
-            ctx.set_paint(DARK_BLUE.into());
-            ctx.set_stroke(stroke);
-            ctx.stroke_rect(&clip_rect);
-
-            ctx.push_clip_layer(&clip_rect.to_path(0.1));
-            ctx.set_paint(RED.into());
-            ctx.fill_rect(&large_rect);
-            ctx.pop_layer();
-        }
-        SceneType::Star => {
-            fn circular_star(center: Point, n: usize, inner: f64, outer: f64) -> BezPath {
-                let mut path = BezPath::new();
-                let start_angle = -std::f64::consts::FRAC_PI_2;
-                path.move_to(center + outer * Vec2::from_angle(start_angle));
-                for i in 1..n * 2 {
-                    let th = start_angle + i as f64 * std::f64::consts::PI / n as f64;
-                    let r = if i % 2 == 0 { outer } else { inner };
-                    path.line_to(center + r * Vec2::from_angle(th));
-                }
-                path.close_path();
-                path
-            }
-            let mut triangle_path = BezPath::new();
-            triangle_path.move_to((10.0, 10.0));
-            triangle_path.line_to((90.0, 20.0));
-            triangle_path.line_to((20.0, 90.0));
-            triangle_path.close_path();
-
-            let stroke = Stroke::new(1.0);
-            ctx.set_paint(DARK_BLUE.into());
-            ctx.set_stroke(stroke);
-            ctx.stroke_path(&triangle_path);
-
-            let star_path = circular_star(Point::new(50., 50.), 13, 25., 45.);
-
-            ctx.push_clip_layer(&star_path);
-            ctx.set_paint(REBECCA_PURPLE.into());
-            ctx.fill_path(&triangle_path);
-            ctx.pop_layer();
-        }
-        SceneType::NestedRect => {
-            // Create a series of 10 nested rectangles with clipping
-            let colors: [Paint; 10] = [
-                RED.into(),
-                DARK_BLUE.into(),
-                DARK_GREEN.into(),
-                REBECCA_PURPLE.into(),
-                BLACK.into(),
-                RED.into(),
-                DARK_BLUE.into(),
-                DARK_GREEN.into(),
-                REBECCA_PURPLE.into(),
-                BLACK.into(),
-            ];
-
-            // Start with a large rectangle (100x100) and decrease by 10 each time
-            let mut size = 100.0;
-            let mut offset = 0.0;
-
-            const COUNT: usize = 10;
-
-            for i in 0..COUNT {
-                // Create a rectangle for clipping
-                let clip_rect = Rect::new(offset, offset, size, size);
-                ctx.set_paint(BLACK.into());
-                // visualise clip
-                ctx.stroke_rect(&clip_rect);
-                // Draw a filled rectangle with current color
-                ctx.set_paint(colors[i].clone());
-
-                // Push clip layer
-                ctx.push_clip_layer(&clip_rect.to_path(0.1));
-
-                ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
-
-                // Decrease size and increase offset for next iteration
-                size -= 10.0;
-                offset += 5.0;
-            }
-
-            // Pop all clip layers
-            for _ in 0..COUNT {
-                ctx.pop_layer();
-            }
-        }
-        SceneType::ThreeDepthCase => {
-            // Create a series of 10 nested rectangles with clipping
-            {
-                let overlap_rect = Rect::new(0.0, 0.0, 100.0, 3.0);
-                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
-                ctx.set_paint(RED.into());
-                ctx.fill_rect(&overlap_rect);
-            }
-            {
-                let overlap_rect = Rect::new(5.0, 0.0, 100.0, 3.0);
-                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
-                ctx.set_paint(GREEN.into());
-                ctx.fill_rect(&overlap_rect);
-            }
-            {
-                let overlap_rect = Rect::new(10.0, 0.0, 100.0, 3.0);
-                ctx.push_clip_layer(&overlap_rect.to_path(0.1));
-                ctx.set_paint(BLUE.into());
-                ctx.fill_rect(&overlap_rect);
-            }
-
-            ctx.pop_layer();
-            ctx.pop_layer();
-            ctx.pop_layer();
-        }
-        SceneType::Basic => {
-            let path = {
-                let mut path = BezPath::new();
-                path.move_to((5.0, 5.0));
-                path.line_to((95.0, 50.0));
-                path.line_to((5.0, 95.0));
-                path.close_path();
-
-                path
-            };
-
-            ctx.set_stroke(Stroke::new(3.0));
-            ctx.set_paint(LIME.into());
-            ctx.stroke_path(&path);
-        }
-    }
 }
 
 async fn run() {
@@ -188,13 +35,10 @@ async fn run() {
     let svg_height = parsed.size.height * render_scale;
     let (width, height) = constraints.calculate_dimensions(svg_width, svg_height);
 
-    // let width = 256 as u16;
-    // let height = 100 as u16;
-    let width = width as u16;
-    let height = height as u16;
+    let width = DimensionConstraints::convert_dimension(width);
+    let height = DimensionConstraints::convert_dimension(height);
 
     let mut scene = Scene::new(width, height);
-    // render(&mut scene);
     render_svg(&mut scene, &parsed.items, Affine::scale(render_scale));
 
     // Initialize wgpu device and queue for GPU rendering
@@ -246,13 +90,10 @@ async fn run() {
         width: width.into(),
         height: height.into(),
     };
-    //let render_data = scene.prepare_render_data();
-    //renderer.prepare(&device, &queue, &render_data, &render_size);
     // Copy texture to buffer
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("Vello Render To Buffer"),
     });
-
     renderer.render(
         &scene,
         &device,
@@ -262,11 +103,7 @@ async fn run() {
         &texture_view,
     );
 
-    // Get clip texture dimensions
-    let clip_texture_width = vello_common::coarse::WideTile::WIDTH as u32;
-    let clip_texture_height = device.limits().max_texture_dimension_2d / 4;
-
-    // Create buffer for the main texture
+    // Create a buffer to copy the texture data
     let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
     let texture_copy_buffer = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("Output Buffer"),
@@ -275,7 +112,6 @@ async fn run() {
         mapped_at_creation: false,
     });
 
-    // Copy main texture to buffer
     encoder.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
             texture: &texture,
@@ -297,10 +133,9 @@ async fn run() {
             depth_or_array_layers: 1,
         },
     );
-
     queue.submit([encoder.finish()]);
 
-    // Map the main buffer for reading
+    // Map the buffer for reading
     texture_copy_buffer
         .slice(..)
         .map_async(wgpu::MapMode::Read, move |result| {
@@ -310,49 +145,26 @@ async fn run() {
         });
     device.poll(wgpu::Maintain::Wait);
 
-    // Calculate the total width needed for the full debug output
-    // Main texture + all debug buffers
-    let debug_buffer_count = 0;
-    let total_width = width as u32 + (clip_texture_width * debug_buffer_count as u32);
-
-    // Create a new pixmap that can fit all textures side by side
-    let mut pixmap = Pixmap::new(total_width as u16, height.max(clip_texture_height as u16));
-
-    // Fill the pixmap with black pixels
-    for i in 0..pixmap.buf.len() {
-        pixmap.buf[i] = 0;
+    // Read back the pixel data
+    let mut img_data = Vec::with_capacity(usize::from(width) * usize::from(height) * 4);
+    for row in texture_copy_buffer
+        .slice(..)
+        .get_mapped_range()
+        .chunks_exact(bytes_per_row as usize)
+    {
+        img_data.extend_from_slice(&row[0..width as usize * 4]);
     }
+    texture_copy_buffer.unmap();
 
-    // Read the main texture data
-    let main_data = texture_copy_buffer.slice(..).get_mapped_range();
-
-    // Copy the main texture data to the pixmap
-    let main_width = width as usize;
-    let main_height = height as usize;
-    for y in 0..main_height {
-        let src_offset = y * bytes_per_row as usize;
-        let dst_offset = y * (total_width as usize * 4);
-        for x in 0..main_width {
-            let src_pixel_offset = src_offset + x * 4;
-            let dst_pixel_offset = dst_offset + x * 4;
-            if src_pixel_offset + 3 < main_data.len() && dst_pixel_offset + 3 < pixmap.buf.len() {
-                pixmap.buf[dst_pixel_offset] = main_data[src_pixel_offset];
-                pixmap.buf[dst_pixel_offset + 1] = main_data[src_pixel_offset + 1];
-                pixmap.buf[dst_pixel_offset + 2] = main_data[src_pixel_offset + 2];
-                pixmap.buf[dst_pixel_offset + 3] = main_data[src_pixel_offset + 3];
-            }
-        }
-    }
-
-    // Unmap the buffers
-    drop(main_data);
-
+    // Create a pixmap and set the buffer
+    let mut pixmap = Pixmap::new(width, height);
+    pixmap.buf = img_data;
     pixmap.unpremultiply();
 
     // Write the pixmap to a file
     let file = std::fs::File::create(output_filename).unwrap();
     let w = BufWriter::new(file);
-    let mut png_encoder = png::Encoder::new(w, total_width, pixmap.height().into());
+    let mut png_encoder = png::Encoder::new(w, width.into(), height.into());
     png_encoder.set_color(png::ColorType::Rgba);
     let mut writer = png_encoder.write_header().unwrap();
     writer.write_image_data(&pixmap.buf).unwrap();
