@@ -16,8 +16,8 @@
 //! The hybrid approach combines CPU-side path processing with efficient GPU rendering
 //! to balance flexibility and performance.
 
+use alloc::vec;
 use alloc::vec::Vec;
-use alloc::{string::String, vec};
 use core::fmt::Debug;
 
 use bytemuck::{Pod, Zeroable};
@@ -109,7 +109,7 @@ impl Renderer {
 /// Defines the GPU resources and pipelines for rendering.
 #[derive(Debug)]
 struct Programs {
-    /// Pipeline for rendering clip draws
+    /// Pipeline for rendering wide tile commands.
     clip_pipeline: RenderPipeline,
     /// Bind group layout for clip draws
     clip_bind_group_layout: BindGroupLayout,
@@ -750,7 +750,7 @@ impl Programs {
                     .push(self.resources.strips_buffer.clone());
                 self.resources.strips_buffer = new_buffer;
             } else {
-                // No suitable buffer found, create a new one and put the old one in the pool
+                // No suitable buffer found, create a new one and put the old one in the pool for re-use.
                 let new_buffer = Self::make_strips_buffer(device, needed_size);
                 self.resources
                     .strips_buffer_pool
@@ -770,7 +770,7 @@ impl Programs {
                 offset,
                 required_strips_size.try_into().unwrap(),
             )
-            .expect("Has capacity for strips per above condition");
+            .expect("Capacity for strips per above");
         buffer.copy_from_slice(bytemuck::cast_slice(strips));
 
         // Update the offset for next upload
