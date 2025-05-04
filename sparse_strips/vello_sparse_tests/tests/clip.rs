@@ -50,6 +50,7 @@ fn clip_rectangle_with_star_nonzero(ctx: &mut impl Renderer) {
     ctx.pop_layer();
 }
 
+#[vello_test]
 fn clip_rectangle_with_star_evenodd(ctx: &mut impl Renderer) {
     let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
     // Create a self-intersecting star shape that will show the difference between fill rules

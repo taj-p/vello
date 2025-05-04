@@ -1,1 +1,0 @@
-cargo watch -i out.png -- bash -c "cargo run --example render_to_file ../../examples/assets/Ghostscript_Tiger.svg ./out.png && open -a 'qView.app' out.png"
