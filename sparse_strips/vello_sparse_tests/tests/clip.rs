@@ -75,7 +75,7 @@ fn clip_single_wide_tile(ctx: &mut impl Renderer) {
     const WIDTH: f64 = 100.0;
     assert!(WIDTH <= WideTile::WIDTH as f64);
     const HEIGHT: f64 = Tile::HEIGHT as f64;
-    const OFFSET: f64 = 5.0;
+    const OFFSET: f64 = WIDTH / 3.0;
 
     let colors = [RED, GREEN, BLUE];
 
