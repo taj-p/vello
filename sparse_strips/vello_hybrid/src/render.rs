@@ -92,9 +92,6 @@ impl Renderer {
         self.programs
             .prepare_alphas(device, queue, &scene.alphas, render_size);
 
-        // Reset buffer offsets at the start of each frame
-        self.programs.reset_buffer_offsets();
-
         let mut junk = RendererJunk {
             programs: &mut self.programs,
             device,
@@ -130,23 +127,6 @@ struct Programs {
     clear_bind_group: BindGroup,
 }
 
-struct Pipelines {
-    wide_tile: RenderPipeline,
-    clear_slots: RenderPipeline,
-}
-
-struct Textures {
-    wide_tile: [TextureView; 2],
-    alphas: Texture,
-    alpha_data: Vec<u8>,
-}
-
-struct Buffers {
-    strips: Buffer,
-    slot_indices: Buffer,
-    config: Buffer,
-}
-
 /// Contains all GPU resources needed for rendering
 ///
 /// This struct contains the GPU resources that may be reallocated depending
@@ -156,22 +136,14 @@ struct Buffers {
 struct GpuResources {
     /// Current main buffer for strip data
     strips_buffer: Buffer,
-    /// Current offset in the strips buffer for appending new strips
-    strips_buffer_offset: u64,
-    /// Pool of strips buffers for reuse
-    strips_buffer_pool: Vec<Buffer>,
     /// Texture for alpha values
     alphas_texture: Texture,
     /// Buffer for config data
     config_buffer: Buffer,
     // Bind groups for rendering with clip buffers
     strip_bind_groups: [BindGroup; 3],
-    /// Slot indices buffer with current offset
-    slot_indices_offset: u64,
     /// Buffer for slot indices used in clear_slots
     slot_indices_buffer: Buffer,
-    /// Pool of slot index buffers for reuse
-    slot_indices_buffer_pool: Vec<Buffer>,
 }
 
 /// Configuration for the GPU renderer
@@ -315,11 +287,12 @@ impl Programs {
             ),
         });
 
-        let strip_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Clip Pipeline Layout"),
-            bind_group_layouts: &[&strip_bind_group_layout],
-            push_constant_ranges: &[],
-        });
+        let strip_pipeline_layout =
+            device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("Clip Pipeline Layout"),
+                bind_group_layouts: &[&strip_bind_group_layout],
+                push_constant_ranges: &[],
+            });
 
         // Create pipeline layout for clearing slots
         let clear_pipeline_layout =
@@ -484,11 +457,7 @@ impl Programs {
 
         let resources = GpuResources {
             strips_buffer: Self::make_strips_buffer(device, 0),
-            strips_buffer_offset: 0,
-            strips_buffer_pool: Vec::new(),
             slot_indices_buffer,
-            slot_indices_buffer_pool: Vec::new(),
-            slot_indices_offset: 0,
             alphas_texture,
             strip_bind_groups,
             config_buffer,
@@ -737,69 +706,22 @@ impl Programs {
 
     /// Upload the strip data by appending to the buffer
     /// Returns the buffer and the range of the uploaded strips
-    fn upload_strips(&mut self, device: &Device, queue: &Queue, strips: &[GpuStrip]) -> (u64, u64) {
+    fn upload_strips(&mut self, device: &Device, queue: &Queue, strips: &[GpuStrip]) {
         if strips.is_empty() {
-            return (0, 0);
+            return;
         }
 
         let required_strips_size = size_of_val(strips) as u64;
-
-        // Check if we need to switch to a new buffer
-        let current_buffer_size = self.resources.strips_buffer.size();
-        let current_offset = self.resources.strips_buffer_offset;
-
-        // If this upload won't fit in the remaining space, try to find a buffer from the pool
-        // or create a new one if necessary
-        if current_offset + required_strips_size > current_buffer_size {
-            // First try to find a suitable buffer in the pool
-            let needed_size = required_strips_size.max(current_buffer_size * 2);
-            let suitable_buffer_idx = self
-                .resources
-                .strips_buffer_pool
-                .iter()
-                .position(|buffer| buffer.size() >= needed_size);
-
-            if let Some(idx) = suitable_buffer_idx {
-                // Found a suitable buffer in the pool, swap it with the current one
-                let new_buffer = self.resources.strips_buffer_pool.remove(idx);
-                self.resources
-                    .strips_buffer_pool
-                    .push(self.resources.strips_buffer.clone());
-                self.resources.strips_buffer = new_buffer;
-            } else {
-                // No suitable buffer found, create a new one and put the old one in the pool for re-use.
-                let new_buffer = Self::make_strips_buffer(device, needed_size);
-                self.resources
-                    .strips_buffer_pool
-                    .push(self.resources.strips_buffer.clone());
-                self.resources.strips_buffer = new_buffer;
-            }
-
-            // Reset the offset for the new buffer
-            self.resources.strips_buffer_offset = 0;
-        }
-
-        // Append strips to the buffer at the current offset
-        let offset = self.resources.strips_buffer_offset;
+        self.resources.strips_buffer = Self::make_strips_buffer(device, required_strips_size);
+        // TODO: Consider using a staging belt to avoid an extra staging buffer allocation.
         let mut buffer = queue
             .write_buffer_with(
                 &self.resources.strips_buffer,
-                offset,
+                0,
                 required_strips_size.try_into().unwrap(),
             )
-            .expect("Capacity for strips per above");
+            .expect("Capacity handled in buffer creation");
         buffer.copy_from_slice(bytemuck::cast_slice(strips));
-
-        // Update the offset for next upload
-        self.resources.strips_buffer_offset += required_strips_size;
-
-        (offset, required_strips_size)
-    }
-
-    /// Reset buffer offsets to start appending from the beginning again
-    fn reset_buffer_offsets(&mut self) {
-        self.resources.strips_buffer_offset = 0;
-        self.resources.slot_indices_offset = 0;
     }
 }
 
@@ -810,8 +732,9 @@ impl RendererJunk<'_> {
         ix: usize,
         load: wgpu::LoadOp<wgpu::Color>,
     ) {
-        // Upload strips and get the offset, size, and buffer reference
-        let (offset, size) = self.programs.upload_strips(self.device, self.queue, strips);
+        // TODO: We currently allocate a new strips buffer for each render pass. A more efficient
+        // approach would be to re-use buffers or slices of a larger buffer.
+        self.programs.upload_strips(self.device, self.queue, strips);
 
         {
             let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
@@ -834,15 +757,7 @@ impl RendererJunk<'_> {
             });
             render_pass.set_pipeline(&self.programs.strip_pipeline);
             render_pass.set_bind_group(0, &self.programs.resources.strip_bind_groups[ix], &[]);
-
-            // Use the specific slice of the buffer for this draw call
-            render_pass.set_vertex_buffer(
-                0,
-                self.programs
-                    .resources
-                    .strips_buffer
-                    .slice(offset..(offset + size)),
-            );
+            render_pass.set_vertex_buffer(0, self.programs.resources.strips_buffer.slice(..));
 
             let strips_to_draw = strips.len();
             render_pass.draw(0..4, 0..u32::try_from(strips_to_draw).unwrap());
@@ -856,44 +771,16 @@ impl RendererJunk<'_> {
         }
 
         let resources = &mut self.programs.resources;
-        let required_size = (size_of::<u32>() * slot_indices.len()) as u64;
-        let current_offset = resources.slot_indices_offset;
-
-        // Check if we need to reset or find a new buffer
-        if current_offset + required_size > resources.slot_indices_buffer.size() {
-            // Try to find a suitable buffer in the pool
-            let needed_size = required_size.max(resources.slot_indices_buffer.size() * 2);
-            let suitable_buffer_idx = resources
-                .slot_indices_buffer_pool
-                .iter()
-                .position(|buffer| buffer.size() >= needed_size);
-
-            if let Some(idx) = suitable_buffer_idx {
-                // Found a suitable buffer in the pool, swap it with the current one
-                let new_buffer = resources.slot_indices_buffer_pool.remove(idx);
-                resources
-                    .slot_indices_buffer_pool
-                    .push(resources.slot_indices_buffer.clone());
-                resources.slot_indices_buffer = new_buffer;
-            } else {
-                // No suitable buffer found, create a new one and put the old one in the pool
-                let new_buffer = Programs::make_slot_indices_buffer(self.device, needed_size);
-                resources
-                    .slot_indices_buffer_pool
-                    .push(resources.slot_indices_buffer.clone());
-                resources.slot_indices_buffer = new_buffer;
-            }
-
-            resources.slot_indices_offset = 0;
-        }
-
-        // Write slot indices to the buffer at the current offset
-        let offset = resources.slot_indices_offset;
-        self.queue.write_buffer(
-            &resources.slot_indices_buffer,
-            offset,
-            bytemuck::cast_slice(slot_indices),
-        );
+        let size = (size_of::<u32>() * slot_indices.len()) as u64;
+        // TODO: We currently allocate a new strips buffer for each render pass. A more efficient
+        // approach would be to re-use buffers or slices of a larger buffer.
+        resources.slot_indices_buffer = Programs::make_slot_indices_buffer(self.device, size);
+        // TODO: Consider using a staging belt to avoid an extra staging buffer allocation.
+        let mut buffer = self
+            .queue
+            .write_buffer_with(&resources.slot_indices_buffer, 0, size.try_into().unwrap())
+            .expect("Capacity handled in buffer creation");
+        buffer.copy_from_slice(bytemuck::cast_slice(slot_indices));
 
         {
             let mut render_pass = self.encoder.begin_render_pass(&RenderPassDescriptor {
@@ -914,19 +801,8 @@ impl RendererJunk<'_> {
 
             render_pass.set_pipeline(&self.programs.clear_pipeline);
             render_pass.set_bind_group(0, &self.programs.clear_bind_group, &[]);
-
-            // Use the specific slice of the buffer for this draw call
-            render_pass.set_vertex_buffer(
-                0,
-                resources
-                    .slot_indices_buffer
-                    .slice(offset..(offset + required_size)),
-            );
-
+            render_pass.set_vertex_buffer(0, resources.slot_indices_buffer.slice(..));
             render_pass.draw(0..4, 0..slot_indices.len() as u32);
         }
-
-        // Update offset for next upload
-        resources.slot_indices_offset += required_size;
     }
 }
