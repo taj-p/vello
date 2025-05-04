@@ -3279,17 +3279,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "vello_macros"
-version = "0.0.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
- "vello_api",
- "vello_common",
-]
-
-[[package]]
 name = "vello_shaders"
 version = "0.4.0"
 dependencies = [
