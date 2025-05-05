@@ -69,7 +69,7 @@
 //!
 //! ### Draw to texture 1:
 //!
-//! In Slot N - 2 of texture 1, draw unclipped red rectangle and in slot N - 1, draw the unclipped
+//! In Slot N - 2 of texture 1, draw unclipped red rectangle and, in slot N - 1, draw the unclipped
 //! blue rectangle.
 //!
 //! Slot N - 2:
@@ -95,7 +95,9 @@
 //!
 //! ### Round 1
 //!
-//! In this round, we have three slots that contain our unclipped rectangles.
+//! At this point, we have three slots that contain our unclipped rectangles. In this round,
+//! we start to sample those pixels to apply clipping (texture 1 samples from texture 0 and 
+//! the render target view samples from texture 1).
 //!
 //! ### Draw to texture 0:
 //!
