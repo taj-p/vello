@@ -7,9 +7,9 @@
 // numbering from 0 to `texture_height / slot_height - 1` from top to bottom.
 
 struct Config {
-    // Width of a slot (typically matching WideTile::WIDTH)
+    // Width of a slot (typically matching `WideTile::WIDTH`)
     slot_width: u32,
-    // Height of a slot (typically matching Tile::HEIGHT)
+    // Height of a slot (typically matching `Tile::HEIGHT`)
     slot_height: u32,
     // Total height of the texture (slot_height * number_of_slots)
     texture_height: u32,
