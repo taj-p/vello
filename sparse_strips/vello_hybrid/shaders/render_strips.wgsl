@@ -1,7 +1,18 @@
 // Copyright 2024 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-// This shader is a copy of sparse_strip_renderer but organized for clipping.
+// A WGSL shader for rendering sparse strips with alpha blending.
+//
+// Each strip instance represents a horizontal slice of the rendered output and consists of:
+// 1. A variable-width region of alpha values for semi-transparent rendering
+// 2. A solid color region for fully opaque areas
+//
+// The alpha values are stored in a texture and sampled during fragment shading.
+// This approach optimizes memory usage by only storing alpha data where needed.
+//
+// The `StripInstance`'s `rgba` field can either encode a color or a slot index.
+// If the alpha value is non-zero, the fragment shader samples the alpha texture.
+// Otherwise, the fragment shader samples the source clip texture.
 
 struct Config {
     // Width of the rendering target
@@ -22,7 +33,7 @@ struct StripInstance {
     @location(1) widths: u32,
     // Alpha texture column index where this strip's alpha values begin
     @location(2) col: u32,
-    // [r, g, b, a] packed as u8's
+    // [r, g, b, a] packed as u8's or a slot index when alpha is 0
     @location(3) rgba: u32,
 }
 
@@ -35,8 +46,6 @@ struct VertexOutput {
     @location(2) @interpolate(flat) color: u32,
     // Normalized device coordinates (NDC) for the current vertex
     @builtin(position) position: vec4<f32>,
-    // Pixel coordinates for the current fragment (packed as u32 [x, y])
-    @location(3) pixel_coord: u32,
 };
 
 // TODO: Measure performance of moving to a separate group
@@ -73,7 +82,6 @@ fn vs_main(
     out.position = vec4<f32>(ndc_x, ndc_y, 0.0, 1.0);
     out.tex_coord = vec2<f32>(f32(instance.col) + x * f32(width), y * f32(config.strip_height));
     out.color = instance.rgba;
-    out.pixel_coord = u32(pix_x) | (u32(pix_y) << 16u);
     return out;
 }
 
