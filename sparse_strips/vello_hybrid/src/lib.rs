@@ -30,6 +30,11 @@
 //! See the individual module documentation for more details on usage and implementation.
 
 #![no_std]
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "We temporarily ignore those because the casts\
+only break in edge cases, and some of them are also only related to conversions from f64 to f32."
+)]
 
 extern crate alloc;
 

@@ -247,15 +247,15 @@ impl Scheduler {
         self.round = 0;
         self.tile_state = tile_state;
         self.tile_state.stack.clear();
-        debug_assert!(self.clear[0].is_empty());
-        debug_assert!(self.clear[1].is_empty());
+        debug_assert!(self.clear[0].is_empty(), "clear has not reset");
+        debug_assert!(self.clear[1].is_empty(), "clear has not reset");
         if cfg!(debug_assertions) {
             for i in 0..self.total_slots {
                 debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
                 debug_assert!(self.free[1].contains(&i), "free[1] is missing slot {}", i);
             }
         }
-        debug_assert!(self.rounds_queue.is_empty());
+        debug_assert!(self.rounds_queue.is_empty(), "rounds_queue is not empty");
 
         Ok(())
     }
@@ -418,8 +418,8 @@ impl Scheduler {
                     let round = nos.round.max(tos.round + next_round as usize);
                     nos.round = round;
                     // free slot after draw
-                    debug_assert!(round >= self.round);
-                    debug_assert!(round - self.round < self.rounds_queue.len());
+                    debug_assert!(round >= self.round, "round must be after current round");
+                    debug_assert!(round - self.round < self.rounds_queue.len(), "round must be in queue");
                     self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
                         .push(tos.slot_ix);
                 }
