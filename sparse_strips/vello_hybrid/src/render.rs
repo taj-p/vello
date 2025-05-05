@@ -127,7 +127,7 @@ struct GpuResources {
     slot_config_buffer: Buffer,
 
     /// Buffer for slot indices used in clear_slots
-    slot_indices_buffer: Buffer,
+    clear_slot_indices_buffer: Buffer,
     // Bind groups for rendering with clip buffers
     slot_bind_groups: [BindGroup; 3],
     /// Slot texture views
@@ -260,7 +260,6 @@ impl Programs {
             source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/render_strips.wgsl").into()),
         });
 
-        // Create shader module for clearing slots
         let clear_shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label: Some("Clear Slots Shader"),
             source: wgpu::ShaderSource::Wgsl(include_str!("../shaders/clear_slots.wgsl").into()),
@@ -273,7 +272,6 @@ impl Programs {
                 push_constant_ranges: &[],
             });
 
-        // Create pipeline layout for clearing slots
         let clear_pipeline_layout =
             device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
                 label: Some("Clear Slots Pipeline Layout"),
@@ -314,7 +312,6 @@ impl Programs {
             cache: None,
         });
 
-        // Create pipeline for clearing slots
         let clear_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
             label: Some("Clear Slots Pipeline"),
             layout: Some(&clear_pipeline_layout),
@@ -375,7 +372,6 @@ impl Programs {
                 .create_view(&wgpu::TextureViewDescriptor::default())
         });
 
-        // Create clear config buffer
         let clear_config_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("Clear Slots Config Buffer"),
             contents: bytemuck::bytes_of(&ClearSlotsConfig {
@@ -386,8 +382,6 @@ impl Programs {
             }),
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
-
-        // Create clear bind group
         let clear_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("Clear Slots Bind Group"),
             layout: &clear_bind_group_layout,
@@ -396,11 +390,10 @@ impl Programs {
                 resource: clear_config_buffer.as_entire_binding(),
             }],
         });
-
-        // Create slot indices buffer with initial capacity for 64 slots
-        // This can store up to 64 slot indices (adjust size if needed)
-        let slot_indices_buffer =
-            Self::make_slot_indices_buffer(device, slot_count as u64 * size_of::<u32>() as u64);
+        let clear_slot_indices_buffer = Self::make_clear_slot_indices_buffer(
+            device,
+            slot_count as u64 * size_of::<u32>() as u64,
+        );
 
         let slot_config_buffer = Self::make_config_buffer(
             device,
@@ -436,7 +429,7 @@ impl Programs {
 
         let resources = GpuResources {
             strips_buffer: Self::make_strips_buffer(device, 0),
-            slot_indices_buffer,
+            clear_slot_indices_buffer,
             slot_texture_views,
             slot_config_buffer,
             slot_bind_groups,
@@ -468,7 +461,7 @@ impl Programs {
         })
     }
 
-    fn make_slot_indices_buffer(device: &Device, required_size: u64) -> Buffer {
+    fn make_clear_slot_indices_buffer(device: &Device, required_size: u64) -> Buffer {
         device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Slot Indices Buffer"),
             size: required_size,
@@ -753,11 +746,16 @@ impl RendererJunk<'_> {
         let size = (size_of::<u32>() * slot_indices.len()) as u64;
         // TODO: We currently allocate a new strips buffer for each render pass. A more efficient
         // approach would be to re-use buffers or slices of a larger buffer.
-        resources.slot_indices_buffer = Programs::make_slot_indices_buffer(self.device, size);
+        resources.clear_slot_indices_buffer =
+            Programs::make_clear_slot_indices_buffer(self.device, size);
         // TODO: Consider using a staging belt to avoid an extra staging buffer allocation.
         let mut buffer = self
             .queue
-            .write_buffer_with(&resources.slot_indices_buffer, 0, size.try_into().unwrap())
+            .write_buffer_with(
+                &resources.clear_slot_indices_buffer,
+                0,
+                size.try_into().unwrap(),
+            )
             .expect("Capacity handled in creation");
         buffer.copy_from_slice(bytemuck::cast_slice(slot_indices));
 
@@ -780,7 +778,7 @@ impl RendererJunk<'_> {
 
             render_pass.set_pipeline(&self.programs.clear_pipeline);
             render_pass.set_bind_group(0, &resources.clear_bind_group, &[]);
-            render_pass.set_vertex_buffer(0, resources.slot_indices_buffer.slice(..));
+            render_pass.set_vertex_buffer(0, resources.clear_slot_indices_buffer.slice(..));
             render_pass.draw(0..4, 0..slot_indices.len() as u32);
         }
     }
