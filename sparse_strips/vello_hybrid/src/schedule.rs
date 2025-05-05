@@ -1,27 +1,30 @@
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+use crate::{GpuStrip, Scene, render::RendererJunk};
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
-
+use core::mem;
 use vello_common::{
     coarse::{Cmd, WideTile},
     paint::Paint,
     tile::Tile,
 };
 
-use crate::{GpuStrip, Scene, render::RendererJunk};
-
 #[derive(Debug)]
 pub(crate) struct Scheduler {
     /// Index of the current round
     round: usize,
+    /// The total number of slots in each slot texture.
     total_slots: usize,
+    /// The slots that are free to use in each slot texture.
     free: [Vec<usize>; 2],
     /// Slots that require clearing before subsequent draws.
     clear: [Vec<u32>; 2],
     /// Rounds are enqueued on push clip commands and dequeued on flush.
     rounds_queue: VecDeque<Round>,
+    /// State for a single wide tile.
+    tile_state: TileState,
 }
 
 /// A "round" is a coarse scheduling quantum.
@@ -31,21 +34,19 @@ pub(crate) struct Scheduler {
 /// clip buffers are for even and odd clip depths.
 #[derive(Debug, Default)]
 struct Round {
-    /// [even clip depth, odd depth, final target] draw calls
+    /// Draw calls scheduled into the two slot textures [0, 1] and the final target [2].
     draws: [Draw; 3],
-    /// Slots that will be freed after the draws
+    /// Slots that will be freed after drawing into the two slot textures [0, 1].
     free: [Vec<usize>; 2],
 }
 
-/// State for a single tile.
-///
-/// Perhaps this should just be a field in the scheduler.
-#[derive(Default)]
+// State for a single wide tile.
+#[derive(Debug, Default)]
 struct TileState {
     stack: Vec<TileEl>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 struct TileEl {
     slot_ix: usize,
     round: usize,
@@ -68,11 +69,12 @@ impl Scheduler {
             free,
             clear,
             rounds_queue,
+            tile_state: Default::default(),
         }
     }
 
     pub(crate) fn do_scene(&mut self, junk: &mut RendererJunk<'_>, scene: &Scene) {
-        let mut state = TileState::default();
+        let mut tile_state = mem::take(&mut self.tile_state);
         let wide_tiles_per_row = (scene.width).div_ceil(WideTile::WIDTH);
         let wide_tiles_per_col = (scene.height).div_ceil(Tile::HEIGHT);
 
@@ -83,15 +85,20 @@ impl Scheduler {
                 let wide_tile = &scene.wide.tiles[wide_tile_idx];
                 let wide_tile_x = wide_tile_col * WideTile::WIDTH;
                 let wide_tile_y = wide_tile_row * Tile::HEIGHT;
-                self.do_tile(junk, wide_tile_x, wide_tile_y, wide_tile, &mut state);
+                self.do_tile(junk, wide_tile_x, wide_tile_y, wide_tile, &mut tile_state);
             }
         }
         while !self.rounds_queue.is_empty() {
             self.flush(junk);
         }
+        // Restore state to reuse allocations.
+        self.tile_state = tile_state;
 
         // When a scene ends, state should return to its initial state for reuse.
         self.round = 0;
+        self.tile_state.stack.clear();
+        debug_assert!(self.clear[0].len() == 0);
+        debug_assert!(self.clear[1].len() == 0);
         if cfg!(debug_assertions) {
             for i in 0..self.total_slots {
                 debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
@@ -99,8 +106,6 @@ impl Scheduler {
             }
         }
         debug_assert!(self.rounds_queue.is_empty());
-        debug_assert!(self.clear[0].len() == 0);
-        debug_assert!(self.clear[1].len() == 0);
     }
 
     /// Flush one round.
