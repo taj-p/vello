@@ -263,9 +263,6 @@ impl Scheduler {
                 Cmd::PopBuf => {
                     let tos = state.stack.pop().unwrap();
                     let nos = state.stack.last_mut().unwrap();
-                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
-                    // then we need to schedule these commands for the next round and preserve the slot's
-                    // contents.
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     nos.round = round;
@@ -278,13 +275,9 @@ impl Scheduler {
                 Cmd::ClipFill(clip_fill) => {
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
-                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
-                    // then we need to schedule these commands for the next round and preserve the slot's
-                    // contents.
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     let draw = self.draw_mut(round, clip_depth - 1);
-                    // At clip depth 2, we're drawing to the final target, so use the wide tile coords.
                     let (x, y) = if clip_depth <= 2 {
                         (wide_tile_x + clip_fill.x as u16, wide_tile_y)
                     } else {
@@ -302,9 +295,6 @@ impl Scheduler {
                 Cmd::ClipStrip(clip_alpha_fill) => {
                     let tos = &state.stack[clip_depth - 1];
                     let nos = &state.stack[clip_depth - 2];
-                    // If the pixels for the slot we are sampling from won't be drawn until the next round,
-                    // then we need to schedule these commands for the next round and preserve the slot's
-                    // contents.
                     let next_round = clip_depth % 2 == 0 && clip_depth > 2;
                     let round = nos.round.max(tos.round + next_round as usize);
                     let draw = self.draw_mut(round, clip_depth - 1);
