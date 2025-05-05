@@ -10,9 +10,9 @@
 // The alpha values are stored in a texture and sampled during fragment shading.
 // This approach optimizes memory usage by only storing alpha data where needed.
 //
-// The `StripInstance`'s `rgba` field can either encode a color or a slot index.
+// The `StripInstance`'s `rgba_or_slot` field can either encode a color or a slot index.
 // If the alpha value is non-zero, the fragment shader samples the alpha texture.
-// Otherwise, the fragment shader samples the source clip texture.
+// Otherwise, the fragment shader samples the source clip texture using the given slot index.
 
 struct Config {
     // Width of the rendering target
