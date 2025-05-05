@@ -1,6 +1,153 @@
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
+//! # Scheduling
+//!
+//! - Draw commands are either issued to the final target or slots in a clip texture.
+//! - Rounds represent a draw in up to 3 render targets (two clip textures and a final target).
+//! - The clip texture stores slots for many clip depths. Once our clip textures are full,
+//!   we flush rounds (i.e. execute render passes) to free up space. Note that a slot refers
+//!   to 1 wide tile's worth of pixels in the clip texture.
+//! - The `free` vector contains the indices of the slots that are available for use in the two clip textures.
+//!
+//! ## Example
+//!
+//! Consider the following scene of drawing a single wide tile with three overlapping rectangles with
+//! decreasing width clipping regions.
+//!
+//! ```rs
+//! const WIDTH: f64 = 100.0;
+//! const HEIGHT: f64 = Tile::HEIGHT as f64;
+//! const OFFSET: f64 = WIDTH / 3.0;
+//!
+//! let colors = [RED, GREEN, BLUE];
+//!
+//! for i in 0..3 {
+//!     let clip_rect = Rect::new((i as f64) * OFFSET, 0.0, 100, HEIGHT);
+//!     ctx.push_clip_layer(&clip_rect.to_path(0.1));
+//!     ctx.set_paint(colors[i]);
+//!     ctx.fill_rect(&Rect::new(0.0, 0.0, WIDTH, HEIGHT));
+//! }
+//! for _ in 0..3 {
+//!     ctx.pop_layer();
+//! }
+//! ```
+//!
+//! This single wide tile scene should produce the below rendering:
+//!
+//! ┌────────────────────────────┌────────────────────────────┌─────────────────────────────
+//! │      ──              ───   │       /     /       /     /│        ──────────────      │
+//! │  ────            ────      │      /     /       /     / │────────                    │
+//! │──           ─────          │     /     /       /     /  │                            │
+//! │        ───Red              │    /     /Green  /     /   │           Blue             │
+//! │    ────                ──  │   /     /       /     /    │                     ───────│
+//! │ ───                ────    │  /     /       /     /     │       ──────────────       │
+//! │                  ──        │ /     /       /     /      │───────                     │
+//! └────────────────────────────└────────────────────────────└────────────────────────────┘
+//!                                                                                         
+//! How the scene is scheduled into rounds and draw calls are shown below:
+//!
+//! ### Round 0
+//!
+//! In this round, we don't have any preserved slots or slots that we need to sample from. Simply,
+//! draw unclipped primitives.
+//!
+//! ### Draw to texture 0:
+//!
+//! In Slot N - 1 of texture 0, draw the unclipped green rectangle.
+//!
+//! Slot N - 1:
+//! ┌──────────────────────────────────────────────────────────────────────────────────────┐
+//! │       /     /       /     /        /     /       /     /       /     /       /     / │
+//! │      /     /       /     /        /     /       /     /       /     /       /     /  │
+//! │     /     /       /     /        /     /       /     /       /     /       /     /   │
+//! │    /     /       /     /        /     / Green /     /       /     /       /     /    │
+//! │   /     /       /     /        /     /       /     /       /     /       /     /     │
+//! │  /     /       /     /        /     /       /     /       /     /       /     /      │
+//! │ /     /       /     /        /     /       /     /       /     /       /     /       │
+//! └──────────────────────────────────────────────────────────────────────────────────────┘
+//!
+//! ### Draw to texture 1:
+//!
+//! In Slot N - 2 of texture 1, draw unclipped red rectangle and in slot N - 1, draw the unclipped
+//! blue rectangle.
+//!
+//! Slot N - 2:
+//! ┌──────────────────────────────────────────────────────────────────────────────────────┐
+//! │      ──              ───                            ──              ───              │
+//! │  ────            ────               ──          ────            ────               ──│
+//! │──           ─────               ────          ──           ─────               ────  │
+//! │        ─────                ────        Red           ─────                ────      │
+//! │    ────                 ────                      ────                 ────          │
+//! │ ───                 ────                       ───                 ────              │
+//! │                  ───                                            ───                  │
+//! └──────────────────────────────────────────────────────────────────────────────────────┘
+//! Slot N - 1:
+//! ┌──────────────────────────────────────────────────────────────────────────────────────┐
+//! │                                           ────────────────────────────────────────── │
+//! │───────────────────────────────────────────                                           │
+//! │                                                                                      │
+//! │                                         Blue                          ───────────────│
+//! │                                           ────────────────────────────               │
+//! │               ────────────────────────────                                           │
+//! │───────────────                                                                       │
+//! └──────────────────────────────────────────────────────────────────────────────────────┘
+//!
+//! ### Round 1
+//!
+//! In this round, we have three slots that contain our unclipped rectangles.
+//!
+//! ### Draw to texture 0:
+//!
+//! Slot N - 1 of texture 0 contains our unclipped green rectangle. In this draw, we sample
+//! the pixels from slot N - 2 from texture 1 to draw the blue rectangle into this slot.
+//!
+//! Slot N - 1:
+//! ┌─────────────────────────────────────────────────────────┌─────────────────────────────
+//! │        /     /       /     /       /     /       /     /│        ──────────────      │
+//! │       /     /       /     /       /     /       /     / │────────                    │
+//! │      /     /       /     /       /     /       /     /  │                            │
+//! │     /     /       /  Green      /     /       /     /   │           Blue             │
+//! │    /     /       /     /       /     /       /     /    │                     ───────│
+//! │   /     /       /     /       /     /       /     /     │       ──────────────       │
+//! │  /     /       /     /       /     /       /     /      │───────                     │
+//! └─────────────────────────────────────────────────────────└────────────────────────────┘
+//!
+//! ### Draw to texture 1:
+//!
+//! Then, into Slot N - 2 of texture 1, which contains our red rectangle, we sample the pixels
+//! from slot N - 1 of texture 0 which contain our green and blue rectangles.
+//!
+//! ┌────────────────────────────┌────────────────────────────┌─────────────────────────────
+//! │      ──              ───   │       /     /       /     /│        ──────────────      │
+//! │  ────            ────      │      /     /       /     / │────────                    │
+//! │──           ─────          │     /     /       /     /  │                            │
+//! │        ───Red              │    /     /Green  /     /   │           Blue             │
+//! │    ────                ──  │   /     /       /     /    │                     ───────│
+//! │ ───                ────    │  /     /       /     /     │       ──────────────       │
+//! │                  ──        │ /     /       /     /      │───────                     │
+//! └────────────────────────────└────────────────────────────└────────────────────────────┘
+//!
+//! ### Draw to render target
+//!
+//! At this point, we can sample the pixels from slot N - 1 of texture 1 to draw the final
+//! rendition.
+//!
+//! ## Nuances
+//!
+//! - When there are no clip/blend regions, we can render directly to the final target.
+//! - The above example provides an intuitive explanation for how rounds after 3 clip depths
+//!   are scheduled. At clip depths 1 and 2, we can draw directly to the final target within a
+//!   single round.
+//! - Before drawing into any slot, we need to clear it. If all slots can be cleared or are free,
+//!   we can use a `LoadOp::Clear` operation. Otherwise, we need to clear the dirty slots using
+//!   a fine grained render pass.
+//!
+//! For more information about this algorithm, see this [Zulip thread].
+//!
+//! [Zulip thread]: https://xi.zulipchat.com/#narrow/channel/197075-vello/topic/Spatiotemporal.20allocation.20.28hybrid.29/near/513442829
+
+
 use crate::{GpuStrip, RenderError, Scene, render::RendererJunk};
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
