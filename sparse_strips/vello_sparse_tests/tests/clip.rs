@@ -19,19 +19,19 @@ use vello_dev_macros::vello_test;
 #[vello_test(height = 8)]
 fn clip_single_wide_tile(ctx: &mut impl Renderer) {
     const WIDTH: f64 = 100.0;
-    assert!(WIDTH <= WideTile::WIDTH as f64);
+    assert!(WIDTH <= WideTile::WIDTH as f64, "Width larger than a tile");
     const HEIGHT: f64 = Tile::HEIGHT as f64;
     const OFFSET: f64 = WIDTH / 3.0;
 
     let colors = [RED, GREEN, BLUE];
 
-    for i in 0..3 {
+    for (i, color) in colors.iter().enumerate() {
         let clip_rect = Rect::new((i as f64) * OFFSET, 0.0, WIDTH, HEIGHT);
         ctx.push_clip_layer(&clip_rect.to_path(0.1));
-        ctx.set_paint(colors[i]);
+        ctx.set_paint(*color);
         ctx.fill_rect(&Rect::new(0.0, 0.0, WIDTH, HEIGHT));
     }
-    for _ in 0..3 {
+    for _ in colors.iter() {
         ctx.pop_layer();
     }
 }
@@ -117,19 +117,19 @@ fn clip_deeply_nested_circles(ctx: &mut impl Renderer) {
     let mut radius = INITIAL_RADIUS;
 
     for _ in 0..outer_count {
-        for i in 0..INNER_COUNT {
+        for color in COLORS.iter() {
             let clip_circle = Circle::new(CENTER, radius).to_path(0.1);
             draw_clipping_outline(ctx, &clip_circle);
             ctx.push_clip_layer(&clip_circle);
 
-            ctx.set_paint(COLORS[i]);
+            ctx.set_paint(*color);
             ctx.fill_rect(&COVER_RECT);
 
             radius -= RADIUS_DECREMENT;
         }
     }
     for _ in 0..outer_count {
-        for _ in 0..INNER_COUNT {
+        for _ in COLORS.iter() {
             ctx.pop_layer();
         }
     }

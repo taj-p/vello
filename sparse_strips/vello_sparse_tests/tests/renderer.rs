@@ -9,7 +9,6 @@ use vello_api::pixmap::Pixmap;
 use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder};
 use vello_cpu::RenderContext;
 use vello_hybrid::Scene;
-use wgpu::RenderPassDescriptor;
 
 pub(crate) trait Renderer: Sized + GlyphRenderer {
     fn new(width: u16, height: u16) -> Self;
@@ -276,14 +275,16 @@ impl Renderer for Scene {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
             label: Some("Vello Render To Buffer"),
         });
-        renderer.render(
-            self,
-            &device,
-            &queue,
-            &mut encoder,
-            &render_size,
-            &texture_view,
-        );
+        renderer
+            .render(
+                self,
+                &device,
+                &queue,
+                &mut encoder,
+                &render_size,
+                &texture_view,
+            )
+            .unwrap();
 
         // Create a buffer to copy the texture data
         let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
