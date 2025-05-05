@@ -180,14 +180,17 @@ impl AppState {
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-        self.renderer_wrapper.renderer.render(
-            &self.scene,
-            &self.renderer_wrapper.device,
-            &self.renderer_wrapper.queue,
-            &mut encoder,
-            &render_size,
-            &surface_texture_view,
-        );
+        self.renderer_wrapper
+            .renderer
+            .render(
+                &self.scene,
+                &self.renderer_wrapper.device,
+                &self.renderer_wrapper.queue,
+                &mut encoder,
+                &render_size,
+                &surface_texture_view,
+            )
+            .unwrap();
 
         self.renderer_wrapper.queue.submit([encoder.finish()]);
         surface_texture.present();
@@ -494,14 +497,16 @@ pub async fn render_scene(scene: vello_hybrid::Scene, width: u16, height: u16) {
     let mut encoder =
         device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-    renderer.render(
-        &scene,
-        &device,
-        &queue,
-        &mut encoder,
-        &render_size,
-        &surface_texture_view,
-    );
+    renderer
+        .render(
+            &scene,
+            &device,
+            &queue,
+            &mut encoder,
+            &render_size,
+            &surface_texture_view,
+        )
+        .unwrap();
 
     queue.submit([encoder.finish()]);
     surface_texture.present();

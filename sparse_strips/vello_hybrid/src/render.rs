@@ -24,7 +24,7 @@ use wgpu::{
     RenderPipeline, Texture, TextureView, util::DeviceExt,
 };
 
-use crate::{scene::Scene, schedule::Scheduler};
+use crate::{RenderError, scene::Scene, schedule::Scheduler};
 
 /// Dimensions of the rendering target
 #[derive(Debug, PartialEq, Eq, Clone)]
@@ -76,7 +76,7 @@ impl Renderer {
         encoder: &mut CommandEncoder,
         render_size: &RenderSize,
         view: &TextureView,
-    ) {
+    ) -> Result<(), RenderError> {
         // For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
         // buffer fills.
@@ -89,7 +89,8 @@ impl Renderer {
             encoder,
             view,
         };
-        self.scheduler.do_scene(&mut junk, scene);
+
+        self.scheduler.do_scene(&mut junk, scene)
     }
 }
 

@@ -43,6 +43,16 @@ pub use scene::Scene;
 pub use util::DimensionConstraints;
 pub use vello_common::pixmap::Pixmap;
 
+use thiserror::Error;
+
+/// Errors that can occur during rendering.
+#[derive(Error, Debug)]
+pub enum RenderError {
+    /// No slots available for rendering.
+    #[error("No slots available for rendering")]
+    SlotsExhausted,
+}
+
 #[cfg(test)]
 const _: () = if vello_common::tile::Tile::HEIGHT != 4 {
     panic!("`vello_hybrid` shaders currently require `Tile::HEIGHT` to be `4`");

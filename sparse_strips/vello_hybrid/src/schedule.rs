@@ -1,7 +1,7 @@
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use crate::{GpuStrip, Scene, render::RendererJunk};
+use crate::{GpuStrip, RenderError, Scene, render::RendererJunk};
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 use core::mem;
@@ -72,7 +72,11 @@ impl Scheduler {
         }
     }
 
-    pub(crate) fn do_scene(&mut self, junk: &mut RendererJunk<'_>, scene: &Scene) {
+    pub(crate) fn do_scene(
+        &mut self,
+        junk: &mut RendererJunk<'_>,
+        scene: &Scene,
+    ) -> Result<(), RenderError> {
         let mut tile_state = mem::take(&mut self.tile_state);
         let wide_tiles_per_row = (scene.width).div_ceil(WideTile::WIDTH);
         let wide_tiles_per_col = (scene.height).div_ceil(Tile::HEIGHT);
@@ -84,7 +88,7 @@ impl Scheduler {
                 let wide_tile = &scene.wide.tiles[wide_tile_idx];
                 let wide_tile_x = wide_tile_col * WideTile::WIDTH;
                 let wide_tile_y = wide_tile_row * Tile::HEIGHT;
-                self.do_tile(junk, wide_tile_x, wide_tile_y, wide_tile, &mut tile_state);
+                self.do_tile(junk, wide_tile_x, wide_tile_y, wide_tile, &mut tile_state)?;
             }
         }
         while !self.rounds_queue.is_empty() {
@@ -104,6 +108,8 @@ impl Scheduler {
             }
         }
         debug_assert!(self.rounds_queue.is_empty());
+
+        Ok(())
     }
 
     /// Flush one round.
@@ -165,7 +171,7 @@ impl Scheduler {
         wide_tile_y: u16,
         tile: &WideTile,
         state: &mut TileState,
-    ) {
+    ) -> Result<(), RenderError> {
         state.stack.clear();
         // Sentinel `TileEl` to indicate the end of the stack where we draw all
         // commands to the final target.
@@ -248,8 +254,7 @@ impl Scheduler {
                     let ix = clip_depth % 2;
                     while self.free[ix].is_empty() {
                         if self.rounds_queue.is_empty() {
-                            // TODO: Probably should return error here
-                            panic!("failed to allocate slot");
+                            return Err(RenderError::SlotsExhausted);
                         }
                         self.flush(junk);
                     }
@@ -317,6 +322,8 @@ impl Scheduler {
                 _ => unimplemented!(),
             }
         }
+
+        Ok(())
     }
 }
 

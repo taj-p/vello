@@ -3252,6 +3252,7 @@ dependencies = [
  "png",
  "pollster",
  "roxmltree",
+ "thiserror 2.0.12",
  "vello_common",
  "wgpu",
 ]

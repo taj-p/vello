@@ -94,14 +94,16 @@ async fn run() {
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("Vello Render To Buffer"),
     });
-    renderer.render(
-        &scene,
-        &device,
-        &queue,
-        &mut encoder,
-        &render_size,
-        &texture_view,
-    );
+    renderer
+        .render(
+            &scene,
+            &device,
+            &queue,
+            &mut encoder,
+            &render_size,
+            &texture_view,
+        )
+        .unwrap();
 
     // Create a buffer to copy the texture data
     let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
