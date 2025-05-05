@@ -235,7 +235,7 @@ impl Scheduler {
                         wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
                     } else {
                         // Some slots need to be preserved, so clear only the dirty slots.
-                        junk.clear_slots(i, &self.clear[i].as_slice());
+                        junk.do_clear_slots_render_pass(i, &self.clear[i].as_slice());
                         self.clear[i].clear();
                         wgpu::LoadOp::Load
                     }
