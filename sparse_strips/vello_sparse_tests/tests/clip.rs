@@ -15,6 +15,26 @@ use vello_common::peniko::Fill;
 use vello_common::tile::Tile;
 use vello_dev_macros::vello_test;
 
+#[vello_test(height = 8)]
+fn clip_single_wide_tile(ctx: &mut impl Renderer) {
+    const WIDTH: f64 = 100.0;
+    assert!(WIDTH <= WideTile::WIDTH as f64);
+    const HEIGHT: f64 = Tile::HEIGHT as f64;
+    const OFFSET: f64 = WIDTH / 3.0;
+
+    let colors = [RED, GREEN, BLUE];
+
+    for i in 0..3 {
+        let clip_rect = Rect::new((i as f64) * OFFSET, 0.0, WIDTH, HEIGHT);
+        ctx.push_clip_layer(&clip_rect.to_path(0.1));
+        ctx.set_paint(colors[i]);
+        ctx.fill_rect(&Rect::new(0.0, 0.0, WIDTH, HEIGHT));
+    }
+    for _ in 0..3 {
+        ctx.pop_layer();
+    }
+}
+
 #[vello_test]
 fn clip_triangle_with_star(ctx: &mut impl Renderer) {
     let mut triangle_path = BezPath::new();
@@ -68,26 +88,6 @@ fn clip_rectangle_with_star_evenodd(ctx: &mut impl Renderer) {
     ctx.set_paint(REBECCA_PURPLE);
     ctx.fill_rect(&rect);
     ctx.pop_layer();
-}
-
-#[vello_test]
-fn clip_single_wide_tile(ctx: &mut impl Renderer) {
-    const WIDTH: f64 = 100.0;
-    assert!(WIDTH <= WideTile::WIDTH as f64);
-    const HEIGHT: f64 = Tile::HEIGHT as f64;
-    const OFFSET: f64 = WIDTH / 3.0;
-
-    let colors = [RED, GREEN, BLUE];
-
-    for i in 0..3 {
-        let clip_rect = Rect::new((i as f64) * OFFSET, 0.0, WIDTH, HEIGHT);
-        ctx.push_clip_layer(&clip_rect.to_path(0.1));
-        ctx.set_paint(colors[i]);
-        ctx.fill_rect(&Rect::new(0.0, 0.0, WIDTH, HEIGHT));
-    }
-    for _ in 0..3 {
-        ctx.pop_layer();
-    }
 }
 
 #[vello_test]
