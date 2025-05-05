@@ -14,7 +14,7 @@
 
 use alloc::vec;
 use alloc::vec::Vec;
-use core::{fmt::Debug, num::NonZeroU64};
+use core::{fmt::Debug, mem, num::NonZeroU64};
 
 use bytemuck::{Pod, Zeroable};
 use vello_common::{coarse::WideTile, tile::Tile};
@@ -743,7 +743,7 @@ impl RendererJunk<'_> {
         }
 
         let resources = &mut self.programs.resources;
-        let size = (size_of::<u32>() * slot_indices.len()) as u64;
+        let size = mem::size_of_val(slot_indices) as u64;
         // TODO: We currently allocate a new strips buffer for each render pass. A more efficient
         // approach would be to re-use buffers or slices of a larger buffer.
         resources.clear_slot_indices_buffer =

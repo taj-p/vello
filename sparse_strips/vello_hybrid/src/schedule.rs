@@ -247,8 +247,8 @@ impl Scheduler {
         self.round = 0;
         self.tile_state = tile_state;
         self.tile_state.stack.clear();
-        debug_assert!(self.clear[0].len() == 0);
-        debug_assert!(self.clear[1].len() == 0);
+        debug_assert!(self.clear[0].is_empty());
+        debug_assert!(self.clear[1].is_empty());
         if cfg!(debug_assertions) {
             for i in 0..self.total_slots {
                 debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
@@ -281,7 +281,7 @@ impl Scheduler {
                     wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
                 } else {
                     // Some slots need to be preserved, so only clear the dirty slots.
-                    junk.do_clear_slots_render_pass(i, &self.clear[i].as_slice());
+                    junk.do_clear_slots_render_pass(i, self.clear[i].as_slice());
                     self.clear[i].clear();
                     wgpu::LoadOp::Load
                 }

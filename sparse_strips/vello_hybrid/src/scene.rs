@@ -140,13 +140,13 @@ impl Scene {
         };
 
         // Blend mode, opacity, and mask are not supported yet.
-        if let Some(_) = blend_mode {
+        if blend_mode.is_some() {
             unimplemented!()
         }
-        if let Some(_) = opacity {
+        if opacity.is_some() {
             unimplemented!()
         }
-        if let Some(_) = mask {
+        if mask.is_some() {
             unimplemented!()
         }
 
