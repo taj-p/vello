@@ -12,8 +12,6 @@ use vello_common::{
 
 use crate::{GpuStrip, Scene, render::RendererJunk};
 
-const DEBUG: bool = false;
-
 #[derive(Debug)]
 pub(crate) struct Scheduler {
     /// Index of the current round
@@ -156,9 +154,6 @@ impl Scheduler {
         if self.rounds_queue.len() == rel_round {
             self.rounds_queue.push_back(Round::default());
         }
-        if DEBUG {
-            //println!("draw_mut: ix={}, rel_round={}", ix, rel_round);
-        }
         &mut self.rounds_queue[rel_round].draws[ix]
     }
 
@@ -197,10 +192,6 @@ impl Scheduler {
             // TODO: Maybe change this to be the "real" clip depth after we have this all working?
             // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
-            if DEBUG {
-                //println!("CMD: {:?}", cmd);
-                //println!("clip_depth: {}", clip_depth);
-            }
             match cmd {
                 Cmd::Fill(fill) => {
                     let el = state.stack.last().unwrap();
