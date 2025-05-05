@@ -419,7 +419,10 @@ impl Scheduler {
                     nos.round = round;
                     // free slot after draw
                     debug_assert!(round >= self.round, "round must be after current round");
-                    debug_assert!(round - self.round < self.rounds_queue.len(), "round must be in queue");
+                    debug_assert!(
+                        round - self.round < self.rounds_queue.len(),
+                        "round must be in queue"
+                    );
                     self.rounds_queue[round - self.round].free[1 - clip_depth % 2]
                         .push(tos.slot_ix);
                 }
