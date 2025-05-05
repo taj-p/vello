@@ -181,7 +181,7 @@ pub(crate) struct Scheduler {
 /// clip/blend buffers, and the third for the actual render target.
 #[derive(Debug, Default)]
 struct Round {
-    /// Draw calls scheduled into the two slot textures [0, 1] and the final target [2].
+    /// Draw calls scheduled into the two slot textures (0, 1) and the final target (2).
     draws: [Draw; 3],
     /// Slots that will be freed after drawing into the two slot textures [0, 1].
     free: [Vec<usize>; 2],
