@@ -96,7 +96,7 @@
 //! ### Round 1
 //!
 //! At this point, we have three slots that contain our unclipped rectangles. In this round,
-//! we start to sample those pixels to apply clipping (texture 1 samples from texture 0 and 
+//! we start to sample those pixels to apply clipping (texture 1 samples from texture 0 and
 //! the render target view samples from texture 1).
 //!
 //! ### Draw to texture 0:
@@ -148,7 +148,6 @@
 //! For more information about this algorithm, see this [Zulip thread].
 //!
 //! [Zulip thread]: https://xi.zulipchat.com/#narrow/channel/197075-vello/topic/Spatiotemporal.20allocation.20.28hybrid.29/near/513442829
-
 
 use crate::{GpuStrip, RenderError, Scene, render::RendererJunk};
 use alloc::collections::VecDeque;
