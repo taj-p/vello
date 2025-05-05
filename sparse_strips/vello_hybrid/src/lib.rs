@@ -50,8 +50,8 @@ use thiserror::Error;
 pub enum RenderError {
     /// No slots available for rendering.
     ///
-    /// This error is likely to where a portion of a scene has an extreme number
-    /// of nested layers (clipping, blending, masks, or opacity layers).
+    /// This error is likely to occur if a scene has an extreme number of nested layers
+    /// (clipping, blending, masks, or opacity layers).
     ///
     /// TODO: Consider supporting more than a single column of slots in slot textures.
     #[error("No slots available for rendering")]
