@@ -34,7 +34,7 @@ struct StripInstance {
     // Alpha texture column index where this strip's alpha values begin
     @location(2) col: u32,
     // [r, g, b, a] packed as u8's or a slot index when alpha is 0
-    @location(3) rgba: u32,
+    @location(3) rgba_or_slot: u32,
 }
 
 struct VertexOutput {
@@ -42,8 +42,8 @@ struct VertexOutput {
     @location(0) tex_coord: vec2<f32>,
     // Ending x-position of the dense (alpha) region
     @location(1) @interpolate(flat) dense_end: u32,
-    // RGBA color value
-    @location(2) @interpolate(flat) color: u32,
+    // Color value or slot index when alpha is 0
+    @location(2) @interpolate(flat) rgba_or_slot: u32,
     // Normalized device coordinates (NDC) for the current vertex
     @builtin(position) position: vec4<f32>,
 };
@@ -81,7 +81,7 @@ fn vs_main(
 
     out.position = vec4<f32>(ndc_x, ndc_y, 0.0, 1.0);
     out.tex_coord = vec2<f32>(f32(instance.col) + x * f32(width), y * f32(config.strip_height));
-    out.color = instance.rgba;
+    out.rgba_or_slot = instance.rgba_or_slot;
     return out;
 }
 
@@ -123,14 +123,15 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         // Extract the alpha value for the current y-position from the packed u32 data
         alpha = f32((alphas_u32 >> (y * 8u)) & 0xffu) * (1.0 / 255.0);
     }
-    // Apply the alpha value to the unpacked RGBA color
-    let alpha_byte = in.color >> 24u;
+    // Apply the alpha value to the unpacked RGBA color or slot index
+    let alpha_byte = in.rgba_or_slot >> 24u;
     if alpha_byte != 0 {
-        return alpha * unpack4x8unorm(in.color);
+        // in.rgba_or_slot encodes a color
+        return alpha * unpack4x8unorm(in.rgba_or_slot);
     } else {
-        // in.color encodes a slot in the source clip texture
+        // in.rgba_or_slot encodes a slot in the source clip texture
         let clip_x = u32(in.position.x) & 0xFFu;
-        let clip_y = (u32(in.position.y) & 3) + in.color * config.strip_height;
+        let clip_y = (u32(in.position.y) & 3) + in.rgba_or_slot * config.strip_height;
         let clip_in_color = textureLoad(clip_input_texture, vec2(clip_x, clip_y), 0);
         return alpha * clip_in_color;
     }
