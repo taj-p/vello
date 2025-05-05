@@ -25,7 +25,8 @@ fn vs_main(
     @builtin(vertex_index) vertex_index: u32,
     @location(0) index: u32,
 ) -> @builtin(position) vec4<f32> {
-    // Map vertex_index (0-3) to quad corners
+    // Map vertex_index (0-3) to quad corners:
+    // 0 → (0,0), 1 → (1,0), 2 → (0,1), 3 → (1,1)
     let x = f32(vertex_index & 1u);
     let y = f32(vertex_index >> 1u);
     
