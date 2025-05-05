@@ -123,9 +123,7 @@ impl Scene {
 
     /// Push a new layer with the given properties.
     ///
-    /// Note that the mask, if provided, needs to have the same size as the render context. Otherwise,
-    /// it will be ignored. In addition to that, the mask will not be affected by the current
-    /// transformation matrix in place.
+    /// Only `clip_path` is supported for now.
     pub fn push_layer(
         &mut self,
         clip_path: Option<&BezPath>,
@@ -141,39 +139,28 @@ impl Scene {
             None
         };
 
-        let mask = mask.and_then(|m| {
-            if m.width() != self.width || m.height() != self.height {
-                None
-            } else {
-                Some(m)
-            }
-        });
+        // Blend mode, opacity, and mask are not supported yet.
+        if let Some(_) = blend_mode {
+            unimplemented!()
+        }
+        if let Some(_) = opacity {
+            unimplemented!()
+        }
+        if let Some(_) = mask {
+            unimplemented!()
+        }
 
         self.wide.push_layer(
             clip,
-            blend_mode.unwrap_or(BlendMode::new(Mix::Normal, Compose::SrcOver)),
-            mask,
-            opacity.unwrap_or(255),
+            BlendMode::new(Mix::Normal, Compose::SrcOver),
+            None,
+            255,
         );
     }
 
     /// Push a new clip layer.
     pub fn push_clip_layer(&mut self, path: &BezPath) {
         self.push_layer(Some(path), None, None, None);
-    }
-
-    /// Push a new opacity layer.
-    pub fn push_opacity_layer(&mut self, opacity: u8) {
-        self.push_layer(None, None, Some(opacity), None);
-    }
-
-    /// Push a new mask layer.
-    ///
-    /// Note that the mask, if provided, needs to have the same size as the render context. Otherwise,
-    /// it will be ignored. In addition to that, the mask will not be affected by the current
-    /// transformation matrix in place.
-    pub fn push_mask_layer(&mut self, mask: Mask) {
-        self.push_layer(None, None, None, Some(mask));
     }
 
     /// Pop the last-pushed layer.
