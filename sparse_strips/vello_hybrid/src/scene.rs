@@ -163,7 +163,7 @@ impl Scene {
         self.push_layer(Some(path), None, None, None);
     }
 
-    /// Pop the last-pushed layer.
+    /// Pop the last pushed layer.
     pub fn pop_layer(&mut self) {
         self.wide.pop_layer();
     }
@@ -179,7 +179,6 @@ impl Scene {
     }
 
     /// Set the paint for subsequent rendering operations.
-    // TODO: Make the second arg `Impl Into<Paint>`
     pub fn set_paint(&mut self, paint: Paint) {
         self.paint = paint;
     }
