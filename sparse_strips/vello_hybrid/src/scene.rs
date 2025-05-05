@@ -15,7 +15,7 @@ use vello_common::peniko::Font;
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
 use vello_common::strip::Strip;
-use vello_common::tile::{Tile, Tiles};
+use vello_common::tile::Tiles;
 use vello_common::{flatten, strip};
 
 /// Default tolerance for curve flattening

@@ -126,7 +126,7 @@ struct GpuResources {
     /// Config buffer for rendering wide tile commands into a slot texture.
     slot_config_buffer: Buffer,
 
-    /// Buffer for slot indices used in clear_slots
+    /// Buffer for slot indices used in `clear_slots`
     clear_slot_indices_buffer: Buffer,
     // Bind groups for rendering with clip buffers
     slot_bind_groups: [BindGroup; 3],

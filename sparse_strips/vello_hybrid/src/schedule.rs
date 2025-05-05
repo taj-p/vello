@@ -274,18 +274,16 @@ impl Scheduler {
                 if i == 2 {
                     // We're rendering to the view, don't clear.
                     wgpu::LoadOp::Load
+                } else if self.clear[i].len() + self.free[i].len() == self.total_slots {
+                    // All slots are either unoccupied or need to be cleared.
+                    // Simply clear the slots via a load operation.
+                    self.clear[i].clear();
+                    wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
                 } else {
-                    if self.clear[i].len() + self.free[i].len() == self.total_slots {
-                        // All slots are either unoccupied or need to be cleared.
-                        // Simply clear the slots via a load operation.
-                        self.clear[i].clear();
-                        wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
-                    } else {
-                        // Some slots need to be preserved, so only clear the dirty slots.
-                        junk.do_clear_slots_render_pass(i, &self.clear[i].as_slice());
-                        self.clear[i].clear();
-                        wgpu::LoadOp::Load
-                    }
+                    // Some slots need to be preserved, so only clear the dirty slots.
+                    junk.do_clear_slots_render_pass(i, &self.clear[i].as_slice());
+                    self.clear[i].clear();
+                    wgpu::LoadOp::Load
                 }
             };
             junk.do_strip_render_pass(&draw.0, i, load);
