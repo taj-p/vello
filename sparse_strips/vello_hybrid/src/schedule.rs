@@ -19,7 +19,7 @@ pub(crate) struct Scheduler {
     total_slots: usize,
     /// The slots that are free to use in each slot texture.
     free: [Vec<usize>; 2],
-    /// Slots that require clearing before subsequent draws.
+    /// Slots that require clearing before subsequent draws for each slot texture.
     clear: [Vec<u32>; 2],
     /// Rounds are enqueued on push clip commands and dequeued on flush.
     rounds_queue: VecDeque<Round>,
@@ -30,8 +30,7 @@ pub(crate) struct Scheduler {
 /// A "round" is a coarse scheduling quantum.
 ///
 /// It represents draws in up to three render targets; two for intermediate
-/// clip/blend buffers, and the third for the actual render target. The two
-/// clip buffers are for even and odd clip depths.
+/// clip/blend buffers, and the third for the actual render target.
 #[derive(Debug, Default)]
 struct Round {
     /// Draw calls scheduled into the two slot textures [0, 1] and the final target [2].
@@ -91,11 +90,10 @@ impl Scheduler {
         while !self.rounds_queue.is_empty() {
             self.flush(junk);
         }
-        // Restore state to reuse allocations.
-        self.tile_state = tile_state;
 
-        // When a scene ends, state should return to its initial state for reuse.
+        // Restore state to reuse allocations.
         self.round = 0;
+        self.tile_state = tile_state;
         self.tile_state.stack.clear();
         debug_assert!(self.clear[0].len() == 0);
         debug_assert!(self.clear[1].len() == 0);
@@ -129,7 +127,7 @@ impl Scheduler {
                         self.clear[i].clear();
                         wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT)
                     } else {
-                        // Some slots need to be preserved, so clear only the dirty slots.
+                        // Some slots need to be preserved, so only clear the dirty slots.
                         junk.do_clear_slots_render_pass(i, &self.clear[i].as_slice());
                         self.clear[i].clear();
                         wgpu::LoadOp::Load
@@ -150,9 +148,6 @@ impl Scheduler {
             // We can draw to the final target
             2
         } else {
-            // Clip depth even => draw to index 1
-            // Clip depth odd => draw to index 0
-            // Clip depth starts at 1, so even `clip_depth` represents an odd "real" clip depth.
             1 - clip_depth % 2
         };
         let rel_round = el_round.saturating_sub(self.round);
@@ -163,7 +158,6 @@ impl Scheduler {
     }
 
     /// Iterates over wide tile commands and schedules them for rendering.
-    #[allow(clippy::todo, reason = "still working on this")]
     fn do_tile(
         &mut self,
         junk: &mut RendererJunk<'_>,
@@ -194,8 +188,6 @@ impl Scheduler {
         }
         for cmd in &tile.cmds {
             // Note: this starts at 1 (for the final target)
-            // TODO: Maybe change this to be the "real" clip depth after we have this all working?
-            // Since this is "real" clip depth + 1, it can be confusing.
             let clip_depth = state.stack.len();
             match cmd {
                 Cmd::Fill(fill) => {
