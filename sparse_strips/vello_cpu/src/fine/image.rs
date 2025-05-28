@@ -1,11 +1,33 @@
 // Copyright 2025 the Vello Authors
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
-use crate::fine::{COLOR_COMPONENTS, Painter, TILE_HEIGHT_COMPONENTS};
+use crate::fine::{COLOR_COMPONENTS, FineType, Painter, TILE_HEIGHT_COMPONENTS};
 use vello_common::encode::EncodedImage;
 use vello_common::kurbo::{Point, Vec2};
 use vello_common::peniko::{Extend, ImageQuality};
 use vello_common::tile::Tile;
+
+#[cfg(not(feature = "std"))]
+use vello_common::kurbo::common::FloatFuncs as _;
+
+#[cfg(feature = "std")]
+fn fract(val: f64) -> f64 {
+    val.fract()
+}
+
+#[cfg(not(feature = "std"))]
+fn fract(val: f64) -> f64 {
+    #[cfg(feature = "libm")]
+    return val - libm::trunc(val);
+    #[cfg(not(feature = "libm"))]
+    compile_error!("vello_common requires either the `std` or `libm` feature");
+}
+
+// Inlined version of f32::rem_euclid, to allow using abs.
+fn rem_euclid(lhs: f32, rhs: f32) -> f32 {
+    let r = lhs % rhs;
+    if r < 0.0 { r + rhs.abs() } else { r }
+}
 
 #[derive(Debug)]
 pub(crate) struct ImageFiller<'a> {
@@ -19,12 +41,13 @@ impl<'a> ImageFiller<'a> {
     pub(crate) fn new(image: &'a EncodedImage, start_x: u16, start_y: u16) -> Self {
         Self {
             // We want to sample values of the pixels at the center, so add an offset of 0.5.
-            cur_pos: image.transform * Point::new(start_x as f64 + 0.5, start_y as f64 + 0.5),
+            cur_pos: image.transform
+                * Point::new(f64::from(start_x) + 0.5, f64::from(start_y) + 0.5),
             image,
         }
     }
 
-    pub(super) fn run(mut self, target: &mut [u8]) {
+    pub(super) fn run<F: FineType>(mut self, target: &mut [F]) {
         // We currently have two branches for filling images: The first case is used for
         // nearest neighbor filtering and for images with no skewing-transform (this is checked
         // by the first two conditions), which allows us to take a faster path.
@@ -59,7 +82,7 @@ impl<'a> ImageFiller<'a> {
                     // we always floor to get the target pixel.
                     (self.cur_pos.y + y_advance * idx as f64).floor() as f32,
                     self.image.extends.1,
-                    self.image.pixmap.height() as f32,
+                    f32::from(self.image.pixmap.height()),
                 );
             }
 
@@ -70,7 +93,7 @@ impl<'a> ImageFiller<'a> {
                         // As above, always floor.
                         x_pos.floor() as f32,
                         self.image.extends.0,
-                        self.image.pixmap.width() as f32,
+                        f32::from(self.image.pixmap.width()),
                     );
                     self.run_simple_column(column, extended_x_pos, &y_positions);
                     x_pos += x_advance;
@@ -78,9 +101,14 @@ impl<'a> ImageFiller<'a> {
         }
     }
 
-    fn run_simple_column(
+    // Ideally, we'd add this only on the specific arm, but clippy doesn't support that
+    #[expect(
+        clippy::trivially_copy_pass_by_ref,
+        reason = "Tile::HEIGHT is expected to increase later."
+    )]
+    fn run_simple_column<F: FineType>(
         &mut self,
-        col: &mut [u8],
+        col: &mut [F],
         x_pos: f32,
         y_positions: &[f32; Tile::HEIGHT as usize],
     ) {
@@ -89,27 +117,33 @@ impl<'a> ImageFiller<'a> {
             .zip(y_positions.iter())
         {
             let sample = match self.image.quality {
-                ImageQuality::Low => self.image.pixmap.sample(x_pos as u16, *y_pos as u16),
+                ImageQuality::Low => F::from_rgba8(
+                    &self
+                        .image
+                        .pixmap
+                        .sample(x_pos as u16, *y_pos as u16)
+                        .to_u8_array()[..],
+                ),
                 ImageQuality::Medium | ImageQuality::High => unimplemented!(),
             };
 
-            pixel.copy_from_slice(sample);
+            pixel.copy_from_slice(&sample);
         }
     }
 
-    fn run_complex_column(&mut self, col: &mut [u8]) {
+    fn run_complex_column<F: FineType>(&mut self, col: &mut [F]) {
         let extend_point = |mut point: Point| {
             // For the same reason as mentioned above, we always floor.
-            point.x = extend(
+            point.x = f64::from(extend(
                 point.x.floor() as f32,
                 self.image.extends.0,
-                self.image.pixmap.width() as f32,
-            ) as f64;
-            point.y = extend(
+                f32::from(self.image.pixmap.width()),
+            ));
+            point.y = f64::from(extend(
                 point.y.floor() as f32,
                 self.image.extends.1,
-                self.image.pixmap.height() as f32,
-            ) as f64;
+                f32::from(self.image.pixmap.height()),
+            ));
 
             point
         };
@@ -122,8 +156,14 @@ impl<'a> ImageFiller<'a> {
                 // Simply takes the nearest pixel to our current position.
                 ImageQuality::Low => {
                     let point = extend_point(pos);
-                    let sample = self.image.pixmap.sample(point.x as u16, point.y as u16);
-                    pixel.copy_from_slice(sample);
+                    let sample = F::from_rgba8(
+                        &self
+                            .image
+                            .pixmap
+                            .sample(point.x as u16, point.y as u16)
+                            .to_u8_array()[..],
+                    );
+                    pixel.copy_from_slice(&sample);
                 }
                 ImageQuality::Medium | ImageQuality::High => {
                     // We have two versions of filtering: `Medium` (bilinear filtering) and
@@ -150,7 +190,7 @@ impl<'a> ImageFiller<'a> {
                         // contribution). Thus, we need to subtract 0.5 from the position to get
                         // the correct fractional contribution.
                         let start = orig_val - 0.5;
-                        let mut res = start.fract() as f32;
+                        let mut res = fract(start) as f32;
 
                         // In case we are in the negative we need to mirror the result.
                         if res.is_sign_negative() {
@@ -163,9 +203,14 @@ impl<'a> ImageFiller<'a> {
                     let x_fract = fract(pos.x);
                     let y_fract = fract(pos.y);
 
-                    let mut f32_color = [0.0_f32; 4];
+                    let mut interpolated_color = [0.0_f32; 4];
 
-                    let sample = |p: Point| self.image.pixmap.sample(p.x as u16, p.y as u16);
+                    let sample = |p: Point| {
+                        let c = |val: u8| f32::from(val) / 255.0;
+                        let s = self.image.pixmap.sample(p.x as u16, p.y as u16);
+
+                        [c(s.r), c(s.g), c(s.b), c(s.a)]
+                    };
 
                     if self.image.quality == ImageQuality::Medium {
                         let cx = [1.0 - x_fract, x_fract];
@@ -181,8 +226,10 @@ impl<'a> ImageFiller<'a> {
                                 let color_sample = sample(extend_point(pos + Vec2::new(x, y)));
                                 let w = cx[x_idx] * cy[y_idx];
 
-                                for i in 0..COLOR_COMPONENTS {
-                                    f32_color[i] += w * color_sample[i] as f32;
+                                for (component, component_sample) in
+                                    interpolated_color.iter_mut().zip(color_sample)
+                                {
+                                    *component += w * component_sample;
                                 }
                             }
                         }
@@ -200,20 +247,29 @@ impl<'a> ImageFiller<'a> {
                                 let color_sample = sample(extend_point(pos + Vec2::new(x, y)));
                                 let c = cx[x_idx] * cy[y_idx];
 
-                                for i in 0..COLOR_COMPONENTS {
-                                    f32_color[i] += c * color_sample[i] as f32;
+                                for (component, component_sample) in
+                                    interpolated_color.iter_mut().zip(color_sample)
+                                {
+                                    *component += c * component_sample;
                                 }
                             }
                         }
                     }
 
-                    let mut u8_color = [0; 4];
-
                     for i in 0..COLOR_COMPONENTS {
-                        u8_color[i] = (f32_color[i] + 0.5) as u8;
+                        // Due to the nature of the cubic filter, it can happen in certain situations
+                        // that one of the color components ends up with a higher value than the
+                        // alpha component, which isn't permissible because the color is
+                        // premultiplied and would lead to overflows when doing source over
+                        // compositing with u8-based values. Because of this, we need to clamp
+                        // to the alpha value.
+                        let f32_val = interpolated_color[i]
+                            .clamp(0.0, 1.0)
+                            .min(interpolated_color[3]);
+                        interpolated_color[i] = f32_val;
                     }
 
-                    pixel.copy_from_slice(&u8_color);
+                    pixel.copy_from_slice(&F::from_rgbaf32(&interpolated_color[..]));
                 }
             };
 
@@ -226,11 +282,11 @@ fn extend(val: f32, extend: Extend, max: f32) -> f32 {
     match extend {
         Extend::Pad => val.clamp(0.0, max - 1.0),
         // TODO: We need to make repeat and reflect more efficient and branch-less.
-        Extend::Repeat => val.rem_euclid(max),
+        Extend::Repeat => rem_euclid(val, max),
         Extend::Reflect => {
             let period = 2.0 * max;
 
-            let val_mod = val.rem_euclid(period);
+            let val_mod = rem_euclid(val, period);
 
             if val_mod < max {
                 val_mod
@@ -242,7 +298,7 @@ fn extend(val: f32, extend: Extend, max: f32) -> f32 {
 }
 
 impl Painter for ImageFiller<'_> {
-    fn paint(self, target: &mut [u8]) {
+    fn paint<F: FineType>(self, target: &mut [F]) {
         self.run(target);
     }
 }

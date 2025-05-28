@@ -3,7 +3,7 @@ env:
   # version like 1.70. Note that we only specify MAJOR.MINOR and not PATCH so that bugfixes still
   # come automatically. If the version specified here is no longer the latest stable version,
   # then please feel free to submit a PR that adjusts it along with the potential clippy fixes.
-  RUST_STABLE_VER: "1.85" # In quotes because otherwise (e.g.) 1.70 would be interpreted as 1.7
+  RUST_STABLE_VER: "1.86" # In quotes because otherwise (e.g.) 1.70 would be interpreted as 1.7
   # The purpose of checking with the minimum supported Rust toolchain is to detect its staleness.
   # If the compilation fails, then the version specified here needs to be bumped up to reality.
   # Be sure to also update the rust-version property in the workspace Cargo.toml file,
@@ -14,14 +14,14 @@ env:
   RUST_MIN_VER_PKGS: "-p vello -p vello_encoding -p vello_shaders -p vello_api -p vello_common -p vello_cpu -p vello_hybrid"
   # List of packages that will be checked for `no_std` builds.
   # This should be limited to packages that are intended for publishing.
-  RUST_NO_STD_PKGS: "-p vello_api"
+  RUST_NO_STD_PKGS: "-p vello_api -p vello_common -p vello_cpu"
   # List of features that depend on the standard library and will be excluded from no_std checks.
-  FEATURES_DEPENDING_ON_STD: "std,default,png"
+  FEATURES_DEPENDING_ON_STD: "std,default,png,pico_svg"
   # List of packages that can not target Wasm.
   # `vello_tests` uses `nv-flip`, which doesn't support Wasm.
   NO_WASM_PKGS: "--exclude vello_tests"
   # The files stored in LFS the tests need to access, in JSON format
-  LFS_FILES: '["vello_tests/snapshots/*.png", "sparse_strips/vello_cpu/snapshots/*.png"]'
+  LFS_FILES: '["vello_tests/snapshots/*.png", "sparse_strips/vello_sparse_tests/snapshots/*.png"]'
 
 
 # Rationale
@@ -100,6 +100,20 @@ jobs:
 
       - name: check copyright headers
         run: bash .github/copyright.sh
+      
+      - name: Install cargo-rdme
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-rdme
+
+      - name: Run cargo rdme (vello_cpu)
+        run: cargo rdme --check --heading-base-level=0 --workspace-project=vello_cpu
+
+      - name: Run cargo rdme (vello_common)
+        run: cargo rdme --check --heading-base-level=0 --workspace-project=vello_common
+    
+      - name: Run cargo rdme (vello_api)
+        run: cargo rdme --check --heading-base-level=0 --workspace-project=vello_api
 
   clippy-stable:
     name: cargo clippy
@@ -283,18 +297,36 @@ jobs:
         with:
           name: vello-snapshot-tests-${{ matrix.os }}
           path: |
-            vello_tests/snapshots
-            vello_tests/smoke_snapshots
             vello_tests/comparisons
+            vello_tests/current
+            sparse_strips/vello_sparse_tests/diffs
 
       - name: cargo test --doc
         run: cargo test --doc --workspace --locked --all-features --no-fail-fast
 
   test-stable-wasm:
     name: cargo test (wasm32)
+    needs: prime-lfs-cache
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        # We intentionally do not use lfs: true here, instead using the caching method to save LFS bandwidth.
+
+      - name: Restore lfs cache
+        id: lfs-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: .git/lfs
+          # The files targeted with git lfs
+          key: vello-lfs-${{ needs.prime-lfs-cache.outputs.lfs-hash }}
+          enableCrossOsArchive: true
+  
+      - name: Checkout LFS files
+        # `git lfs checkout` requires that each individual glob is a separate command line argument.
+        # The string `''' '''` is how you write `' '` in GitHub's expression context (i.e. two quotes separated by a space)
+        # The quotes are to avoid the shell from evaluating the globs itself.
+        run: git lfs checkout '${{ join(fromJson(env.LFS_FILES), ''' ''') }}'
+        continue-on-error: true
 
       - name: install stable toolchain
         uses: dtolnay/rust-toolchain@master
@@ -315,9 +347,17 @@ jobs:
         with:
           tool: wasm-pack
 
-      - name: check vello_hybrid is webgl compatible
+      - name: check vello_hybrid is wgpu webgl compatible
         run: wasm-pack test --headless --chrome
-        working-directory: sparse_strips/vello_hybrid/examples/webgl
+        working-directory: sparse_strips/vello_hybrid/examples/wgpu_webgl
+
+      - name: check vello_hybrid is native webgl compatible
+        run: wasm-pack test --headless --chrome
+        working-directory: sparse_strips/vello_hybrid/examples/native_webgl
+
+      - name: Run vello_sparse_tests on Chrome
+        run: wasm-pack test --headless --chrome --features webgl
+        working-directory: sparse_strips/vello_sparse_tests
 
 
   check-stable-android:

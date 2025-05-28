@@ -4,22 +4,64 @@
 
 **Shared data structures**
 
+[![Latest published version.](https://img.shields.io/crates/v/vello_common.svg)](https://crates.io/crates/vello_common)
+[![Documentation build status.](https://img.shields.io/docsrs/vello_common.svg)](https://docs.rs/vello_common)
 [![Apache 2.0 or MIT license.](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg)](#license)
 \
 [![Linebender Zulip chat.](https://img.shields.io/badge/Linebender-%23vello-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/197075-vello)
 [![GitHub Actions CI status.](https://img.shields.io/github/actions/workflow/status/linebender/vello/ci.yml?logo=github&label=CI)](https://github.com/linebender/vello/actions)
+[![Dependency staleness status.](https://deps.rs/crate/vello_common/latest/status.svg)](https://deps.rs/crate/vello_common)
 
 </div>
 
-This crate contains core data structures and utilities shared across the Vello rendering. It includes common geometry representations, tiling logic, and other fundamental components used by both `vello_cpu` and `vello_hybrid`.
+<!-- We use cargo-rdme to update the README with the contents of lib.rs.
+To edit the following section, update it in lib.rs, then run:
+cargo rdme --workspace-project=vello_common --heading-base-level=0
+Full documentation at https://github.com/orium/cargo-rdme -->
+
+<!-- Intra-doc links used in lib.rs should be evaluated here.
+See https://linebender.org/blog/doc-include/ for related discussion. -->
+
+[libm]: https://crates.io/crates/libm
+[crate::pixmap::Pixmap]: https://docs.rs/vello_common/latest/vello_common/pixmap/struct.Pixmap.html
+
+<!-- cargo-rdme start -->
+
+This crate includes common geometry representations, tiling logic, and other fundamental components used by both [Vello CPU][vello_cpu] and Vello Hybrid.
+
+## Usage
+
+This crate should not be used on its own, and you should instead use one of the renderers which use it.
+At the moment, only [Vello CPU][vello_cpu] is published, and you probably want to use that.
+
+We also develop [Vello](https://crates.io/crates/vello), which makes use of the GPU for 2D rendering and has higher performance than Vello CPU.
+Vello CPU is being developed as part of work to address shortcomings in Vello.
+Vello does not use this crate.
 
 ## Features
+
+- `std` (enabled by default): Get floating point functions from the standard library
+  (likely using your target's libc).
+- `libm`: Use floating point implementations from [libm].
+- `png` (enabled by default): Allow loading [`Pixmap`][crate::pixmap::Pixmap]s from PNG images.
+  Also required for rendering glyphs with an embedded PNG.
+  Implies `std`.
+- `simd`: Allows requesting SIMD execution modes.
+  Note that SIMD is not yet implemented.
+
+At least one of `std` and `libm` is required; `std` overrides `libm`.
+
+## Contents
+
 - Shared data structures for paths, tiles, and strips
 - Geometry processing utilities
 - Common logic for rendering stages
 
-## Usage
 This crate acts as a foundation for `vello_cpu` and `vello_hybrid`, providing essential components to minimize duplication.
+
+[vello_cpu]: https://crates.io/crates/vello_cpu
+
+<!-- cargo-rdme end -->
 
 ## Minimum supported Rust Version (MSRV)
 
@@ -59,5 +101,3 @@ Licensed under either of
 at your option.
 
 [Rust code of conduct]: https://www.rust-lang.org/policies/code-of-conduct
-[Vello]: https://github.com/linebender/vello
-[the changelog]: https://github.com/linebender/vello/tree/main/CHANGELOG.md

@@ -24,8 +24,8 @@
 //! The renderer is split into several key components:
 //!
 //! - `Scene`: Manages the render context and path processing on the CPU
-//! - `Renderer`: Handles GPU resource management and rendering operations
-//! - `RenderData`: Contains the processed geometry ready for GPU consumption
+//! - `Renderer` or `WebGlRenderer`: Handles GPU resource management and executes draw operations
+//! - `Scheduler`: Manages and schedules draw operations on the renderer.
 //!
 //! See the individual module documentation for more details on usage and implementation.
 
@@ -35,12 +35,34 @@ extern crate alloc;
 
 mod render;
 mod scene;
+#[cfg(any(all(target_arch = "wasm32", feature = "webgl"), feature = "wgpu"))]
+mod schedule;
 pub mod util;
 
-pub use render::{Config, GpuStrip, RenderData, RenderSize, RenderTargetConfig, Renderer};
+#[cfg(all(target_arch = "wasm32", feature = "webgl"))]
+pub use render::WebGlRenderer;
+pub use render::{Config, GpuStrip, RenderSize};
+#[cfg(feature = "wgpu")]
+pub use render::{RenderTargetConfig, Renderer};
 pub use scene::Scene;
 pub use util::DimensionConstraints;
 pub use vello_common::pixmap::Pixmap;
+
+use thiserror::Error;
+
+/// Errors that can occur during rendering.
+#[derive(Error, Debug)]
+pub enum RenderError {
+    /// No slots available for rendering.
+    ///
+    /// This error is likely to occur if a scene has an extreme number of nested layers
+    /// (clipping, blending, masks, or opacity layers).
+    ///
+    /// TODO: Consider supporting more than a single column of slots in slot textures.
+    #[error("No slots available for rendering")]
+    SlotsExhausted,
+    // TODO: Consider expanding `RenderError` to replace some `.unwrap` and `.expect`.
+}
 
 #[cfg(test)]
 const _: () = if vello_common::tile::Tile::HEIGHT != 4 {

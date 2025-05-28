@@ -10,10 +10,9 @@ use std::env;
 use std::sync::Arc;
 use vello_common::color::palette::css::WHITE;
 use vello_common::color::{AlphaColor, Srgb};
-use vello_common::kurbo::{Affine, Vec2};
+use vello_common::kurbo::{Affine, Point};
 use vello_hybrid::{RenderSize, Renderer, Scene};
 use vello_hybrid_scenes::{AnyScene, get_example_scenes};
-use wgpu::RenderPassDescriptor;
 use winit::{
     application::ApplicationHandler,
     event::{ElementState, KeyEvent, MouseButton, MouseScrollDelta, WindowEvent},
@@ -44,7 +43,7 @@ struct App<'s> {
     scene: Scene,
     transform: Affine,
     mouse_down: bool,
-    last_cursor_position: Option<Vec2>,
+    last_cursor_position: Option<Point>,
 }
 
 fn main() {
@@ -212,13 +211,15 @@ impl ApplicationHandler for App<'_> {
                 }
             }
             WindowEvent::CursorMoved { position, .. } => {
-                let current_pos = Vec2::new(position.x, position.y);
+                let current_pos = Point {
+                    x: position.x,
+                    y: position.y,
+                };
 
                 if self.mouse_down {
                     // Pan the scene if mouse is down
                     if let Some(last_pos) = self.last_cursor_position {
-                        let delta = current_pos - last_pos;
-                        self.transform = Affine::translate(delta) * self.transform;
+                        self.transform = self.transform.then_translate(current_pos - last_pos);
                         window.request_redraw();
                     }
                 }
@@ -236,27 +237,23 @@ impl ApplicationHandler for App<'_> {
                     let zoom_factor = (1.0 + delta_y * ZOOM_STEP).max(0.1);
 
                     // Zoom centered at cursor position
-                    self.transform = Affine::translate(cursor_pos)
-                        * Affine::scale(zoom_factor)
-                        * Affine::translate(-cursor_pos)
-                        * self.transform;
+                    self.transform = self.transform.then_scale_about(zoom_factor, cursor_pos);
 
                     window.request_redraw();
                 }
             }
             WindowEvent::PinchGesture { delta, .. } => {
-                // Handle pinch-to-zoom on touchpad
-                let center = Vec2::new(
-                    f64::from(surface.config.width) / 2.0,
-                    f64::from(surface.config.height) / 2.0,
-                );
-
+                // Handle pinch-to-zoom on touchpad.
                 let zoom_factor = 1.0 + delta * ZOOM_STEP * 5.0;
 
-                self.transform = Affine::translate(center)
-                    * Affine::scale(zoom_factor)
-                    * Affine::translate(-center)
-                    * self.transform;
+                // Zoom centered at cursor position, or the center if no position is set.
+                self.transform = self.transform.then_scale_about(
+                    zoom_factor,
+                    self.last_cursor_position.unwrap_or(Point {
+                        x: 0.5 * surface.config.width as f64,
+                        y: 0.5 * surface.config.height as f64,
+                    }),
+                );
 
                 window.request_redraw();
             }
@@ -271,12 +268,6 @@ impl ApplicationHandler for App<'_> {
                     width: surface.config.width,
                     height: surface.config.height,
                 };
-                self.renderers[surface.dev_id].as_mut().unwrap().prepare(
-                    &device_handle.device,
-                    &device_handle.queue,
-                    &self.scene,
-                    &render_size,
-                );
 
                 let surface_texture = surface
                     .surface
@@ -293,26 +284,18 @@ impl ApplicationHandler for App<'_> {
                         .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                             label: Some("Vello Render to Surface pass"),
                         });
-                {
-                    let mut pass = encoder.begin_render_pass(&RenderPassDescriptor {
-                        label: Some("Render to Texture Pass"),
-                        color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                            view: &texture_view,
-                            resolve_target: None,
-                            ops: wgpu::Operations {
-                                load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
-                                store: wgpu::StoreOp::Store,
-                            },
-                        })],
-                        depth_stencil_attachment: None,
-                        occlusion_query_set: None,
-                        timestamp_writes: None,
-                    });
-                    self.renderers[surface.dev_id]
-                        .as_mut()
-                        .unwrap()
-                        .render(&self.scene, &mut pass);
-                }
+                self.renderers[surface.dev_id]
+                    .as_mut()
+                    .unwrap()
+                    .render(
+                        &self.scene,
+                        &device_handle.device,
+                        &device_handle.queue,
+                        &mut encoder,
+                        &render_size,
+                        &texture_view,
+                    )
+                    .unwrap();
 
                 device_handle.queue.submit([encoder.finish()]);
                 surface_texture.present();

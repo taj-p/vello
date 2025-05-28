@@ -7,6 +7,9 @@ use crate::flatten::Line;
 use alloc::vec;
 use alloc::vec::Vec;
 
+#[cfg(not(feature = "std"))]
+use peniko::kurbo::common::FloatFuncs as _;
+
 /// The max number of lines per path.
 ///
 /// Trying to render a path with more lines than this may result in visual artifacts.
@@ -123,28 +126,28 @@ impl Tile {
     }
 }
 
-impl core::cmp::PartialEq for Tile {
+impl PartialEq for Tile {
     #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
         self.to_bits() == other.to_bits()
     }
 }
 
-impl core::cmp::Ord for Tile {
+impl Ord for Tile {
     #[inline(always)]
     fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.to_bits().cmp(&other.to_bits())
     }
 }
 
-impl core::cmp::PartialOrd for Tile {
+impl PartialOrd for Tile {
     #[inline(always)]
     fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl core::cmp::Eq for Tile {}
+impl Eq for Tile {}
 
 /// Handles the tiling of paths.
 #[derive(Clone, Debug)]
@@ -244,10 +247,10 @@ impl Tiles {
         for (line_idx, line) in lines.iter().take(MAX_LINES_PER_PATH as usize).enumerate() {
             let line_idx = line_idx as u32;
 
-            let p0_x = line.p0.x / Tile::WIDTH as f32;
-            let p0_y = line.p0.y / Tile::HEIGHT as f32;
-            let p1_x = line.p1.x / Tile::WIDTH as f32;
-            let p1_y = line.p1.y / Tile::HEIGHT as f32;
+            let p0_x = line.p0.x / f32::from(Tile::WIDTH);
+            let p0_y = line.p0.y / f32::from(Tile::HEIGHT);
+            let p1_x = line.p1.x / f32::from(Tile::WIDTH);
+            let p1_y = line.p1.y / f32::from(Tile::HEIGHT);
 
             let (line_left_x, line_right_x) = if p0_x < p1_x {
                 (p0_x, p1_x)
@@ -267,7 +270,7 @@ impl Tiles {
 
                 let x = line_left_x as u16;
                 for y_idx in y_top_tiles..y_bottom_tiles {
-                    let y = y_idx as f32;
+                    let y = f32::from(y_idx);
 
                     let tile = Tile::new(x, y_idx, line_idx, y >= line_top_y);
                     self.tile_buf.push(tile);
@@ -279,7 +282,7 @@ impl Tiles {
                 let y_bottom_tiles = (line_bottom_y.ceil() as u16).min(tile_rows);
 
                 for y_idx in y_top_tiles..y_bottom_tiles {
-                    let y = y_idx as f32;
+                    let y = f32::from(y_idx);
 
                     // The line's y-coordinates at the line's top- and bottom-most points within
                     // the tile row.

@@ -4,22 +4,31 @@
 
 **Public API types**
 
+[![Latest published version.](https://img.shields.io/crates/v/vello_api.svg)](https://crates.io/crates/vello_api)
+[![Documentation build status.](https://img.shields.io/docsrs/vello_api.svg)](https://docs.rs/vello_api)
 [![Apache 2.0 or MIT license.](https://img.shields.io/badge/license-Apache--2.0_OR_MIT-blue.svg)](#license)
 \
 [![Linebender Zulip chat.](https://img.shields.io/badge/Linebender-%23vello-blue?logo=Zulip)](https://xi.zulipchat.com/#narrow/channel/197075-vello)
 [![GitHub Actions CI status.](https://img.shields.io/github/actions/workflow/status/linebender/vello/ci.yml?logo=github&label=CI)](https://github.com/linebender/vello/actions)
+[![Dependency staleness status.](https://deps.rs/crate/vello_api/latest/status.svg)](https://deps.rs/crate/vello_api)
 
 </div>
 
-This crate defines the public API types for the Vello rendering. It provides common interfaces and data structures used across different implementations, including CPU, GPU, and hybrid rendering backends.
+<!-- We use cargo-rdme to update the README with the contents of lib.rs.
+To edit the following section, update it in lib.rs, then run:
+cargo rdme --workspace-project=vello_api --heading-base-level=0
+Full documentation at https://github.com/orium/cargo-rdme -->
 
-## Features
-- Shared API types for Vello's rendering pipeline.
-- Interfaces for render contexts and rendering options.
-- Designed for compatibility across CPU and GPU implementations.
+<!-- Intra-doc links used in lib.rs should be evaluated here.
+See https://linebender.org/blog/doc-include/ for related discussion. -->
 
-## Usage
-This crate is intended to be used by other Vello components and external consumers needing a stable API.
+<!-- cargo-rdme start -->
+
+A stub crate.
+Planned to provide an abstraction between different renderers in the future.
+This abstraction is not yet designed.
+
+<!-- cargo-rdme end -->
 
 ## Minimum supported Rust Version (MSRV)
 
@@ -59,5 +68,3 @@ Licensed under either of
 at your option.
 
 [Rust code of conduct]: https://www.rust-lang.org/policies/code-of-conduct
-[Vello]: https://github.com/linebender/vello
-[the changelog]: https://github.com/linebender/vello/tree/main/CHANGELOG.md

@@ -3,9 +3,8 @@
 
 //! Flattening filled and stroked paths.
 
+use crate::kurbo::{self, Affine, BezPath, Stroke, StrokeOpts};
 use alloc::vec::Vec;
-use vello_api::kurbo;
-use vello_api::kurbo::{Affine, BezPath, Stroke, StrokeOpts};
 
 /// The flattening tolerance.
 const TOL: f64 = 0.25;
@@ -94,8 +93,9 @@ pub fn fill(path: &BezPath, affine: Affine, line_buf: &mut Vec<Line>) {
             line_buf.push(Line::new(pt0, pt1));
             p0 = p;
         }
-        kurbo::PathEl::QuadTo(_, _) => unreachable!(),
-        kurbo::PathEl::CurveTo(_, _, _) => unreachable!(),
+        el @ (kurbo::PathEl::QuadTo(_, _) | kurbo::PathEl::CurveTo(_, _, _)) => {
+            unreachable!("Path has been flattened, so shouldn't contain {el:?}.")
+        }
         kurbo::PathEl::ClosePath => {
             closed = true;
 
