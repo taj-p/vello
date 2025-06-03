@@ -117,13 +117,15 @@ fn render_glyph_run(ctx: &mut Scene, glyph_run: &GlyphRun<'_, ColorBrush>, paddi
     let run = glyph_run.run();
     let font = run.font();
     let font_size = run.font_size();
-    let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
+    // We haven't updated Parley to use the new Peniko version.
+    // It's not worth it to make this example work.
+    //let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
 
-    let style = glyph_run.style();
-    ctx.set_paint(style.brush.color.into());
-    ctx.glyph_run(font)
-        .font_size(font_size)
-        .normalized_coords(normalized_coords)
-        .hint(true)
-        .fill_glyphs(glyphs);
+    //let style = glyph_run.style();
+    //ctx.set_paint(style.brush.color.into());
+    //ctx.glyph_run(font)
+    //    .font_size(font_size)
+    //    .normalized_coords(normalized_coords)
+    //    .hint(true)
+    //    .fill_glyphs(glyphs);
 }

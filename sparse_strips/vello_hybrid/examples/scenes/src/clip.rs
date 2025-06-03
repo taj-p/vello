@@ -10,7 +10,8 @@ only break in edge cases, and some of them are also only related to conversions 
 )]
 
 use crate::ExampleScene;
-use parley::Rect;
+// This is a bug. It should be importing from Kurbo.
+//use parley::Rect;
 use vello_common::color::palette::css::{
     BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
 };
@@ -69,7 +70,7 @@ pub fn render(ctx: &mut Scene, root_transform: Affine) {
         DARK_GREEN,
     ];
 
-    const COVER_RECT: Rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+    //const COVER_RECT: Rect = Rect::new(0.0, 0.0, 100.0, 100.0);
     const CENTER: Point = Point::new(50.0, 50.0);
     let mut radius = INITIAL_RADIUS;
 
@@ -81,7 +82,7 @@ pub fn render(ctx: &mut Scene, root_transform: Affine) {
             ctx.push_clip_layer(&clip_circle);
 
             ctx.set_paint((*color).into());
-            ctx.fill_rect(&COVER_RECT);
+            //ctx.fill_rect(&COVER_RECT);
 
             radius -= RADIUS_DECREMENT;
         }

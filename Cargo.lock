@@ -899,7 +899,7 @@ dependencies = [
  "objc2-core-foundation",
  "objc2-core-text",
  "objc2-foundation 0.3.1",
- "peniko",
+ "peniko 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "read-fonts",
  "roxmltree",
  "smallvec",
@@ -1392,6 +1392,15 @@ name = "kurbo"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1077d333efea6170d9ccb96d3c3026f300ca0773da4938cc4c811daa6df68b0c"
+dependencies = [
+ "arrayvec",
+ "smallvec",
+]
+
+[[package]]
+name = "kurbo"
+version = "0.11.2"
+source = "git+https://github.com/taj-p/kurbo.git?rev=8c47b0bc9bbc3f5949057fccc2c179f694d482db#8c47b0bc9bbc3f5949057fccc2c179f694d482db"
 dependencies = [
  "arrayvec",
  "libm",
@@ -2073,7 +2082,7 @@ checksum = "e28dadbe655332fd7d996794ec8d0c376695f6ca47bc75aa01e0967c7f28e42a"
 dependencies = [
  "fontique",
  "hashbrown 0.15.3",
- "peniko",
+ "peniko 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "skrifa",
  "swash",
 ]
@@ -2090,9 +2099,19 @@ version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1f9529efd019889b2a205193c14ffb6e2839b54ed9d2720674f10f4b04d87ac9"
 dependencies = [
+ "color",
+ "kurbo 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "smallvec",
+]
+
+[[package]]
+name = "peniko"
+version = "0.4.0"
+source = "git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6#4ed4241767fe3b6c5935d5c283a484871128c6e6"
+dependencies = [
  "bytemuck",
  "color",
- "kurbo",
+ "kurbo 0.11.2 (git+https://github.com/taj-p/kurbo.git?rev=8c47b0bc9bbc3f5949057fccc2c179f694d482db)",
  "smallvec",
 ]
 
@@ -2808,7 +2827,7 @@ version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68c7541fff44b35860c1a7a47a7cadf3e4a304c457b58f9870d9706ece028afc"
 dependencies = [
- "kurbo",
+ "kurbo 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "siphasher",
 ]
 
@@ -3127,7 +3146,7 @@ dependencies = [
  "flate2",
  "fontdb",
  "imagesize",
- "kurbo",
+ "kurbo 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "pico-args",
  "roxmltree",
@@ -3162,7 +3181,7 @@ dependencies = [
  "bytemuck",
  "futures-intrusive",
  "log",
- "peniko",
+ "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6)",
  "png",
  "skrifa",
  "static_assertions",
@@ -3178,7 +3197,7 @@ name = "vello_api"
 version = "0.5.0"
 dependencies = [
  "bytemuck",
- "peniko",
+ "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6)",
  "png",
 ]
 
@@ -3201,7 +3220,7 @@ version = "0.0.1"
 dependencies = [
  "bytemuck",
  "libm",
- "peniko",
+ "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6)",
  "png",
  "roxmltree",
  "skrifa",
@@ -3231,7 +3250,7 @@ version = "0.5.0"
 dependencies = [
  "bytemuck",
  "guillotiere",
- "peniko",
+ "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6)",
  "skrifa",
  "smallvec",
 ]
@@ -4290,7 +4309,7 @@ dependencies = [
  "env_logger",
  "getrandom",
  "jni",
- "kurbo",
+ "kurbo 0.11.2 (git+https://github.com/taj-p/kurbo.git?rev=8c47b0bc9bbc3f5949057fccc2c179f694d482db)",
  "log",
  "notify-debouncer-full",
  "pollster",

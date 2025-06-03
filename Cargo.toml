@@ -100,9 +100,11 @@ bytemuck = { version = "1.23.0", features = ["derive"] }
 skrifa = { version = "0.31.0", default-features = false, features = ["autohint_shaping"] }
 # The version of kurbo used below should be kept in sync
 # with the version of kurbo used by peniko.
-peniko = { version = "0.4.0", default-features = false }
+# See: https://github.com/linebender/peniko/compare/main...taj-p:peniko:tajp/fastStroke
+peniko = { git = "https://github.com/taj-p/peniko.git", rev = "4ed4241767fe3b6c5935d5c283a484871128c6e6", default-features = false }
 # FIXME: This can be removed once peniko supports the schemars feature.
-kurbo = { version = "0.11.2", default-features = false }
+# See: https://github.com/linebender/kurbo/compare/main...taj-p:kurbo:tajp/fastStrokeOnMain
+kurbo = { git = "https://github.com/taj-p/kurbo.git", rev = "8c47b0bc9bbc3f5949057fccc2c179f694d482db", default-features = false }
 futures-intrusive = "0.5.0"
 smallvec = "1.15.0"
 static_assertions = "1.1.0"
