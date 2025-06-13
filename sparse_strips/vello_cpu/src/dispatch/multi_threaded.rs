@@ -33,8 +33,7 @@ type RenderTasksSender = crossbeam_channel::Sender<Vec<RenderTask>>;
 type CoarseCommandSender = ordered_channel::Sender<CoarseCommand>;
 type CoarseCommandReceiver = ordered_channel::Receiver<CoarseCommand>;
 
-/// Lock-free alpha storage using OnceLock for each thread slot
-/// This eliminates mutex contention and HashMap overhead
+/// OnceLock for each thread slot. This eliminates mutex contention and HashMap overhead
 #[derive(Debug)]
 struct LockFreeAlphaStorage {
     slots: Vec<OnceLock<Vec<u8>>>,
@@ -235,7 +234,6 @@ impl MultiThreadedDispatcher {
         let mut buffer = Regions::new(width, height, buffer);
         let fines = ThreadLocal::new();
         let wide = &self.wide;
-        // With lock-free storage, we can directly access the alpha data without cloning
         let alpha_storage = &self.alpha_storage;
 
         self.thread_pool.install(|| {
