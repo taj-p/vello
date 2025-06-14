@@ -51,9 +51,8 @@ impl OnceLockAlphaStorage {
         self.slots[thread_id as usize].set(data)
     }
 
-    /// Get alpha data for a specific thread
-    fn get(&self, thread_id: u8) -> Option<&Vec<u8>> {
-        self.slots.get(thread_id as usize)?.get()
+    fn slots(&self) -> &[OnceLock<Vec<u8>>] {
+        &self.slots
     }
 }
 pub(crate) struct MultiThreadedDispatcher {
@@ -234,7 +233,7 @@ impl MultiThreadedDispatcher {
         let mut buffer = Regions::new(width, height, buffer);
         let fines = ThreadLocal::new();
         let wide = &self.wide;
-        let alpha_storage = &self.alpha_storage;
+        let alpha_slots = self.alpha_storage.slots();
 
         self.thread_pool.install(|| {
             buffer.update_regions_par(|region| {
@@ -255,8 +254,8 @@ impl MultiThreadedDispatcher {
                     };
 
                     let alphas = thread_idx
-                        .and_then(|i| alpha_storage.get(i))
-                        .map(|s| s.as_slice())
+                        .and_then(|i| alpha_slots[i as usize].get())
+                        .map(|v| v.as_slice())
                         .unwrap_or(&[]);
                     fine.run_cmd(cmd, alphas, encoded_paints);
                 }
@@ -356,6 +355,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         self.flush_tasks();
         core::mem::take(&mut self.task_sender);
         self.run_coarse(false);
+        // TODO: Reset alpha storage here I think.
 
         *(self.flushed.borrow_mut()) = true;
     }
