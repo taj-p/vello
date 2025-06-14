@@ -35,11 +35,11 @@ type CoarseCommandReceiver = ordered_channel::Receiver<CoarseCommand>;
 
 /// OnceLock for each thread slot. This eliminates mutex contention and HashMap overhead
 #[derive(Debug)]
-struct LockFreeAlphaStorage {
+struct OnceLockAlphaStorage {
     slots: Vec<OnceLock<Vec<u8>>>,
 }
 
-impl LockFreeAlphaStorage {
+impl OnceLockAlphaStorage {
     fn new(num_threads: u16) -> Self {
         Self {
             slots: (0..num_threads).map(|_| OnceLock::new()).collect(),
@@ -64,7 +64,7 @@ pub(crate) struct MultiThreadedDispatcher {
     task_sender: Option<RenderTasksSender>,
     workers: Arc<ThreadLocal<RefCell<Worker>>>,
     result_receiver: Option<CoarseCommandReceiver>,
-    alpha_storage: Arc<LockFreeAlphaStorage>,
+    alpha_storage: Arc<OnceLockAlphaStorage>,
     task_idx: usize,
     num_threads: u16,
     flushed: RefCell<bool>,
@@ -77,7 +77,7 @@ impl MultiThreadedDispatcher {
             .num_threads(num_threads as usize)
             .build()
             .unwrap();
-        let alpha_storage = Arc::new(LockFreeAlphaStorage::new(num_threads));
+        let alpha_storage = Arc::new(OnceLockAlphaStorage::new(num_threads));
         let workers = Arc::new(ThreadLocal::new());
         let task_batch = vec![];
 
@@ -331,7 +331,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         (*self.flushed.borrow_mut()) = false;
         self.task_sender = None;
         self.result_receiver = None;
-        self.alpha_storage = Arc::new(LockFreeAlphaStorage::new(self.num_threads));
+        self.alpha_storage = Arc::new(OnceLockAlphaStorage::new(self.num_threads));
         // TODO: Fix reset for alpha storage.
 
         let workers = self.workers.clone();
@@ -465,7 +465,7 @@ enum CoarseCommand {
 struct Worker {
     strip_generator: StripGenerator,
     thread_id: u8,
-    alpha_storage: Arc<LockFreeAlphaStorage>,
+    alpha_storage: Arc<OnceLockAlphaStorage>,
 }
 
 impl Worker {
@@ -473,7 +473,7 @@ impl Worker {
         width: u16,
         height: u16,
         thread_id: u8,
-        alpha_storage: Arc<LockFreeAlphaStorage>,
+        alpha_storage: Arc<OnceLockAlphaStorage>,
     ) -> Self {
         let strip_generator = StripGenerator::new(width, height, thread_id);
 
