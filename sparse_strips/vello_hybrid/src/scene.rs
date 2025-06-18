@@ -394,6 +394,7 @@ pub struct CachedStrips {
     alphas: Vec<u8>,
 }
 
+// TODO: Allow translation of these strips.
 impl CachedStrips {
     pub fn new() -> Self {
         Self {
