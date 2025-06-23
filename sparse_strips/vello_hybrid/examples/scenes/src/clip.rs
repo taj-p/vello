@@ -10,12 +10,10 @@ only break in edge cases, and some of them are also only related to conversions 
 )]
 
 use crate::ExampleScene;
-// This is a bug. It should be importing from Kurbo.
-//use parley::Rect;
 use vello_common::color::palette::css::{
     BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
 };
-use vello_common::kurbo::{Affine, BezPath, Circle, Point, Shape, Stroke};
+use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke};
 use vello_common::peniko::Color;
 use vello_hybrid::Scene;
 
@@ -44,7 +42,7 @@ impl Default for ClipScene {
 
 fn draw_clipping_outline(ctx: &mut Scene, path: &BezPath) {
     let stroke = Stroke::new(1.0);
-    ctx.set_paint(DARK_BLUE.into());
+    ctx.set_paint(DARK_BLUE);
     ctx.set_stroke(stroke);
     ctx.stroke_path(path);
 }
@@ -81,7 +79,7 @@ pub fn render(ctx: &mut Scene, root_transform: Affine) {
             draw_clipping_outline(ctx, &clip_circle);
             ctx.push_clip_layer(&clip_circle);
 
-            ctx.set_paint((*color).into());
+            //ctx.set_paint((*color).into());
             //ctx.fill_rect(&COVER_RECT);
 
             radius -= RADIUS_DECREMENT;

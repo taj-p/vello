@@ -18,6 +18,8 @@ rand = { workspace = true }
 smallvec = { workspace = true }
 usvg = { workspace = true }
 
+[features]
+
 [[bench]]
 name = "main"
 harness = false

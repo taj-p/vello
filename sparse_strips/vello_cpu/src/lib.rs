@@ -30,6 +30,8 @@
 //! context.fill_rect(&Rect::from_points((3., 1.), (7., 4.)));
 //!
 //! let mut target = Pixmap::new(width, height);
+//! // This is only necessary if you activated the `multithreading` feature.
+//! context.flush();
 //! context.render_to_pixmap(&mut target, RenderMode::default());
 //!
 //! let expected_render = b"\
@@ -60,6 +62,7 @@
 //! - `libm`: Use floating point implementations from [libm].
 //! - `png`(enabled by default): Allow loading [`Pixmap`]s from PNG images.
 //!   Also required for rendering glyphs with an embedded PNG.
+//! - `multithreading`: Enable multi-threaded rendering.
 //!
 //! At least one of `std` and `libm` is required; `std` overrides `libm`.
 //!
@@ -100,7 +103,7 @@
     clippy::cast_possible_truncation,
     reason = "We cast u16s to u8 in various places where we know for sure that it's < 256"
 )]
-#![no_std]
+#![cfg_attr(not(feature = "multithreading"), no_std)]
 
 extern crate alloc;
 
@@ -110,12 +113,18 @@ use libm as _;
 
 mod render;
 
+mod dispatch;
 #[doc(hidden)]
 /// This is an internal module, do not access directly.
 pub mod fine;
+#[doc(hidden)]
+pub mod region;
+mod strip_generator;
 mod util;
 
-pub use render::RenderContext;
+pub use render::{RenderContext, RenderSettings};
+pub use vello_common::fearless_simd::Level;
+#[cfg(feature = "text")]
 pub use vello_common::glyph::Glyph;
 pub use vello_common::mask::Mask;
 pub use vello_common::paint::{Image, Paint, PaintType};

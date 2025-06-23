@@ -7,11 +7,11 @@ use vello_common::mask::Mask;
 use vello_common::paint::PaintType;
 use vello_common::peniko::{BlendMode, Fill, Font};
 use vello_common::pixmap::Pixmap;
-use vello_cpu::{RenderContext, RenderMode};
+use vello_cpu::{Level, RenderContext, RenderMode, RenderSettings};
 use vello_hybrid::Scene;
 
 pub(crate) trait Renderer: Sized + GlyphRenderer {
-    fn new(width: u16, height: u16) -> Self;
+    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self;
     fn fill_path(&mut self, path: &BezPath);
     fn stroke_path(&mut self, path: &BezPath);
     fn fill_rect(&mut self, rect: &Rect);
@@ -25,6 +25,7 @@ pub(crate) trait Renderer: Sized + GlyphRenderer {
         opacity: Option<f32>,
         mask: Option<Mask>,
     );
+    fn flush(&mut self);
     fn push_clip_layer(&mut self, path: &BezPath);
     fn push_blend_layer(&mut self, blend_mode: BlendMode);
     fn push_opacity_layer(&mut self, opacity: f32);
@@ -41,8 +42,10 @@ pub(crate) trait Renderer: Sized + GlyphRenderer {
 }
 
 impl Renderer for RenderContext {
-    fn new(width: u16, height: u16) -> Self {
-        Self::new(width, height)
+    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self {
+        let settings = RenderSettings { level, num_threads };
+
+        Self::new_with(width, height, &settings)
     }
 
     fn fill_path(&mut self, path: &BezPath) {
@@ -77,6 +80,10 @@ impl Renderer for RenderContext {
         mask: Option<Mask>,
     ) {
         Self::push_layer(self, clip_path, blend_mode, opacity, mask);
+    }
+
+    fn flush(&mut self) {
+        Self::flush(self);
     }
 
     fn push_clip_layer(&mut self, path: &BezPath) {
@@ -133,7 +140,15 @@ impl Renderer for RenderContext {
 }
 
 impl Renderer for Scene {
-    fn new(width: u16, height: u16) -> Self {
+    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self {
+        if num_threads != 0 {
+            panic!("hybrid renderer doesn't support multi-threading");
+        }
+
+        if !matches!(level, Level::Fallback(_)) {
+            panic!("hybrid renderer doesn't support SIMD");
+        }
+
         Self::new(width, height)
     }
 
@@ -171,6 +186,8 @@ impl Renderer for Scene {
         Self::push_layer(self, clip, blend_mode, opacity, mask);
     }
 
+    fn flush(&mut self) {}
+
     fn push_clip_layer(&mut self, path: &BezPath) {
         Self::push_clip_layer(self, path);
     }
@@ -198,7 +215,7 @@ impl Renderer for Scene {
     fn set_paint(&mut self, paint: impl Into<PaintType>) {
         let paint_type: PaintType = paint.into();
         match paint_type {
-            PaintType::Solid(s) => Self::set_paint(self, s.into()),
+            PaintType::Solid(s) => Self::set_paint(self, s),
             PaintType::Gradient(_) => {}
             PaintType::Image(_) => {}
         }

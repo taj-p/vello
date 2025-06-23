@@ -61,10 +61,12 @@ extern crate alloc;
 
 pub mod blurred_rounded_rect;
 pub mod coarse;
+#[cfg(feature = "text")]
 pub mod colr;
 pub mod encode;
 pub mod execute;
 pub mod flatten;
+#[cfg(feature = "text")]
 pub mod glyph;
 pub mod mask;
 pub mod math;
@@ -76,6 +78,7 @@ pub mod pixmap;
 pub mod strip;
 pub mod tile;
 
+pub use fearless_simd;
 pub use peniko;
 pub use peniko::color;
 pub use peniko::kurbo;

@@ -3,7 +3,7 @@
 
 use crate::{
     Attribute, AttributeInput, DEFAULT_CPU_F32_TOLERANCE, DEFAULT_CPU_U8_TOLERANCE,
-    DEFAULT_HYBRID_TOLERANCE, parse_int_lit, parse_string_lit,
+    DEFAULT_HYBRID_TOLERANCE, DEFAULT_SIMD_TOLERANCE, parse_int_lit, parse_string_lit,
 };
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
@@ -29,6 +29,11 @@ struct Arguments {
     skip_cpu: bool,
     /// Whether the test should not be run on the GPU (`vello_hybrid`).
     skip_hybrid: bool,
+    /// The maximum number of pixels that are allowed to completely deviate from the reference
+    /// images. This attribute mainly exists because there are some test cases (like gradients),
+    /// where, due to floating point inaccuracies, some pixels might land on a different color
+    /// stop and thus yield a different value in CI.
+    diff_pixels: u16,
     /// Whether no reference image should actually be created (for tests that only check
     /// for panics, but are not interested in the actual output).
     no_ref: bool,
@@ -47,6 +52,7 @@ impl Default for Arguments {
             skip_cpu: false,
             skip_hybrid: false,
             no_ref: false,
+            diff_pixels: 0,
             ignore_reason: None,
         }
     }
@@ -58,8 +64,26 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     let input_fn = parse_macro_input!(item as ItemFn);
 
     let input_fn_name = input_fn.sig.ident.clone();
-    let u8_fn_name = Ident::new(&format!("{}_cpu_u8", input_fn_name), input_fn_name.span());
-    let f32_fn_name = Ident::new(&format!("{}_cpu_f32", input_fn_name), input_fn_name.span());
+    let u8_fn_name_scalar = Ident::new(
+        &format!("{}_cpu_u8_scalar", input_fn_name),
+        input_fn_name.span(),
+    );
+    let f32_fn_name_scalar = Ident::new(
+        &format!("{}_cpu_f32_scalar", input_fn_name),
+        input_fn_name.span(),
+    );
+    let u8_fn_name_neon = Ident::new(
+        &format!("{}_cpu_u8_neon", input_fn_name),
+        input_fn_name.span(),
+    );
+    let f32_fn_name_neon = Ident::new(
+        &format!("{}_cpu_f32_neon", input_fn_name),
+        input_fn_name.span(),
+    );
+    let multithreaded_fn_name = Ident::new(
+        &format!("{}_cpu_multithreaded", input_fn_name),
+        input_fn_name.span(),
+    );
     let hybrid_fn_name = Ident::new(&format!("{}_hybrid", input_fn_name), input_fn_name.span());
     let webgl_fn_name = Ident::new(
         &format!("{}_hybrid_webgl", input_fn_name),
@@ -71,8 +95,11 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     // We should take the module path into consideration for naming the tests.
 
     let input_fn_name_str = input_fn_name.to_string();
-    let u8_fn_name_str = u8_fn_name.to_string();
-    let f32_fn_name_str = f32_fn_name.to_string();
+    let u8_fn_name_str_scalar = u8_fn_name_scalar.to_string();
+    let f32_fn_name_str_scalar = f32_fn_name_scalar.to_string();
+    let u8_fn_name_str_neon = u8_fn_name_neon.to_string();
+    let f32_fn_name_str_neon = f32_fn_name_neon.to_string();
+    let multithreaded_fn_name_str = multithreaded_fn_name.to_string();
     let hybrid_fn_name_str = hybrid_fn_name.to_string();
     let webgl_fn_name_str = webgl_fn_name.to_string();
 
@@ -86,6 +113,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         mut skip_hybrid,
         ignore_reason,
         no_ref,
+        diff_pixels,
     } = parse_args(&attrs);
 
     // Wasm doesn't have access to the filesystem. For wasm, inline the snapshot bytes into the
@@ -112,21 +140,22 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         }
     };
 
-    let cpu_u8_tolerance = cpu_u8_tolerance + DEFAULT_CPU_U8_TOLERANCE;
+    let cpu_u8_tolerance_scalar = cpu_u8_tolerance + DEFAULT_CPU_U8_TOLERANCE;
+    let cpu_u8_tolerance_neon = cpu_u8_tolerance + DEFAULT_SIMD_TOLERANCE;
+
     // Since f32 is our gold standard, we always require exact matches for this one.
-    let cpu_f32_tolerance = DEFAULT_CPU_F32_TOLERANCE;
+    let cpu_f32_tolerance_scalar = DEFAULT_CPU_F32_TOLERANCE;
+    let cpu_f32_tolerance_neon = DEFAULT_CPU_F32_TOLERANCE + DEFAULT_SIMD_TOLERANCE;
     hybrid_tolerance += DEFAULT_HYBRID_TOLERANCE;
 
     // These tests currently don't work with `vello_hybrid`.
     skip_hybrid |= {
-        input_fn_name_str.contains("clip")
-            || input_fn_name_str.contains("compose")
+        input_fn_name_str.contains("compose")
             || input_fn_name_str.contains("gradient")
             || input_fn_name_str.contains("image")
             || input_fn_name_str.contains("layer")
             || input_fn_name_str.contains("mask")
             || input_fn_name_str.contains("mix")
-            || input_fn_name_str.contains("opacity")
             || input_fn_name_str.contains("blurred_rounded_rect")
     };
 
@@ -143,19 +172,24 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         empty_snippet.clone()
     };
 
-    let ignore_cpu = if skip_cpu {
-        ignore_snippet.clone()
-    } else {
-        empty_snippet.clone()
-    };
-
     let cpu_snippet = |fn_name: Ident,
                        fn_name_str: String,
                        tolerance: u8,
                        is_reference: bool,
+                       num_threads: u16,
+                       // Need to pass as string, to avoid dependency on `fearless_simd` and also
+                       // so that it works with proc_macros.
+                       level: &str,
+                       ignore: bool,
                        render_mode: proc_macro2::TokenStream| {
+        let ignore_snippet = if ignore {
+            ignore_snippet.clone()
+        } else {
+            quote! {}
+        };
+
         quote! {
-            #ignore_cpu
+            #ignore_snippet
             #[test]
             fn #fn_name() {
                 use crate::util::{
@@ -163,27 +197,71 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 };
                 use vello_cpu::{RenderContext, RenderMode};
 
-                let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent);
+                let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level);
                 #input_fn_name(&mut ctx);
+                ctx.flush();
                 if !#no_ref {
-                    check_ref(&ctx, #input_fn_name_str, #fn_name_str, #tolerance, #is_reference, #render_mode, #reference_image_name);
+                    check_ref(&ctx, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #render_mode, #reference_image_name);
                 }
             }
         }
     };
 
+    #[cfg(target_arch = "aarch64")]
+    let has_neon = std::arch::is_aarch64_feature_detected!("neon");
+    #[cfg(not(target_arch = "aarch64"))]
+    let has_neon = false;
+
     let u8_snippet = cpu_snippet(
-        u8_fn_name,
-        u8_fn_name_str,
-        cpu_u8_tolerance,
+        u8_fn_name_scalar,
+        u8_fn_name_str_scalar,
+        cpu_u8_tolerance_scalar,
         false,
+        0,
+        "fallback",
+        skip_cpu,
         quote! { RenderMode::OptimizeSpeed },
     );
     let f32_snippet = cpu_snippet(
-        f32_fn_name,
-        f32_fn_name_str,
-        cpu_f32_tolerance,
+        f32_fn_name_scalar,
+        f32_fn_name_str_scalar,
+        cpu_f32_tolerance_scalar,
         true,
+        0,
+        "fallback",
+        skip_cpu,
+        quote! { RenderMode::OptimizeQuality },
+    );
+    let multi_threaded_snippet = cpu_snippet(
+        multithreaded_fn_name,
+        multithreaded_fn_name_str,
+        cpu_f32_tolerance_scalar,
+        false,
+        3,
+        "fallback",
+        skip_cpu,
+        quote! { RenderMode::OptimizeQuality },
+    );
+
+    let neon_u8_snippet = cpu_snippet(
+        u8_fn_name_neon,
+        u8_fn_name_str_neon,
+        cpu_u8_tolerance_neon,
+        false,
+        0,
+        "neon",
+        skip_cpu | !has_neon,
+        quote! { RenderMode::OptimizeSpeed },
+    );
+
+    let neon_f32_snippet = cpu_snippet(
+        f32_fn_name_neon,
+        f32_fn_name_str_neon,
+        cpu_f32_tolerance_neon,
+        false,
+        0,
+        "neon",
+        skip_cpu | !has_neon,
         quote! { RenderMode::OptimizeQuality },
     );
 
@@ -194,7 +272,13 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
 
         #u8_snippet
 
+        #neon_u8_snippet
+
         #f32_snippet
+
+        #neon_f32_snippet
+
+        #multi_threaded_snippet
 
         #ignore_hybrid
         #[test]
@@ -205,10 +289,11 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use vello_hybrid::Scene;
             use vello_cpu::RenderMode;
 
-            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent);
+            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent, 0, "fallback");
             #input_fn_name(&mut ctx);
+            ctx.flush();
             if !#no_ref {
-                check_ref(&ctx, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, false, RenderMode::OptimizeSpeed, #reference_image_name);
+                check_ref(&ctx, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, #diff_pixels, false, RenderMode::OptimizeSpeed, #reference_image_name);
             }
         }
 
@@ -222,10 +307,11 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use vello_hybrid::Scene;
             use vello_cpu::RenderMode;
 
-            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent);
+            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent, 0, "fallback");
             #input_fn_name(&mut ctx);
+            ctx.flush();
             if !#no_ref {
-                check_ref(&ctx, #input_fn_name_str, #webgl_fn_name_str, #hybrid_tolerance, false, RenderMode::OptimizeSpeed, #reference_image_name);
+                check_ref(&ctx, #input_fn_name_str, #webgl_fn_name_str, #hybrid_tolerance, #diff_pixels, false, RenderMode::OptimizeSpeed, #reference_image_name);
             }
         }
     };
@@ -247,6 +333,7 @@ fn parse_args(attribute_input: &AttributeInput) -> Arguments {
                         args.ignore_reason = Some(parse_string_lit(expr, "ignore"));
                     }
                     "width" => args.width = parse_int_lit(expr, "width"),
+                    "diff_pixels" => args.diff_pixels = parse_int_lit(expr, "diff_pixels"),
                     "height" => args.height = parse_int_lit(expr, "height"),
                     "cpu_u8_tolerance" => {
                         args.cpu_u8_tolerance = parse_int_lit(expr, "cpu_u8_tolerance")

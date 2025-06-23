@@ -62,6 +62,8 @@ context.set_paint(css::MAGENTA);
 context.fill_rect(&Rect::from_points((3., 1.), (7., 4.)));
 
 let mut target = Pixmap::new(width, height);
+// This is only necessary if you activated the `multithreading` feature.
+context.flush();
 context.render_to_pixmap(&mut target, RenderMode::default());
 
 let expected_render = b"\
@@ -92,6 +94,7 @@ assert_eq!(&result, expected_render);
 - `libm`: Use floating point implementations from [libm].
 - `png`(enabled by default): Allow loading [`Pixmap`]s from PNG images.
   Also required for rendering glyphs with an embedded PNG.
+- `multithreading`: Enable multi-threaded rendering.
 
 At least one of `std` and `libm` is required; `std` overrides `libm`.
 
