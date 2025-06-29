@@ -37,4 +37,7 @@ mod mask;
 mod mix;
 mod opacity;
 mod renderer;
+#[macro_use]
 mod util;
+#[cfg(target_arch = "wasm32")]
+mod wasm_binary_invariants;
