@@ -176,13 +176,15 @@
 only break in edge cases, and some of them are also only related to conversions from f64 to f32."
 )]
 
+use crate::render::common::GpuEncodedImage;
 use crate::{GpuStrip, RenderError, Scene};
 use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 use core::mem;
 use vello_common::{
     coarse::{Cmd, WideTile},
-    paint::Paint,
+    encode::EncodedPaint,
+    paint::{ImageSource, Paint},
     tile::Tile,
 };
 
@@ -269,18 +271,18 @@ impl Scheduler {
         scene: &Scene,
     ) -> Result<(), RenderError> {
         let mut tile_state = mem::take(&mut self.tile_state);
-        let wide_tiles_per_row = (scene.width).div_ceil(WideTile::WIDTH);
-        let wide_tiles_per_col = (scene.height).div_ceil(Tile::HEIGHT);
+        let wide_tiles_per_row = scene.wide.width_tiles();
+        let wide_tiles_per_col = scene.wide.height_tiles();
 
         // Left to right, top to bottom iteration over wide tiles.
         for wide_tile_row in 0..wide_tiles_per_col {
             for wide_tile_col in 0..wide_tiles_per_row {
-                let wide_tile_idx = usize::from(wide_tile_row * wide_tiles_per_row + wide_tile_col);
-                let wide_tile = &scene.wide.tiles[wide_tile_idx];
+                let wide_tile = scene.wide.get(wide_tile_col, wide_tile_row);
                 let wide_tile_x = wide_tile_col * WideTile::WIDTH;
                 let wide_tile_y = wide_tile_row * Tile::HEIGHT;
                 self.do_tile(
                     renderer,
+                    scene,
                     wide_tile_x,
                     wide_tile_y,
                     wide_tile,
@@ -301,8 +303,8 @@ impl Scheduler {
         #[cfg(debug_assertions)]
         {
             for i in 0..self.total_slots {
-                debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {}", i);
-                debug_assert!(self.free[1].contains(&i), "free[1] is missing slot {}", i);
+                debug_assert!(self.free[0].contains(&i), "free[0] is missing slot {i}");
+                debug_assert!(self.free[1].contains(&i), "free[1] is missing slot {i}");
             }
         }
         debug_assert!(self.rounds_queue.is_empty(), "rounds_queue is not empty");
@@ -363,6 +365,7 @@ impl Scheduler {
     fn do_tile<R: RendererBackend>(
         &mut self,
         renderer: &mut R,
+        scene: &Scene,
         wide_tile_x: u16,
         wide_tile_y: u16,
         tile: &WideTile,
@@ -385,8 +388,9 @@ impl Scheduler {
                     y: wide_tile_y,
                     width: WideTile::WIDTH,
                     dense_width: 0,
-                    col: 0,
-                    rgba: bg,
+                    col_idx: 0,
+                    payload: bg,
+                    paint: 0,
                 });
             }
         }
@@ -397,55 +401,56 @@ impl Scheduler {
                 Cmd::Fill(fill) => {
                     let el = state.stack.last().unwrap();
                     let draw = self.draw_mut(el.round, clip_depth);
-                    let color = match fill.paint {
-                        Paint::Solid(color) => color,
-                        Paint::Indexed(_) => unimplemented!(),
-                    };
-                    let rgba = color.as_premul_rgba8().to_u32();
-                    debug_assert!(
-                        has_non_zero_alpha(rgba),
-                        "Color fields with 0 alpha are reserved for clipping"
-                    );
+
+                    let (scene_strip_x, scene_strip_y) = (wide_tile_x + fill.x, wide_tile_y);
+                    let (payload, paint) =
+                        Self::process_paint(&fill.paint, scene, (scene_strip_x, scene_strip_y));
+
                     let (x, y) = if clip_depth == 1 {
-                        (wide_tile_x + fill.x, wide_tile_y)
+                        (scene_strip_x, scene_strip_y)
                     } else {
                         (fill.x, el.slot_ix as u16 * Tile::HEIGHT)
                     };
+
                     draw.0.push(GpuStrip {
                         x,
                         y,
                         width: fill.width,
                         dense_width: 0,
-                        col: 0,
-                        rgba,
+                        col_idx: 0,
+                        payload,
+                        paint,
                     });
                 }
                 Cmd::AlphaFill(alpha_fill) => {
                     let el = state.stack.last().unwrap();
                     let draw = self.draw_mut(el.round, clip_depth);
-                    let color = match alpha_fill.paint {
-                        Paint::Solid(color) => color,
-                        Paint::Indexed(_) => unimplemented!(),
-                    };
-                    let rgba = color.as_premul_rgba8().to_u32();
-                    debug_assert!(
-                        has_non_zero_alpha(rgba),
-                        "Color fields with 0 alpha are reserved for clipping"
+
+                    let col_idx = (alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
+                        .try_into()
+                        .expect("Sparse strips are bound to u32 range");
+
+                    let (scene_strip_x, scene_strip_y) = (wide_tile_x + alpha_fill.x, wide_tile_y);
+                    let (payload, paint) = Self::process_paint(
+                        &alpha_fill.paint,
+                        scene,
+                        (scene_strip_x, scene_strip_y),
                     );
+
                     let (x, y) = if clip_depth == 1 {
-                        (wide_tile_x + alpha_fill.x, wide_tile_y)
+                        (scene_strip_x, scene_strip_y)
                     } else {
                         (alpha_fill.x, el.slot_ix as u16 * Tile::HEIGHT)
                     };
+
                     draw.0.push(GpuStrip {
                         x,
                         y,
                         width: alpha_fill.width,
                         dense_width: alpha_fill.width,
-                        col: (alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
-                            .try_into()
-                            .expect("Sparse strips are bound to u32 range"),
-                        rgba,
+                        col_idx,
+                        payload,
+                        paint,
                     });
                 }
                 Cmd::PushBuf => {
@@ -489,13 +494,15 @@ impl Scheduler {
                     } else {
                         (clip_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
                     };
+                    let paint = COLOR_SOURCE_SLOT << 31;
                     draw.0.push(GpuStrip {
                         x,
                         y,
                         width: clip_fill.width as u16,
                         dense_width: 0,
-                        col: 0,
-                        rgba: tos.slot_ix as u32,
+                        col_idx: 0,
+                        payload: tos.slot_ix as u32,
+                        paint,
                     });
                 }
                 Cmd::ClipStrip(clip_alpha_fill) => {
@@ -509,15 +516,17 @@ impl Scheduler {
                     } else {
                         (clip_alpha_fill.x as u16, nos.slot_ix as u16 * Tile::HEIGHT)
                     };
+                    let paint = COLOR_SOURCE_SLOT << 31;
                     draw.0.push(GpuStrip {
                         x,
                         y,
                         width: clip_alpha_fill.width as u16,
                         dense_width: clip_alpha_fill.width as u16,
-                        col: (clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
+                        col_idx: (clip_alpha_fill.alpha_idx / usize::from(Tile::HEIGHT))
                             .try_into()
                             .expect("Sparse strips are bound to u32 range"),
-                        rgba: tos.slot_ix as u32,
+                        payload: tos.slot_ix as u32,
+                        paint,
                     });
                 }
                 _ => unimplemented!(),
@@ -526,7 +535,52 @@ impl Scheduler {
 
         Ok(())
     }
+
+    /// Process a paint and return (`payload`, `paint`)
+    fn process_paint(
+        paint: &Paint,
+        scene: &Scene,
+        (scene_strip_x, scene_strip_y): (u16, u16),
+    ) -> (u32, u32) {
+        match paint {
+            Paint::Solid(color) => {
+                let rgba = color.as_premul_rgba8().to_u32();
+                debug_assert!(
+                    has_non_zero_alpha(rgba),
+                    "Color fields with 0 alpha are reserved for clipping"
+                );
+                let paint_packed = (COLOR_SOURCE_PAYLOAD << 31) | (PAINT_TYPE_SOLID << 29);
+                (rgba, paint_packed)
+            }
+            Paint::Indexed(indexed_paint) => {
+                let paint_id = indexed_paint.index();
+                // 16 bytes per texel: Rgba32Uint (4 bytes) * 4 (4 texels)
+                let paint_tex_id = (paint_id * size_of::<GpuEncodedImage>() / 16) as u32;
+
+                match scene.encoded_paints.get(paint_id) {
+                    Some(EncodedPaint::Image(encoded_image)) => match &encoded_image.source {
+                        ImageSource::OpaqueId(_) => {
+                            let paint_packed = (COLOR_SOURCE_PAYLOAD << 31)
+                                | (PAINT_TYPE_IMAGE << 29)
+                                | (paint_tex_id & 0x1FFFFFFF);
+                            let scene_strip_xy =
+                                ((scene_strip_y as u32) << 16) | (scene_strip_x as u32);
+                            (scene_strip_xy, paint_packed)
+                        }
+                        _ => unimplemented!("Unsupported image source"),
+                    },
+                    _ => unimplemented!("Unsupported paint type"),
+                }
+            }
+        }
+    }
 }
+
+const COLOR_SOURCE_PAYLOAD: u32 = 0;
+const COLOR_SOURCE_SLOT: u32 = 1;
+
+const PAINT_TYPE_SOLID: u32 = 0;
+const PAINT_TYPE_IMAGE: u32 = 1;
 
 #[inline(always)]
 fn has_non_zero_alpha(rgba: u32) -> bool {

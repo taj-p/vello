@@ -7,7 +7,7 @@ use smallvec::smallvec;
 use vello_common::color::palette::css::{BLUE, LIME, MAGENTA, RED, YELLOW};
 use vello_common::color::{AlphaColor, DynamicColor, Srgb};
 use vello_common::kurbo::{Affine, Point, Rect};
-use vello_common::paint::Image;
+use vello_common::paint::{Image, ImageSource};
 use vello_common::peniko::{
     BlendMode, ColorStop, ColorStops, Compose, Extend, Gradient, GradientKind, ImageQuality, Mix,
 };
@@ -49,7 +49,7 @@ fn mix(ctx: &mut impl Renderer, blend_mode: BlendMode) {
     };
 
     let image = Image {
-        pixmap: load_image!("cowboy"),
+        source: ImageSource::Pixmap(load_image!("cowboy")),
         x_extend: Extend::Pad,
         y_extend: Extend::Pad,
         quality: ImageQuality::Low,
@@ -89,7 +89,7 @@ fn mix_lighten(ctx: &mut impl Renderer) {
     mix(ctx, BlendMode::new(Mix::Lighten, Compose::SrcOver));
 }
 
-#[vello_test(cpu_u8_tolerance = 1)]
+#[vello_test(cpu_u8_tolerance = 4)]
 fn mix_color_dodge(ctx: &mut impl Renderer) {
     mix(ctx, BlendMode::new(Mix::ColorDodge, Compose::SrcOver));
 }

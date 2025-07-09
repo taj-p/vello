@@ -29,24 +29,49 @@ pub struct Config {
     pub alphas_tex_width_bits: u32,
 }
 
-/// Represents a GPU strip for rendering
+/// Represents a GPU strip for rendering.
+///
+/// This struct corresponds to the `StripInstance` struct in the shader.
+/// See the `StripInstance` documentation in `render_strips.wgsl` for detailed field descriptions.
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Zeroable, Pod)]
 pub struct GpuStrip {
-    /// X coordinate of the strip
+    /// See `StripInstance::xy` documentation in `render_strips.wgsl`.
     pub x: u16,
-    /// Y coordinate of the strip
+    /// See `StripInstance::xy` documentation in `render_strips.wgsl`.
     pub y: u16,
-    /// Width of the strip
+    /// See `StripInstance::widths` documentation in `render_strips.wgsl`.
     pub width: u16,
-    /// Width of the portion where alpha blending should be applied.
+    /// See `StripInstance::widths` documentation in `render_strips.wgsl`.
     pub dense_width: u16,
-    /// Column-index into the alpha texture where this strip's alpha values begin.
-    ///
-    /// There are [`Config::strip_height`] alpha values per column.
-    pub col: u32,
-    /// RGBA color value
-    pub rgba: u32,
+    /// See `StripInstance::col_idx` documentation in `render_strips.wgsl`.
+    pub col_idx: u32,
+    /// See `StripInstance::payload` documentation in `render_strips.wgsl`.
+    pub payload: u32,
+    /// See `StripInstance::paint` documentation in `render_strips.wgsl`.
+    pub paint: u32,
+}
+
+/// Represents a GPU encoded image data for rendering
+// Align to 16 bytes for RGBA32Uint alignment
+#[repr(C, align(16))]
+#[derive(Debug, Clone, Copy, Zeroable, Pod)]
+#[allow(dead_code, reason = "Clippy fails when --no-default-features")]
+pub(crate) struct GpuEncodedImage {
+    // 1st 16 bytes
+    /// The rendering quality of the image.
+    pub quality_and_extend_modes: u32,
+    /// The extends in the horizontal and vertical direction.
+    /// The size of the image in pixels.
+    pub image_size: u32,
+    /// The offset of the image in the atlas texture in pixels.
+    pub image_offset: u32,
+    pub _padding1: u32,
+    // 2nd & 3rd 16 bytes
+    /// A transform to apply to the image.
+    pub transform: [f32; 6],
+    /// Padding to align to 64 bytes (16-byte aligned)
+    pub _padding2: [u32; 2],
 }
 
 #[cfg(all(feature = "webgl", feature = "wgpu"))]

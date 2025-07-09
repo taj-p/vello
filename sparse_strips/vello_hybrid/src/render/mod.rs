@@ -8,15 +8,15 @@
 //! - `wgpu` contains the default renderer backend, leveraging `wgpu`.
 //! - `webgl` contains a WebGL2 backend specifically for `wasm32` if the `webgl` feature is active.
 
-mod common;
-#[cfg(feature = "webgl")]
+pub(crate) mod common;
+#[cfg(all(target_arch = "wasm32", feature = "webgl"))]
 mod webgl;
 #[cfg(feature = "wgpu")]
 mod wgpu;
 
 pub use common::{Config, GpuStrip, RenderSize};
 
-#[cfg(feature = "webgl")]
-pub use webgl::WebGlRenderer;
+#[cfg(all(target_arch = "wasm32", feature = "webgl"))]
+pub use webgl::{WebGlAtlasWriter, WebGlRenderer, WebGlTextureWithDimensions};
 #[cfg(feature = "wgpu")]
-pub use wgpu::{RenderTargetConfig, Renderer};
+pub use wgpu::{AtlasWriter, RenderTargetConfig, Renderer};

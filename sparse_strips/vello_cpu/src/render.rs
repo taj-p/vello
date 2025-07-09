@@ -19,6 +19,8 @@ use vello_common::encode::{EncodeExt, EncodedPaint};
 use vello_common::fearless_simd::Level;
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
 use vello_common::mask::Mask;
+#[cfg(feature = "text")]
+use vello_common::paint::ImageSource;
 use vello_common::paint::{Paint, PaintType};
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
@@ -427,7 +429,7 @@ impl GlyphRenderer for RenderContext {
                 };
 
                 let image = vello_common::paint::Image {
-                    pixmap: Arc::new(glyph.pixmap),
+                    source: ImageSource::Pixmap(Arc::new(glyph.pixmap)),
                     x_extend: crate::peniko::Extend::Pad,
                     y_extend: crate::peniko::Extend::Pad,
                     quality,
@@ -473,7 +475,7 @@ impl GlyphRenderer for RenderContext {
                 };
 
                 let image = vello_common::paint::Image {
-                    pixmap: Arc::new(glyph_pixmap),
+                    source: ImageSource::Pixmap(Arc::new(glyph_pixmap)),
                     x_extend: crate::peniko::Extend::Pad,
                     y_extend: crate::peniko::Extend::Pad,
                     // Since the pixmap will already have the correct size, no need to
@@ -567,5 +569,24 @@ mod tests {
 
         ctx.push_clip_layer(&Rect::new(20.0, 20.0, 180.0, 180.0).to_path(0.1));
         ctx.pop_layer();
+    }
+
+    #[cfg(feature = "multithreading")]
+    #[test]
+    fn multithreaded_crash_after_reset() {
+        use crate::{Level, RenderMode, RenderSettings};
+        use vello_common::pixmap::Pixmap;
+
+        let mut pixmap = Pixmap::new(200, 200);
+        let settings = RenderSettings {
+            level: Level::new(),
+            num_threads: 1,
+        };
+
+        let mut ctx = RenderContext::new_with(200, 200, &settings);
+        ctx.reset();
+        ctx.fill_path(&Rect::new(0.0, 0.0, 100.0, 100.0).to_path(0.1));
+        ctx.flush();
+        ctx.render_to_pixmap(&mut pixmap, RenderMode::OptimizeQuality);
     }
 }

@@ -63,8 +63,14 @@ pub(crate) fn get_ctx<T: Renderer>(
     let level = match level {
         #[cfg(target_arch = "aarch64")]
         "neon" => Level::Neon(Level::new().as_neon().expect("neon should be available")),
+        #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
+        "wasm_simd128" => Level::WasmSimd128(
+            Level::new()
+                .as_wasm_simd128()
+                .expect("wasm simd128 should be available"),
+        ),
         "fallback" => Level::fallback(),
-        _ => panic!("unknown level: {}", level),
+        _ => panic!("unknown level: {level}"),
     };
 
     let mut ctx = T::new(width, height, num_threads, level);
@@ -284,7 +290,7 @@ pub(crate) fn check_ref(
     let pixmap = render_pixmap(ctx, render_mode);
 
     let encoded_image = pixmap_to_png(pixmap, ctx.width() as u32, ctx.height() as u32);
-    let ref_path = REFS_PATH.join(format!("{}.png", test_name));
+    let ref_path = REFS_PATH.join(format!("{test_name}.png"));
 
     let write_ref_image = || {
         let optimized =
@@ -310,7 +316,7 @@ pub(crate) fn check_ref(
     let diff_image = get_diff(&ref_image, &actual, threshold, diff_pixels);
 
     if let Some(diff_image) = diff_image {
-        if std::env::var("REPLACE").is_ok() && is_reference {
+        if should_replace() && is_reference {
             write_ref_image();
             panic!("test was replaced");
         }
@@ -319,7 +325,7 @@ pub(crate) fn check_ref(
             let _ = std::fs::create_dir_all(DIFFS_PATH.as_path());
         }
 
-        let diff_path = DIFFS_PATH.join(format!("{}.png", specific_name));
+        let diff_path = DIFFS_PATH.join(format!("{specific_name}.png"));
         diff_image
             .save_with_format(&diff_path, image::ImageFormat::Png)
             .unwrap();
@@ -381,7 +387,7 @@ fn append_diff_image_to_browser_document(specific_name: &str, diff_image: &RgbaI
         .unwrap();
 
     let title = document.create_element("h3").unwrap();
-    title.set_text_content(Some(&format!("Test Failed: {}", specific_name)));
+    title.set_text_content(Some(&format!("Test Failed: {specific_name}")));
     title
         .set_attribute("style", "color: red; margin-top: 0;")
         .unwrap();
@@ -494,4 +500,12 @@ fn is_pix_diff(pixel1: &Rgba<u8>, pixel2: &Rgba<u8>, threshold: u8) -> bool {
     }
 
     different
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn should_replace() -> bool {
+    match std::env::var("REPLACE") {
+        Ok(value) => value == "1",
+        Err(_) => false,
+    }
 }

@@ -370,9 +370,9 @@ checksum = "1628fb46dfa0b37568d12e5edd512553eccf6a22a78e8bde00bb4aed84d5bdbf"
 
 [[package]]
 name = "bytemuck"
-version = "1.23.0"
+version = "1.23.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9134a6ef01ce4b366b50689c94f82c14bc72bc5d0386829828a2e2752ef7958c"
+checksum = "5c76a5792e44e4abe34d3abf15636779261d45a7450612059293d1d2cfc63422"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -919,7 +919,7 @@ dependencies = [
 [[package]]
 name = "fearless_simd"
 version = "0.2.0"
-source = "git+https://github.com/raphlinus/fearless_simd?rev=1c658f7#1c658f79db9eb4014d5bb14ed08c5fb91c44a230"
+source = "git+https://github.com/linebender/fearless_simd?rev=8ca44c0#8ca44c04c186bedcde51de983bfaa54ae3a03e8d"
 dependencies = [
  "bytemuck",
  "libm",
@@ -3742,6 +3742,7 @@ dependencies = [
  "bytemuck",
  "fearless_simd",
  "libm",
+ "once_cell",
  "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=4ed4241767fe3b6c5935d5c283a484871128c6e6)",
  "png",
  "roxmltree",
@@ -3753,8 +3754,8 @@ dependencies = [
 name = "vello_cpu"
 version = "0.0.1"
 dependencies = [
+ "bytemuck",
  "crossbeam-channel",
- "libm",
  "ordered-channel",
  "rayon",
  "thread_local",
@@ -3790,6 +3791,7 @@ name = "vello_hybrid"
 version = "0.5.0"
 dependencies = [
  "bytemuck",
+ "guillotiere",
  "js-sys",
  "log",
  "png",
@@ -3807,6 +3809,7 @@ name = "vello_hybrid_scenes"
 version = "0.0.0"
 dependencies = [
  "bytemuck",
+ "image",
  "parley",
  "vello_common",
  "vello_hybrid",
@@ -3873,6 +3876,7 @@ dependencies = [
  "futures-intrusive",
  "image",
  "nv-flip",
+ "oxipng",
  "png",
  "pollster",
  "scenes",
@@ -4130,6 +4134,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ff694f02a8d7a50b6922b197ae03883fbf18cdb2ae9fbee7b6148456f5f44041"
 dependencies = [
  "leb128",
+]
+
+[[package]]
+name = "wasm_cpu"
+version = "0.5.0"
+dependencies = [
+ "bytemuck",
+ "console_error_panic_hook",
+ "console_log",
+ "js-sys",
+ "log",
+ "parley",
+ "vello_common",
+ "vello_cpu",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-bindgen-test",
+ "web-sys",
+ "wgpu",
 ]
 
 [[package]]

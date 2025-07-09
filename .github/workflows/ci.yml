@@ -3,7 +3,7 @@ env:
   # version like 1.70. Note that we only specify MAJOR.MINOR and not PATCH so that bugfixes still
   # come automatically. If the version specified here is no longer the latest stable version,
   # then please feel free to submit a PR that adjusts it along with the potential clippy fixes.
-  RUST_STABLE_VER: "1.87" # In quotes because otherwise (e.g.) 1.70 would be interpreted as 1.7
+  RUST_STABLE_VER: "1.88" # In quotes because otherwise (e.g.) 1.70 would be interpreted as 1.7
   # The purpose of checking with the minimum supported Rust toolchain is to detect its staleness.
   # If the compilation fails, then the version specified here needs to be bumped up to reality.
   # Be sure to also update the rust-version property in the workspace Cargo.toml file,
@@ -356,7 +356,13 @@ jobs:
         working-directory: sparse_strips/vello_hybrid/examples/native_webgl
 
       - name: Run vello_sparse_tests on Chrome
-        run: wasm-pack test --headless --chrome --features webgl
+        # We need to run in release mode, because otherwise wasm_parser can't read the
+        # blob, see <https://github.com/linebender/vello/pull/1078#issuecomment-3029336905>
+        run: wasm-pack test --headless --chrome --features webgl --release
+        working-directory: sparse_strips/vello_sparse_tests
+
+      - name: Run vello_sparse_tests (+simd128) on Chrome
+        run: RUSTFLAGS=-Ctarget-feature=+simd128 wasm-pack test --headless --chrome --features webgl --release
         working-directory: sparse_strips/vello_sparse_tests
 
 
@@ -475,4 +481,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: check typos
-        uses: crate-ci/typos@v1.32.0
+        uses: crate-ci/typos@v1.34.0

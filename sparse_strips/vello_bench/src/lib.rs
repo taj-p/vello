@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 #![allow(missing_docs, reason = "Not needed for benchmarks")]
+#![allow(dead_code, reason = "Might be unused on platforms not supporting SIMD")]
 
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
 pub mod data;
 pub mod fine;
+pub mod flatten;
 pub mod strip;
 pub mod tile;
 

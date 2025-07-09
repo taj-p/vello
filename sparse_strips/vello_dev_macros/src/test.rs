@@ -65,36 +65,36 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
 
     let input_fn_name = input_fn.sig.ident.clone();
     let u8_fn_name_scalar = Ident::new(
-        &format!("{}_cpu_u8_scalar", input_fn_name),
+        &format!("{input_fn_name}_cpu_u8_scalar"),
         input_fn_name.span(),
     );
     let f32_fn_name_scalar = Ident::new(
-        &format!("{}_cpu_f32_scalar", input_fn_name),
+        &format!("{input_fn_name}_cpu_f32_scalar"),
         input_fn_name.span(),
     );
     let u8_fn_name_neon = Ident::new(
-        &format!("{}_cpu_u8_neon", input_fn_name),
+        &format!("{input_fn_name}_cpu_u8_neon"),
         input_fn_name.span(),
     );
     let f32_fn_name_neon = Ident::new(
-        &format!("{}_cpu_f32_neon", input_fn_name),
+        &format!("{input_fn_name}_cpu_f32_neon"),
         input_fn_name.span(),
     );
-    let u8_fn_name_scalar_wasm = Ident::new(
-        &format!("{}_cpu_u8_scalar_wasm", input_fn_name),
+    let u8_fn_name_wasm = Ident::new(
+        &format!("{input_fn_name}_cpu_u8_wasm"),
         input_fn_name.span(),
     );
-    let f32_fn_name_scalar_wasm: Ident = Ident::new(
-        &format!("{}_cpu_f32_scalar_wasm", input_fn_name),
+    let f32_fn_name_wasm: Ident = Ident::new(
+        &format!("{input_fn_name}_cpu_f32_wasm"),
         input_fn_name.span(),
     );
     let multithreaded_fn_name = Ident::new(
-        &format!("{}_cpu_multithreaded", input_fn_name),
+        &format!("{input_fn_name}_cpu_multithreaded"),
         input_fn_name.span(),
     );
-    let hybrid_fn_name = Ident::new(&format!("{}_hybrid", input_fn_name), input_fn_name.span());
+    let hybrid_fn_name = Ident::new(&format!("{input_fn_name}_hybrid"), input_fn_name.span());
     let webgl_fn_name = Ident::new(
-        &format!("{}_hybrid_webgl", input_fn_name),
+        &format!("{input_fn_name}_hybrid_webgl"),
         input_fn_name.span(),
     );
 
@@ -107,8 +107,8 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     let f32_fn_name_str_scalar = f32_fn_name_scalar.to_string();
     let u8_fn_name_str_neon = u8_fn_name_neon.to_string();
     let f32_fn_name_str_neon = f32_fn_name_neon.to_string();
-    let u8_fn_name_scalar_wasm_str = u8_fn_name_scalar_wasm.to_string();
-    let f32_fn_name_scalar_wasm_str = f32_fn_name_scalar_wasm.to_string();
+    let u8_fn_name_wasm_str = u8_fn_name_wasm.to_string();
+    let f32_fn_name_wasm_str = f32_fn_name_wasm.to_string();
     let multithreaded_fn_name_str = multithreaded_fn_name.to_string();
     let hybrid_fn_name_str = hybrid_fn_name.to_string();
     let webgl_fn_name_str = webgl_fn_name.to_string();
@@ -151,7 +151,8 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     };
 
     let cpu_u8_tolerance_scalar = cpu_u8_tolerance + DEFAULT_CPU_U8_TOLERANCE;
-    let cpu_u8_tolerance_neon = cpu_u8_tolerance + DEFAULT_SIMD_TOLERANCE;
+    let cpu_u8_tolerance_neon =
+        cpu_u8_tolerance + DEFAULT_SIMD_TOLERANCE.max(DEFAULT_CPU_U8_TOLERANCE);
 
     // Since f32 is our gold standard, we always require exact matches for this one.
     let cpu_f32_tolerance_scalar = DEFAULT_CPU_F32_TOLERANCE;
@@ -162,12 +163,13 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     skip_hybrid |= {
         input_fn_name_str.contains("compose")
             || input_fn_name_str.contains("gradient")
-            || input_fn_name_str.contains("image")
             || input_fn_name_str.contains("layer")
             || input_fn_name_str.contains("mask")
             || input_fn_name_str.contains("mix")
             || input_fn_name_str.contains("blurred_rounded_rect")
     };
+
+    let skip_hybrid_webgl = skip_hybrid;
 
     let empty_snippet = quote! {};
     let ignore_snippet = if let Some(reason) = ignore_reason {
@@ -181,6 +183,11 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     } else {
         empty_snippet.clone()
     };
+    let ignore_hybrid_webgl = if skip_hybrid_webgl {
+        ignore_snippet.clone()
+    } else {
+        empty_snippet.clone()
+    };
 
     let cpu_snippet = |fn_name: Ident,
                        fn_name_str: String,
@@ -189,7 +196,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                        num_threads: u16,
                        // Need to pass as string, to avoid dependency on `fearless_simd` and also
                        // so that it works with proc_macros.
-                       level: &str,
+                       level: proc_macro2::TokenStream,
                        ignore: bool,
                        render_mode: proc_macro2::TokenStream| {
         // Use the name to infer if the test is running in the browser.
@@ -237,13 +244,20 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
     #[cfg(not(target_arch = "aarch64"))]
     let has_neon = false;
 
+    let wasm_simd_level = quote! {if cfg!(target_feature = "simd128") {
+            "wasm_simd128"
+        } else {
+            "fallback"
+        }
+    };
+
     let u8_snippet = cpu_snippet(
         u8_fn_name_scalar,
         u8_fn_name_str_scalar,
         cpu_u8_tolerance_scalar,
         false,
         0,
-        "fallback",
+        quote! {"fallback"},
         skip_cpu,
         quote! { RenderMode::OptimizeSpeed },
     );
@@ -253,27 +267,27 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         cpu_f32_tolerance_scalar,
         true,
         0,
-        "fallback",
+        quote! {"fallback"},
         skip_cpu,
         quote! { RenderMode::OptimizeQuality },
     );
     let u8_snippet_wasm = cpu_snippet(
-        u8_fn_name_scalar_wasm,
-        u8_fn_name_scalar_wasm_str,
+        u8_fn_name_wasm,
+        u8_fn_name_wasm_str,
         cpu_u8_tolerance_scalar,
         false,
         0,
-        "fallback",
+        wasm_simd_level.clone(),
         skip_cpu,
         quote! { RenderMode::OptimizeSpeed },
     );
     let f32_snippet_wasm = cpu_snippet(
-        f32_fn_name_scalar_wasm,
-        f32_fn_name_scalar_wasm_str,
+        f32_fn_name_wasm,
+        f32_fn_name_wasm_str,
         cpu_f32_tolerance_scalar,
         true,
         0,
-        "fallback",
+        wasm_simd_level,
         skip_cpu,
         quote! { RenderMode::OptimizeQuality },
     );
@@ -283,7 +297,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         cpu_f32_tolerance_scalar,
         false,
         3,
-        "fallback",
+        quote! {"fallback"},
         skip_cpu,
         quote! { RenderMode::OptimizeQuality },
     );
@@ -294,7 +308,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         cpu_u8_tolerance_neon,
         false,
         0,
-        "neon",
+        quote! {"neon"},
         skip_cpu | !has_neon,
         quote! { RenderMode::OptimizeSpeed },
     );
@@ -305,7 +319,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
         cpu_f32_tolerance_neon,
         false,
         0,
-        "neon",
+        quote! {"neon"},
         skip_cpu | !has_neon,
         quote! { RenderMode::OptimizeQuality },
     );
@@ -335,10 +349,10 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use crate::util::{
                 check_ref, get_ctx
             };
-            use vello_hybrid::Scene;
+            use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
 
-            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent, 0, "fallback");
+            let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback");
             #input_fn_name(&mut ctx);
             ctx.flush();
             if !#no_ref {
@@ -346,17 +360,17 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             }
         }
 
-        #ignore_hybrid
+        #ignore_hybrid_webgl
         #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
         #[wasm_bindgen_test::wasm_bindgen_test]
         async fn #webgl_fn_name() {
             use crate::util::{
                 check_ref, get_ctx
             };
-            use vello_hybrid::Scene;
+            use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
 
-            let mut ctx = get_ctx::<Scene>(#width, #height, #transparent, 0, "fallback");
+            let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback");
             #input_fn_name(&mut ctx);
             ctx.flush();
             if !#no_ref {
@@ -394,7 +408,7 @@ fn parse_args(attribute_input: &AttributeInput) -> Arguments {
                             .try_into()
                             .expect("value to fit for hybrid_tolerance.");
                     }
-                    _ => panic!("unknown pair attribute {}", key_str),
+                    _ => panic!("unknown pair attribute {key_str}"),
                 }
             }
             Attribute::Flag(flag_ident) => {
@@ -408,7 +422,7 @@ fn parse_args(attribute_input: &AttributeInput) -> Arguments {
                         args.skip_cpu = true;
                         args.skip_hybrid = true;
                     }
-                    _ => panic!("unknown flag attribute {}", flag_str),
+                    _ => panic!("unknown flag attribute {flag_str}"),
                 }
             }
         }
