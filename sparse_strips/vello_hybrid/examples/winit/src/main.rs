@@ -9,9 +9,9 @@ use render_context::{RenderContext, RenderSurface, create_vello_renderer, create
 use std::env;
 use std::sync::Arc;
 use vello_common::color::palette::css::WHITE;
-use vello_common::color::{AlphaColor, Srgb};
-use vello_common::kurbo::{Affine, Point};
-use vello_hybrid::{RenderSize, Renderer, Scene};
+use vello_common::color::{AlphaColor, Srgb, palette};
+use vello_common::kurbo::{Affine, BezPath, Point};
+use vello_hybrid::{RenderCommand, RenderSize, Renderer, Scene};
 use vello_hybrid_scenes::{AnyScene, get_example_scenes};
 use winit::{
     application::ApplicationHandler,
@@ -261,7 +261,7 @@ impl ApplicationHandler for App<'_> {
                 self.scene.reset();
 
                 self.scene.set_transform(self.transform);
-                self.scenes[self.current_scene].render(&mut self.scene, self.transform);
+                //self.scenes[self.current_scene].render(&mut self.scene, self.transform);
 
                 let device_handle = &self.context.devices[surface.dev_id];
                 let render_size = RenderSize {
@@ -284,9 +284,25 @@ impl ApplicationHandler for App<'_> {
                         .create_command_encoder(&wgpu::CommandEncoderDescriptor {
                             label: Some("Vello Render to Surface pass"),
                         });
-                self.renderers[surface.dev_id]
-                    .as_mut()
-                    .unwrap()
+
+                let renderer = self.renderers[surface.dev_id].as_mut().unwrap();
+
+                let mut path = BezPath::new();
+                path.move_to((10.0, 10.0));
+                path.line_to((180.0, 20.0));
+                path.line_to((30.0, 40.0));
+                path.close_path();
+
+                // Maybe need this in `RenderCommand` too?
+                self.scene.set_paint(palette::css::REBECCA_PURPLE);
+
+                // Store result in ECS. ECS will destroy the node whenever it sees a change.
+                let cached_strips = self.scene.cache_commands(&[RenderCommand::FillPath(path)]);
+
+                // Pull cached_strips from ecs and render them.
+                self.scene.render_cached_strips(&cached_strips);
+
+                renderer
                     .render(
                         &self.scene,
                         &device_handle.device,

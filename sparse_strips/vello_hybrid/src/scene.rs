@@ -21,6 +21,31 @@ use vello_common::{flatten, strip};
 /// Default tolerance for curve flattening
 pub(crate) const DEFAULT_TOLERANCE: f64 = 0.1;
 
+/// A rendering command that can be cached and executed later.
+#[derive(Debug, Clone)]
+pub enum RenderCommand {
+    /// Fill a path with the current paint and fill rule.
+    FillPath(BezPath),
+    /// Stroke a path with the current paint and stroke settings.
+    StrokePath(BezPath),
+    /// Fill a rectangle with the current paint and fill rule.
+    FillRect(Rect),
+    /// Stroke a rectangle with the current paint and stroke settings.
+    StrokeRect(Rect),
+}
+
+impl RenderCommand {
+    /// Execute this command on the given scene.
+    fn execute(&self, scene: &mut Scene) {
+        match self {
+            RenderCommand::FillPath(path) => scene.fill_path(path),
+            RenderCommand::StrokePath(path) => scene.stroke_path(path),
+            RenderCommand::FillRect(rect) => scene.fill_rect(rect),
+            RenderCommand::StrokeRect(rect) => scene.stroke_rect(rect),
+        }
+    }
+}
+
 /// A render state which contains the style properties for path rendering and
 /// the current transform.
 #[derive(Debug)]
@@ -270,6 +295,119 @@ impl Scene {
             fill_rule,
             &self.line_buf,
         );
+    }
+
+    // TODO: Probably want API for caching a single command...
+    // TODO: There's definitely a better API and way to prevent some allocations.
+    // TODO: There might be a way to use 1 vec for N commands by understanding where in the vec
+    // some command points to (i.e. an arena-like approach).
+    /// Cache multiple rendering commands executed serially.
+    ///
+    /// # Example
+    /// ```rust,ignore
+    /// let commands = vec![
+    ///     RenderCommand::FillRect(rect1),
+    ///     RenderCommand::StrokePath(path1),
+    /// ];
+    /// let cached = scene.cache_commands(&commands);
+    /// scene.render_cached_strips(&cached);
+    /// ```
+    pub fn cache_commands(&mut self, commands: &[RenderCommand]) -> CachedStrips {
+        let mut combined_strips = Vec::new();
+        let mut combined_alphas = Vec::new();
+
+        for command in commands {
+            let initial_strips_len = self.strip_buf.len();
+            let initial_alphas_len = self.alphas.len();
+            command.execute(self);
+            let cached = self.create_cached_strips(initial_strips_len, initial_alphas_len);
+
+            // Adjust alpha indices for the combined buffer
+            let alpha_offset = combined_alphas.len() as u32;
+            let mut adjusted_strips = cached.strips;
+            for strip in &mut adjusted_strips {
+                strip.alpha_idx += alpha_offset;
+            }
+
+            combined_strips.extend(adjusted_strips);
+            combined_alphas.extend(cached.alphas);
+        }
+
+        CachedStrips {
+            strips: combined_strips,
+            alphas: combined_alphas,
+        }
+    }
+
+    fn create_cached_strips(
+        &mut self,
+        initial_strips_len: usize,
+        initial_alphas_len: usize,
+    ) -> CachedStrips {
+        // Extract the new strips and alphas that were added
+        let new_strips = if self.strip_buf.len() > initial_strips_len {
+            let mut strips = self.strip_buf[initial_strips_len..].to_vec();
+            // Normalize alpha indices to start from 0
+            let alpha_offset = initial_alphas_len as u32;
+            for strip in &mut strips {
+                strip.alpha_idx -= alpha_offset;
+            }
+            strips
+        } else {
+            Vec::new()
+        };
+
+        let new_alphas = if self.alphas.len() > initial_alphas_len {
+            self.alphas[initial_alphas_len..].to_vec()
+        } else {
+            Vec::new()
+        };
+
+        CachedStrips {
+            strips: new_strips,
+            alphas: new_alphas,
+        }
+    }
+
+    /// Render previously cached strips with the current paint settings.
+    pub fn render_cached_strips(&mut self, cached: &CachedStrips) {
+        if cached.strips.is_empty() {
+            return;
+        }
+
+        let start_alpha_idx = self.alphas.len() as u32;
+        let mut strips = cached.strips.clone();
+        for strip in &mut strips {
+            strip.alpha_idx += start_alpha_idx;
+        }
+
+        self.alphas.extend_from_slice(&cached.alphas);
+        let paint = self.encode_current_paint();
+        self.wide.generate(&strips, self.fill_rule, paint);
+    }
+}
+
+/// Cached strip data that can be rendered multiple times efficiently.
+// TODO: Reuse this alloc
+#[derive(Debug, Clone)]
+pub struct CachedStrips {
+    strips: Vec<Strip>,
+    alphas: Vec<u8>,
+}
+
+// TODO: Allow translation of these strips.
+impl CachedStrips {
+    pub fn new() -> Self {
+        Self {
+            strips: Vec::new(),
+            alphas: Vec::new(),
+        }
+    }
+}
+
+impl Default for CachedStrips {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
