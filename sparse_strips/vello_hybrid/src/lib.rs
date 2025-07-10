@@ -42,7 +42,7 @@ pub mod util;
 #[cfg(feature = "wgpu")]
 pub use render::{AtlasWriter, RenderTargetConfig, Renderer};
 pub use render::{Config, GpuStrip, RenderSize};
-#[cfg(all(target_arch = "wasm32", feature = "webgl"))]
+#[cfg(feature = "webgl")]
 pub use render::{WebGlAtlasWriter, WebGlRenderer, WebGlTextureWithDimensions};
 pub use scene::Scene;
 pub use util::DimensionConstraints;
