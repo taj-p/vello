@@ -44,7 +44,7 @@ pub use render::WebGlRenderer;
 pub use render::{Config, GpuStrip, RenderSize};
 #[cfg(feature = "wgpu")]
 pub use render::{RenderTargetConfig, Renderer};
-pub use scene::{CachedStrips, Scene};
+pub use scene::{CachedStrips, RenderCommand, Scene};
 pub use util::DimensionConstraints;
 pub use vello_common::pixmap::Pixmap;
 
