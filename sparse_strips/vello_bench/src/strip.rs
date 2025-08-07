@@ -29,6 +29,7 @@ pub fn render_strips(c: &mut Criterion) {
                         &mut strip_buf,
                         &mut alpha_buf,
                         Fill::NonZero,
+                        true,
                         &lines,
                     );
                     std::hint::black_box((&strip_buf, &alpha_buf));
@@ -38,7 +39,8 @@ pub fn render_strips(c: &mut Criterion) {
     }
 
     for item in get_data_items() {
-        strip_single!(item, Level::fallback(), "fallback");
+        // Commenting this out by default since SIMD is what we care about most.
+        // strip_single!(item, Level::fallback(), "fallback");
         let simd_level = Level::new();
         if !matches!(simd_level, Level::Fallback(_)) {
             strip_single!(item, simd_level, "simd");

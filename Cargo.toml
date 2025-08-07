@@ -102,13 +102,13 @@ bytemuck = { version = "1.23.0", features = ["derive"] }
 skrifa = { version = "0.31.0", default-features = false, features = ["autohint_shaping"] }
 # The version of kurbo used below should be kept in sync
 # with the version of kurbo used by peniko.
-# See: https://github.com/linebender/peniko/compare/main...taj-p:peniko:tajp/fastStroke
-peniko = { git = "https://github.com/taj-p/peniko.git", rev = "4ed4241767fe3b6c5935d5c283a484871128c6e6", default-features = false }
+# See: https://github.com/linebender/peniko/compare/main...taj-p:peniko:tajp/fastStroke (uses Kurbo main)
+peniko = { git = "https://github.com/taj-p/peniko.git", rev = "2b0a17d1805d3dd4cac255365a600609272ed4b3", default-features = false }
 # FIXME: This can be removed once peniko supports the schemars feature.
-# See: https://github.com/linebender/kurbo/compare/main...taj-p:kurbo:tajp/fastStrokeOnMain
-kurbo = { git = "https://github.com/taj-p/kurbo.git", rev = "8c47b0bc9bbc3f5949057fccc2c179f694d482db", default-features = false }
+# Kurbo main.
+kurbo = { git = "https://github.com/linebender/kurbo.git", rev = "1312d43a6ef78e3eaea6e2209e942d9426766f04", default-features = false }
 futures-intrusive = "0.5.0"
-smallvec = "1.15.0"
+smallvec = "1.15.1"
 static_assertions = "1.1.0"
 thiserror = "2.0.12"
 oxipng = { version = "9.1.5", default-features = false }
@@ -117,7 +117,7 @@ rayon = { version = "1.10.0" }
 thread_local = "1.1.8"
 crossbeam-channel = "0.5.15"
 ordered-channel = { version = "1.2.0", features = ["crossbeam-channel"] }
-fearless_simd = { git = "https://github.com/linebender/fearless_simd", rev = "8ca44c0", default-features = false }
+fearless_simd = { git = "https://github.com/linebender/fearless_simd", rev = "3d1a77c", default-features = false }
 
 # The below crates are experimental!
 vello_api = { path = "sparse_strips/vello_api", default-features = false }
@@ -129,7 +129,7 @@ vello_hybrid_scenes = { path = "sparse_strips/vello_hybrid/examples/scenes" }
 vello_dev_macros = { path = "sparse_strips/vello_dev_macros" }
 
 # NOTE: Make sure to keep this in sync with the version badge in README.md and vello/README.md
-wgpu = { version = "24.0.3" }
+wgpu = { version = "25.0.2" }
 log = "0.4.27"
 image = { version = "0.25.6", default-features = false }
 
@@ -138,7 +138,7 @@ clap = "4.5.38"
 anyhow = "1.0.98"
 pollster = "0.4.0"
 web-time = "1.1.0"
-wgpu-profiler = "0.22.0"
+wgpu-profiler = "0.23.0"
 winit = "0.30.10"
 scenes = { path = "examples/scenes" }
 svg = "0.18.0"

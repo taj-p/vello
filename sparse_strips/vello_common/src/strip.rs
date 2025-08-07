@@ -6,6 +6,7 @@
 use crate::flatten::Line;
 use crate::peniko::Fill;
 use crate::tile::{Tile, Tiles};
+use crate::util::f32_to_u8;
 use alloc::vec::Vec;
 use fearless_simd::*;
 
@@ -37,9 +38,18 @@ pub fn render(
     strip_buf: &mut Vec<Strip>,
     alpha_buf: &mut Vec<u8>,
     fill_rule: Fill,
+    anti_aliasing: bool,
     lines: &[Line],
 ) {
-    render_dispatch(level, tiles, strip_buf, alpha_buf, fill_rule, lines);
+    render_dispatch(
+        level,
+        tiles,
+        strip_buf,
+        alpha_buf,
+        fill_rule,
+        anti_aliasing,
+        lines,
+    );
 }
 
 simd_dispatch!(render_dispatch(
@@ -48,6 +58,7 @@ simd_dispatch!(render_dispatch(
     strip_buf: &mut Vec<Strip>,
     alpha_buf: &mut Vec<u8>,
     fill_rule: Fill,
+    anti_aliasing: bool,
     lines: &[Line],
 ) = render_impl);
 
@@ -57,6 +68,7 @@ fn render_impl<S: Simd>(
     strip_buf: &mut Vec<Strip>,
     alpha_buf: &mut Vec<u8>,
     fill_rule: Fill,
+    anti_aliasing: bool,
     lines: &[Line],
 ) {
     strip_buf.clear();
@@ -114,12 +126,11 @@ fn render_impl<S: Simd>(
                         let area = location_winding[x];
                         let coverage = area.abs();
                         let mulled = p1.madd(coverage, p2);
-                        let slice = mulled.val;
-                        // TODO: Improve this
-                        alpha_buf.push(slice[0] as u8);
-                        alpha_buf.push(slice[1] as u8);
-                        alpha_buf.push(slice[2] as u8);
-                        alpha_buf.push(slice[3] as u8);
+                        // Note that we are not storing the location winding here but the actual
+                        // alpha value as f32, so we reuse the variable as a temporary storage.
+                        // Also note that we need the `min` here because the winding can be > 1
+                        // and thus the calculated alpha value need to be clamped to 255.
+                        location_winding[x] = mulled.min(p2);
                     }
                 }
                 Fill::EvenOdd => {
@@ -133,15 +144,27 @@ fn render_impl<S: Simd>(
                         let im1 = p1.madd(area, p1).floor();
                         let coverage = area.madd(p2, im1).abs();
                         let mulled = p1.madd(p3, coverage);
-                        let slice = mulled.val;
-                        // TODO: Improve this
-                        alpha_buf.push(slice[0] as u8);
-                        alpha_buf.push(slice[1] as u8);
-                        alpha_buf.push(slice[2] as u8);
-                        alpha_buf.push(slice[3] as u8);
+                        // TODO: It is possible that, unlike for `NonZero`, we don't need the `min`
+                        // here.
+                        location_winding[x] = mulled.min(p3);
                     }
                 }
             };
+
+            let p1 = s.combine_f32x4(location_winding[0], location_winding[1]);
+            let p2 = s.combine_f32x4(location_winding[2], location_winding[3]);
+
+            let mut u8_vals = f32_to_u8(s.combine_f32x8(p1, p2));
+
+            if !anti_aliasing {
+                u8_vals = s.select_u8x16(
+                    u8_vals.simd_ge(u8x16::splat(s, 128)),
+                    u8x16::splat(s, 255),
+                    u8x16::splat(s, 0),
+                );
+            }
+
+            alpha_buf.extend_from_slice(&u8_vals.val);
 
             #[expect(clippy::needless_range_loop, reason = "dimension clarity")]
             for x in 0..Tile::WIDTH as usize {
