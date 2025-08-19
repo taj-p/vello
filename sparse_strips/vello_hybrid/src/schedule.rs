@@ -237,7 +237,7 @@ pub(crate) struct Scheduler {
 /// copied back to the other texture because we need to ensure the two slots we are blending are in
 /// the same texture.
 #[derive(Debug)]
-struct PendingWideTileWork<'a> {
+struct PendingWideTileWork {
     /// Used to reference the wide tile.
     wide_tile_col: u16,
     /// Used to reference the wide tile.
@@ -249,7 +249,7 @@ struct PendingWideTileWork<'a> {
     /// Round at which this work was suspended. Used to calculate round offsets.
     suspended_at_round: usize,
     /// The draw commands being iterated to draw the wide tile.
-    annotated_cmds: Vec<AnnotatedCmd<'a>>,
+    annotated_cmds: Vec<AnnotatedCmd>,
 }
 
 /// A "round" is a coarse scheduling quantum.
@@ -301,9 +301,9 @@ impl ClaimedSlot {
 /// TODO: In the future these annotations could be optionally enabled in coarse.rs directly avoiding
 /// the need to do linear scans.
 #[derive(Debug)]
-enum AnnotatedCmd<'a> {
+enum AnnotatedCmd {
     /// A wrapped command - no semantic meaning added.
-    IdentityBorrowed(&'a Cmd),
+    IdentityBorrowed(usize),
     PushBuf,
     Empty,
     SrcOverNormalBlend,
@@ -313,10 +313,10 @@ enum AnnotatedCmd<'a> {
     PushBufWithTemporarySlot,
 }
 
-impl<'a> AnnotatedCmd<'a> {
-    fn as_cmd<'b: 'a>(&'b self) -> Option<&'a Cmd> {
+impl AnnotatedCmd {
+    fn as_cmd<'a>(&'a self, cmds: &'a[Cmd]) -> Option<&'a Cmd> {
         match self {
-            AnnotatedCmd::IdentityBorrowed(cmd) => Some(cmd),
+            AnnotatedCmd::IdentityBorrowed(idx) => Some(&cmds[*idx]),
             AnnotatedCmd::PushBufWithTemporarySlot => Some(&Cmd::PushBuf),
             AnnotatedCmd::PushBuf => Some(&Cmd::PushBuf),
             AnnotatedCmd::SrcOverNormalBlend => Some(&Cmd::Blend(BlendMode {
@@ -421,14 +421,14 @@ impl Scheduler {
         }
     }
 
-    pub(crate) fn do_scene<'scene, R: RendererBackend>(
+    pub(crate) fn do_scene<R: RendererBackend>(
         &mut self,
         renderer: &mut R,
-        scene: &'scene Scene,
+        scene: &Scene,
     ) -> Result<(), RenderError> {
         let wide_tiles_per_row = scene.wide.width_tiles();
         let wide_tiles_per_col = scene.wide.height_tiles();
-        let mut pending_work: Vec<PendingWideTileWork<'scene>> = Default::default();
+        let mut pending_work: Vec<PendingWideTileWork> = Default::default();
 
         // Left to right, top to bottom iteration over wide tiles.
         for wide_tile_row in 0..wide_tiles_per_col {
@@ -461,7 +461,7 @@ impl Scheduler {
                 self.flush(renderer);
             }
 
-            let pending: Vec<PendingWideTileWork<'scene>> = mem::take(&mut pending_work);
+            let pending: Vec<PendingWideTileWork> = mem::take(&mut pending_work);
             for work in pending {
                 let wide_tile_col = work.wide_tile_col;
                 let wide_tile_row = work.wide_tile_row;
@@ -474,12 +474,14 @@ impl Scheduler {
                     el.round += round_offset;
                 }
 
+                let wide_tile = scene.wide.get(wide_tile_col, wide_tile_row);
                 if let Some(next_cmd_idx) = self.do_tile(
                     renderer,
                     scene,
                     wide_tile_x,
                     wide_tile_y,
                     &work.annotated_cmds,
+                    &wide_tile.cmds,
                     &mut tile_state,
                     work.next_cmd_idx,
                 )? {
@@ -638,13 +640,14 @@ impl Scheduler {
     ///
     /// Returns `Some(command_idx)` if there is more work to be done. Returns `None` if the wide
     /// tile has been fully consumed.
-    fn do_tile<'a, R: RendererBackend>(
+    fn do_tile<R: RendererBackend>(
         &mut self,
         renderer: &mut R,
         scene: &Scene,
         wide_tile_x: u16,
         wide_tile_y: u16,
-        cmds: &[AnnotatedCmd<'a>],
+        cmds: &[AnnotatedCmd],
+        original_cmds: &[Cmd],
         state: &mut TileState,
         start_cmd_idx: usize,
     ) -> Result<Option<usize>, RenderError> {
@@ -653,7 +656,7 @@ impl Scheduler {
             let cmd_idx = start_cmd_idx + offset_cmd_idx;
             // Note: this starts at 1 (for the final target)
             let clip_depth = state.stack.len();
-            let cmd = annotated_cmd.as_cmd();
+            let cmd = annotated_cmd.as_cmd(original_cmds);
             if cmd.is_none() {
                 continue;
             }
@@ -1126,14 +1129,14 @@ fn has_non_zero_alpha(rgba: u32) -> bool {
 ///
 /// TODO: Can be triggered via a const generic on coarse draw cmd generation which will avoid
 /// a linear scan.
-fn prepare_cmds<'a>(cmds: &'a [Cmd]) -> Vec<AnnotatedCmd<'a>> {
-    let mut annotated_commands: Vec<AnnotatedCmd<'a>> = Default::default();
+fn prepare_cmds(cmds: &[Cmd]) -> Vec<AnnotatedCmd> {
+    let mut annotated_commands: Vec<AnnotatedCmd> = Default::default();
     let mut pointer_to_push_buf_stack: Vec<usize> = Default::default();
     // We pretend that the surface might be blended into. This will be removed if no blends occur to
     // the surface.
     pointer_to_push_buf_stack.push(0);
     annotated_commands.push(AnnotatedCmd::PushBuf);
-    for cmd in cmds {
+    for (idx, cmd) in cmds.iter().enumerate() {
         match cmd {
             Cmd::PushBuf => {
                 pointer_to_push_buf_stack.push(annotated_commands.len());
@@ -1154,7 +1157,7 @@ fn prepare_cmds<'a>(cmds: &'a [Cmd]) -> Vec<AnnotatedCmd<'a>> {
             _ => {}
         };
 
-        annotated_commands.push(AnnotatedCmd::IdentityBorrowed(cmd));
+        annotated_commands.push(AnnotatedCmd::IdentityBorrowed(idx));
     }
 
     if matches!(
