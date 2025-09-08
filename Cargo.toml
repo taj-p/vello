@@ -42,7 +42,7 @@ version = "0.5.0"
 edition = "2024"
 # Keep in sync with RUST_MIN_VER in .github/workflows/ci.yml, with the relevant README.md files
 # and with the MSRV in the `Unreleased` section of CHANGELOG.md.
-rust-version = "1.85"
+rust-version = "1.86"
 license = "Apache-2.0 OR MIT"
 repository = "https://github.com/linebender/vello"
 
@@ -99,14 +99,14 @@ vello = { version = "0.5.0", path = "vello" }
 vello_encoding = { version = "0.5.0", path = "vello_encoding" }
 vello_shaders = { version = "0.5.0", path = "vello_shaders" }
 bytemuck = { version = "1.23.0", features = ["derive"] }
-skrifa = { version = "0.31.0", default-features = false, features = ["autohint_shaping"] }
+skrifa = { version = "0.36.0", default-features = false, features = ["autohint_shaping"] }
 # The version of kurbo used below should be kept in sync
 # with the version of kurbo used by peniko.
 # See: https://github.com/linebender/peniko/compare/main...taj-p:peniko:tajp/fastStroke (uses Kurbo main)
-peniko = { git = "https://github.com/taj-p/peniko.git", rev = "2b0a17d1805d3dd4cac255365a600609272ed4b3", default-features = false }
+peniko = { git = "https://github.com/taj-p/peniko.git", rev = "2bac557d186334fcf057cb5575a8b31c010310ae", default-features = false }
 # FIXME: This can be removed once peniko supports the schemars feature.
 # Kurbo main.
-kurbo = { git = "https://github.com/linebender/kurbo.git", rev = "1312d43a6ef78e3eaea6e2209e942d9426766f04", default-features = false }
+kurbo = { version = "0.12.0", default-features = false }
 futures-intrusive = "0.5.0"
 smallvec = "1.15.1"
 static_assertions = "1.1.0"
@@ -117,7 +117,7 @@ rayon = { version = "1.10.0" }
 thread_local = "1.1.8"
 crossbeam-channel = "0.5.15"
 ordered-channel = { version = "1.2.0", features = ["crossbeam-channel"] }
-fearless_simd = { git = "https://github.com/linebender/fearless_simd", rev = "3d1a77c", default-features = false }
+fearless_simd = { version = "0.2.0", default-features = false }
 
 # The below crates are experimental!
 vello_api = { path = "sparse_strips/vello_api", default-features = false }
@@ -129,7 +129,7 @@ vello_hybrid_scenes = { path = "sparse_strips/vello_hybrid/examples/scenes" }
 vello_dev_macros = { path = "sparse_strips/vello_dev_macros" }
 
 # NOTE: Make sure to keep this in sync with the version badge in README.md and vello/README.md
-wgpu = { version = "25.0.2" }
+wgpu = { version = "26.0.1" }
 log = "0.4.27"
 image = { version = "0.25.6", default-features = false }
 
@@ -138,7 +138,7 @@ clap = "4.5.38"
 anyhow = "1.0.98"
 pollster = "0.4.0"
 web-time = "1.1.0"
-wgpu-profiler = "0.23.0"
+wgpu-profiler = "0.24.0"
 winit = "0.30.10"
 scenes = { path = "examples/scenes" }
 svg = "0.18.0"

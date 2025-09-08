@@ -93,8 +93,13 @@ impl Renderer {
         // TODO: For the time being, we upload the entire alpha buffer as one big chunk. As a future
         // refinement, we could have a bounded alpha buffer, and break draws when the alpha
         // buffer fills.
-        self.programs
-            .prepare(device, queue, &scene.alphas, encoded_paints, render_size);
+        self.programs.prepare(
+            device,
+            queue,
+            scene.strip_generator.alpha_buf(),
+            encoded_paints,
+            render_size,
+        );
         let mut junk = RendererContext {
             programs: &mut self.programs,
             device,
@@ -1065,6 +1070,7 @@ impl RendererContext<'_> {
                 } else {
                     &self.programs.resources.slot_texture_views[ix]
                 },
+                depth_slice: None,
                 resolve_target: None,
                 ops: wgpu::Operations {
                     load,
@@ -1111,6 +1117,7 @@ impl RendererContext<'_> {
                 label: Some("Clear Slots Render Pass"),
                 color_attachments: &[Some(RenderPassColorAttachment {
                     view: &resources.slot_texture_views[ix],
+                    depth_slice: None,
                     resolve_target: None,
                     ops: wgpu::Operations {
                         // Don't clear the entire texture, just specific slots

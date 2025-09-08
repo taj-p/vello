@@ -10,6 +10,7 @@ use vello_common::mask::Mask;
 use vello_common::paint::{ImageSource, PaintType};
 use vello_common::peniko::{BlendMode, Fill, Font};
 use vello_common::pixmap::Pixmap;
+use vello_common::recording::{Recordable, Recorder, Recording};
 use vello_cpu::{Level, RenderContext, RenderMode, RenderSettings};
 use vello_hybrid::Scene;
 #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
@@ -18,7 +19,13 @@ use web_sys::WebGl2RenderingContext;
 pub(crate) trait Renderer: Sized + GlyphRenderer {
     type GlyphRenderer: GlyphRenderer;
 
-    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self;
+    fn new(
+        width: u16,
+        height: u16,
+        num_threads: u16,
+        level: Level,
+        render_mode: RenderMode,
+    ) -> Self;
     fn fill_path(&mut self, path: &BezPath);
     fn stroke_path(&mut self, path: &BezPath);
     fn fill_rect(&mut self, rect: &Rect);
@@ -43,20 +50,33 @@ pub(crate) trait Renderer: Sized + GlyphRenderer {
     fn set_paint_transform(&mut self, affine: Affine);
     fn set_fill_rule(&mut self, fill_rule: Fill);
     fn set_transform(&mut self, transform: Affine);
-    fn set_anti_aliasing(&mut self, value: bool);
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap, render_mode: RenderMode);
+    fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>);
+    fn render_to_pixmap(&self, pixmap: &mut Pixmap);
     fn width(&self) -> u16;
     fn height(&self) -> u16;
     fn get_image_source(&mut self, pixmap: Arc<Pixmap>) -> ImageSource;
+    fn record(&mut self, recording: &mut Recording, f: impl FnOnce(&mut Recorder<'_>));
+    fn prepare_recording(&mut self, recording: &mut Recording);
+    fn execute_recording(&mut self, recording: &Recording);
 }
 
 impl Renderer for RenderContext {
     type GlyphRenderer = Self;
 
-    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self {
-        let settings = RenderSettings { level, num_threads };
+    fn new(
+        width: u16,
+        height: u16,
+        num_threads: u16,
+        level: Level,
+        render_mode: RenderMode,
+    ) -> Self {
+        let settings = RenderSettings {
+            level,
+            num_threads,
+            render_mode,
+        };
 
-        Self::new_with(width, height, &settings)
+        Self::new_with(width, height, settings)
     }
 
     fn fill_path(&mut self, path: &BezPath) {
@@ -137,12 +157,12 @@ impl Renderer for RenderContext {
         Self::set_transform(self, transform);
     }
 
-    fn set_anti_aliasing(&mut self, value: bool) {
-        Self::set_anti_aliasing(self, value);
+    fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>) {
+        Self::set_aliasing_threshold(self, aliasing_threshold);
     }
 
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap, render_mode: RenderMode) {
-        Self::render_to_pixmap(self, pixmap, render_mode);
+    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
+        Self::render_to_pixmap(self, pixmap);
     }
 
     fn width(&self) -> u16 {
@@ -155,6 +175,18 @@ impl Renderer for RenderContext {
 
     fn get_image_source(&mut self, pixmap: Arc<Pixmap>) -> ImageSource {
         ImageSource::Pixmap(pixmap)
+    }
+
+    fn record(&mut self, recording: &mut Recording, f: impl FnOnce(&mut Recorder<'_>)) {
+        Recordable::record(self, recording, f);
+    }
+
+    fn prepare_recording(&mut self, recording: &mut Recording) {
+        Recordable::prepare_recording(self, recording);
+    }
+
+    fn execute_recording(&mut self, recording: &Recording) {
+        Recordable::execute_recording(self, recording);
     }
 }
 
@@ -172,7 +204,7 @@ pub(crate) struct HybridRenderer {
 impl Renderer for HybridRenderer {
     type GlyphRenderer = Scene;
 
-    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self {
+    fn new(width: u16, height: u16, num_threads: u16, level: Level, _: RenderMode) -> Self {
         if num_threads != 0 {
             panic!("hybrid renderer doesn't support multi-threading");
         }
@@ -275,8 +307,8 @@ impl Renderer for HybridRenderer {
         self.scene.push_clip_layer(path);
     }
 
-    fn push_blend_layer(&mut self, _: BlendMode) {
-        unimplemented!()
+    fn push_blend_layer(&mut self, blend_mode: BlendMode) {
+        self.scene.push_layer(None, Some(blend_mode), None, None);
     }
 
     fn push_opacity_layer(&mut self, opacity: f32) {
@@ -316,14 +348,14 @@ impl Renderer for HybridRenderer {
         self.scene.set_transform(transform);
     }
 
-    fn set_anti_aliasing(&mut self, value: bool) {
-        self.scene.set_anti_aliasing(value);
+    fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>) {
+        self.scene.set_aliasing_threshold(aliasing_threshold);
     }
 
     // This method creates device resources every time it is called. This does not matter much for
     // testing, but should not be used as a basis for implementing something real. This would be a
     // very bad example for that.
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap, _: RenderMode) {
+    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
         // On some platforms using `cargo test` triggers segmentation faults in wgpu when the GPU
         // tests are run in parallel (likely related to the number of device resources being
         // requested simultaneously). This is "fixed" by putting a mutex around this method,
@@ -451,6 +483,18 @@ impl Renderer for HybridRenderer {
 
         ImageSource::OpaqueId(image_id)
     }
+
+    fn record(&mut self, recording: &mut Recording, f: impl FnOnce(&mut Recorder<'_>)) {
+        self.scene.record(recording, f);
+    }
+
+    fn prepare_recording(&mut self, recording: &mut Recording) {
+        self.scene.prepare_recording(recording);
+    }
+
+    fn execute_recording(&mut self, recording: &Recording) {
+        self.scene.execute_recording(recording);
+    }
 }
 
 #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
@@ -464,7 +508,7 @@ pub(crate) struct HybridRenderer {
 impl Renderer for HybridRenderer {
     type GlyphRenderer = Scene;
 
-    fn new(width: u16, height: u16, num_threads: u16, level: Level) -> Self {
+    fn new(width: u16, height: u16, num_threads: u16, level: Level, _: RenderMode) -> Self {
         use wasm_bindgen::JsCast;
         use web_sys::HtmlCanvasElement;
 
@@ -547,8 +591,8 @@ impl Renderer for HybridRenderer {
         self.scene.push_clip_layer(path);
     }
 
-    fn push_blend_layer(&mut self, _: BlendMode) {
-        unimplemented!()
+    fn push_blend_layer(&mut self, mode: BlendMode) {
+        self.scene.push_layer(None, Some(mode), None, None);
     }
 
     fn push_opacity_layer(&mut self, opacity: f32) {
@@ -588,12 +632,12 @@ impl Renderer for HybridRenderer {
         self.scene.set_transform(transform);
     }
 
-    fn set_anti_aliasing(&mut self, value: bool) {
-        self.scene.set_anti_aliasing(value);
+    fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>) {
+        self.scene.set_aliasing_threshold(aliasing_threshold);
     }
 
     // vello_hybrid WebGL renderer backend.
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap, _: RenderMode) {
+    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
         use web_sys::WebGl2RenderingContext;
 
         let width = self.scene.width();
@@ -635,6 +679,18 @@ impl Renderer for HybridRenderer {
     fn get_image_source(&mut self, pixmap: Arc<Pixmap>) -> ImageSource {
         let image_id = self.renderer.borrow_mut().upload_image(&pixmap);
         ImageSource::OpaqueId(image_id)
+    }
+
+    fn record(&mut self, recording: &mut Recording, f: impl FnOnce(&mut Recorder<'_>)) {
+        self.scene.record(recording, f);
+    }
+
+    fn prepare_recording(&mut self, recording: &mut Recording) {
+        self.scene.prepare_recording(recording);
+    }
+
+    fn execute_recording(&mut self, recording: &Recording) {
+        self.scene.execute_recording(recording);
     }
 }
 

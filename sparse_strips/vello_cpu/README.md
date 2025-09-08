@@ -64,7 +64,7 @@ context.fill_rect(&Rect::from_points((3., 1.), (7., 4.)));
 let mut target = Pixmap::new(width, height);
 // This is only necessary if you activated the `multithreading` feature.
 context.flush();
-context.render_to_pixmap(&mut target, RenderMode::default());
+context.render_to_pixmap(&mut target);
 
 let expected_render = b"\
     0000000000\
@@ -125,7 +125,7 @@ TODO: Point to documentation of sparse strips pattern.
 
 ## Minimum supported Rust Version (MSRV)
 
-This version of Vello CPU has been verified to compile with **Rust 1.85** and later.
+This version of Vello CPU has been verified to compile with **Rust 1.86** and later.
 
 Future versions of Vello CPU might increase the Rust version requirement.
 It will not be treated as a breaking change and as such can even happen with small patch releases.

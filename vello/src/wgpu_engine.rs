@@ -504,6 +504,14 @@ impl WgpuEngine {
                             },
                         );
                     } else {
+                        if image.data.is_empty() && image.width != 0 && image.height != 0 {
+                            panic!(
+                                "Tried to draw an invalid empty image (id: {}). \
+                                Maybe it was registered to a different renderer, or \
+                                unregistered before this render was submitted.",
+                                image.data.id()
+                            );
+                        }
                         queue.write_texture(
                             wgpu::TexelCopyTextureInfo {
                                 texture,
@@ -665,6 +673,7 @@ impl WgpuEngine {
                         label: None,
                         color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                             view: render_target,
+                            depth_slice: None,
                             resolve_target: None,
                             ops: wgpu::Operations {
                                 load: match draw_params.clear_color {

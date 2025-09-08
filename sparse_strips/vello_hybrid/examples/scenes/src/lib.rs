@@ -3,6 +3,7 @@
 
 //! Example scenes for Vello Hybrid.
 
+pub mod blend;
 pub mod clip;
 pub mod image;
 pub mod simple;
@@ -16,16 +17,27 @@ use vello_hybrid::Scene;
 pub trait ExampleScene {
     /// Render the scene using the current state
     fn render(&mut self, scene: &mut Scene, root_transform: Affine);
+
+    /// Handle key press events (optional)
+    /// Returns true if the key was handled, false otherwise
+    fn handle_key(&mut self, _key: &str) -> bool {
+        false
+    }
 }
 
 /// A type-erased example scene
 pub struct AnyScene {
     /// The render function that calls the wrapped scene's render method
     render_fn: RenderFn,
+    /// The key handler function
+    key_handler_fn: KeyHandlerFn,
 }
 
 /// A type-erased render function
 type RenderFn = Box<dyn FnMut(&mut Scene, Affine)>;
+
+/// A type-erased key handler function
+type KeyHandlerFn = Box<dyn FnMut(&str) -> bool>;
 
 impl std::fmt::Debug for AnyScene {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -35,15 +47,25 @@ impl std::fmt::Debug for AnyScene {
 
 impl AnyScene {
     /// Create a new `AnyScene` from any type that implements `ExampleScene`
-    pub fn new<T: ExampleScene + 'static>(mut scene: T) -> Self {
+    pub fn new<T: ExampleScene + 'static>(scene: T) -> Self {
+        let scene = std::rc::Rc::new(std::cell::RefCell::new(scene));
+        let scene_clone = scene.clone();
+
         Self {
-            render_fn: Box::new(move |s, transform| scene.render(s, transform)),
+            render_fn: Box::new(move |s, transform| scene.borrow_mut().render(s, transform)),
+            key_handler_fn: Box::new(move |key| scene_clone.borrow_mut().handle_key(key)),
         }
     }
 
     /// Render the scene
     pub fn render(&mut self, scene: &mut Scene, root_transform: Affine) {
         (self.render_fn)(scene, root_transform);
+    }
+
+    /// Handle key press events
+    /// Returns true if the key was handled, false otherwise
+    pub fn handle_key(&mut self, key: &str) -> bool {
+        (self.key_handler_fn)(key)
     }
 }
 
@@ -67,6 +89,7 @@ pub fn get_example_scenes(svg_paths: Option<Vec<&str>>) -> Box<[AnyScene]> {
     scenes.push(AnyScene::new(text::TextScene::new("Hello, Vello!")));
     scenes.push(AnyScene::new(simple::SimpleScene::new()));
     scenes.push(AnyScene::new(clip::ClipScene::new()));
+    scenes.push(AnyScene::new(blend::BlendScene::new()));
     scenes.push(AnyScene::new(image::ImageScene::new()));
 
     scenes.into_boxed_slice()
@@ -80,6 +103,7 @@ pub fn get_example_scenes() -> Box<[AnyScene]> {
         AnyScene::new(text::TextScene::new("Hello, Vello!")),
         AnyScene::new(simple::SimpleScene::new()),
         AnyScene::new(clip::ClipScene::new()),
+        AnyScene::new(blend::BlendScene::new()),
         AnyScene::new(image::ImageScene {}),
     ]
     .into_boxed_slice()

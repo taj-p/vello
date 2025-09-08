@@ -57,21 +57,46 @@ pub(crate) fn get_ctx<T: Renderer>(
     transparent: bool,
     num_threads: u16,
     level: &str,
+    render_mode: RenderMode,
 ) -> T {
     let level = match level {
         #[cfg(target_arch = "aarch64")]
-        "neon" => Level::Neon(Level::new().as_neon().expect("neon should be available")),
+        "neon" => Level::Neon(
+            Level::try_detect()
+                .unwrap_or(Level::fallback())
+                .as_neon()
+                .expect("neon should be available"),
+        ),
         #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
         "wasm_simd128" => Level::WasmSimd128(
-            Level::new()
+            Level::try_detect()
+                .unwrap_or(Level::fallback())
                 .as_wasm_simd128()
                 .expect("wasm simd128 should be available"),
         ),
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        "sse42" => {
+            if std::arch::is_x86_feature_detected!("sse4.2") {
+                Level::Sse4_2(unsafe { vello_common::fearless_simd::Sse4_2::new_unchecked() })
+            } else {
+                panic!("sse4.2 feature not detected");
+            }
+        }
+        #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+        "avx2" => {
+            if std::arch::is_x86_feature_detected!("avx2")
+                && std::arch::is_x86_feature_detected!("fma")
+            {
+                Level::Avx2(unsafe { vello_common::fearless_simd::Avx2::new_unchecked() })
+            } else {
+                panic!("avx2 or fma feature not detected");
+            }
+        }
         "fallback" => Level::fallback(),
         _ => panic!("unknown level: {level}"),
     };
 
-    let mut ctx = T::new(width, height, num_threads, level);
+    let mut ctx = T::new(width, height, num_threads, level, render_mode);
 
     if !transparent {
         let path = Rect::new(0.0, 0.0, width as f64, height as f64).to_path(0.1);
@@ -83,9 +108,9 @@ pub(crate) fn get_ctx<T: Renderer>(
     ctx
 }
 
-pub(crate) fn render_pixmap(ctx: &impl Renderer, render_mode: RenderMode) -> Pixmap {
+pub(crate) fn render_pixmap(ctx: &impl Renderer) -> Pixmap {
     let mut pixmap = Pixmap::new(ctx.width(), ctx.height());
-    ctx.render_to_pixmap(&mut pixmap, render_mode);
+    ctx.render_to_pixmap(&mut pixmap);
     pixmap
 }
 
@@ -265,10 +290,9 @@ pub(crate) fn check_ref(
     // Whether the test instance is the "gold standard" and should be used
     // for creating reference images.
     is_reference: bool,
-    render_mode: RenderMode,
     _: &[u8],
 ) {
-    let pixmap = render_pixmap(ctx, render_mode);
+    let pixmap = render_pixmap(ctx);
 
     let encoded_image = pixmap.into_png().unwrap();
     let ref_path = REFS_PATH.join(format!("{test_name}.png"));
@@ -327,12 +351,11 @@ pub(crate) fn check_ref(
     diff_pixels: u16,
     // Must be `false` on `wasm32` as reference image cannot be written to filesystem.
     is_reference: bool,
-    render_mode: RenderMode,
     ref_data: &[u8],
 ) {
     assert!(!is_reference, "WASM cannot create new reference images");
 
-    let pixmap = render_pixmap(ctx, render_mode);
+    let pixmap = render_pixmap(ctx);
     let encoded_image = pixmap.into_png().unwrap();
     let actual = load_from_memory(&encoded_image).unwrap().into_rgba8();
 

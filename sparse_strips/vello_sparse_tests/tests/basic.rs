@@ -392,7 +392,7 @@ fn oversized_star(ctx: &mut impl Renderer) {
 #[vello_test(width = 100, height = 100)]
 fn no_anti_aliasing(ctx: &mut impl Renderer) {
     let rect = Rect::new(30.0, 30.0, 70.0, 70.0);
-    ctx.set_anti_aliasing(false);
+    ctx.set_aliasing_threshold(Some(128));
 
     ctx.set_transform(Affine::rotate_about(
         45.0 * PI / 180.0,
@@ -404,7 +404,7 @@ fn no_anti_aliasing(ctx: &mut impl Renderer) {
 
 #[vello_test(width = 100, height = 100)]
 fn no_anti_aliasing_clip_path(ctx: &mut impl Renderer) {
-    ctx.set_anti_aliasing(false);
+    ctx.set_aliasing_threshold(Some(128));
     let rect = Rect::new(0.0, 0.0, 100.0, 100.0);
     let star_path = crossed_line_star();
 
@@ -413,4 +413,24 @@ fn no_anti_aliasing_clip_path(ctx: &mut impl Renderer) {
     ctx.set_paint(REBECCA_PURPLE);
     ctx.fill_rect(&rect);
     ctx.pop_layer();
+}
+
+#[vello_test(diff_pixels = 1)]
+fn stroke_scaled(ctx: &mut impl Renderer) {
+    let mut path = BezPath::new();
+    path.move_to((0.0, 0.0));
+    path.curve_to((0.25, 1.0), (0.75, 1.0), (1.0, 0.0));
+
+    // This path should be more or less completely covered.
+    let mut stroke = Stroke::new(10.0);
+    ctx.set_transform(Affine::IDENTITY);
+    ctx.set_stroke(stroke);
+    ctx.set_paint(RED);
+    ctx.stroke_path(&(Affine::scale(100.0) * path.clone()));
+
+    stroke = Stroke::new(0.1);
+    ctx.set_transform(Affine::scale(100.0));
+    ctx.set_stroke(stroke);
+    ctx.set_paint(LIME);
+    ctx.stroke_path(&path);
 }

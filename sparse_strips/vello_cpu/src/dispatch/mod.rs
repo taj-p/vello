@@ -8,6 +8,7 @@ pub(crate) mod single_threaded;
 use crate::RenderMode;
 use crate::kurbo::{Affine, BezPath, Stroke};
 use crate::peniko::{BlendMode, Fill};
+use alloc::vec::Vec;
 use core::fmt::Debug;
 use vello_common::coarse::Wide;
 use vello_common::encode::EncodedPaint;
@@ -16,13 +17,14 @@ use vello_common::paint::Paint;
 
 pub(crate) trait Dispatcher: Debug + Send + Sync {
     fn wide(&self) -> &Wide;
+    fn wide_mut(&mut self) -> &mut Wide;
     fn fill_path(
         &mut self,
         path: &BezPath,
         fill_rule: Fill,
         transform: Affine,
         paint: Paint,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
     );
     fn stroke_path(
         &mut self,
@@ -30,7 +32,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         stroke: &Stroke,
         transform: Affine,
         paint: Paint,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
     );
     fn push_layer(
         &mut self,
@@ -39,7 +41,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         clip_transform: Affine,
         blend_mode: BlendMode,
         opacity: f32,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
     );
     fn pop_layer(&mut self);
@@ -53,4 +55,8 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         height: u16,
         encoded_paints: &[EncodedPaint],
     );
+    fn alpha_buf(&self) -> &[u8];
+    fn extend_alpha_buf(&mut self, alphas: &[u8]);
+    fn replace_alpha_buf(&mut self, alphas: Vec<u8>) -> Vec<u8>;
+    fn set_alpha_buf(&mut self, alphas: Vec<u8>);
 }

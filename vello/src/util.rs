@@ -32,10 +32,12 @@ impl RenderContext {
     pub fn new() -> Self {
         let backends = wgpu::Backends::from_env().unwrap_or_default();
         let flags = wgpu::InstanceFlags::from_build_config().with_env();
+        let memory_budget_thresholds = wgpu::MemoryBudgetThresholds::default();
         let backend_options = wgpu::BackendOptions::from_env_or_default();
         let instance = Instance::new(&wgpu::InstanceDescriptor {
             backends,
             flags,
+            memory_budget_thresholds,
             backend_options,
         });
         Self {
@@ -107,6 +109,10 @@ impl RenderContext {
     }
 
     /// Resizes the surface to the new dimensions.
+    ///
+    /// # Panics
+    ///
+    /// If `width` or `height` is zero.
     pub fn resize_surface(&self, surface: &mut RenderSurface<'_>, width: u32, height: u32) {
         let (texture, view) = create_targets(width, height, &self.devices[surface.dev_id].device);
         // TODO: Use clever resize semantics to avoid thrashing the memory allocator during a resize

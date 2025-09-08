@@ -127,8 +127,12 @@ impl WebGlRenderer {
         );
 
         let encoded_paints = self.prepare_gpu_encoded_paints(&scene.encoded_paints);
-        self.programs
-            .prepare(&self.gl, &scene.alphas, encoded_paints, render_size);
+        self.programs.prepare(
+            &self.gl,
+            scene.strip_generator.alpha_buf(),
+            encoded_paints,
+            render_size,
+        );
         let mut ctx = WebGlRendererContext {
             programs: &mut self.programs,
             gl: &self.gl,
@@ -729,7 +733,7 @@ fn create_shader_program(
         let info = gl
             .get_shader_info_log(&vertex_shader)
             .unwrap_or_else(|| "Unknown error creating vertex shader".into());
-        panic!("Failed to compile vertex shader: {}", info);
+        panic!("Failed to compile vertex shader: {info}");
     }
 
     // Compile fragment shader.
@@ -747,7 +751,7 @@ fn create_shader_program(
         let info = gl
             .get_shader_info_log(&fragment_shader)
             .unwrap_or_else(|| "Unknown error creating fragment shader".into());
-        panic!("Failed to compile fragment shader: {}", info);
+        panic!("Failed to compile fragment shader: {info}");
     }
 
     // Create and link the program.
@@ -764,7 +768,7 @@ fn create_shader_program(
         let info = gl
             .get_program_info_log(&program)
             .unwrap_or_else(|| "Unknown error creating program".into());
-        panic!("Failed to link program: {}", info);
+        panic!("Failed to link program: {info}");
     }
 
     gl.delete_shader(Some(&vertex_shader));
@@ -1467,7 +1471,7 @@ impl WebGlAtlasWriter for WebGlTexture {
         // Verify framebuffer is complete
         let status = gl.check_framebuffer_status(WebGl2RenderingContext::FRAMEBUFFER);
         if status != WebGl2RenderingContext::FRAMEBUFFER_COMPLETE {
-            panic!("Framebuffer not complete: {}", status);
+            panic!("Framebuffer not complete: {status}");
         }
 
         // Bind the atlas texture as the target

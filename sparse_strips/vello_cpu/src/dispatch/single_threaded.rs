@@ -7,12 +7,13 @@ use crate::fine::{F32Kernel, Fine, FineKernel, U8Kernel};
 use crate::kurbo::{Affine, BezPath, Stroke};
 use crate::peniko::{BlendMode, Fill};
 use crate::region::Regions;
-use crate::strip_generator::StripGenerator;
-use vello_common::coarse::Wide;
+use alloc::vec::Vec;
+use vello_common::coarse::{MODE_CPU, Wide};
 use vello_common::encode::EncodedPaint;
-use vello_common::fearless_simd::{Fallback, Level, Simd};
+use vello_common::fearless_simd::{Level, Simd, simd_dispatch};
 use vello_common::mask::Mask;
 use vello_common::paint::Paint;
+use vello_common::strip_generator::StripGenerator;
 
 #[derive(Debug)]
 pub(crate) struct SingleThreadedDispatcher {
@@ -23,7 +24,7 @@ pub(crate) struct SingleThreadedDispatcher {
 
 impl SingleThreadedDispatcher {
     pub(crate) fn new(width: u16, height: u16, level: Level) -> Self {
-        let wide = Wide::new(width, height);
+        let wide = Wide::<MODE_CPU>::new(width, height);
         let strip_generator = StripGenerator::new(width, height, level);
 
         Self {
@@ -31,6 +32,26 @@ impl SingleThreadedDispatcher {
             strip_generator,
             level,
         }
+    }
+
+    fn rasterize_f32(
+        &self,
+        buffer: &mut [u8],
+        width: u16,
+        height: u16,
+        encoded_paints: &[EncodedPaint],
+    ) {
+        rasterize_with_f32_dispatch(self.level, self, buffer, width, height, encoded_paints);
+    }
+
+    fn rasterize_u8(
+        &self,
+        buffer: &mut [u8],
+        width: u16,
+        height: u16,
+        encoded_paints: &[EncodedPaint],
+    ) {
+        rasterize_with_u8_dispatch(self.level, self, buffer, width, height, encoded_paints);
     }
 
     fn rasterize_with<S: Simd, F: FineKernel<S>>(
@@ -66,19 +87,28 @@ impl Dispatcher for SingleThreadedDispatcher {
         &self.wide
     }
 
+    fn wide_mut(&mut self) -> &mut Wide {
+        &mut self.wide
+    }
+
     fn fill_path(
         &mut self,
         path: &BezPath,
         fill_rule: Fill,
         transform: Affine,
         paint: Paint,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
     ) {
         let wide = &mut self.wide;
 
         let func = |strips| wide.generate(strips, fill_rule, paint, 0);
-        self.strip_generator
-            .generate_filled_path(path, fill_rule, transform, anti_alias, func);
+        self.strip_generator.generate_filled_path(
+            path,
+            fill_rule,
+            transform,
+            aliasing_threshold,
+            func,
+        );
     }
 
     fn stroke_path(
@@ -87,13 +117,34 @@ impl Dispatcher for SingleThreadedDispatcher {
         stroke: &Stroke,
         transform: Affine,
         paint: Paint,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
     ) {
         let wide = &mut self.wide;
 
         let func = |strips| wide.generate(strips, Fill::NonZero, paint, 0);
-        self.strip_generator
-            .generate_stroked_path(path, stroke, transform, anti_alias, func);
+        self.strip_generator.generate_stroked_path(
+            path,
+            stroke,
+            transform,
+            aliasing_threshold,
+            func,
+        );
+    }
+
+    fn alpha_buf(&self) -> &[u8] {
+        self.strip_generator.alpha_buf()
+    }
+
+    fn extend_alpha_buf(&mut self, alphas: &[u8]) {
+        self.strip_generator.extend_alpha_buf(alphas);
+    }
+
+    fn replace_alpha_buf(&mut self, alphas: Vec<u8>) -> Vec<u8> {
+        self.strip_generator.replace_alpha_buf(alphas)
+    }
+
+    fn set_alpha_buf(&mut self, alphas: Vec<u8>) {
+        self.strip_generator.set_alpha_buf(alphas);
     }
 
     fn push_layer(
@@ -103,7 +154,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         clip_transform: Affine,
         blend_mode: BlendMode,
         opacity: f32,
-        anti_alias: bool,
+        aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
     ) {
         let clip = if let Some(c) = clip_path {
@@ -115,7 +166,7 @@ impl Dispatcher for SingleThreadedDispatcher {
                 c,
                 fill_rule,
                 clip_transform,
-                anti_alias,
+                aliasing_threshold,
                 |strips| strip_buf = strips,
             );
 
@@ -147,64 +198,54 @@ impl Dispatcher for SingleThreadedDispatcher {
         encoded_paints: &[EncodedPaint],
     ) {
         match render_mode {
-            RenderMode::OptimizeSpeed => match self.level {
-                #[cfg(all(feature = "std", target_arch = "aarch64"))]
-                Level::Neon(n) => {
-                    self.rasterize_with::<vello_common::fearless_simd::Neon, U8Kernel>(
-                        n,
-                        buffer,
-                        width,
-                        height,
-                        encoded_paints,
-                    );
-                }
-                #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
-                Level::WasmSimd128(w) => {
-                    self.rasterize_with::<vello_common::fearless_simd::WasmSimd128, U8Kernel>(
-                        w,
-                        buffer,
-                        width,
-                        height,
-                        encoded_paints,
-                    );
-                }
-                _ => self.rasterize_with::<Fallback, U8Kernel>(
-                    Fallback::new(),
-                    buffer,
-                    width,
-                    height,
-                    encoded_paints,
-                ),
-            },
-            RenderMode::OptimizeQuality => match self.level {
-                #[cfg(all(feature = "std", target_arch = "aarch64"))]
-                Level::Neon(n) => {
-                    self.rasterize_with::<vello_common::fearless_simd::Neon, F32Kernel>(
-                        n,
-                        buffer,
-                        width,
-                        height,
-                        encoded_paints,
-                    );
-                }
-                #[cfg(all(target_arch = "wasm32", target_feature = "simd128"))]
-                Level::WasmSimd128(w) => {
-                    self.rasterize_with::<vello_common::fearless_simd::WasmSimd128, F32Kernel>(
-                        w,
-                        buffer,
-                        width,
-                        height,
-                        encoded_paints,
-                    );
-                }
-                _ => self.rasterize_with::<Fallback, F32Kernel>(
-                    Fallback::new(),
-                    buffer,
-                    width,
-                    height,
-                    encoded_paints,
-                ),
-            },
+            RenderMode::OptimizeSpeed => self.rasterize_u8(buffer, width, height, encoded_paints),
+            RenderMode::OptimizeQuality => {
+                self.rasterize_f32(buffer, width, height, encoded_paints);
+            }
         }
     }
+}
+
+simd_dispatch!(
+    pub fn rasterize_with_f32_dispatch(
+        level,
+        self_: &SingleThreadedDispatcher,
+        buffer: &mut [u8],
+        width: u16,
+        height: u16,
+        encoded_paints: &[EncodedPaint]
+    ) = rasterize_with_f32
+);
+
+simd_dispatch!(
+    pub fn rasterize_with_u8_dispatch(
+        level,
+        self_: &SingleThreadedDispatcher,
+        buffer: &mut [u8],
+        width: u16,
+        height: u16,
+        encoded_paints: &[EncodedPaint]
+    ) = rasterize_with_u8
+);
+
+fn rasterize_with_f32<S: Simd>(
+    simd: S,
+    self_: &SingleThreadedDispatcher,
+    buffer: &mut [u8],
+    width: u16,
+    height: u16,
+    encoded_paints: &[EncodedPaint],
+) {
+    self_.rasterize_with::<S, F32Kernel>(simd, buffer, width, height, encoded_paints);
+}
+
+fn rasterize_with_u8<S: Simd>(
+    simd: S,
+    self_: &SingleThreadedDispatcher,
+    buffer: &mut [u8],
+    width: u16,
+    height: u16,
+    encoded_paints: &[EncodedPaint],
+) {
+    self_.rasterize_with::<S, U8Kernel>(simd, buffer, width, height, encoded_paints);
 }

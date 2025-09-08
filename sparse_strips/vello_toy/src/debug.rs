@@ -14,7 +14,7 @@ use std::path;
 use svg::node::element::path::Data;
 use svg::node::element::{Line as SvgLine, Path, Rectangle};
 use svg::{Document, Node};
-use vello_common::coarse::{Cmd, Wide, WideTile};
+use vello_common::coarse::{Cmd, MODE_CPU, Wide, WideTile};
 use vello_common::color::palette::css::BLACK;
 use vello_common::fearless_simd::Level;
 use vello_common::flatten::{FlattenCtx, Line};
@@ -31,10 +31,10 @@ fn main() {
         Document::new().set("viewBox", (-10, -10, args.width + 20, args.height + 20));
 
     let mut line_buf = vec![];
-    let mut tiles = Tiles::new();
+    let mut tiles = Tiles::new(Level::new());
     let mut strip_buf = vec![];
     let mut alpha_buf = vec![];
-    let mut wide = Wide::new(args.width, args.height);
+    let mut wide = Wide::<MODE_CPU>::new(args.width, args.height);
 
     let stages = &args.stages;
 
@@ -80,7 +80,7 @@ fn main() {
             &mut strip_buf,
             &mut alpha_buf,
             args.fill_rule,
-            true,
+            None,
             &line_buf,
         );
     }

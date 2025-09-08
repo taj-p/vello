@@ -84,7 +84,7 @@ pub fn fill(
     fill_dispatch(level, path, affine, line_buf, ctx);
 }
 
-simd_dispatch!(fill_dispatch(
+simd_dispatch!(fn fill_dispatch(
     level,
     path: impl IntoIterator<Item = PathEl>, 
     affine: Affine,
@@ -134,7 +134,11 @@ pub fn stroke(
     flatten_ctx: &mut FlattenCtx,
 ) {
     // TODO: Temporary hack to ensure that strokes are scaled properly by the transform.
-    let tolerance = TOL / affine.as_coeffs()[0].abs().max(affine.as_coeffs()[3].abs());
+    let tolerance = TOL
+        / affine.as_coeffs()[0]
+            .abs()
+            .max(affine.as_coeffs()[3].abs())
+            .max(1.);
 
     let expanded = expand_stroke(path, style, tolerance);
     fill(level, &expanded, affine, line_buf, flatten_ctx);

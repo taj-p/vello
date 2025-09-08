@@ -32,7 +32,7 @@
 //! let mut target = Pixmap::new(width, height);
 //! // This is only necessary if you activated the `multithreading` feature.
 //! context.flush();
-//! context.render_to_pixmap(&mut target, RenderMode::default());
+//! context.render_to_pixmap(&mut target);
 //!
 //! let expected_render = b"\
 //!     0000000000\
@@ -117,7 +117,6 @@ mod dispatch;
 pub mod fine;
 #[doc(hidden)]
 pub mod region;
-mod strip_generator;
 mod util;
 
 pub use render::{RenderContext, RenderSettings};

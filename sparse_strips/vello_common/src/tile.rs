@@ -6,7 +6,7 @@
 use crate::flatten::Line;
 use alloc::vec;
 use alloc::vec::Vec;
-
+use fearless_simd::Level;
 #[cfg(not(feature = "std"))]
 use peniko::kurbo::common::FloatFuncs as _;
 
@@ -153,20 +153,16 @@ impl Eq for Tile {}
 #[derive(Clone, Debug)]
 pub struct Tiles {
     tile_buf: Vec<Tile>,
+    level: Level,
     sorted: bool,
-}
-
-impl Default for Tiles {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl Tiles {
     /// Create a new tiles container.
-    pub fn new() -> Self {
+    pub fn new(level: Level) -> Self {
         Self {
             tile_buf: vec![],
+            level,
             sorted: false,
         }
     }
@@ -190,7 +186,8 @@ impl Tiles {
     /// Sort the tiles in the container.
     pub fn sort_tiles(&mut self) {
         self.sorted = true;
-        self.tile_buf.sort_unstable();
+        // To enable auto-vectorization.
+        self.level.dispatch(|_| self.tile_buf.sort_unstable());
     }
 
     /// Get the tile at a certain index.
@@ -268,7 +265,15 @@ impl Tiles {
                 let y_top_tiles = (line_top_y as u16).min(tile_rows);
                 let y_bottom_tiles = (line_bottom_y.ceil() as u16).min(tile_rows);
 
-                let x = line_left_x as u16;
+                // Clamp all tiles that are strictly on the right of the viewport to the tile x coordinate
+                // right next to the outside of the viewport. If we don't do this, we might end up
+                // with too big tile coordinates, which will cause overflows in strip rendering.
+                // TODO: in principle it is possible to cull right-of-viewport tiles, but it was causing some
+                // issues, and we are choosing to do the less efficient but working thing for now.
+                // See <https://github.com/linebender/vello/pull/1189> and
+                // <https://github.com/linebender/vello/issues/1126>.
+                let x = (line_left_x as u16).min(tile_columns + 1);
+
                 for y_idx in y_top_tiles..y_bottom_tiles {
                     let y = f32::from(y_idx);
 
@@ -326,8 +331,11 @@ impl Tiles {
 
 #[cfg(test)]
 mod tests {
-    use crate::flatten::{Line, Point};
+    use crate::flatten::{FlattenCtx, Line, Point, fill};
+    use crate::kurbo::{Affine, BezPath};
     use crate::tile::{Tile, Tiles};
+    use fearless_simd::Level;
+    use std::vec;
 
     #[test]
     fn cull_line_at_top() {
@@ -336,7 +344,7 @@ mod tests {
             p1: Point { x: 9.0, y: -1.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
 
         assert!(tiles.is_empty());
@@ -349,7 +357,7 @@ mod tests {
             p1: Point { x: 103.0, y: 20.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
 
         assert!(tiles.is_empty());
@@ -362,7 +370,7 @@ mod tests {
             p1: Point { x: 35.0, y: 105.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
 
         assert!(tiles.is_empty());
@@ -375,7 +383,7 @@ mod tests {
             p1: Point { x: 2.0, y: 1.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
 
         assert_eq!(tiles.tile_buf, [Tile::new(0, 0, 0, true)]);
@@ -388,7 +396,7 @@ mod tests {
             p1: Point { x: 8.5, y: 1.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -409,7 +417,7 @@ mod tests {
             p1: Point { x: 1.0, y: 8.5 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -430,7 +438,7 @@ mod tests {
             p1: Point { x: 11.0, y: 8.5 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -453,7 +461,7 @@ mod tests {
             p1: Point { x: 1.0, y: 1.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -476,7 +484,7 @@ mod tests {
             p1: Point { x: 14.0, y: 6.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -499,7 +507,7 @@ mod tests {
             p1: Point { x: 2.0, y: 11.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 100, 100);
         tiles.sort_tiles();
 
@@ -527,7 +535,7 @@ mod tests {
             p1: Point { x: 0.0, y: 1.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line_1, line_2], 100, 100);
 
         assert_eq!(
@@ -544,7 +552,25 @@ mod tests {
             p1: Point { x: 224.0, y: 388.0 },
         };
 
-        let mut tiles = Tiles::new();
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
         tiles.make_tiles(&[line], 600, 600);
+    }
+
+    #[test]
+    fn vertical_path_on_the_right_of_viewport() {
+        let path = BezPath::from_svg("M261,0 L78848,0 L78848,4 L261,4 Z").unwrap();
+        let mut line_buf = vec![];
+        fill(
+            Level::try_detect().unwrap_or(Level::fallback()),
+            &path,
+            Affine::IDENTITY,
+            &mut line_buf,
+            &mut FlattenCtx::default(),
+        );
+
+        let mut tiles = Tiles::new(Level::try_detect().unwrap_or(Level::fallback()));
+        tiles.make_tiles(&line_buf, 10, 10);
+        assert_eq!(tiles.tile_buf[0].x, 4);
+        assert_eq!(tiles.tile_buf[1].x, 4);
     }
 }
