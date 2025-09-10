@@ -54,6 +54,9 @@ pub struct Scene {
     pub(crate) fill_rule: Fill,
     pub(crate) blend_mode: BlendMode,
     pub(crate) strip_generator: StripGenerator,
+
+    pub(crate) glyph_cache: Option<vello_common::glyph::GlyphCache>,
+    pub(crate) hinting_cache: Option<vello_common::glyph::HintCache>,
 }
 
 impl Scene {
@@ -78,6 +81,8 @@ impl Scene {
             transform: render_state.transform,
             fill_rule: render_state.fill_rule,
             blend_mode: render_state.blend_mode,
+            glyph_cache: Some(Default::default()),
+            hinting_cache: Some(Default::default()),
         }
     }
 
@@ -342,6 +347,21 @@ impl Scene {
 }
 
 impl GlyphRenderer for Scene {
+    fn take_glyph_cache(&mut self) -> vello_common::glyph::GlyphCache {
+         self.glyph_cache.take().unwrap_or_default()
+    }
+    fn restore_hinting_cache(&mut self, cache: vello_common::glyph::HintCache) {
+        self.hinting_cache = Some(cache);
+    }
+
+    fn take_hinting_cache(&mut self) -> vello_common::glyph::HintCache {
+        self.hinting_cache.take().unwrap_or_default()
+    }
+
+    fn restore_glyph_cache(&mut self, cache: vello_common::glyph::GlyphCache) {
+        self.glyph_cache = Some(cache);
+    }
+
     fn fill_glyph(&mut self, prepared_glyph: PreparedGlyph<'_>) {
         match prepared_glyph.glyph_type {
             GlyphType::Outline(glyph) => {

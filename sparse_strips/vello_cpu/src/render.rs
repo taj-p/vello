@@ -56,6 +56,11 @@ pub struct RenderContext {
     )]
     pub(crate) render_settings: RenderSettings,
     dispatcher: Box<dyn Dispatcher>,
+
+    #[cfg(feature = "text")]
+    pub(crate) glyph_cache: Option<vello_common::glyph::GlyphCache>,
+    #[cfg(feature = "text")]
+    pub(crate) hinting_cache: Option<vello_common::glyph::HintCache>,
 }
 
 /// Settings to apply to the render context.
@@ -145,6 +150,10 @@ impl RenderContext {
             stroke,
             temp_path,
             encoded_paints,
+            #[cfg(feature = "text")]
+            glyph_cache: Some(Default::default()),
+            #[cfg(feature = "text")]
+            hinting_cache: Some(Default::default()),
         }
     }
 
@@ -477,16 +486,20 @@ impl RenderContext {
 
 #[cfg(feature = "text")]
 impl GlyphRenderer for RenderContext {
-    fn restore_glyph_cache(&mut self, cache: vello_common::glyph::GlyphCache) {}
+    fn restore_glyph_cache(&mut self, cache: vello_common::glyph::GlyphCache) {
+        self.glyph_cache = Some(cache);
+    }
 
-    fn restore_hinting_cache(&mut self, cache: vello_common::glyph::HintCache) {}
+    fn restore_hinting_cache(&mut self, cache: vello_common::glyph::HintCache) {
+        self.hinting_cache = Some(cache);
+    }
 
     fn take_glyph_cache(&mut self) -> vello_common::glyph::GlyphCache {
-        Default::default()
+        self.glyph_cache.take().unwrap_or_default()
     }
 
     fn take_hinting_cache(&mut self) -> vello_common::glyph::HintCache {
-        Default::default()
+        self.hinting_cache.take().unwrap_or_default()
     }
 
     fn fill_glyph(&mut self, prepared_glyph: PreparedGlyph<'_>) {

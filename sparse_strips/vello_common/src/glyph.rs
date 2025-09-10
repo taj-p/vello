@@ -671,6 +671,12 @@ pub struct GlyphCache {
     variable_map: HashMap<VarKey, HashMap<GlyphKey, OutlinePath>>,
 }
 
+impl Debug for GlyphCache {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "GlyphCache")
+    }
+}
+
 impl GlyphCache {
     fn get(
         &mut self,
@@ -764,6 +770,12 @@ pub struct HintCache {
     glyf_entries: Vec<HintEntry>,
     cff_entries: Vec<HintEntry>,
     serial: u64,
+}
+
+impl Debug for HintCache {
+    fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+        write!(f, "HintCache")
+    }
 }
 
 impl HintCache {
