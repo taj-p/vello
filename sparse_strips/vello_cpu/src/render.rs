@@ -26,7 +26,7 @@ use vello_common::paint::{Paint, PaintType};
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
 use vello_common::pixmap::Pixmap;
-use vello_common::recording::{PushLayerCommand, Recordable, Recording, RenderCommand};
+use vello_common::recording::{PushLayerCommand, Recordable, Recorder, Recording, RenderCommand};
 use vello_common::strip::Strip;
 use vello_common::strip_generator::StripGenerator;
 #[cfg(feature = "text")]
@@ -56,6 +56,9 @@ pub struct RenderContext {
     )]
     pub(crate) render_settings: RenderSettings,
     dispatcher: Box<dyn Dispatcher>,
+
+    #[cfg(feature = "text")]
+    pub(crate) glyph_caches: Option<vello_common::glyph::GlyphCaches>,
 }
 
 /// Settings to apply to the render context.
@@ -145,6 +148,8 @@ impl RenderContext {
             stroke,
             temp_path,
             encoded_paints,
+            #[cfg(feature = "text")]
+            glyph_caches: Some(Default::default()),
         }
     }
 
@@ -425,7 +430,7 @@ impl RenderContext {
     /// Render the current context into a buffer.
     /// The buffer is expected to be in premultiplied RGBA8 format with length `width * height * 4`
     pub fn render_to_buffer(
-        &self,
+        &mut self,
         buffer: &mut [u8],
         width: u16,
         height: u16,
@@ -445,10 +450,14 @@ impl RenderContext {
 
         self.dispatcher
             .rasterize(buffer, render_mode, width, height, &self.encoded_paints);
+
+        if let Some(glyph_caches) = self.glyph_caches.as_mut() {
+            glyph_caches.maintain();
+        }
     }
 
     /// Render the current context into a pixmap.
-    pub fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
+    pub fn render_to_pixmap(&mut self, pixmap: &mut Pixmap) {
         let width = pixmap.width();
         let height = pixmap.height();
         self.render_to_buffer(
@@ -457,6 +466,10 @@ impl RenderContext {
             height,
             self.render_settings.render_mode,
         );
+
+        if let Some(glyph_caches) = self.glyph_caches.as_mut() {
+            glyph_caches.maintain();
+        }
     }
 
     /// Return the width of the pixmap.
@@ -591,6 +604,14 @@ impl GlyphRenderer for RenderContext {
             }
         }
     }
+
+    fn take_glyph_caches(&mut self) -> vello_common::glyph::GlyphCaches {
+        self.glyph_caches.take().unwrap_or_default()
+    }
+
+    fn restore_glyph_caches(&mut self, cache: vello_common::glyph::GlyphCaches) {
+        self.glyph_caches = Some(cache);
+    }
 }
 
 #[cfg(feature = "text")]
@@ -633,6 +654,22 @@ impl ColrRenderer for RenderContext {
 }
 
 impl Recordable for RenderContext {
+    fn record<F>(&mut self, recording: &mut Recording, f: F)
+    where
+        F: FnOnce(&mut Recorder<'_>),
+    {
+        let mut recorder = Recorder::new(
+            recording,
+            #[cfg(feature = "text")]
+            self.take_glyph_caches(),
+        );
+        f(&mut recorder);
+        #[cfg(feature = "text")]
+        {
+            self.glyph_caches = Some(recorder.take_glyph_caches());
+        }
+    }
+
     fn prepare_recording(&mut self, recording: &mut Recording) {
         let buffers = recording.take_cached_strips();
         let (strips, alphas, strip_start_indices) =
