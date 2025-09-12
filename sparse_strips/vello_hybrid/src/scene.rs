@@ -558,7 +558,7 @@ impl Scene {
             .iter()
             .map(move |strip| {
                 let mut adjusted_strip = *strip;
-                adjusted_strip.alpha_idx += alpha_offset;
+                adjusted_strip.set_alpha_idx(strip.alpha_idx() + alpha_offset);
                 adjusted_strip
             })
             .collect()

@@ -17,17 +17,31 @@ pub struct Strip {
     pub x: u16,
     /// The y coordinate of the strip, in user coordinates.
     pub y: u16,
-    /// The index into the alpha buffer.
-    pub alpha_idx: u32,
-    /// Whether the gap that lies between this strip and the previous in the _same_
-    /// row should be filled.
-    pub fill_gap: bool,
+    /// First 31 bits: The index into the alpha buffer where the alpha values for this strip start.
+    /// The last (highest) bit: whether to fill gaps when rendering this strip.
+    pub alpha_idx_fill_gap: u32,
 }
 
 impl Strip {
     /// Return the y coordinate of the strip, in strip units.
     pub fn strip_y(&self) -> u16 {
         self.y / Tile::HEIGHT
+    }
+
+    #[inline(always)]
+    pub fn set_alpha_idx(&mut self, idx: u32) {
+        let fill_gap = self.fill_gap();
+        self.alpha_idx_fill_gap = idx & 0x7FFFFFFF | if fill_gap { 0x80000000 } else { 0 };
+    }
+
+    #[inline(always)]
+    pub fn alpha_idx(&self) -> u32 {
+        self.alpha_idx_fill_gap & 0x7FFFFFFF
+    }
+
+    #[inline(always)]
+    pub fn fill_gap(&self) -> bool {
+        (self.alpha_idx_fill_gap & 0x80000000) != 0
     }
 }
 
@@ -106,8 +120,7 @@ fn render_impl<S: Simd>(
     let mut strip = Strip {
         x: prev_tile.x * Tile::WIDTH,
         y: prev_tile.y * Tile::HEIGHT,
-        alpha_idx: alpha_buf.len() as u32,
-        fill_gap: false,
+        alpha_idx_fill_gap: alpha_buf.len() as u32,
     };
 
     for (tile_idx, tile) in tiles.iter().copied().chain([SENTINEL]).enumerate() {
@@ -182,7 +195,7 @@ fn render_impl<S: Simd>(
         if !prev_tile.same_loc(&tile) && !prev_tile.prev_loc(&tile) {
             debug_assert_eq!(
                 (prev_tile.x + 1) * Tile::WIDTH - strip.x,
-                ((alpha_buf.len() - strip.alpha_idx as usize) / usize::from(Tile::HEIGHT)) as u16,
+                ((alpha_buf.len() - strip.alpha_idx() as usize) / usize::from(Tile::HEIGHT)) as u16,
                 "The number of columns written to the alpha buffer should equal the number of columns spanned by this strip."
             );
             strip_buf.push(strip);
@@ -196,8 +209,12 @@ fn render_impl<S: Simd>(
                     strip_buf.push(Strip {
                         x: u16::MAX,
                         y: prev_tile.y * Tile::HEIGHT,
-                        alpha_idx: alpha_buf.len() as u32,
-                        fill_gap: should_fill(winding_delta),
+                        alpha_idx_fill_gap: (alpha_buf.len() as u32)
+                            | if should_fill(winding_delta) {
+                                0x80000000
+                            } else {
+                                0
+                            },
                     });
                 }
 
@@ -217,8 +234,12 @@ fn render_impl<S: Simd>(
             strip = Strip {
                 x: tile.x * Tile::WIDTH,
                 y: tile.y * Tile::HEIGHT,
-                alpha_idx: alpha_buf.len() as u32,
-                fill_gap: should_fill(winding_delta),
+                alpha_idx_fill_gap: alpha_buf.len() as u32
+                    | if should_fill(winding_delta) {
+                        0x80000000
+                    } else {
+                        0
+                    },
             };
             // Note: this fill is mathematically not necessary. It provides a way to reduce
             // accumulation of float rounding errors.
