@@ -28,6 +28,15 @@ pub(crate) struct GradientRampCache {
     retained_count: u32,
     /// SIMD level used for gradient LUT generation.
     level: Level,
+    /// Scratch space for maintaining the cache.
+    scratch: ScratchSpace,
+}
+
+#[derive(Debug, Default)]
+struct ScratchSpace {
+    entries: Vec<(&'static CacheKey<GradientCacheKey>, u64)>,
+    removed: Vec<CacheKey<GradientCacheKey>>,
+    lru_entries: Vec<(CacheKey<GradientCacheKey>, CachedRamp)>,
 }
 
 impl GradientRampCache {
@@ -40,6 +49,7 @@ impl GradientRampCache {
             has_changed: false,
             retained_count,
             level,
+            scratch: ScratchSpace::default(),
         }
     }
 
@@ -76,7 +86,7 @@ impl GradientRampCache {
             .cache
             .len()
             .saturating_sub(self.retained_count as usize);
-        self.remove_lru_entries(entries_to_remove_count);
+        self.evict(entries_to_remove_count);
     }
 
     /// Get the size of the packed luts.
@@ -110,24 +120,24 @@ impl GradientRampCache {
     }
 
     /// Remove multiple least recently used cache entries and compact the luts vector efficiently.
-    fn remove_lru_entries(&mut self, count: usize) {
+    fn evict(&mut self, count: usize) {
         if count == 0 {
             return;
         }
 
-        let entries_to_remove = self.get_lru_entries(count);
-        if entries_to_remove.is_empty() {
-            return;
-        }
-        for (key, _) in &entries_to_remove {
-            self.cache.remove(key);
-        }
-        self.compact_luts(entries_to_remove);
+        let mut lru_entries = core::mem::take(&mut self.scratch.lru_entries);
+        lru_entries.clear();
+        self.remove_lru_entries(count, &mut lru_entries);
+        self.compact_luts(&mut lru_entries);
+        self.scratch.lru_entries = lru_entries;
         self.has_changed = true;
     }
 
     /// Compact the luts vector by removing multiple cached ramps
-    fn compact_luts(&mut self, mut ramps_to_remove: Vec<(CacheKey<GradientCacheKey>, CachedRamp)>) {
+    fn compact_luts(
+        &mut self,
+        ramps_to_remove: &mut Vec<(CacheKey<GradientCacheKey>, CachedRamp)>,
+    ) {
         if ramps_to_remove.is_empty() {
             return;
         }
@@ -136,30 +146,27 @@ impl GradientRampCache {
         ramps_to_remove.sort_by_key(|(_, ramp)| ramp.lut_start);
 
         // Convert to byte ranges for easier processing
-        let ranges_to_remove: Vec<(usize, usize)> = ramps_to_remove
+        let mut ranges_to_remove = ramps_to_remove
             .iter()
             .map(|(_, ramp)| {
                 let start = (ramp.lut_start * BYTES_PER_TEXEL) as usize;
                 let end = start + (ramp.width * BYTES_PER_TEXEL) as usize;
                 (start, end)
             })
-            .collect();
+            .peekable();
 
         // Total bytes removed so far
         let mut write_offset = 0;
         // Current read position
         let mut read_pos = 0;
-        // Index into ranges_to_remove
-        let mut range_idx = 0;
 
         while read_pos < self.luts.len() {
             // Check if we're at the start of a range to remove
-            if range_idx < ranges_to_remove.len() && read_pos == ranges_to_remove[range_idx].0 {
-                let (start, end) = ranges_to_remove[range_idx];
+            if ranges_to_remove.peek().is_some() && read_pos == ranges_to_remove.peek().unwrap().0 {
+                let (start, end) = ranges_to_remove.next().unwrap();
                 // Skip over the range to remove
                 write_offset += end - start;
                 read_pos = end;
-                range_idx += 1;
             } else {
                 // Copy byte from read position to write position (read_pos - write_offset)
                 if write_offset > 0 {
@@ -176,7 +183,7 @@ impl GradientRampCache {
         // Calculate how much data was removed before each ramp's original position
         for (_, (ramp, _)) in self.cache.iter_mut() {
             let mut removed_before = 0;
-            for (_, removed_ramp) in &ramps_to_remove {
+            for (_, removed_ramp) in ramps_to_remove.iter() {
                 if removed_ramp.lut_start < ramp.lut_start {
                     removed_before += removed_ramp.width;
                 }
@@ -186,26 +193,49 @@ impl GradientRampCache {
     }
 
     /// Get multiple least recently used cache entries.
-    fn get_lru_entries(&self, count: usize) -> Vec<(CacheKey<GradientCacheKey>, CachedRamp)> {
+    fn remove_lru_entries(
+        &mut self,
+        count: usize,
+        lru_entries: &mut Vec<(CacheKey<GradientCacheKey>, CachedRamp)>,
+    ) {
         if count == 0 || self.cache.is_empty() {
-            return Vec::new();
+            return;
         }
 
-        let mut entries: Vec<_> = self
-            .cache
-            .iter()
-            .map(|(key, (ramp, last_used))| (key.clone(), ramp.clone(), *last_used))
-            .collect();
+        let mut entries = reuse_vec(core::mem::take(&mut self.scratch.entries));
+        entries.extend(
+            self.cache
+                .iter()
+                .map(|(key, (_, last_used))| (key, *last_used)),
+        );
 
         // Sort by last_used (ascending) to get LRU entries first
-        entries.sort_by_key(|(_, _, last_used)| *last_used);
+        entries.sort_by_key(|(_, last_used)| *last_used);
 
-        entries
-            .into_iter()
-            .take(count)
-            .map(|(key, ramp, _)| (key, ramp))
-            .collect()
+        let mut removed = core::mem::take(&mut self.scratch.removed);
+        removed.clear();
+        removed.extend(entries.iter().take(count).map(|(key, _)| (*key).clone()));
+        self.scratch.entries = reuse_vec(entries);
+
+        for key in removed.drain(..) {
+            let ramp = self.cache.remove(&key).unwrap().0;
+            lru_entries.push((key, ramp));
+        }
+
+        self.scratch.removed = removed;
     }
+}
+
+/// Used to reinterpret the lifetimes of a vector.
+// For how this works, see:
+// https://davidlattimore.github.io/posts/2025/09/02/rustforge-wild-performance-tricks.html
+fn reuse_vec<T, U>(mut v: Vec<T>) -> Vec<U> {
+    const {
+        assert!(size_of::<T>() == size_of::<U>());
+        assert!(align_of::<T>() == align_of::<U>());
+    }
+    v.clear();
+    v.into_iter().map(|_x| unreachable!()).collect()
 }
 
 /// Cached gradient ramp data with metadata.
