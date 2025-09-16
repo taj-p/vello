@@ -53,8 +53,12 @@ pub(crate) struct MultiThreadedDispatcher {
     thread_pool: ThreadPool,
     /// The current batch of paths we want to render.
     task_batch: Vec<RenderTaskType>,
+    task_free_list: Vec<Vec<RenderTaskType>>,
+
     /// The path containing all elements of the current batch.
     batch_path: BezPath,
+    path_free_list: Vec<BezPath>,
+
     /// The cost of the current batch.
     batch_cost: f32,
     /// The sender used to dispatch new rendering tasks from the main thread.
@@ -138,7 +142,9 @@ impl MultiThreadedDispatcher {
             wide,
             thread_pool,
             task_batch,
+            task_free_list: Default::default(),
             batch_path: Default::default(),
+            path_free_list: Default::default(),
             batch_cost,
             task_idx,
             flushed,
@@ -249,13 +255,21 @@ impl MultiThreadedDispatcher {
 
     fn send_pending_tasks(&mut self) {
         let task_idx = self.bump_task_idx();
-        let tasks = self.task_batch.as_slice();
-        let path = self.batch_path.elements();
+        let tasks = core::mem::replace(
+            &mut self.task_batch,
+            self.task_free_list.pop().unwrap_or_default(),
+        );
+
+        let batch_path = core::mem::replace(
+            &mut self.batch_path,
+            self.path_free_list.pop().unwrap_or_default(),
+        );
+
         let task_sender = self.task_sender.as_mut().unwrap();
         let task = RenderTask {
             idx: task_idx,
-            path: path.into(),
-            tasks: tasks.into(),
+            path: batch_path,
+            tasks,
         };
         task_sender.send(task).unwrap();
         self.run_coarse(true);
@@ -279,6 +293,8 @@ impl MultiThreadedDispatcher {
         loop {
             match result_receiver.try_recv() {
                 Ok(task) => {
+                    self.path_free_list.push(task.scratch.path);
+                    self.task_free_list.push(task.scratch.tasks);
                     for cmd in task.tasks {
                         match cmd {
                             CoarseTaskType::RenderPath {
@@ -600,8 +616,8 @@ impl Debug for MultiThreadedDispatcher {
 #[derive(Debug)]
 pub(crate) struct RenderTask {
     pub(crate) idx: u32,
-    pub(crate) path: Box<[PathEl]>,
-    pub(crate) tasks: Box<[RenderTaskType]>,
+    pub(crate) path: BezPath,
+    pub(crate) tasks: Vec<RenderTaskType>,
 }
 
 #[derive(Debug, Clone)]
@@ -639,6 +655,13 @@ pub(crate) enum RenderTaskType {
 pub(crate) struct CoarseTask {
     pub(crate) strips: Box<[Strip]>,
     pub(crate) tasks: Vec<CoarseTaskType>,
+
+    scratch: CoarseTaskScratch,
+}
+
+struct CoarseTaskScratch {
+    path: BezPath,
+    tasks: Vec<RenderTaskType>,
 }
 
 pub(crate) enum CoarseTaskType {

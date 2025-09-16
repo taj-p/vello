@@ -3,7 +3,7 @@
 
 use crate::Level;
 use crate::dispatch::multi_threaded::{
-    CoarseTask, CoarseTaskSender, CoarseTaskType, RenderTask, RenderTaskType,
+    CoarseTask, CoarseTaskScratch, CoarseTaskSender, CoarseTaskType, RenderTask, RenderTaskType,
 };
 use std::vec::Vec;
 use vello_common::strip_generator::{GenerationMode, StripGenerator, StripStorage};
@@ -41,7 +41,7 @@ impl Worker {
 
     pub(crate) fn run_render_task(
         &mut self,
-        render_task: RenderTask,
+        mut render_task: RenderTask,
         result_sender: &mut CoarseTaskSender,
     ) {
         self.strip_storage.strips.clear();
@@ -50,7 +50,9 @@ impl Worker {
         let mut task_buf = Vec::with_capacity(render_task.tasks.len());
         let task_idx = render_task.idx;
 
-        for task in render_task.tasks {
+        let paths = render_task.path.elements();
+
+        for task in render_task.tasks.drain(..) {
             match task {
                 RenderTaskType::FillPath {
                     path_range,
@@ -60,8 +62,7 @@ impl Worker {
                     aliasing_threshold,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
-                    let path =
-                        &render_task.path[path_range.start as usize..path_range.end as usize];
+                    let path = &paths[path_range.start as usize..path_range.end as usize];
 
                     self.strip_generator.generate_filled_path(
                         path.iter().copied(),
@@ -88,8 +89,7 @@ impl Worker {
                     aliasing_threshold,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
-                    let path =
-                        &render_task.path[path_range.start as usize..path_range.end as usize];
+                    let path = &paths[path_range.start as usize..path_range.end as usize];
 
                     self.strip_generator.generate_stroked_path(
                         path.iter().copied(),
@@ -118,8 +118,7 @@ impl Worker {
                 } => {
                     let clip = if let Some((path_range, transform)) = clip_path {
                         let start = self.strip_storage.strips.len() as u32;
-                        let path =
-                            &render_task.path[path_range.start as usize..path_range.end as usize];
+                        let path = &paths[path_range.start as usize..path_range.end as usize];
 
                         self.strip_generator.generate_filled_path(
                             path.iter().copied(),
@@ -170,6 +169,11 @@ impl Worker {
         let task = CoarseTask {
             strips: strips_slice.into(),
             tasks: task_buf,
+
+            scratch: CoarseTaskScratch {
+                path: render_task.path,
+                tasks: render_task.tasks,
+            },
         };
 
         result_sender.send(task_idx as usize, task).unwrap();
