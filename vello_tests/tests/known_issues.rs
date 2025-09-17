@@ -15,10 +15,10 @@
 use scenes::ImageCache;
 use vello::{
     AaConfig, Scene,
-    kurbo::{Affine, Rect},
-    peniko::{Color, ColorStop, Extend, Gradient, ImageFormat, ImageQuality, color::palette},
+    kurbo::{Affine, Rect, Triangle},
+    peniko::{Color, ColorStop, Extend, Gradient, ImageFormat, ImageQuality, Mix, color::palette},
 };
-use vello_tests::{TestParams, smoke_snapshot_test_sync};
+use vello_tests::{TestParams, smoke_snapshot_test_sync, snapshot_test_sync};
 
 /// A reproduction of <https://github.com/linebender/vello/issues/680>
 fn many_bins(use_cpu: bool) {
@@ -79,6 +79,7 @@ fn many_bins_cpu() {
 /// Test for <https://github.com/linebender/vello/issues/1061>
 #[test]
 #[should_panic]
+#[cfg_attr(skip_gpu_tests, ignore)]
 fn test_layer_size() {
     let mut scene = Scene::new();
     scene.fill(
@@ -112,7 +113,8 @@ const DATA_IMAGE_PNG: &[u8] = include_bytes!("../snapshots/smoke/data_image_roun
 
 /// Test for <https://github.com/linebender/vello/issues/972>
 #[test]
-#[ignore = "CI runs these tests on a CPU, leading to them having unrealistic precision"]
+#[ignore = "CI runs these tests on a CPU, leading to them having unrealistic precision"] // Uncomment below line when removing this.
+// #[cfg_attr(skip_gpu_tests, ignore)]
 #[should_panic]
 fn test_data_image_roundtrip_extend_reflect() {
     let mut scene = Scene::new();
@@ -132,7 +134,8 @@ fn test_data_image_roundtrip_extend_reflect() {
 
 /// Test for <https://github.com/linebender/vello/issues/972>
 #[test]
-#[ignore = "CI runs these tests on a CPU, leading to them having unrealistic precision"]
+#[ignore = "CI runs these tests on a CPU, leading to them having unrealistic precision"] // Uncomment below line when removing this.
+// #[cfg_attr(skip_gpu_tests, ignore)]
 #[should_panic]
 fn test_data_image_roundtrip_extend_repeat() {
     let mut scene = Scene::new();
@@ -153,6 +156,7 @@ fn test_data_image_roundtrip_extend_repeat() {
 /// <https://github.com/web-platform-tests/wpt/blob/18c64a74b1/html/canvas/element/fill-and-stroke-styles/2d.gradient.interpolate.coloralpha.html>
 /// See <https://github.com/linebender/vello/issues/1056>.
 #[test]
+#[cfg_attr(skip_gpu_tests, ignore)]
 fn test_gradient_color_alpha() {
     let mut scene = Scene::new();
     let viewport = Rect::new(0., 0., 100., 50.);
@@ -175,6 +179,38 @@ fn test_gradient_color_alpha() {
     let mut params = TestParams::new("gradient_color_alpha", 100, 50);
     params.base_color = Some(palette::css::WHITE);
     smoke_snapshot_test_sync(scene, &params)
+        .unwrap()
+        .assert_mean_less_than(0.001);
+}
+
+/// See <https://github.com/linebender/vello/issues/1198>
+#[test]
+#[cfg_attr(skip_gpu_tests, ignore)]
+fn clip_blends() {
+    let mut scene = Scene::new();
+
+    scene.fill(
+        vello::peniko::Fill::EvenOdd,
+        Affine::IDENTITY,
+        palette::css::BLUE,
+        None,
+        &Rect::from_origin_size((0., 0.), (100., 100.)),
+    );
+    let layer_shape = Triangle::from_coords((50., 0.), (0., 100.), (100., 100.));
+    scene.push_layer(Mix::Clip, 1.0, Affine::IDENTITY, &layer_shape);
+    scene.push_layer(Mix::Multiply, 1.0, Affine::IDENTITY, &layer_shape);
+    scene.fill(
+        vello::peniko::Fill::EvenOdd,
+        Affine::IDENTITY,
+        palette::css::AQUAMARINE,
+        None,
+        &Rect::from_origin_size((0., 0.), (100., 100.)),
+    );
+    scene.pop_layer();
+    scene.pop_layer();
+
+    let params = TestParams::new("clip_blends", 100, 100);
+    snapshot_test_sync(scene, &params)
         .unwrap()
         .assert_mean_less_than(0.001);
 }

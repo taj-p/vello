@@ -3736,6 +3736,7 @@ name = "vello_bench"
 version = "0.0.0"
 dependencies = [
  "criterion",
+ "parley",
  "rand",
  "smallvec",
  "usvg",
@@ -3750,6 +3751,7 @@ version = "0.0.1"
 dependencies = [
  "bytemuck",
  "fearless_simd",
+ "hashbrown 0.15.3",
  "libm",
  "log",
  "peniko 0.4.0 (git+https://github.com/taj-p/peniko.git?rev=2bac557d186334fcf057cb5575a8b31c010310ae)",
@@ -3767,7 +3769,6 @@ dependencies = [
  "crossbeam-channel",
  "ordered-channel",
  "rayon",
- "smallvec",
  "thread_local",
  "vello_common",
 ]
@@ -3802,6 +3803,7 @@ version = "0.5.0"
 dependencies = [
  "bytemuck",
  "guillotiere",
+ "hashbrown 0.15.3",
  "js-sys",
  "log",
  "png",
@@ -3821,6 +3823,7 @@ dependencies = [
  "bytemuck",
  "image",
  "parley",
+ "smallvec",
  "vello_common",
  "vello_hybrid",
 ]
