@@ -21,6 +21,13 @@ use vello_cpu::color::AlphaColor;
 use vello_cpu::kurbo::{Affine, BezPath, Stroke};
 use vello_cpu::peniko::Fill;
 use vello_cpu::{Level, Pixmap, RenderContext, RenderMode, RenderSettings};
+use vello_example_scenes::ExampleScene;
+use vello_example_scenes::svg::SvgScene;
+
+use alloc_tracker::{Allocator, Session};
+
+#[global_allocator]
+static ALLOCATOR: Allocator<std::alloc::System> = Allocator::system();
 
 fn main() {
     let args = Args::parse();
@@ -35,30 +42,36 @@ fn main() {
     let mut num_iters = 0;
     let settings = RenderSettings {
         level: Level::new(),
-        num_threads: args.num_threads as u16,
+        num_threads: 1 as u16,
         render_mode: RenderMode::OptimizeSpeed,
     };
     let mut ctx = RenderContext::new_with(width, height, settings);
     let mut pixmap = Pixmap::new(width, height);
     let mut runtime = Duration::default();
 
-    loop {
-        ctx.reset();
-        let mut sctx = SVGContext::new_with_scale(scale as f64);
+    //loop {
+    ctx.reset();
 
-        let start = Instant::now();
+    let start = Instant::now();
 
-        render_tree(&mut ctx, &mut sctx, &tree);
-        ctx.flush();
+    let mut scene = SvgScene::tiger();
+    scene.render(&mut ctx, Affine::IDENTITY);
+
+    ctx.flush();
+
+    let session = Session::new();
+    {
+        let operation = session.operation("render_to_pixmap");
+        let _span = operation.measure_process();
         ctx.render_to_pixmap(&mut pixmap);
-
-        runtime += start.elapsed();
-        num_iters += 1;
-
-        if runtime.as_millis() > args.runtime as u128 {
-            break;
-        }
     }
+    session.to_report().operations().for_each(|operation| {
+        assert_eq!(operation.1.total_allocations_count(), 0);
+    });
+    session.print_to_stdout();
+
+    runtime += start.elapsed();
+    num_iters += 1;
 
     let avg_runtime = (runtime.as_millis() as f32) / (num_iters as f32);
 

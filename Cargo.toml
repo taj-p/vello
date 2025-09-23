@@ -151,3 +151,7 @@ console_log = "1.0"
 proc-macro2 = "1.0.95"
 syn = { version = "2.0.101", features = ["full", "extra-traits"] }
 quote = "1.0.40"
+alloc_tracker = "0.5.8"
+
+[profile.release]
+debug = true
