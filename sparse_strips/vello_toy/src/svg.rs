@@ -59,21 +59,19 @@ fn main() {
 
     ctx.flush();
 
-    let mut session = Session::new();
+    let session = Session::new();
     {
         let operation = session.operation("render_to_pixmap");
         let _span = operation.measure_process();
         ctx.render_to_pixmap(&mut pixmap);
     }
+    session.to_report().operations().for_each(|operation| {
+        assert_eq!(operation.1.total_allocations_count(), 0);
+    });
     session.print_to_stdout();
 
     runtime += start.elapsed();
     num_iters += 1;
-
-    //if runtime.as_millis() > args.runtime as u128 {
-    //    break;
-    //}
-    //}
 
     let avg_runtime = (runtime.as_millis() as f32) / (num_iters as f32);
 
