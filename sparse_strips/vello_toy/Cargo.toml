@@ -15,7 +15,9 @@ usvg = { workspace = true }
 bytemuck = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 vello_common = { workspace = true }
-vello_cpu = { workspace = true, features = ["multithreading"] }
+vello_cpu = { workspace = true }
+vello_example_scenes = { workspace = true, features = ["cpu"] }
+alloc_tracker = { workspace = true }
 image = { workspace = true, features = ["png"] }
 
 [[bin]]
@@ -28,3 +30,6 @@ path = "src/svg.rs"
 
 [lints]
 workspace = true
+
+[profile.release]
+debug = true

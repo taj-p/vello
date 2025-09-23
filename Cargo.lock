@@ -56,6 +56,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "alloc_tracker"
+version = "0.5.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12e001f02dfe604f71e8930bc56194829fb3fa7c6fa39b8a0a7af25b672ca6a0"
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3842,6 +3848,7 @@ dependencies = [
 name = "vello_cpu"
 version = "0.0.1"
 dependencies = [
+ "alloc_tracker",
  "bytemuck",
  "crossbeam-channel",
  "ordered-channel",
@@ -3981,6 +3988,7 @@ dependencies = [
 name = "vello_toy"
 version = "0.0.0"
 dependencies = [
+ "alloc_tracker",
  "bytemuck",
  "clap",
  "image",
@@ -3988,6 +3996,7 @@ dependencies = [
  "usvg",
  "vello_common",
  "vello_cpu",
+ "vello_example_scenes",
 ]
 
 [[package]]
