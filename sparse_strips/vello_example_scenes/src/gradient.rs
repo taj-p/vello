@@ -9,14 +9,12 @@
 //! - `RadialScene`:
 //!     - `two_point_radial` method from `https://github.com/linebender/vello/blob/0f3ef03a823eb10b0d7a60164e286cde77ffa222/examples/scenes/src/test_scenes.rs#L882`
 
-use crate::ExampleScene;
+use crate::{ExampleScene, RenderingContext};
 use smallvec::smallvec;
 use vello_common::color::palette::css::{BLACK, BLUE, LIME, RED, WHITE, YELLOW};
 use vello_common::kurbo::{Affine, Ellipse, Point, Rect, Shape, Stroke};
-use vello_common::peniko::{
-    Color, ColorStop, ColorStops, Extend, Gradient, GradientKind, color::DynamicColor,
-};
-use vello_hybrid::Scene;
+use vello_common::peniko::{Color, ColorStop, ColorStops, Extend, Gradient, color::DynamicColor};
+use vello_common::peniko::{LinearGradientPosition, RadialGradientPosition, SweepGradientPosition};
 
 /// Gradient scene state
 #[derive(Debug, Default)]
@@ -30,7 +28,7 @@ impl GradientExtendScene {
 }
 
 impl ExampleScene for GradientExtendScene {
-    fn render(&mut self, scene: &mut Scene, root_transform: Affine) {
+    fn render(&mut self, ctx: &mut impl RenderingContext, root_transform: Affine) {
         enum Kind {
             Linear,
             Radial,
@@ -56,7 +54,7 @@ impl ExampleScene for GradientExtendScene {
         }
 
         /// Helper function to create a square with a specific gradient type and extend mode
-        fn square(scene: &mut Scene, kind: Kind, transform: Affine, extend: Extend) {
+        fn square(ctx: &mut impl RenderingContext, kind: Kind, transform: Affine, extend: Extend) {
             let colors = [RED, LIME, BLUE];
             let width = 300.0;
             let height = 300.0;
@@ -69,10 +67,11 @@ impl ExampleScene for GradientExtendScene {
                     let end_y = height * 0.5;
 
                     Gradient {
-                        kind: GradientKind::Linear {
+                        kind: LinearGradientPosition {
                             start: Point::new(start_x, start_y),
                             end: Point::new(end_x, end_y),
-                        },
+                        }
+                        .into(),
                         stops: create_color_stops(&colors),
                         extend,
                         ..Default::default()
@@ -81,19 +80,20 @@ impl ExampleScene for GradientExtendScene {
                 Kind::Radial => {
                     let center_x = width * 0.5;
                     let center_y = height * 0.5;
-                    #[allow(
+                    #[expect(
                         clippy::cast_possible_truncation,
                         reason = "Width is always positive and bounded"
                     )]
                     let radius = (width * 0.25) as f32;
 
                     Gradient {
-                        kind: GradientKind::Radial {
+                        kind: RadialGradientPosition {
                             start_center: Point::new(center_x, center_y),
                             start_radius: radius * 0.25,
                             end_center: Point::new(center_x, center_y),
                             end_radius: radius,
-                        },
+                        }
+                        .into(),
                         stops: create_color_stops(&colors),
                         extend,
                         ..Default::default()
@@ -104,11 +104,12 @@ impl ExampleScene for GradientExtendScene {
                     let center_y = height * 0.5;
 
                     Gradient {
-                        kind: GradientKind::Sweep {
+                        kind: SweepGradientPosition {
                             center: Point::new(center_x, center_y),
-                            start_angle: 30.0,
-                            end_angle: 150.0,
-                        },
+                            start_angle: 30.0_f32.to_radians(),
+                            end_angle: 150.0_f32.to_radians(),
+                        }
+                        .into(),
                         stops: create_color_stops(&colors),
                         extend,
                         ..Default::default()
@@ -116,9 +117,9 @@ impl ExampleScene for GradientExtendScene {
                 }
             };
 
-            scene.set_transform(transform);
-            scene.set_paint(gradient);
-            scene.fill_rect(&Rect::new(0.0, 0.0, width, height));
+            ctx.set_transform(transform);
+            ctx.set_paint(gradient);
+            ctx.fill_rect(&Rect::new(0.0, 0.0, width, height));
         }
 
         let extend_modes = [Extend::Pad, Extend::Repeat, Extend::Reflect];
@@ -129,7 +130,7 @@ impl ExampleScene for GradientExtendScene {
             {
                 let transform = root_transform
                     * Affine::translate((x as f64 * 350.0 + 50.0, y as f64 * 350.0 + 100.0));
-                square(scene, kind, transform, *extend);
+                square(ctx, kind, transform, *extend);
             }
         }
     }
@@ -147,7 +148,7 @@ impl RadialScene {
 }
 
 impl ExampleScene for RadialScene {
-    fn render(&mut self, scene: &mut Scene, root_transform: Affine) {
+    fn render(&mut self, ctx: &mut impl RenderingContext, root_transform: Affine) {
         /// Helper function to create color stops
         fn create_color_stops(colors: &[Color]) -> ColorStops {
             ColorStops(smallvec![
@@ -168,7 +169,7 @@ impl ExampleScene for RadialScene {
 
         /// Helper function to create a two-point radial gradient rectangle
         fn make(
-            scene: &mut Scene,
+            ctx: &mut impl RenderingContext,
             x0: f64,
             y0: f64,
             r0: f32,
@@ -182,32 +183,33 @@ impl ExampleScene for RadialScene {
             let width = 400.0;
             let height = 200.0;
 
-            scene.set_transform(transform);
-            scene.set_paint(WHITE);
-            scene.fill_rect(&Rect::new(0.0, 0.0, width, height));
+            ctx.set_transform(transform);
+            ctx.set_paint(WHITE);
+            ctx.fill_rect(&Rect::new(0.0, 0.0, width, height));
 
             let gradient = Gradient {
-                kind: GradientKind::Radial {
+                kind: RadialGradientPosition {
                     start_center: Point::new(x0, y0),
                     start_radius: r0,
                     end_center: Point::new(x1, y1),
                     end_radius: r1,
-                },
+                }
+                .into(),
                 stops: create_color_stops(&colors),
                 extend,
                 ..Default::default()
             };
 
-            scene.set_paint(gradient);
-            scene.fill_rect(&Rect::new(0.0, 0.0, width, height));
+            ctx.set_paint(gradient);
+            ctx.fill_rect(&Rect::new(0.0, 0.0, width, height));
 
             // Draw stroke circles showing the gradient extents
             let r0 = r0 as f64 - 1.0;
             let r1 = r1 as f64 - 1.0;
-            scene.set_paint(BLACK);
-            scene.set_stroke(Stroke::new(1.0));
-            scene.stroke_path(&Ellipse::new((x0, y0), (r0, r0), 0.0).to_path(0.1));
-            scene.stroke_path(&Ellipse::new((x1, y1), (r1, r1), 0.0).to_path(0.1));
+            ctx.set_paint(BLACK);
+            ctx.set_stroke(Stroke::new(1.0));
+            ctx.stroke_path(&Ellipse::new((x0, y0), (r0, r0), 0.0).to_path(0.1));
+            ctx.stroke_path(&Ellipse::new((x1, y1), (r1, r1), 0.0).to_path(0.1));
         }
 
         // These demonstrate radial gradient patterns similar to the examples shown
@@ -224,7 +226,7 @@ impl ExampleScene for RadialScene {
             let r0 = 20.0;
             let r1 = 50.0;
             make(
-                scene,
+                ctx,
                 x0,
                 y,
                 r0,
@@ -247,7 +249,7 @@ impl ExampleScene for RadialScene {
             let r0 = 20.0;
             let r1 = 50.0;
             make(
-                scene,
+                ctx,
                 x1,
                 y,
                 r1,
@@ -270,7 +272,7 @@ impl ExampleScene for RadialScene {
             let r0 = 50.0;
             let r1 = 50.0;
             make(
-                scene,
+                ctx,
                 x0,
                 y,
                 r0,
@@ -294,7 +296,7 @@ impl ExampleScene for RadialScene {
             let y1 = 100.0;
             let r1 = 95.0;
             make(
-                scene,
+                ctx,
                 x0,
                 y0,
                 r0,
@@ -322,7 +324,7 @@ impl ExampleScene for RadialScene {
             let normalized_direction = direction.normalize();
             let p0 = Point::new(x1, y1) + (normalized_direction * (r1 - r0) as f64);
             make(
-                scene,
+                ctx,
                 p0.x,
                 p0.y,
                 r0,

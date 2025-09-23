@@ -271,7 +271,7 @@ impl RenderContext {
 
     /// Creates a builder for drawing a run of glyphs that have the same attributes.
     #[cfg(feature = "text")]
-    pub fn glyph_run(&mut self, font: &crate::peniko::Font) -> GlyphRunBuilder<'_, Self> {
+    pub fn glyph_run(&mut self, font: &crate::peniko::FontData) -> GlyphRunBuilder<'_, Self> {
         GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
@@ -915,7 +915,7 @@ impl RenderContext {
             .iter()
             .map(move |strip| {
                 let mut adjusted_strip = *strip;
-                adjusted_strip.alpha_idx += alpha_offset;
+                adjusted_strip.set_alpha_idx(adjusted_strip.alpha_idx() + alpha_offset);
                 adjusted_strip
             })
             .collect()

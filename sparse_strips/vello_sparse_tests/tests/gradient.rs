@@ -7,7 +7,8 @@ use smallvec::smallvec;
 use vello_common::color::palette::css::{BLACK, BLUE, GREEN, WHITE, YELLOW};
 use vello_common::color::{ColorSpaceTag, DynamicColor};
 use vello_common::kurbo::{Point, Rect};
-use vello_common::peniko::{ColorStop, ColorStops, Gradient, GradientKind};
+use vello_common::peniko::{ColorStop, ColorStops, Gradient};
+use vello_cpu::peniko::LinearGradientPosition;
 use vello_dev_macros::vello_test;
 
 pub(crate) const fn tan_45() -> f64 {
@@ -19,10 +20,11 @@ fn gradient_on_3_wide_tiles(ctx: &mut impl Renderer) {
     let rect = Rect::new(4.0, 4.0, 596.0, 28.0);
 
     let gradient = Gradient {
-        kind: GradientKind::Linear {
+        kind: LinearGradientPosition {
             start: Point::new(0.0, 0.0),
             end: Point::new(600.0, 0.0),
-        },
+        }
+        .into(),
         stops: stops_green_blue(),
         ..Default::default()
     };
@@ -36,10 +38,11 @@ fn gradient_with_global_alpha(ctx: &mut impl Renderer) {
     let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
     let gradient = Gradient {
-        kind: GradientKind::Linear {
+        kind: LinearGradientPosition {
             start: Point::new(10.0, 0.0),
             end: Point::new(90.0, 0.0),
-        },
+        }
+        .into(),
         stops: stops_blue_green_red_yellow(),
         ..Default::default()
     }
@@ -60,10 +63,11 @@ fn gradient_with_color_spaces(ctx: &mut impl Renderer, stops: ColorStops) {
 
     for cs in COLOR_SPACES {
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(10.0, 0.0),
                 end: Point::new(190.0, 0.0),
-            },
+            }
+            .into(),
             stops: stops.clone(),
             interpolation_cs: *cs,
             ..Default::default()
@@ -116,10 +120,11 @@ fn padded_stops(ctx: &mut impl Renderer, offset_1: f32, offset_2: f32) {
     let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
     let gradient = Gradient {
-        kind: GradientKind::Linear {
+        kind: LinearGradientPosition {
             start: Point::new(10.0, 0.0),
             end: Point::new(90.0, 0.0),
-        },
+        }
+        .into(),
         stops: ColorStops(smallvec![
             ColorStop {
                 offset: offset_1,
@@ -162,7 +167,8 @@ mod linear {
     use peniko::Extend;
     use std::f64::consts::PI;
     use vello_common::kurbo::{Affine, Point, Rect};
-    use vello_common::peniko::{self, Gradient, GradientKind};
+    use vello_common::peniko::{self, Gradient};
+    use vello_cpu::peniko::LinearGradientPosition;
     use vello_dev_macros::vello_test;
 
     #[vello_test]
@@ -170,10 +176,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(10.0, 0.0),
                 end: Point::new(90.0, 0.0),
-            },
+            }
+            .into(),
             stops: stops_green_blue(),
             ..Default::default()
         };
@@ -187,10 +194,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(10.0, 0.0),
                 end: Point::new(90.0, 0.0),
-            },
+            }
+            .into(),
             stops: stops_green_blue_with_alpha(),
             ..Default::default()
         };
@@ -203,7 +211,7 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear { start, end },
+            kind: LinearGradientPosition { start, end }.into(),
             stops: stops_green_blue(),
             ..Default::default()
         };
@@ -236,10 +244,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(40.0, 40.0),
                 end: Point::new(50.0, 60.0),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             extend,
             ..Default::default()
@@ -269,10 +278,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(10.0, 0.0),
                 end: Point::new(90.0, 0.0),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -286,10 +296,11 @@ mod linear {
         let path = crossed_line_star();
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(0.0, 0.0),
                 end: Point::new(100.0, 0.0),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -307,10 +318,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(47.5, 47.5),
                 end: Point::new(50.5, 52.5),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             extend: Extend::Repeat,
             ..Default::default()
@@ -325,10 +337,11 @@ mod linear {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(47.5, 47.5),
                 end: Point::new(50.5, 52.5),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             extend: Extend::Reflect,
             ..Default::default()
@@ -349,10 +362,11 @@ mod linear {
         let rect = Rect::new(l, t, r, b);
 
         let gradient = Gradient {
-            kind: GradientKind::Linear {
+            kind: LinearGradientPosition {
                 start: Point::new(l, t),
                 end: Point::new(r, b),
-            },
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -474,18 +488,19 @@ mod radial {
     use vello_common::kurbo::{Affine, Point, Rect};
     use vello_common::peniko::GradientKind::Radial;
     use vello_common::peniko::{self, ColorStops, Gradient};
+    use vello_cpu::peniko::RadialGradientPosition;
     use vello_dev_macros::vello_test;
 
     fn simple(ctx: &mut impl Renderer, stops: ColorStops) {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 10.0,
                 end_center: Point::new(50.0, 50.0),
                 end_radius: 40.0,
-            },
+            }),
             stops,
             ..Default::default()
         };
@@ -513,12 +528,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 20.0,
                 end_center: Point::new(50.0, 50.0),
                 end_radius: 25.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             extend,
             ..Default::default()
@@ -547,12 +562,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: point,
                 start_radius: 2.0,
                 end_center: Point::new(50.0, 50.0),
                 end_radius: 40.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             extend: Extend::Repeat,
             ..Default::default()
@@ -587,12 +602,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 40.0,
                 end_center: Point::new(50.0, 50.0),
                 end_radius: 10.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -605,12 +620,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(30.0, 50.0),
                 start_radius: radius,
                 end_center: Point::new(70.0, 50.0),
                 end_radius: 20.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -644,12 +659,12 @@ mod radial {
         let path = crossed_line_star();
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 5.0,
                 end_center: Point::new(50.0, 50.0),
                 end_radius: 35.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -670,12 +685,12 @@ mod radial {
         let point = Point::new((l + r) / 2.0, (t + b) / 2.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: point,
                 start_radius: 5.0,
                 end_center: point,
                 end_radius: 35.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -789,12 +804,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 0.0,
                 end_center: Point::new(75.0, 75.0),
                 end_radius: 40.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -808,12 +823,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(50.0, 50.0),
                 start_radius: 0.0,
                 end_center: Point::new(75.0, 50.0),
                 end_radius: 25.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -827,12 +842,12 @@ mod radial {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: Radial {
+            kind: Radial(RadialGradientPosition {
                 start_center: Point::new(30.0, 50.0),
                 start_radius: 40.0,
                 end_center: Point::new(60.0, 50.0),
                 end_radius: 0.0,
-            },
+            }),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -851,18 +866,20 @@ mod sweep {
     };
     use peniko::Extend;
     use vello_common::kurbo::{Affine, Point, Rect};
-    use vello_common::peniko::{self, ColorStops, Gradient, GradientKind};
+    use vello_common::peniko::{self, ColorStops, Gradient};
+    use vello_cpu::peniko::SweepGradientPosition;
     use vello_dev_macros::vello_test;
 
     fn basic(ctx: &mut impl Renderer, stops: ColorStops, center: Point) {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Sweep {
+            kind: SweepGradientPosition {
                 center,
-                start_angle: 0.0,
-                end_angle: 360.0,
-            },
+                start_angle: 0.0_f32.to_radians(),
+                end_angle: 360.0_f32.to_radians(),
+            }
+            .into(),
             stops,
             ..Default::default()
         };
@@ -897,11 +914,12 @@ mod sweep {
         let path = crossed_line_star();
 
         let gradient = Gradient {
-            kind: GradientKind::Sweep {
+            kind: SweepGradientPosition {
                 center: Point::new(50.0, 50.0),
-                start_angle: 0.0,
-                end_angle: 360.0,
-            },
+                start_angle: 0.0_f32.to_radians(),
+                end_angle: 360.0_f32.to_radians(),
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };
@@ -914,11 +932,12 @@ mod sweep {
         let rect = Rect::new(10.0, 10.0, 90.0, 90.0);
 
         let gradient = Gradient {
-            kind: GradientKind::Sweep {
+            kind: SweepGradientPosition {
                 center: Point::new(50.0, 50.0),
-                start_angle: 150.0,
-                end_angle: 210.0,
-            },
+                start_angle: 150.0_f32.to_radians(),
+                end_angle: 210.0_f32.to_radians(),
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             extend,
             ..Default::default()
@@ -954,11 +973,12 @@ mod sweep {
         let rect = Rect::new(l, t, r, b);
 
         let gradient = Gradient {
-            kind: GradientKind::Sweep {
+            kind: SweepGradientPosition {
                 center: Point::new((l + r) / 2.0, (t + b) / 2.0),
-                start_angle: 150.0,
-                end_angle: 210.0,
-            },
+                start_angle: 150.0_f32.to_radians(),
+                end_angle: 210.0_f32.to_radians(),
+            }
+            .into(),
             stops: stops_blue_green_red_yellow(),
             ..Default::default()
         };

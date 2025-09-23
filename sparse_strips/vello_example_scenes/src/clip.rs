@@ -9,27 +9,26 @@
 only break in edge cases, and some of them are also only related to conversions from f64 to f32."
 )]
 
-use crate::scenes::ExampleScene;
+use crate::{ExampleScene, RenderingContext};
 use vello_common::color::palette::css::{
     BLACK, BLUE, DARK_BLUE, DARK_GREEN, GREEN, REBECCA_PURPLE, RED,
 };
 use vello_common::kurbo::{Affine, BezPath, Circle, Point, Rect, Shape, Stroke};
 use vello_common::peniko::Color;
-use vello_cpu::RenderContext;
 
 /// Clip scene state
 #[derive(Debug)]
-pub(crate) struct ClipScene {}
+pub struct ClipScene {}
 
 impl ExampleScene for ClipScene {
-    fn render(&mut self, ctx: &mut RenderContext, root_transform: Affine) {
+    fn render(&mut self, ctx: &mut impl RenderingContext, root_transform: Affine) {
         render(ctx, root_transform);
     }
 }
 
 impl ClipScene {
     /// Create a new `ClipScene`
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self {}
     }
 }
@@ -40,7 +39,7 @@ impl Default for ClipScene {
     }
 }
 
-fn draw_clipping_outline(ctx: &mut RenderContext, path: &BezPath) {
+fn draw_clipping_outline(ctx: &mut impl RenderingContext, path: &BezPath) {
     let stroke = Stroke::new(1.0);
     ctx.set_paint(DARK_BLUE);
     ctx.set_stroke(stroke);
@@ -48,7 +47,7 @@ fn draw_clipping_outline(ctx: &mut RenderContext, path: &BezPath) {
 }
 
 /// Draws a deeply nested clip of circles.
-pub(crate) fn render(ctx: &mut RenderContext, root_transform: Affine) {
+pub fn render(ctx: &mut impl RenderingContext, root_transform: Affine) {
     const INITIAL_RADIUS: f64 = 48.0;
     const RADIUS_DECREMENT: f64 = 2.5;
     const INNER_COUNT: usize = 10;
@@ -68,7 +67,7 @@ pub(crate) fn render(ctx: &mut RenderContext, root_transform: Affine) {
         DARK_GREEN,
     ];
 
-    const COVER_RECT: Rect = Rect::new(0.0, 0.0, 100.0, 100.0);
+    //const COVER_RECT: Rect = Rect::new(0.0, 0.0, 100.0, 100.0);
     const CENTER: Point = Point::new(50.0, 50.0);
     let mut radius = INITIAL_RADIUS;
 
@@ -79,8 +78,8 @@ pub(crate) fn render(ctx: &mut RenderContext, root_transform: Affine) {
             draw_clipping_outline(ctx, &clip_circle);
             ctx.push_clip_layer(&clip_circle);
 
-            ctx.set_paint(*color);
-            ctx.fill_rect(&COVER_RECT);
+            //ctx.set_paint((*color).into());
+            //ctx.fill_rect(&COVER_RECT);
 
             radius -= RADIUS_DECREMENT;
         }

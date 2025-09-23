@@ -11,9 +11,12 @@
 
 use std::cell::RefCell;
 use std::rc::Rc;
-use vello_common::kurbo::{Affine, Point};
-use vello_hybrid::Pixmap;
-use vello_hybrid_scenes::AnyScene;
+use vello_common::{
+    kurbo::{Affine, Point},
+    paint::{ImageId, ImageSource},
+};
+use vello_example_scenes::{AnyScene, image::ImageScene};
+use vello_hybrid::{Pixmap, Scene};
 use wasm_bindgen::prelude::*;
 use web_sys::{Event, HtmlCanvasElement, KeyboardEvent, MouseEvent, WheelEvent};
 
@@ -106,7 +109,7 @@ impl RendererWrapper {
 
 /// State that handles scene rendering and interactions
 struct AppState {
-    scenes: Box<[AnyScene]>,
+    scenes: Box<[AnyScene<Scene>]>,
     current_scene: usize,
     scene: vello_hybrid::Scene,
     transform: Affine,
@@ -120,7 +123,7 @@ struct AppState {
 }
 
 impl AppState {
-    async fn new(canvas: HtmlCanvasElement, scenes: Box<[AnyScene]>) -> Self {
+    async fn new(canvas: HtmlCanvasElement, scenes: Box<[AnyScene<Scene>]>) -> Self {
         let width = canvas.width();
         let height = canvas.height();
 
@@ -235,11 +238,11 @@ impl AppState {
     fn handle_mouse_move(&mut self, x: f64, y: f64) {
         let current_pos = Point { x, y };
 
-        if self.mouse_down {
-            if let Some(last_pos) = self.last_cursor_position {
-                self.transform = self.transform.then_translate(current_pos - last_pos);
-                self.need_render = true;
-            }
+        if self.mouse_down
+            && let Some(last_pos) = self.last_cursor_position
+        {
+            self.transform = self.transform.then_translate(current_pos - last_pos);
+            self.need_render = true;
         }
 
         self.last_cursor_position = Some(current_pos);
@@ -262,8 +265,6 @@ impl AppState {
     }
 
     fn upload_images_to_atlas(&mut self) {
-        use vello_hybrid_scenes::image::ImageScene;
-
         let mut encoder =
             self.renderer_wrapper
                 .device
@@ -385,7 +386,10 @@ pub async fn run_interactive(canvas_width: u16, canvas_height: u16) {
         .append_child(&canvas)
         .unwrap();
 
-    let scenes = vello_hybrid_scenes::get_example_scenes();
+    let scenes = vello_example_scenes::get_example_scenes(vec![
+        ImageSource::OpaqueId(ImageId::new(0)),
+        ImageSource::OpaqueId(ImageId::new(1)),
+    ]);
 
     let app_state = Rc::new(RefCell::new(AppState::new(canvas.clone(), scenes).await));
 

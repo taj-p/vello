@@ -4,11 +4,11 @@
 use std::cell::RefCell;
 use std::sync::Arc;
 
-use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder, PreparedGlyph};
+use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder};
 use vello_common::kurbo::{Affine, BezPath, Rect, Stroke};
 use vello_common::mask::Mask;
 use vello_common::paint::{ImageSource, PaintType};
-use vello_common::peniko::{BlendMode, Fill, Font};
+use vello_common::peniko::{BlendMode, Fill, FontData};
 use vello_common::pixmap::Pixmap;
 use vello_common::recording::{Recordable, Recorder, Recording};
 use vello_cpu::{Level, RenderContext, RenderMode, RenderSettings};
@@ -16,7 +16,7 @@ use vello_hybrid::Scene;
 #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
 use web_sys::WebGl2RenderingContext;
 
-pub(crate) trait Renderer: Sized + GlyphRenderer {
+pub(crate) trait Renderer: Sized {
     type GlyphRenderer: GlyphRenderer;
 
     fn new(
@@ -31,7 +31,7 @@ pub(crate) trait Renderer: Sized + GlyphRenderer {
     fn fill_rect(&mut self, rect: &Rect);
     fn fill_blurred_rounded_rect(&mut self, rect: &Rect, radius: f32, std_dev: f32);
     fn stroke_rect(&mut self, rect: &Rect);
-    fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self::GlyphRenderer>;
+    fn glyph_run(&mut self, font: &FontData) -> GlyphRunBuilder<'_, Self::GlyphRenderer>;
     fn push_layer(
         &mut self,
         clip_path: Option<&BezPath>,
@@ -99,7 +99,7 @@ impl Renderer for RenderContext {
         Self::stroke_rect(self, rect);
     }
 
-    fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self> {
+    fn glyph_run(&mut self, font: &FontData) -> GlyphRunBuilder<'_, Self> {
         Self::glyph_run(self, font)
     }
 
@@ -287,7 +287,7 @@ impl Renderer for HybridRenderer {
         self.scene.stroke_rect(rect);
     }
 
-    fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self::GlyphRenderer> {
+    fn glyph_run(&mut self, font: &FontData) -> GlyphRunBuilder<'_, Self::GlyphRenderer> {
         self.scene.glyph_run(font)
     }
 
@@ -571,7 +571,7 @@ impl Renderer for HybridRenderer {
         self.scene.stroke_rect(rect);
     }
 
-    fn glyph_run(&mut self, font: &Font) -> GlyphRunBuilder<'_, Self::GlyphRenderer> {
+    fn glyph_run(&mut self, font: &FontData) -> GlyphRunBuilder<'_, Self::GlyphRenderer> {
         self.scene.glyph_run(font)
     }
 
@@ -691,23 +691,5 @@ impl Renderer for HybridRenderer {
 
     fn execute_recording(&mut self, recording: &Recording) {
         self.scene.execute_recording(recording);
-    }
-}
-
-impl GlyphRenderer for HybridRenderer {
-    fn fill_glyph(&mut self, glyph: PreparedGlyph<'_>) {
-        self.scene.fill_glyph(glyph);
-    }
-
-    fn stroke_glyph(&mut self, glyph: PreparedGlyph<'_>) {
-        self.scene.stroke_glyph(glyph);
-    }
-
-    fn take_glyph_caches(&mut self) -> vello_common::glyph::GlyphCaches {
-        self.scene.take_glyph_caches()
-    }
-
-    fn restore_glyph_caches(&mut self, caches: vello_common::glyph::GlyphCaches) {
-        self.scene.restore_glyph_caches(caches);
     }
 }
