@@ -1,0 +1,62 @@
+test = "intersected_clip_bbox_with_x0_gt_x1"
+units = "bytes"
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_cpu_f32_neon"
+allocations = 6
+deallocations = 4
+reallocations = 3
+bytes_allocated = 576
+bytes_deallocated = 0
+bytes_reallocated = 576
+net_bytes = 576
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_cpu_f32_scalar"
+allocations = 6
+deallocations = 4
+reallocations = 3
+bytes_allocated = 576
+bytes_deallocated = 0
+bytes_reallocated = 576
+net_bytes = 576
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_cpu_multithreaded"
+allocations = 41
+deallocations = 21
+reallocations = 13
+bytes_allocated = 2520
+bytes_deallocated = 0
+bytes_reallocated = 2520
+net_bytes = 2520
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_cpu_u8_neon"
+allocations = 6
+deallocations = 4
+reallocations = 3
+bytes_allocated = 576
+bytes_deallocated = 0
+bytes_reallocated = 576
+net_bytes = 576
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_cpu_u8_scalar"
+allocations = 6
+deallocations = 4
+reallocations = 3
+bytes_allocated = 576
+bytes_deallocated = 0
+bytes_reallocated = 576
+net_bytes = 576
+
+[[instances]]
+name = "intersected_clip_bbox_with_x0_gt_x1_hybrid"
+allocations = 6
+deallocations = 4
+reallocations = 3
+bytes_allocated = 576
+bytes_deallocated = 0
+bytes_reallocated = 576
+net_bytes = 576

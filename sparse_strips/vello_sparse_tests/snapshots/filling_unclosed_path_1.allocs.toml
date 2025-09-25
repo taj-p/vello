@@ -1,0 +1,62 @@
+test = "filling_unclosed_path_1"
+units = "bytes"
+
+[[instances]]
+name = "filling_unclosed_path_1_cpu_f32_neon"
+allocations = 30
+deallocations = 30
+reallocations = 25
+bytes_allocated = 52427
+bytes_deallocated = 0
+bytes_reallocated = 52427
+net_bytes = 52427
+
+[[instances]]
+name = "filling_unclosed_path_1_cpu_f32_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 25
+bytes_allocated = 52427
+bytes_deallocated = 0
+bytes_reallocated = 52427
+net_bytes = 52427
+
+[[instances]]
+name = "filling_unclosed_path_1_cpu_multithreaded"
+allocations = 87
+deallocations = 50
+reallocations = 41
+bytes_allocated = 55187
+bytes_deallocated = 0
+bytes_reallocated = 55187
+net_bytes = 55187
+
+[[instances]]
+name = "filling_unclosed_path_1_cpu_u8_neon"
+allocations = 30
+deallocations = 30
+reallocations = 25
+bytes_allocated = 52427
+bytes_deallocated = 0
+bytes_reallocated = 52427
+net_bytes = 52427
+
+[[instances]]
+name = "filling_unclosed_path_1_cpu_u8_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 25
+bytes_allocated = 52427
+bytes_deallocated = 0
+bytes_reallocated = 52427
+net_bytes = 52427
+
+[[instances]]
+name = "filling_unclosed_path_1_hybrid"
+allocations = 205
+deallocations = 184
+reallocations = 42
+bytes_allocated = 88411
+bytes_deallocated = 0
+bytes_reallocated = 88411
+net_bytes = 88411

@@ -1,0 +1,52 @@
+test = "mask_alpha"
+units = "bytes"
+
+[[instances]]
+name = "mask_alpha_cpu_f32_neon"
+allocations = 66
+deallocations = 63
+reallocations = 83
+bytes_allocated = 137580
+bytes_deallocated = 0
+bytes_reallocated = 137580
+net_bytes = 137580
+
+[[instances]]
+name = "mask_alpha_cpu_f32_scalar"
+allocations = 66
+deallocations = 63
+reallocations = 83
+bytes_allocated = 137580
+bytes_deallocated = 0
+bytes_reallocated = 137580
+net_bytes = 137580
+
+[[instances]]
+name = "mask_alpha_cpu_multithreaded"
+allocations = 125
+deallocations = 78
+reallocations = 108
+bytes_allocated = 175748
+bytes_deallocated = 0
+bytes_reallocated = 175748
+net_bytes = 175748
+
+[[instances]]
+name = "mask_alpha_cpu_u8_neon"
+allocations = 66
+deallocations = 63
+reallocations = 83
+bytes_allocated = 125292
+bytes_deallocated = 0
+bytes_reallocated = 125292
+net_bytes = 125292
+
+[[instances]]
+name = "mask_alpha_cpu_u8_scalar"
+allocations = 66
+deallocations = 63
+reallocations = 83
+bytes_allocated = 125292
+bytes_deallocated = 0
+bytes_reallocated = 125292
+net_bytes = 125292

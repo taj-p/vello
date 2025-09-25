@@ -1,0 +1,62 @@
+test = "compose_src_in"
+units = "bytes"
+
+[[instances]]
+name = "compose_src_in_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 64
+bytes_allocated = 112680
+bytes_deallocated = 0
+bytes_reallocated = 112680
+net_bytes = 112680
+
+[[instances]]
+name = "compose_src_in_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 64
+bytes_allocated = 112680
+bytes_deallocated = 0
+bytes_reallocated = 112680
+net_bytes = 112680
+
+[[instances]]
+name = "compose_src_in_cpu_multithreaded"
+allocations = 88
+deallocations = 46
+reallocations = 87
+bytes_allocated = 215168
+bytes_deallocated = 0
+bytes_reallocated = 215168
+net_bytes = 215168
+
+[[instances]]
+name = "compose_src_in_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 64
+bytes_allocated = 75816
+bytes_deallocated = 0
+bytes_reallocated = 75816
+net_bytes = 75816
+
+[[instances]]
+name = "compose_src_in_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 64
+bytes_allocated = 75816
+bytes_deallocated = 0
+bytes_reallocated = 75816
+net_bytes = 75816
+
+[[instances]]
+name = "compose_src_in_hybrid"
+allocations = 292
+deallocations = 266
+reallocations = 134
+bytes_allocated = 108140
+bytes_deallocated = 0
+bytes_reallocated = 108140
+net_bytes = 108140

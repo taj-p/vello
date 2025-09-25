@@ -1,0 +1,62 @@
+test = "stroked_unaligned_rect_as_path"
+units = "bytes"
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_cpu_f32_neon"
+allocations = 33
+deallocations = 30
+reallocations = 29
+bytes_allocated = 20012
+bytes_deallocated = 0
+bytes_reallocated = 20012
+net_bytes = 20012
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_cpu_f32_scalar"
+allocations = 33
+deallocations = 30
+reallocations = 29
+bytes_allocated = 20012
+bytes_deallocated = 0
+bytes_reallocated = 20012
+net_bytes = 20012
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_cpu_multithreaded"
+allocations = 75
+deallocations = 52
+reallocations = 41
+bytes_allocated = 21236
+bytes_deallocated = 0
+bytes_reallocated = 21236
+net_bytes = 21236
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_cpu_u8_neon"
+allocations = 33
+deallocations = 30
+reallocations = 29
+bytes_allocated = 20012
+bytes_deallocated = 0
+bytes_reallocated = 20012
+net_bytes = 20012
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_cpu_u8_scalar"
+allocations = 33
+deallocations = 30
+reallocations = 29
+bytes_allocated = 20012
+bytes_deallocated = 0
+bytes_reallocated = 20012
+net_bytes = 20012
+
+[[instances]]
+name = "stroked_unaligned_rect_as_path_hybrid"
+allocations = 157
+deallocations = 133
+reallocations = 44
+bytes_allocated = 54076
+bytes_deallocated = 0
+bytes_reallocated = 54076
+net_bytes = 54076

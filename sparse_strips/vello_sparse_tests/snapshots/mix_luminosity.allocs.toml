@@ -1,0 +1,62 @@
+test = "mix_luminosity"
+units = "bytes"
+
+[[instances]]
+name = "mix_luminosity_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 157795
+bytes_deallocated = 0
+bytes_reallocated = 157795
+net_bytes = 157795
+
+[[instances]]
+name = "mix_luminosity_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 157795
+bytes_deallocated = 0
+bytes_reallocated = 157795
+net_bytes = 157795
+
+[[instances]]
+name = "mix_luminosity_cpu_multithreaded"
+allocations = 110
+deallocations = 56
+reallocations = 89
+bytes_allocated = 195963
+bytes_deallocated = 0
+bytes_reallocated = 195963
+net_bytes = 195963
+
+[[instances]]
+name = "mix_luminosity_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 145537
+bytes_deallocated = 0
+bytes_reallocated = 145537
+net_bytes = 145537
+
+[[instances]]
+name = "mix_luminosity_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 145537
+bytes_deallocated = 0
+bytes_reallocated = 145537
+net_bytes = 145537
+
+[[instances]]
+name = "mix_luminosity_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 116
+bytes_allocated = 211826
+bytes_deallocated = 0
+bytes_reallocated = 211826
+net_bytes = 211826

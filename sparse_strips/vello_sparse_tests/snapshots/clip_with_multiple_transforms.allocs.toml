@@ -1,0 +1,62 @@
+test = "clip_with_multiple_transforms"
+units = "bytes"
+
+[[instances]]
+name = "clip_with_multiple_transforms_cpu_f32_neon"
+allocations = 42
+deallocations = 36
+reallocations = 80
+bytes_allocated = 141263
+bytes_deallocated = 0
+bytes_reallocated = 141263
+net_bytes = 141263
+
+[[instances]]
+name = "clip_with_multiple_transforms_cpu_f32_scalar"
+allocations = 42
+deallocations = 36
+reallocations = 80
+bytes_allocated = 141263
+bytes_deallocated = 0
+bytes_reallocated = 141263
+net_bytes = 141263
+
+[[instances]]
+name = "clip_with_multiple_transforms_cpu_multithreaded"
+allocations = 100
+deallocations = 57
+reallocations = 106
+bytes_allocated = 245959
+bytes_deallocated = 0
+bytes_reallocated = 245959
+net_bytes = 245959
+
+[[instances]]
+name = "clip_with_multiple_transforms_cpu_u8_neon"
+allocations = 42
+deallocations = 36
+reallocations = 80
+bytes_allocated = 104411
+bytes_deallocated = 0
+bytes_reallocated = 104411
+net_bytes = 104411
+
+[[instances]]
+name = "clip_with_multiple_transforms_cpu_u8_scalar"
+allocations = 42
+deallocations = 36
+reallocations = 80
+bytes_allocated = 104411
+bytes_deallocated = 0
+bytes_reallocated = 104411
+net_bytes = 104411
+
+[[instances]]
+name = "clip_with_multiple_transforms_hybrid"
+allocations = 261
+deallocations = 233
+reallocations = 122
+bytes_allocated = 131059
+bytes_deallocated = 0
+bytes_reallocated = 131059
+net_bytes = 131059

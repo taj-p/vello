@@ -1,0 +1,62 @@
+test = "glyphs_skewed_long_unhinted"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_cpu_f32_neon"
+allocations = 55
+deallocations = 35
+reallocations = 117
+bytes_allocated = 224397
+bytes_deallocated = 0
+bytes_reallocated = 224397
+net_bytes = 224397
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_cpu_f32_scalar"
+allocations = 55
+deallocations = 35
+reallocations = 117
+bytes_allocated = 224397
+bytes_deallocated = 0
+bytes_reallocated = 224397
+net_bytes = 224397
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_cpu_multithreaded"
+allocations = 151
+deallocations = 50
+reallocations = 263
+bytes_allocated = 359589
+bytes_deallocated = 0
+bytes_reallocated = 359589
+net_bytes = 359589
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_cpu_u8_neon"
+allocations = 55
+deallocations = 35
+reallocations = 117
+bytes_allocated = 224509
+bytes_deallocated = 0
+bytes_reallocated = 224509
+net_bytes = 224509
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_cpu_u8_scalar"
+allocations = 55
+deallocations = 35
+reallocations = 117
+bytes_allocated = 224509
+bytes_deallocated = 0
+bytes_reallocated = 224509
+net_bytes = 224509
+
+[[instances]]
+name = "glyphs_skewed_long_unhinted_hybrid"
+allocations = 212
+deallocations = 171
+reallocations = 136
+bytes_allocated = 268061
+bytes_deallocated = 0
+bytes_reallocated = 268061
+net_bytes = 268061

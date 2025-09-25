@@ -1,0 +1,62 @@
+test = "filling_nonzero_rule"
+units = "bytes"
+
+[[instances]]
+name = "filling_nonzero_rule_cpu_f32_neon"
+allocations = 30
+deallocations = 30
+reallocations = 40
+bytes_allocated = 67586
+bytes_deallocated = 0
+bytes_reallocated = 67586
+net_bytes = 67586
+
+[[instances]]
+name = "filling_nonzero_rule_cpu_f32_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 40
+bytes_allocated = 67586
+bytes_deallocated = 0
+bytes_reallocated = 67586
+net_bytes = 67586
+
+[[instances]]
+name = "filling_nonzero_rule_cpu_multithreaded"
+allocations = 87
+deallocations = 49
+reallocations = 56
+bytes_allocated = 70402
+bytes_deallocated = 0
+bytes_reallocated = 70402
+net_bytes = 70402
+
+[[instances]]
+name = "filling_nonzero_rule_cpu_u8_neon"
+allocations = 30
+deallocations = 30
+reallocations = 40
+bytes_allocated = 67588
+bytes_deallocated = 0
+bytes_reallocated = 67588
+net_bytes = 67588
+
+[[instances]]
+name = "filling_nonzero_rule_cpu_u8_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 40
+bytes_allocated = 67588
+bytes_deallocated = 0
+bytes_reallocated = 67588
+net_bytes = 67588
+
+[[instances]]
+name = "filling_nonzero_rule_hybrid"
+allocations = 205
+deallocations = 184
+reallocations = 57
+bytes_allocated = 103570
+bytes_deallocated = 0
+bytes_reallocated = 103570
+net_bytes = 103570

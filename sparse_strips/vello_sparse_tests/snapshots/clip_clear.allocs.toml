@@ -1,0 +1,52 @@
+test = "clip_clear"
+units = "bytes"
+
+[[instances]]
+name = "clip_clear_cpu_f32_neon"
+allocations = 32
+deallocations = 29
+reallocations = 43
+bytes_allocated = 86280
+bytes_deallocated = 0
+bytes_reallocated = 86280
+net_bytes = 86280
+
+[[instances]]
+name = "clip_clear_cpu_f32_scalar"
+allocations = 32
+deallocations = 29
+reallocations = 43
+bytes_allocated = 86280
+bytes_deallocated = 0
+bytes_reallocated = 86280
+net_bytes = 86280
+
+[[instances]]
+name = "clip_clear_cpu_multithreaded"
+allocations = 93
+deallocations = 51
+reallocations = 62
+bytes_allocated = 122368
+bytes_deallocated = 0
+bytes_reallocated = 122368
+net_bytes = 122368
+
+[[instances]]
+name = "clip_clear_cpu_u8_neon"
+allocations = 32
+deallocations = 29
+reallocations = 43
+bytes_allocated = 73992
+bytes_deallocated = 0
+bytes_reallocated = 73992
+net_bytes = 73992
+
+[[instances]]
+name = "clip_clear_cpu_u8_scalar"
+allocations = 32
+deallocations = 29
+reallocations = 43
+bytes_allocated = 73992
+bytes_deallocated = 0
+bytes_reallocated = 73992
+net_bytes = 73992

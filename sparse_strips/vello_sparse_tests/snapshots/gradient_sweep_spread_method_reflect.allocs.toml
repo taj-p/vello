@@ -1,0 +1,62 @@
+test = "gradient_sweep_spread_method_reflect"
+units = "bytes"
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_cpu_f32_neon"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 134500
+bytes_deallocated = 0
+bytes_reallocated = 134500
+net_bytes = 134500
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_cpu_f32_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 134500
+bytes_deallocated = 0
+bytes_reallocated = 134500
+net_bytes = 134500
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_cpu_multithreaded"
+allocations = 90
+deallocations = 44
+reallocations = 59
+bytes_allocated = 137388
+bytes_deallocated = 0
+bytes_reallocated = 137388
+net_bytes = 137388
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_cpu_u8_neon"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 134500
+bytes_deallocated = 0
+bytes_reallocated = 134500
+net_bytes = 134500
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_cpu_u8_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 134500
+bytes_deallocated = 0
+bytes_reallocated = 134500
+net_bytes = 134500
+
+[[instances]]
+name = "gradient_sweep_spread_method_reflect_hybrid"
+allocations = 212
+deallocations = 185
+reallocations = 58
+bytes_allocated = 186740
+bytes_deallocated = 0
+bytes_reallocated = 186740
+net_bytes = 186740

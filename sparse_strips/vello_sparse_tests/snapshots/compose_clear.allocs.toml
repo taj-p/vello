@@ -1,0 +1,62 @@
+test = "compose_clear"
+units = "bytes"
+
+[[instances]]
+name = "compose_clear_cpu_f32_neon"
+allocations = 30
+deallocations = 28
+reallocations = 64
+bytes_allocated = 112279
+bytes_deallocated = 0
+bytes_reallocated = 112279
+net_bytes = 112279
+
+[[instances]]
+name = "compose_clear_cpu_f32_scalar"
+allocations = 30
+deallocations = 28
+reallocations = 64
+bytes_allocated = 112279
+bytes_deallocated = 0
+bytes_reallocated = 112279
+net_bytes = 112279
+
+[[instances]]
+name = "compose_clear_cpu_multithreaded"
+allocations = 90
+deallocations = 50
+reallocations = 87
+bytes_allocated = 214767
+bytes_deallocated = 0
+bytes_reallocated = 214767
+net_bytes = 214767
+
+[[instances]]
+name = "compose_clear_cpu_u8_neon"
+allocations = 30
+deallocations = 28
+reallocations = 64
+bytes_allocated = 75415
+bytes_deallocated = 0
+bytes_reallocated = 75415
+net_bytes = 75415
+
+[[instances]]
+name = "compose_clear_cpu_u8_scalar"
+allocations = 30
+deallocations = 28
+reallocations = 64
+bytes_allocated = 75415
+bytes_deallocated = 0
+bytes_reallocated = 75415
+net_bytes = 75415
+
+[[instances]]
+name = "compose_clear_hybrid"
+allocations = 291
+deallocations = 265
+reallocations = 134
+bytes_allocated = 107739
+bytes_deallocated = 0
+bytes_reallocated = 107739
+net_bytes = 107739

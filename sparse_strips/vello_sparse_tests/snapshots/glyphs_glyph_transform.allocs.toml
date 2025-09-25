@@ -1,0 +1,62 @@
+test = "glyphs_glyph_transform"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_glyph_transform_cpu_f32_neon"
+allocations = 51
+deallocations = 34
+reallocations = 82
+bytes_allocated = 153382
+bytes_deallocated = 0
+bytes_reallocated = 153382
+net_bytes = 153382
+
+[[instances]]
+name = "glyphs_glyph_transform_cpu_f32_scalar"
+allocations = 51
+deallocations = 34
+reallocations = 82
+bytes_allocated = 153382
+bytes_deallocated = 0
+bytes_reallocated = 153382
+net_bytes = 153382
+
+[[instances]]
+name = "glyphs_glyph_transform_cpu_multithreaded"
+allocations = 125
+deallocations = 54
+reallocations = 122
+bytes_allocated = 171534
+bytes_deallocated = 0
+bytes_reallocated = 171534
+net_bytes = 171534
+
+[[instances]]
+name = "glyphs_glyph_transform_cpu_u8_neon"
+allocations = 51
+deallocations = 34
+reallocations = 82
+bytes_allocated = 154078
+bytes_deallocated = 0
+bytes_reallocated = 154078
+net_bytes = 154078
+
+[[instances]]
+name = "glyphs_glyph_transform_cpu_u8_scalar"
+allocations = 51
+deallocations = 34
+reallocations = 82
+bytes_allocated = 154078
+bytes_deallocated = 0
+bytes_reallocated = 154078
+net_bytes = 154078
+
+[[instances]]
+name = "glyphs_glyph_transform_hybrid"
+allocations = 247
+deallocations = 209
+reallocations = 100
+bytes_allocated = 191972
+bytes_deallocated = 0
+bytes_reallocated = 191972
+net_bytes = 191972

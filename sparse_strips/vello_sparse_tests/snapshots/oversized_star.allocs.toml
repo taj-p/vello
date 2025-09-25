@@ -1,0 +1,62 @@
+test = "oversized_star"
+units = "bytes"
+
+[[instances]]
+name = "oversized_star_cpu_f32_neon"
+allocations = 34
+deallocations = 31
+reallocations = 90
+bytes_allocated = 123200
+bytes_deallocated = 0
+bytes_reallocated = 123200
+net_bytes = 123200
+
+[[instances]]
+name = "oversized_star_cpu_f32_scalar"
+allocations = 34
+deallocations = 31
+reallocations = 90
+bytes_allocated = 123200
+bytes_deallocated = 0
+bytes_reallocated = 123200
+net_bytes = 123200
+
+[[instances]]
+name = "oversized_star_cpu_multithreaded"
+allocations = 97
+deallocations = 54
+reallocations = 107
+bytes_allocated = 128824
+bytes_deallocated = 0
+bytes_reallocated = 128824
+net_bytes = 128824
+
+[[instances]]
+name = "oversized_star_cpu_u8_neon"
+allocations = 34
+deallocations = 31
+reallocations = 90
+bytes_allocated = 123182
+bytes_deallocated = 0
+bytes_reallocated = 123182
+net_bytes = 123182
+
+[[instances]]
+name = "oversized_star_cpu_u8_scalar"
+allocations = 34
+deallocations = 31
+reallocations = 90
+bytes_allocated = 123182
+bytes_deallocated = 0
+bytes_reallocated = 123182
+net_bytes = 123182
+
+[[instances]]
+name = "oversized_star_hybrid"
+allocations = 209
+deallocations = 185
+reallocations = 109
+bytes_allocated = 166864
+bytes_deallocated = 0
+bytes_reallocated = 166864
+net_bytes = 166864

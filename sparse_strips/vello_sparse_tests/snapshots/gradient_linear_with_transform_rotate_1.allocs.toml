@@ -1,0 +1,62 @@
+test = "gradient_linear_with_transform_rotate_1"
+units = "bytes"
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_cpu_f32_neon"
+allocations = 34
+deallocations = 30
+reallocations = 36
+bytes_allocated = 63807
+bytes_deallocated = 0
+bytes_reallocated = 63807
+net_bytes = 63807
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_cpu_f32_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 36
+bytes_allocated = 63807
+bytes_deallocated = 0
+bytes_reallocated = 63807
+net_bytes = 63807
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_cpu_multithreaded"
+allocations = 90
+deallocations = 44
+reallocations = 52
+bytes_allocated = 66567
+bytes_deallocated = 0
+bytes_reallocated = 66567
+net_bytes = 66567
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_cpu_u8_neon"
+allocations = 34
+deallocations = 30
+reallocations = 36
+bytes_allocated = 63815
+bytes_deallocated = 0
+bytes_reallocated = 63815
+net_bytes = 63815
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_cpu_u8_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 36
+bytes_allocated = 63815
+bytes_deallocated = 0
+bytes_reallocated = 63815
+net_bytes = 63815
+
+[[instances]]
+name = "gradient_linear_with_transform_rotate_1_hybrid"
+allocations = 213
+deallocations = 186
+reallocations = 53
+bytes_allocated = 128335
+bytes_deallocated = 0
+bytes_reallocated = 128335
+net_bytes = 128335

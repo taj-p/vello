@@ -1,0 +1,62 @@
+test = "gradient_radial_outside"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_outside_cpu_f32_neon"
+allocations = 34
+deallocations = 30
+reallocations = 14
+bytes_allocated = 30133
+bytes_deallocated = 0
+bytes_reallocated = 30133
+net_bytes = 30133
+
+[[instances]]
+name = "gradient_radial_outside_cpu_f32_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 14
+bytes_allocated = 30133
+bytes_deallocated = 0
+bytes_reallocated = 30133
+net_bytes = 30133
+
+[[instances]]
+name = "gradient_radial_outside_cpu_multithreaded"
+allocations = 79
+deallocations = 44
+reallocations = 29
+bytes_allocated = 32381
+bytes_deallocated = 0
+bytes_reallocated = 32381
+net_bytes = 32381
+
+[[instances]]
+name = "gradient_radial_outside_cpu_u8_neon"
+allocations = 34
+deallocations = 30
+reallocations = 14
+bytes_allocated = 30133
+bytes_deallocated = 0
+bytes_reallocated = 30133
+net_bytes = 30133
+
+[[instances]]
+name = "gradient_radial_outside_cpu_u8_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 14
+bytes_allocated = 30133
+bytes_deallocated = 0
+bytes_reallocated = 30133
+net_bytes = 30133
+
+[[instances]]
+name = "gradient_radial_outside_hybrid"
+allocations = 177
+deallocations = 150
+reallocations = 30
+bytes_allocated = 93381
+bytes_deallocated = 0
+bytes_reallocated = 93381
+net_bytes = 93381

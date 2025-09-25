@@ -1,0 +1,62 @@
+test = "filled_overflowing_circle"
+units = "bytes"
+
+[[instances]]
+name = "filled_overflowing_circle_cpu_f32_neon"
+allocations = 31
+deallocations = 31
+reallocations = 45
+bytes_allocated = 66741
+bytes_deallocated = 0
+bytes_reallocated = 66741
+net_bytes = 66741
+
+[[instances]]
+name = "filled_overflowing_circle_cpu_f32_scalar"
+allocations = 31
+deallocations = 31
+reallocations = 45
+bytes_allocated = 66741
+bytes_deallocated = 0
+bytes_reallocated = 66741
+net_bytes = 66741
+
+[[instances]]
+name = "filled_overflowing_circle_cpu_multithreaded"
+allocations = 86
+deallocations = 46
+reallocations = 61
+bytes_allocated = 69557
+bytes_deallocated = 0
+bytes_reallocated = 69557
+net_bytes = 69557
+
+[[instances]]
+name = "filled_overflowing_circle_cpu_u8_neon"
+allocations = 31
+deallocations = 31
+reallocations = 45
+bytes_allocated = 66741
+bytes_deallocated = 0
+bytes_reallocated = 66741
+net_bytes = 66741
+
+[[instances]]
+name = "filled_overflowing_circle_cpu_u8_scalar"
+allocations = 31
+deallocations = 31
+reallocations = 45
+bytes_allocated = 66741
+bytes_deallocated = 0
+bytes_reallocated = 66741
+net_bytes = 66741
+
+[[instances]]
+name = "filled_overflowing_circle_hybrid"
+allocations = 206
+deallocations = 185
+reallocations = 62
+bytes_allocated = 102725
+bytes_deallocated = 0
+bytes_reallocated = 102725
+net_bytes = 102725

@@ -1,0 +1,62 @@
+test = "filled_overlapping_circles"
+units = "bytes"
+
+[[instances]]
+name = "filled_overlapping_circles_cpu_f32_neon"
+allocations = 35
+deallocations = 35
+reallocations = 57
+bytes_allocated = 77258
+bytes_deallocated = 0
+bytes_reallocated = 77258
+net_bytes = 77258
+
+[[instances]]
+name = "filled_overlapping_circles_cpu_f32_scalar"
+allocations = 35
+deallocations = 35
+reallocations = 57
+bytes_allocated = 77258
+bytes_deallocated = 0
+bytes_reallocated = 77258
+net_bytes = 77258
+
+[[instances]]
+name = "filled_overlapping_circles_cpu_multithreaded"
+allocations = 98
+deallocations = 58
+reallocations = 76
+bytes_allocated = 82946
+bytes_deallocated = 0
+bytes_reallocated = 82946
+net_bytes = 82946
+
+[[instances]]
+name = "filled_overlapping_circles_cpu_u8_neon"
+allocations = 35
+deallocations = 35
+reallocations = 57
+bytes_allocated = 77700
+bytes_deallocated = 0
+bytes_reallocated = 77700
+net_bytes = 77700
+
+[[instances]]
+name = "filled_overlapping_circles_cpu_u8_scalar"
+allocations = 35
+deallocations = 35
+reallocations = 57
+bytes_allocated = 77700
+bytes_deallocated = 0
+bytes_reallocated = 77700
+net_bytes = 77700
+
+[[instances]]
+name = "filled_overlapping_circles_hybrid"
+allocations = 210
+deallocations = 189
+reallocations = 75
+bytes_allocated = 115884
+bytes_deallocated = 0
+bytes_reallocated = 115884
+net_bytes = 115884

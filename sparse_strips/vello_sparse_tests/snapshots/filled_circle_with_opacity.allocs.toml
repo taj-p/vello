@@ -1,0 +1,62 @@
+test = "filled_circle_with_opacity"
+units = "bytes"
+
+[[instances]]
+name = "filled_circle_with_opacity_cpu_f32_neon"
+allocations = 31
+deallocations = 31
+reallocations = 43
+bytes_allocated = 67048
+bytes_deallocated = 0
+bytes_reallocated = 67048
+net_bytes = 67048
+
+[[instances]]
+name = "filled_circle_with_opacity_cpu_f32_scalar"
+allocations = 31
+deallocations = 31
+reallocations = 43
+bytes_allocated = 67048
+bytes_deallocated = 0
+bytes_reallocated = 67048
+net_bytes = 67048
+
+[[instances]]
+name = "filled_circle_with_opacity_cpu_multithreaded"
+allocations = 94
+deallocations = 54
+reallocations = 59
+bytes_allocated = 69864
+bytes_deallocated = 0
+bytes_reallocated = 69864
+net_bytes = 69864
+
+[[instances]]
+name = "filled_circle_with_opacity_cpu_u8_neon"
+allocations = 31
+deallocations = 31
+reallocations = 43
+bytes_allocated = 67204
+bytes_deallocated = 0
+bytes_reallocated = 67204
+net_bytes = 67204
+
+[[instances]]
+name = "filled_circle_with_opacity_cpu_u8_scalar"
+allocations = 31
+deallocations = 31
+reallocations = 43
+bytes_allocated = 67204
+bytes_deallocated = 0
+bytes_reallocated = 67204
+net_bytes = 67204
+
+[[instances]]
+name = "filled_circle_with_opacity_hybrid"
+allocations = 206
+deallocations = 185
+reallocations = 60
+bytes_allocated = 103038
+bytes_deallocated = 0
+bytes_reallocated = 103038
+net_bytes = 103038

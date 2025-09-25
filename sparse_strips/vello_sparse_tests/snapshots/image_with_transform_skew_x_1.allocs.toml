@@ -1,0 +1,62 @@
+test = "image_with_transform_skew_x_1"
+units = "bytes"
+
+[[instances]]
+name = "image_with_transform_skew_x_1_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 30
+bytes_allocated = 63326
+bytes_deallocated = 0
+bytes_reallocated = 63326
+net_bytes = 63326
+
+[[instances]]
+name = "image_with_transform_skew_x_1_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 30
+bytes_allocated = 63326
+bytes_deallocated = 0
+bytes_reallocated = 63326
+net_bytes = 63326
+
+[[instances]]
+name = "image_with_transform_skew_x_1_cpu_multithreaded"
+allocations = 97
+deallocations = 54
+reallocations = 49
+bytes_allocated = 66278
+bytes_deallocated = 0
+bytes_reallocated = 66278
+net_bytes = 66278
+
+[[instances]]
+name = "image_with_transform_skew_x_1_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 30
+bytes_allocated = 63326
+bytes_deallocated = 0
+bytes_reallocated = 63326
+net_bytes = 63326
+
+[[instances]]
+name = "image_with_transform_skew_x_1_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 30
+bytes_allocated = 63326
+bytes_deallocated = 0
+bytes_reallocated = 63326
+net_bytes = 63326
+
+[[instances]]
+name = "image_with_transform_skew_x_1_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 47
+bytes_allocated = 98741
+bytes_deallocated = 0
+bytes_reallocated = 98741
+net_bytes = 98741

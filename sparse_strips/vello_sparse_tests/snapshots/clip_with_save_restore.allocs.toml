@@ -1,0 +1,62 @@
+test = "clip_with_save_restore"
+units = "bytes"
+
+[[instances]]
+name = "clip_with_save_restore_cpu_f32_neon"
+allocations = 43
+deallocations = 36
+reallocations = 69
+bytes_allocated = 133194
+bytes_deallocated = 0
+bytes_reallocated = 133194
+net_bytes = 133194
+
+[[instances]]
+name = "clip_with_save_restore_cpu_f32_scalar"
+allocations = 43
+deallocations = 36
+reallocations = 69
+bytes_allocated = 133194
+bytes_deallocated = 0
+bytes_reallocated = 133194
+net_bytes = 133194
+
+[[instances]]
+name = "clip_with_save_restore_cpu_multithreaded"
+allocations = 100
+deallocations = 56
+reallocations = 96
+bytes_allocated = 239554
+bytes_deallocated = 0
+bytes_reallocated = 239554
+net_bytes = 239554
+
+[[instances]]
+name = "clip_with_save_restore_cpu_u8_neon"
+allocations = 43
+deallocations = 36
+reallocations = 69
+bytes_allocated = 96334
+bytes_deallocated = 0
+bytes_reallocated = 96334
+net_bytes = 96334
+
+[[instances]]
+name = "clip_with_save_restore_cpu_u8_scalar"
+allocations = 43
+deallocations = 36
+reallocations = 69
+bytes_allocated = 96334
+bytes_deallocated = 0
+bytes_reallocated = 96334
+net_bytes = 96334
+
+[[instances]]
+name = "clip_with_save_restore_hybrid"
+allocations = 263
+deallocations = 234
+reallocations = 113
+bytes_allocated = 124490
+bytes_deallocated = 0
+bytes_reallocated = 124490
+net_bytes = 124490

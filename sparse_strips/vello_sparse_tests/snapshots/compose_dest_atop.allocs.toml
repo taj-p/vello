@@ -1,0 +1,62 @@
+test = "compose_dest_atop"
+units = "bytes"
+
+[[instances]]
+name = "compose_dest_atop_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 112671
+bytes_deallocated = 0
+bytes_reallocated = 112671
+net_bytes = 112671
+
+[[instances]]
+name = "compose_dest_atop_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 112671
+bytes_deallocated = 0
+bytes_reallocated = 112671
+net_bytes = 112671
+
+[[instances]]
+name = "compose_dest_atop_cpu_multithreaded"
+allocations = 89
+deallocations = 47
+reallocations = 88
+bytes_allocated = 215159
+bytes_deallocated = 0
+bytes_reallocated = 215159
+net_bytes = 215159
+
+[[instances]]
+name = "compose_dest_atop_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 75807
+bytes_deallocated = 0
+bytes_reallocated = 75807
+net_bytes = 75807
+
+[[instances]]
+name = "compose_dest_atop_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 75807
+bytes_deallocated = 0
+bytes_reallocated = 75807
+net_bytes = 75807
+
+[[instances]]
+name = "compose_dest_atop_hybrid"
+allocations = 292
+deallocations = 266
+reallocations = 135
+bytes_allocated = 108131
+bytes_deallocated = 0
+bytes_reallocated = 108131
+net_bytes = 108131

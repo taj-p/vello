@@ -1,0 +1,62 @@
+test = "clip_deeply_nested_circles"
+units = "bytes"
+
+[[instances]]
+name = "clip_deeply_nested_circles_cpu_f32_neon"
+allocations = 113
+deallocations = 106
+reallocations = 190
+bytes_allocated = 864786
+bytes_deallocated = 0
+bytes_reallocated = 864786
+net_bytes = 864786
+
+[[instances]]
+name = "clip_deeply_nested_circles_cpu_f32_scalar"
+allocations = 113
+deallocations = 106
+reallocations = 190
+bytes_allocated = 864786
+bytes_deallocated = 0
+bytes_reallocated = 864786
+net_bytes = 864786
+
+[[instances]]
+name = "clip_deeply_nested_circles_cpu_multithreaded"
+allocations = 199
+deallocations = 126
+reallocations = 330
+bytes_allocated = 1700138
+bytes_deallocated = 0
+bytes_reallocated = 1700138
+net_bytes = 1700138
+
+[[instances]]
+name = "clip_deeply_nested_circles_cpu_u8_neon"
+allocations = 113
+deallocations = 106
+reallocations = 190
+bytes_allocated = 483982
+bytes_deallocated = 0
+bytes_reallocated = 483982
+net_bytes = 483982
+
+[[instances]]
+name = "clip_deeply_nested_circles_cpu_u8_scalar"
+allocations = 113
+deallocations = 106
+reallocations = 190
+bytes_allocated = 483982
+bytes_deallocated = 0
+bytes_reallocated = 483982
+net_bytes = 483982
+
+[[instances]]
+name = "clip_deeply_nested_circles_hybrid"
+allocations = 912
+deallocations = 856
+reallocations = 529
+bytes_allocated = 482568
+bytes_deallocated = 0
+bytes_reallocated = 482568
+net_bytes = 482568

@@ -1,0 +1,62 @@
+test = "out_of_viewport_clip"
+units = "bytes"
+
+[[instances]]
+name = "out_of_viewport_clip_cpu_f32_neon"
+allocations = 4
+deallocations = 1
+reallocations = 3
+bytes_allocated = 1472
+bytes_deallocated = 0
+bytes_reallocated = 1472
+net_bytes = 1472
+
+[[instances]]
+name = "out_of_viewport_clip_cpu_f32_scalar"
+allocations = 4
+deallocations = 1
+reallocations = 3
+bytes_allocated = 1472
+bytes_deallocated = 0
+bytes_reallocated = 1472
+net_bytes = 1472
+
+[[instances]]
+name = "out_of_viewport_clip_cpu_multithreaded"
+allocations = 56
+deallocations = 17
+reallocations = 20
+bytes_allocated = 4792
+bytes_deallocated = 0
+bytes_reallocated = 4792
+net_bytes = 4792
+
+[[instances]]
+name = "out_of_viewport_clip_cpu_u8_neon"
+allocations = 4
+deallocations = 1
+reallocations = 3
+bytes_allocated = 1472
+bytes_deallocated = 0
+bytes_reallocated = 1472
+net_bytes = 1472
+
+[[instances]]
+name = "out_of_viewport_clip_cpu_u8_scalar"
+allocations = 4
+deallocations = 1
+reallocations = 3
+bytes_allocated = 1472
+bytes_deallocated = 0
+bytes_reallocated = 1472
+net_bytes = 1472
+
+[[instances]]
+name = "out_of_viewport_clip_hybrid"
+allocations = 4
+deallocations = 2
+reallocations = 3
+bytes_allocated = 1472
+bytes_deallocated = 0
+bytes_reallocated = 1472
+net_bytes = 1472

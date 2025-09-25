@@ -1,0 +1,62 @@
+test = "repeatedly_compose_to_bottom_layer"
+units = "bytes"
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_cpu_f32_neon"
+allocations = 28
+deallocations = 26
+reallocations = 16
+bytes_allocated = 27484
+bytes_deallocated = 0
+bytes_reallocated = 27484
+net_bytes = 27484
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_cpu_f32_scalar"
+allocations = 28
+deallocations = 26
+reallocations = 16
+bytes_allocated = 27484
+bytes_deallocated = 0
+bytes_reallocated = 27484
+net_bytes = 27484
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_cpu_multithreaded"
+allocations = 59
+deallocations = 39
+reallocations = 25
+bytes_allocated = 29396
+bytes_deallocated = 0
+bytes_reallocated = 29396
+net_bytes = 29396
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_cpu_u8_neon"
+allocations = 28
+deallocations = 26
+reallocations = 16
+bytes_allocated = 15196
+bytes_deallocated = 0
+bytes_reallocated = 15196
+net_bytes = 15196
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_cpu_u8_scalar"
+allocations = 28
+deallocations = 26
+reallocations = 16
+bytes_allocated = 15196
+bytes_deallocated = 0
+bytes_reallocated = 15196
+net_bytes = 15196
+
+[[instances]]
+name = "repeatedly_compose_to_bottom_layer_hybrid"
+allocations = 260
+deallocations = 233
+reallocations = 54
+bytes_allocated = 48512
+bytes_deallocated = 0
+bytes_reallocated = 48512
+net_bytes = 48512

@@ -1,0 +1,62 @@
+test = "mix_difference"
+units = "bytes"
+
+[[instances]]
+name = "mix_difference_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 155955
+bytes_deallocated = 0
+bytes_reallocated = 155955
+net_bytes = 155955
+
+[[instances]]
+name = "mix_difference_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 155955
+bytes_deallocated = 0
+bytes_reallocated = 155955
+net_bytes = 155955
+
+[[instances]]
+name = "mix_difference_cpu_multithreaded"
+allocations = 116
+deallocations = 64
+reallocations = 89
+bytes_allocated = 194123
+bytes_deallocated = 0
+bytes_reallocated = 194123
+net_bytes = 194123
+
+[[instances]]
+name = "mix_difference_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 143649
+bytes_deallocated = 0
+bytes_reallocated = 143649
+net_bytes = 143649
+
+[[instances]]
+name = "mix_difference_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 64
+bytes_allocated = 143649
+bytes_deallocated = 0
+bytes_reallocated = 143649
+net_bytes = 143649
+
+[[instances]]
+name = "mix_difference_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 116
+bytes_allocated = 209958
+bytes_deallocated = 0
+bytes_reallocated = 209958
+net_bytes = 209958

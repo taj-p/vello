@@ -1,0 +1,62 @@
+test = "gradient_radial_complex_shape"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_complex_shape_cpu_f32_neon"
+allocations = 33
+deallocations = 30
+reallocations = 40
+bytes_allocated = 97195
+bytes_deallocated = 0
+bytes_reallocated = 97195
+net_bytes = 97195
+
+[[instances]]
+name = "gradient_radial_complex_shape_cpu_f32_scalar"
+allocations = 33
+deallocations = 30
+reallocations = 40
+bytes_allocated = 97195
+bytes_deallocated = 0
+bytes_reallocated = 97195
+net_bytes = 97195
+
+[[instances]]
+name = "gradient_radial_complex_shape_cpu_multithreaded"
+allocations = 88
+deallocations = 44
+reallocations = 57
+bytes_allocated = 100075
+bytes_deallocated = 0
+bytes_reallocated = 100075
+net_bytes = 100075
+
+[[instances]]
+name = "gradient_radial_complex_shape_cpu_u8_neon"
+allocations = 33
+deallocations = 30
+reallocations = 40
+bytes_allocated = 97203
+bytes_deallocated = 0
+bytes_reallocated = 97203
+net_bytes = 97203
+
+[[instances]]
+name = "gradient_radial_complex_shape_cpu_u8_scalar"
+allocations = 33
+deallocations = 30
+reallocations = 40
+bytes_allocated = 97203
+bytes_deallocated = 0
+bytes_reallocated = 97203
+net_bytes = 97203
+
+[[instances]]
+name = "gradient_radial_complex_shape_hybrid"
+allocations = 212
+deallocations = 185
+reallocations = 57
+bytes_allocated = 161725
+bytes_deallocated = 0
+bytes_reallocated = 161725
+net_bytes = 161725

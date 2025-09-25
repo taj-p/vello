@@ -1,0 +1,62 @@
+test = "mix_screen"
+units = "bytes"
+
+[[instances]]
+name = "mix_screen_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 130811
+bytes_deallocated = 0
+bytes_reallocated = 130811
+net_bytes = 130811
+
+[[instances]]
+name = "mix_screen_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 130811
+bytes_deallocated = 0
+bytes_reallocated = 130811
+net_bytes = 130811
+
+[[instances]]
+name = "mix_screen_cpu_multithreaded"
+allocations = 113
+deallocations = 62
+reallocations = 88
+bytes_allocated = 168979
+bytes_deallocated = 0
+bytes_reallocated = 168979
+net_bytes = 168979
+
+[[instances]]
+name = "mix_screen_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118501
+bytes_deallocated = 0
+bytes_reallocated = 118501
+net_bytes = 118501
+
+[[instances]]
+name = "mix_screen_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118501
+bytes_deallocated = 0
+bytes_reallocated = 118501
+net_bytes = 118501
+
+[[instances]]
+name = "mix_screen_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 184806
+bytes_deallocated = 0
+bytes_reallocated = 184806
+net_bytes = 184806

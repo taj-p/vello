@@ -1,0 +1,62 @@
+test = "glyphs_scaled"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_scaled_cpu_f32_neon"
+allocations = 51
+deallocations = 34
+reallocations = 85
+bytes_allocated = 155971
+bytes_deallocated = 0
+bytes_reallocated = 155971
+net_bytes = 155971
+
+[[instances]]
+name = "glyphs_scaled_cpu_f32_scalar"
+allocations = 51
+deallocations = 34
+reallocations = 85
+bytes_allocated = 155971
+bytes_deallocated = 0
+bytes_reallocated = 155971
+net_bytes = 155971
+
+[[instances]]
+name = "glyphs_scaled_cpu_multithreaded"
+allocations = 125
+deallocations = 52
+reallocations = 127
+bytes_allocated = 174635
+bytes_deallocated = 0
+bytes_reallocated = 174635
+net_bytes = 174635
+
+[[instances]]
+name = "glyphs_scaled_cpu_u8_neon"
+allocations = 51
+deallocations = 34
+reallocations = 85
+bytes_allocated = 156737
+bytes_deallocated = 0
+bytes_reallocated = 156737
+net_bytes = 156737
+
+[[instances]]
+name = "glyphs_scaled_cpu_u8_scalar"
+allocations = 51
+deallocations = 34
+reallocations = 85
+bytes_allocated = 156737
+bytes_deallocated = 0
+bytes_reallocated = 156737
+net_bytes = 156737
+
+[[instances]]
+name = "glyphs_scaled_hybrid"
+allocations = 247
+deallocations = 209
+reallocations = 103
+bytes_allocated = 194561
+bytes_deallocated = 0
+bytes_reallocated = 194561
+net_bytes = 194561

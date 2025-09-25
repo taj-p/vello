@@ -1,0 +1,62 @@
+test = "recording_mixed_with_direct_drawing"
+units = "bytes"
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_cpu_f32_neon"
+allocations = 50
+deallocations = 40
+reallocations = 74
+bytes_allocated = 174895
+bytes_deallocated = 0
+bytes_reallocated = 174895
+net_bytes = 174895
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_cpu_f32_scalar"
+allocations = 50
+deallocations = 40
+reallocations = 74
+bytes_allocated = 174895
+bytes_deallocated = 0
+bytes_reallocated = 174895
+net_bytes = 174895
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_cpu_multithreaded"
+allocations = 139
+deallocations = 57
+reallocations = 96
+bytes_allocated = 179271
+bytes_deallocated = 0
+bytes_reallocated = 179271
+net_bytes = 179271
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_cpu_u8_neon"
+allocations = 50
+deallocations = 40
+reallocations = 74
+bytes_allocated = 174899
+bytes_deallocated = 0
+bytes_reallocated = 174899
+net_bytes = 174899
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_cpu_u8_scalar"
+allocations = 50
+deallocations = 40
+reallocations = 74
+bytes_allocated = 174899
+bytes_deallocated = 0
+bytes_reallocated = 174899
+net_bytes = 174899
+
+[[instances]]
+name = "recording_mixed_with_direct_drawing_hybrid"
+allocations = 300
+deallocations = 270
+reallocations = 90
+bytes_allocated = 213407
+bytes_deallocated = 0
+bytes_reallocated = 213407
+net_bytes = 213407

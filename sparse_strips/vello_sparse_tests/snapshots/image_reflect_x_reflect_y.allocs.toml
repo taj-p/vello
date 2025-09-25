@@ -1,0 +1,62 @@
+test = "image_reflect_x_reflect_y"
+units = "bytes"
+
+[[instances]]
+name = "image_reflect_x_reflect_y_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 39
+bytes_allocated = 61944
+bytes_deallocated = 0
+bytes_reallocated = 61944
+net_bytes = 61944
+
+[[instances]]
+name = "image_reflect_x_reflect_y_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 39
+bytes_allocated = 61944
+bytes_deallocated = 0
+bytes_reallocated = 61944
+net_bytes = 61944
+
+[[instances]]
+name = "image_reflect_x_reflect_y_cpu_multithreaded"
+allocations = 103
+deallocations = 56
+reallocations = 58
+bytes_allocated = 64896
+bytes_deallocated = 0
+bytes_reallocated = 64896
+net_bytes = 64896
+
+[[instances]]
+name = "image_reflect_x_reflect_y_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 39
+bytes_allocated = 61944
+bytes_deallocated = 0
+bytes_reallocated = 61944
+net_bytes = 61944
+
+[[instances]]
+name = "image_reflect_x_reflect_y_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 39
+bytes_allocated = 61944
+bytes_deallocated = 0
+bytes_reallocated = 61944
+net_bytes = 61944
+
+[[instances]]
+name = "image_reflect_x_reflect_y_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 56
+bytes_allocated = 97359
+bytes_deallocated = 0
+bytes_reallocated = 97359
+net_bytes = 97359

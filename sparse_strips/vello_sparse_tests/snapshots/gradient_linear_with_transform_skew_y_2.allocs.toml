@@ -1,0 +1,62 @@
+test = "gradient_linear_with_transform_skew_y_2"
+units = "bytes"
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 83171
+bytes_deallocated = 0
+bytes_reallocated = 83171
+net_bytes = 83171
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 83171
+bytes_deallocated = 0
+bytes_reallocated = 83171
+net_bytes = 83171
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_cpu_multithreaded"
+allocations = 94
+deallocations = 50
+reallocations = 55
+bytes_allocated = 85931
+bytes_deallocated = 0
+bytes_reallocated = 85931
+net_bytes = 85931
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 83171
+bytes_deallocated = 0
+bytes_reallocated = 83171
+net_bytes = 83171
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 83171
+bytes_deallocated = 0
+bytes_reallocated = 83171
+net_bytes = 83171
+
+[[instances]]
+name = "gradient_linear_with_transform_skew_y_2_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 56
+bytes_allocated = 147699
+bytes_deallocated = 0
+bytes_reallocated = 147699
+net_bytes = 147699

@@ -1,0 +1,62 @@
+test = "image_lumaa_image"
+units = "bytes"
+
+[[instances]]
+name = "image_lumaa_image_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 83422
+bytes_deallocated = 0
+bytes_reallocated = 83422
+net_bytes = 83422
+
+[[instances]]
+name = "image_lumaa_image_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 83422
+bytes_deallocated = 0
+bytes_reallocated = 83422
+net_bytes = 83422
+
+[[instances]]
+name = "image_lumaa_image_cpu_multithreaded"
+allocations = 110
+deallocations = 64
+reallocations = 59
+bytes_allocated = 86310
+bytes_deallocated = 0
+bytes_reallocated = 86310
+net_bytes = 86310
+
+[[instances]]
+name = "image_lumaa_image_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 83422
+bytes_deallocated = 0
+bytes_reallocated = 83422
+net_bytes = 83422
+
+[[instances]]
+name = "image_lumaa_image_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 83422
+bytes_deallocated = 0
+bytes_reallocated = 83422
+net_bytes = 83422
+
+[[instances]]
+name = "image_lumaa_image_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 58
+bytes_allocated = 118837
+bytes_deallocated = 0
+bytes_reallocated = 118837
+net_bytes = 118837

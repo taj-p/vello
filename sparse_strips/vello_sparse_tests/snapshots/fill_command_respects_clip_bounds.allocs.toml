@@ -1,0 +1,62 @@
+test = "fill_command_respects_clip_bounds"
+units = "bytes"
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_cpu_f32_neon"
+allocations = 63
+deallocations = 31
+reallocations = 70
+bytes_allocated = 269907
+bytes_deallocated = 0
+bytes_reallocated = 269907
+net_bytes = 269907
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_cpu_f32_scalar"
+allocations = 63
+deallocations = 31
+reallocations = 70
+bytes_allocated = 269907
+bytes_deallocated = 0
+bytes_reallocated = 269907
+net_bytes = 269907
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_cpu_multithreaded"
+allocations = 103
+deallocations = 55
+reallocations = 72
+bytes_allocated = 286571
+bytes_deallocated = 0
+bytes_reallocated = 286571
+net_bytes = 286571
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_cpu_u8_neon"
+allocations = 63
+deallocations = 31
+reallocations = 70
+bytes_allocated = 257619
+bytes_deallocated = 0
+bytes_reallocated = 257619
+net_bytes = 257619
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_cpu_u8_scalar"
+allocations = 63
+deallocations = 31
+reallocations = 70
+bytes_allocated = 257619
+bytes_deallocated = 0
+bytes_reallocated = 257619
+net_bytes = 257619
+
+[[instances]]
+name = "fill_command_respects_clip_bounds_hybrid"
+allocations = 1535
+deallocations = 1482
+reallocations = 103
+bytes_allocated = 291019
+bytes_deallocated = 0
+bytes_reallocated = 291019
+net_bytes = 291019

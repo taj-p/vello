@@ -1,0 +1,62 @@
+test = "compose_dest"
+units = "bytes"
+
+[[instances]]
+name = "compose_dest_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 56
+bytes_allocated = 111366
+bytes_deallocated = 0
+bytes_reallocated = 111366
+net_bytes = 111366
+
+[[instances]]
+name = "compose_dest_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 56
+bytes_allocated = 111366
+bytes_deallocated = 0
+bytes_reallocated = 111366
+net_bytes = 111366
+
+[[instances]]
+name = "compose_dest_cpu_multithreaded"
+allocations = 97
+deallocations = 55
+reallocations = 78
+bytes_allocated = 181086
+bytes_deallocated = 0
+bytes_reallocated = 181086
+net_bytes = 181086
+
+[[instances]]
+name = "compose_dest_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 56
+bytes_allocated = 74502
+bytes_deallocated = 0
+bytes_reallocated = 74502
+net_bytes = 74502
+
+[[instances]]
+name = "compose_dest_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 56
+bytes_allocated = 74502
+bytes_deallocated = 0
+bytes_reallocated = 74502
+net_bytes = 74502
+
+[[instances]]
+name = "compose_dest_hybrid"
+allocations = 314
+deallocations = 287
+reallocations = 127
+bytes_allocated = 105466
+bytes_deallocated = 0
+bytes_reallocated = 105466
+net_bytes = 105466

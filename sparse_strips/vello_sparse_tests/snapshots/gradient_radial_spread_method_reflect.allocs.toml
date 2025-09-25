@@ -1,0 +1,62 @@
+test = "gradient_radial_spread_method_reflect"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_f32_neon"
+allocations = 34
+deallocations = 30
+reallocations = 41
+bytes_allocated = 144933
+bytes_deallocated = 0
+bytes_reallocated = 144933
+net_bytes = 144933
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_f32_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 41
+bytes_allocated = 144933
+bytes_deallocated = 0
+bytes_reallocated = 144933
+net_bytes = 144933
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_multithreaded"
+allocations = 91
+deallocations = 46
+reallocations = 57
+bytes_allocated = 147693
+bytes_deallocated = 0
+bytes_reallocated = 147693
+net_bytes = 147693
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_u8_neon"
+allocations = 34
+deallocations = 30
+reallocations = 41
+bytes_allocated = 144933
+bytes_deallocated = 0
+bytes_reallocated = 144933
+net_bytes = 144933
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_u8_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 41
+bytes_allocated = 144933
+bytes_deallocated = 0
+bytes_reallocated = 144933
+net_bytes = 144933
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_hybrid"
+allocations = 213
+deallocations = 186
+reallocations = 58
+bytes_allocated = 197173
+bytes_deallocated = 0
+bytes_reallocated = 197173
+net_bytes = 197173

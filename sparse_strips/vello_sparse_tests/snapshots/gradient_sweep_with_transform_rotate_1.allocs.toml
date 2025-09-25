@@ -1,0 +1,62 @@
+test = "gradient_sweep_with_transform_rotate_1"
+units = "bytes"
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 33
+bytes_allocated = 83836
+bytes_deallocated = 0
+bytes_reallocated = 83836
+net_bytes = 83836
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 33
+bytes_allocated = 83836
+bytes_deallocated = 0
+bytes_reallocated = 83836
+net_bytes = 83836
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_cpu_multithreaded"
+allocations = 90
+deallocations = 49
+reallocations = 50
+bytes_allocated = 86660
+bytes_deallocated = 0
+bytes_reallocated = 86660
+net_bytes = 86660
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 33
+bytes_allocated = 83838
+bytes_deallocated = 0
+bytes_reallocated = 83838
+net_bytes = 83838
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 33
+bytes_allocated = 83838
+bytes_deallocated = 0
+bytes_reallocated = 83838
+net_bytes = 83838
+
+[[instances]]
+name = "gradient_sweep_with_transform_rotate_1_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 50
+bytes_allocated = 148364
+bytes_deallocated = 0
+bytes_reallocated = 148364
+net_bytes = 148364

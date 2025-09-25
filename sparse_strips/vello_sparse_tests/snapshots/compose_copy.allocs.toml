@@ -1,0 +1,62 @@
+test = "compose_copy"
+units = "bytes"
+
+[[instances]]
+name = "compose_copy_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 113696
+bytes_deallocated = 0
+bytes_reallocated = 113696
+net_bytes = 113696
+
+[[instances]]
+name = "compose_copy_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 113696
+bytes_deallocated = 0
+bytes_reallocated = 113696
+net_bytes = 113696
+
+[[instances]]
+name = "compose_copy_cpu_multithreaded"
+allocations = 93
+deallocations = 51
+reallocations = 88
+bytes_allocated = 216184
+bytes_deallocated = 0
+bytes_reallocated = 216184
+net_bytes = 216184
+
+[[instances]]
+name = "compose_copy_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 76832
+bytes_deallocated = 0
+bytes_reallocated = 76832
+net_bytes = 76832
+
+[[instances]]
+name = "compose_copy_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 65
+bytes_allocated = 76832
+bytes_deallocated = 0
+bytes_reallocated = 76832
+net_bytes = 76832
+
+[[instances]]
+name = "compose_copy_hybrid"
+allocations = 292
+deallocations = 266
+reallocations = 135
+bytes_allocated = 109156
+bytes_deallocated = 0
+bytes_reallocated = 109156
+net_bytes = 109156

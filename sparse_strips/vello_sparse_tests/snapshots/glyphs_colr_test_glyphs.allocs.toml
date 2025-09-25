@@ -1,0 +1,52 @@
+test = "glyphs_colr_test_glyphs"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_colr_test_glyphs_cpu_f32_neon"
+allocations = 7624
+deallocations = 7191
+reallocations = 9253
+bytes_allocated = 15526539
+bytes_deallocated = 0
+bytes_reallocated = 15526539
+net_bytes = 15526539
+
+[[instances]]
+name = "glyphs_colr_test_glyphs_cpu_f32_scalar"
+allocations = 7624
+deallocations = 7191
+reallocations = 9253
+bytes_allocated = 15526539
+bytes_deallocated = 0
+bytes_reallocated = 15526539
+net_bytes = 15526539
+
+[[instances]]
+name = "glyphs_colr_test_glyphs_cpu_multithreaded"
+allocations = 8161
+deallocations = 7215
+reallocations = 9377
+bytes_allocated = 15688659
+bytes_deallocated = 0
+bytes_reallocated = 15688659
+net_bytes = 15688659
+
+[[instances]]
+name = "glyphs_colr_test_glyphs_cpu_u8_neon"
+allocations = 7624
+deallocations = 7191
+reallocations = 9253
+bytes_allocated = 6763429
+bytes_deallocated = 0
+bytes_reallocated = 6763429
+net_bytes = 6763429
+
+[[instances]]
+name = "glyphs_colr_test_glyphs_cpu_u8_scalar"
+allocations = 7624
+deallocations = 7191
+reallocations = 9253
+bytes_allocated = 6763429
+bytes_deallocated = 0
+bytes_reallocated = 6763429
+net_bytes = 6763429

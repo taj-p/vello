@@ -1,0 +1,62 @@
+test = "glyphs_small_unhinted"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_small_unhinted_cpu_f32_neon"
+allocations = 43
+deallocations = 33
+reallocations = 51
+bytes_allocated = 28987
+bytes_deallocated = 0
+bytes_reallocated = 28987
+net_bytes = 28987
+
+[[instances]]
+name = "glyphs_small_unhinted_cpu_f32_scalar"
+allocations = 43
+deallocations = 33
+reallocations = 51
+bytes_allocated = 28987
+bytes_deallocated = 0
+bytes_reallocated = 28987
+net_bytes = 28987
+
+[[instances]]
+name = "glyphs_small_unhinted_cpu_multithreaded"
+allocations = 88
+deallocations = 51
+reallocations = 75
+bytes_allocated = 42243
+bytes_deallocated = 0
+bytes_reallocated = 42243
+net_bytes = 42243
+
+[[instances]]
+name = "glyphs_small_unhinted_cpu_u8_neon"
+allocations = 43
+deallocations = 33
+reallocations = 51
+bytes_allocated = 28997
+bytes_deallocated = 0
+bytes_reallocated = 28997
+net_bytes = 28997
+
+[[instances]]
+name = "glyphs_small_unhinted_cpu_u8_scalar"
+allocations = 43
+deallocations = 33
+reallocations = 51
+bytes_allocated = 28997
+bytes_deallocated = 0
+bytes_reallocated = 28997
+net_bytes = 28997
+
+[[instances]]
+name = "glyphs_small_unhinted_hybrid"
+allocations = 152
+deallocations = 121
+reallocations = 67
+bytes_allocated = 63691
+bytes_deallocated = 0
+bytes_reallocated = 63691
+net_bytes = 63691

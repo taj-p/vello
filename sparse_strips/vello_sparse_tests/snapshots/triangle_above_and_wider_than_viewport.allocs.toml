@@ -1,0 +1,62 @@
+test = "triangle_above_and_wider_than_viewport"
+units = "bytes"
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_cpu_f32_neon"
+allocations = 28
+deallocations = 28
+reallocations = 14
+bytes_allocated = 16418
+bytes_deallocated = 0
+bytes_reallocated = 16418
+net_bytes = 16418
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_cpu_f32_scalar"
+allocations = 28
+deallocations = 28
+reallocations = 14
+bytes_allocated = 16418
+bytes_deallocated = 0
+bytes_reallocated = 16418
+net_bytes = 16418
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_cpu_multithreaded"
+allocations = 68
+deallocations = 50
+reallocations = 22
+bytes_allocated = 17002
+bytes_deallocated = 0
+bytes_reallocated = 17002
+net_bytes = 17002
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_cpu_u8_neon"
+allocations = 28
+deallocations = 28
+reallocations = 14
+bytes_allocated = 16420
+bytes_deallocated = 0
+bytes_reallocated = 16420
+net_bytes = 16420
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_cpu_u8_scalar"
+allocations = 28
+deallocations = 28
+reallocations = 14
+bytes_allocated = 16420
+bytes_deallocated = 0
+bytes_reallocated = 16420
+net_bytes = 16420
+
+[[instances]]
+name = "triangle_above_and_wider_than_viewport_hybrid"
+allocations = 137
+deallocations = 116
+reallocations = 28
+bytes_allocated = 50162
+bytes_deallocated = 0
+bytes_reallocated = 50162
+net_bytes = 50162

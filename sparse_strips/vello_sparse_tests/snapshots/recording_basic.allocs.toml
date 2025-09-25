@@ -1,0 +1,62 @@
+test = "recording_basic"
+units = "bytes"
+
+[[instances]]
+name = "recording_basic_cpu_f32_neon"
+allocations = 44
+deallocations = 43
+reallocations = 87
+bytes_allocated = 77931
+bytes_deallocated = 0
+bytes_reallocated = 77931
+net_bytes = 77931
+
+[[instances]]
+name = "recording_basic_cpu_f32_scalar"
+allocations = 44
+deallocations = 43
+reallocations = 87
+bytes_allocated = 77931
+bytes_deallocated = 0
+bytes_reallocated = 77931
+net_bytes = 77931
+
+[[instances]]
+name = "recording_basic_cpu_multithreaded"
+allocations = 108
+deallocations = 65
+reallocations = 111
+bytes_allocated = 84259
+bytes_deallocated = 0
+bytes_reallocated = 84259
+net_bytes = 84259
+
+[[instances]]
+name = "recording_basic_cpu_u8_neon"
+allocations = 44
+deallocations = 43
+reallocations = 87
+bytes_allocated = 77931
+bytes_deallocated = 0
+bytes_reallocated = 77931
+net_bytes = 77931
+
+[[instances]]
+name = "recording_basic_cpu_u8_scalar"
+allocations = 44
+deallocations = 43
+reallocations = 87
+bytes_allocated = 77931
+bytes_deallocated = 0
+bytes_reallocated = 77931
+net_bytes = 77931
+
+[[instances]]
+name = "recording_basic_hybrid"
+allocations = 222
+deallocations = 201
+reallocations = 105
+bytes_allocated = 117339
+bytes_deallocated = 0
+bytes_reallocated = 117339
+net_bytes = 117339

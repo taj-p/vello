@@ -1,0 +1,52 @@
+test = "glyphs_bitmap_noto"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_bitmap_noto_cpu_f32_neon"
+allocations = 88
+deallocations = 78
+reallocations = 51
+bytes_allocated = 194726
+bytes_deallocated = 0
+bytes_reallocated = 194726
+net_bytes = 194726
+
+[[instances]]
+name = "glyphs_bitmap_noto_cpu_f32_scalar"
+allocations = 88
+deallocations = 78
+reallocations = 51
+bytes_allocated = 194726
+bytes_deallocated = 0
+bytes_reallocated = 194726
+net_bytes = 194726
+
+[[instances]]
+name = "glyphs_bitmap_noto_cpu_multithreaded"
+allocations = 143
+deallocations = 100
+reallocations = 77
+bytes_allocated = 202782
+bytes_deallocated = 0
+bytes_reallocated = 202782
+net_bytes = 202782
+
+[[instances]]
+name = "glyphs_bitmap_noto_cpu_u8_neon"
+allocations = 88
+deallocations = 78
+reallocations = 51
+bytes_allocated = 194746
+bytes_deallocated = 0
+bytes_reallocated = 194746
+net_bytes = 194746
+
+[[instances]]
+name = "glyphs_bitmap_noto_cpu_u8_scalar"
+allocations = 88
+deallocations = 78
+reallocations = 51
+bytes_allocated = 194746
+bytes_deallocated = 0
+bytes_reallocated = 194746
+net_bytes = 194746

@@ -1,0 +1,62 @@
+test = "recording_is_executed_at_recorded_transform"
+units = "bytes"
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_cpu_f32_neon"
+allocations = 37
+deallocations = 36
+reallocations = 31
+bytes_allocated = 21953
+bytes_deallocated = 0
+bytes_reallocated = 21953
+net_bytes = 21953
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_cpu_f32_scalar"
+allocations = 37
+deallocations = 36
+reallocations = 31
+bytes_allocated = 21953
+bytes_deallocated = 0
+bytes_reallocated = 21953
+net_bytes = 21953
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_cpu_multithreaded"
+allocations = 86
+deallocations = 53
+reallocations = 46
+bytes_allocated = 23793
+bytes_deallocated = 0
+bytes_reallocated = 23793
+net_bytes = 23793
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_cpu_u8_neon"
+allocations = 37
+deallocations = 36
+reallocations = 31
+bytes_allocated = 21953
+bytes_deallocated = 0
+bytes_reallocated = 21953
+net_bytes = 21953
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_cpu_u8_scalar"
+allocations = 37
+deallocations = 36
+reallocations = 31
+bytes_allocated = 21953
+bytes_deallocated = 0
+bytes_reallocated = 21953
+net_bytes = 21953
+
+[[instances]]
+name = "recording_is_executed_at_recorded_transform_hybrid"
+allocations = 174
+deallocations = 153
+reallocations = 44
+bytes_allocated = 56433
+bytes_deallocated = 0
+bytes_reallocated = 56433
+net_bytes = 56433

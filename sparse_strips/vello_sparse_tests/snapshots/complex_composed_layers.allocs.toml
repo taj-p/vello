@@ -1,0 +1,62 @@
+test = "complex_composed_layers"
+units = "bytes"
+
+[[instances]]
+name = "complex_composed_layers_cpu_f32_neon"
+allocations = 78
+deallocations = 47
+reallocations = 161
+bytes_allocated = 440229
+bytes_deallocated = 0
+bytes_reallocated = 440229
+net_bytes = 440229
+
+[[instances]]
+name = "complex_composed_layers_cpu_f32_scalar"
+allocations = 78
+deallocations = 47
+reallocations = 161
+bytes_allocated = 440229
+bytes_deallocated = 0
+bytes_reallocated = 440229
+net_bytes = 440229
+
+[[instances]]
+name = "complex_composed_layers_cpu_multithreaded"
+allocations = 117
+deallocations = 68
+reallocations = 208
+bytes_allocated = 953645
+bytes_deallocated = 0
+bytes_reallocated = 953645
+net_bytes = 953645
+
+[[instances]]
+name = "complex_composed_layers_cpu_u8_neon"
+allocations = 78
+deallocations = 47
+reallocations = 161
+bytes_allocated = 255937
+bytes_deallocated = 0
+bytes_reallocated = 255937
+net_bytes = 255937
+
+[[instances]]
+name = "complex_composed_layers_cpu_u8_scalar"
+allocations = 78
+deallocations = 47
+reallocations = 161
+bytes_allocated = 255937
+bytes_deallocated = 0
+bytes_reallocated = 255937
+net_bytes = 255937
+
+[[instances]]
+name = "complex_composed_layers_hybrid"
+allocations = 653
+deallocations = 584
+reallocations = 443
+bytes_allocated = 292449
+bytes_deallocated = 0
+bytes_reallocated = 292449
+net_bytes = 292449

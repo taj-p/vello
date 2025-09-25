@@ -1,0 +1,62 @@
+test = "gradient_radial_with_transform_skew_y_2"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_cpu_f32_neon"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 103673
+bytes_deallocated = 0
+bytes_reallocated = 103673
+net_bytes = 103673
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_cpu_f32_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 103673
+bytes_deallocated = 0
+bytes_reallocated = 103673
+net_bytes = 103673
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_cpu_multithreaded"
+allocations = 91
+deallocations = 49
+reallocations = 57
+bytes_allocated = 106433
+bytes_deallocated = 0
+bytes_reallocated = 106433
+net_bytes = 106433
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_cpu_u8_neon"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 103673
+bytes_deallocated = 0
+bytes_reallocated = 103673
+net_bytes = 103673
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_cpu_u8_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 41
+bytes_allocated = 103673
+bytes_deallocated = 0
+bytes_reallocated = 103673
+net_bytes = 103673
+
+[[instances]]
+name = "gradient_radial_with_transform_skew_y_2_hybrid"
+allocations = 212
+deallocations = 185
+reallocations = 58
+bytes_allocated = 168201
+bytes_deallocated = 0
+bytes_reallocated = 168201
+net_bytes = 168201

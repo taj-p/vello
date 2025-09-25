@@ -1,0 +1,62 @@
+test = "basic_alpha_compositing"
+units = "bytes"
+
+[[instances]]
+name = "basic_alpha_compositing_cpu_f32_neon"
+allocations = 30
+deallocations = 29
+reallocations = 37
+bytes_allocated = 59001
+bytes_deallocated = 0
+bytes_reallocated = 59001
+net_bytes = 59001
+
+[[instances]]
+name = "basic_alpha_compositing_cpu_f32_scalar"
+allocations = 30
+deallocations = 29
+reallocations = 37
+bytes_allocated = 59001
+bytes_deallocated = 0
+bytes_reallocated = 59001
+net_bytes = 59001
+
+[[instances]]
+name = "basic_alpha_compositing_cpu_multithreaded"
+allocations = 97
+deallocations = 53
+reallocations = 54
+bytes_allocated = 62321
+bytes_deallocated = 0
+bytes_reallocated = 62321
+net_bytes = 62321
+
+[[instances]]
+name = "basic_alpha_compositing_cpu_u8_neon"
+allocations = 30
+deallocations = 29
+reallocations = 37
+bytes_allocated = 59001
+bytes_deallocated = 0
+bytes_reallocated = 59001
+net_bytes = 59001
+
+[[instances]]
+name = "basic_alpha_compositing_cpu_u8_scalar"
+allocations = 30
+deallocations = 29
+reallocations = 37
+bytes_allocated = 59001
+bytes_deallocated = 0
+bytes_reallocated = 59001
+net_bytes = 59001
+
+[[instances]]
+name = "basic_alpha_compositing_hybrid"
+allocations = 206
+deallocations = 185
+reallocations = 56
+bytes_allocated = 97769
+bytes_deallocated = 0
+bytes_reallocated = 97769
+net_bytes = 97769

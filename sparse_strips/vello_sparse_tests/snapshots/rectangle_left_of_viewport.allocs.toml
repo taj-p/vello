@@ -1,0 +1,62 @@
+test = "rectangle_left_of_viewport"
+units = "bytes"
+
+[[instances]]
+name = "rectangle_left_of_viewport_cpu_f32_neon"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16340
+bytes_deallocated = 0
+bytes_reallocated = 16340
+net_bytes = 16340
+
+[[instances]]
+name = "rectangle_left_of_viewport_cpu_f32_scalar"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16340
+bytes_deallocated = 0
+bytes_reallocated = 16340
+net_bytes = 16340
+
+[[instances]]
+name = "rectangle_left_of_viewport_cpu_multithreaded"
+allocations = 63
+deallocations = 41
+reallocations = 21
+bytes_allocated = 16924
+bytes_deallocated = 0
+bytes_reallocated = 16924
+net_bytes = 16924
+
+[[instances]]
+name = "rectangle_left_of_viewport_cpu_u8_neon"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16340
+bytes_deallocated = 0
+bytes_reallocated = 16340
+net_bytes = 16340
+
+[[instances]]
+name = "rectangle_left_of_viewport_cpu_u8_scalar"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16340
+bytes_deallocated = 0
+bytes_reallocated = 16340
+net_bytes = 16340
+
+[[instances]]
+name = "rectangle_left_of_viewport_hybrid"
+allocations = 137
+deallocations = 116
+reallocations = 27
+bytes_allocated = 50084
+bytes_deallocated = 0
+bytes_reallocated = 50084
+net_bytes = 50084

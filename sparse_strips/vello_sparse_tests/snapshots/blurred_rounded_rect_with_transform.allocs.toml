@@ -1,0 +1,52 @@
+test = "blurred_rounded_rect_with_transform"
+units = "bytes"
+
+[[instances]]
+name = "blurred_rounded_rect_with_transform_cpu_f32_neon"
+allocations = 29
+deallocations = 27
+reallocations = 32
+bytes_allocated = 130773
+bytes_deallocated = 0
+bytes_reallocated = 130773
+net_bytes = 130773
+
+[[instances]]
+name = "blurred_rounded_rect_with_transform_cpu_f32_scalar"
+allocations = 29
+deallocations = 27
+reallocations = 32
+bytes_allocated = 130773
+bytes_deallocated = 0
+bytes_reallocated = 130773
+net_bytes = 130773
+
+[[instances]]
+name = "blurred_rounded_rect_with_transform_cpu_multithreaded"
+allocations = 89
+deallocations = 49
+reallocations = 48
+bytes_allocated = 133533
+bytes_deallocated = 0
+bytes_reallocated = 133533
+net_bytes = 133533
+
+[[instances]]
+name = "blurred_rounded_rect_with_transform_cpu_u8_neon"
+allocations = 29
+deallocations = 27
+reallocations = 32
+bytes_allocated = 131291
+bytes_deallocated = 0
+bytes_reallocated = 131291
+net_bytes = 131291
+
+[[instances]]
+name = "blurred_rounded_rect_with_transform_cpu_u8_scalar"
+allocations = 29
+deallocations = 27
+reallocations = 32
+bytes_allocated = 131291
+bytes_deallocated = 0
+bytes_reallocated = 131291
+net_bytes = 131291

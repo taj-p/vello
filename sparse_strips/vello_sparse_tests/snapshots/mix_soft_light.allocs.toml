@@ -1,0 +1,62 @@
+test = "mix_soft_light"
+units = "bytes"
+
+[[instances]]
+name = "mix_soft_light_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131289
+bytes_deallocated = 0
+bytes_reallocated = 131289
+net_bytes = 131289
+
+[[instances]]
+name = "mix_soft_light_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131289
+bytes_deallocated = 0
+bytes_reallocated = 131289
+net_bytes = 131289
+
+[[instances]]
+name = "mix_soft_light_cpu_multithreaded"
+allocations = 111
+deallocations = 63
+reallocations = 86
+bytes_allocated = 169329
+bytes_deallocated = 0
+bytes_reallocated = 169329
+net_bytes = 169329
+
+[[instances]]
+name = "mix_soft_light_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118939
+bytes_deallocated = 0
+bytes_reallocated = 118939
+net_bytes = 118939
+
+[[instances]]
+name = "mix_soft_light_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118939
+bytes_deallocated = 0
+bytes_reallocated = 118939
+net_bytes = 118939
+
+[[instances]]
+name = "mix_soft_light_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 185282
+bytes_deallocated = 0
+bytes_reallocated = 185282
+net_bytes = 185282

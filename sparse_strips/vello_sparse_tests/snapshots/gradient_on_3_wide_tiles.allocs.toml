@@ -1,0 +1,62 @@
+test = "gradient_on_3_wide_tiles"
+units = "bytes"
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_f32_neon"
+allocations = 40
+deallocations = 30
+reallocations = 23
+bytes_allocated = 152402
+bytes_deallocated = 0
+bytes_reallocated = 152402
+net_bytes = 152402
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_f32_scalar"
+allocations = 40
+deallocations = 30
+reallocations = 23
+bytes_allocated = 152402
+bytes_deallocated = 0
+bytes_reallocated = 152402
+net_bytes = 152402
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_multithreaded"
+allocations = 87
+deallocations = 43
+reallocations = 33
+bytes_allocated = 153242
+bytes_deallocated = 0
+bytes_reallocated = 153242
+net_bytes = 153242
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_u8_neon"
+allocations = 40
+deallocations = 30
+reallocations = 23
+bytes_allocated = 152402
+bytes_deallocated = 0
+bytes_reallocated = 152402
+net_bytes = 152402
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_u8_scalar"
+allocations = 40
+deallocations = 30
+reallocations = 23
+bytes_allocated = 152402
+bytes_deallocated = 0
+bytes_reallocated = 152402
+net_bytes = 152402
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_hybrid"
+allocations = 210
+deallocations = 183
+reallocations = 39
+bytes_allocated = 218722
+bytes_deallocated = 0
+bytes_reallocated = 218722
+net_bytes = 218722

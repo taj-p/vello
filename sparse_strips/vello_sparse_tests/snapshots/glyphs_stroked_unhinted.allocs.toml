@@ -1,0 +1,62 @@
+test = "glyphs_stroked_unhinted"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_stroked_unhinted_cpu_f32_neon"
+allocations = 54
+deallocations = 40
+reallocations = 84
+bytes_allocated = 204945
+bytes_deallocated = 0
+bytes_reallocated = 204945
+net_bytes = 204945
+
+[[instances]]
+name = "glyphs_stroked_unhinted_cpu_f32_scalar"
+allocations = 54
+deallocations = 40
+reallocations = 84
+bytes_allocated = 204945
+bytes_deallocated = 0
+bytes_reallocated = 204945
+net_bytes = 204945
+
+[[instances]]
+name = "glyphs_stroked_unhinted_cpu_multithreaded"
+allocations = 147
+deallocations = 66
+reallocations = 143
+bytes_allocated = 231009
+bytes_deallocated = 0
+bytes_reallocated = 231009
+net_bytes = 231009
+
+[[instances]]
+name = "glyphs_stroked_unhinted_cpu_u8_neon"
+allocations = 54
+deallocations = 40
+reallocations = 84
+bytes_allocated = 205765
+bytes_deallocated = 0
+bytes_reallocated = 205765
+net_bytes = 205765
+
+[[instances]]
+name = "glyphs_stroked_unhinted_cpu_u8_scalar"
+allocations = 54
+deallocations = 40
+reallocations = 84
+bytes_allocated = 205765
+bytes_deallocated = 0
+bytes_reallocated = 205765
+net_bytes = 205765
+
+[[instances]]
+name = "glyphs_stroked_unhinted_hybrid"
+allocations = 262
+deallocations = 227
+reallocations = 102
+bytes_allocated = 243509
+bytes_deallocated = 0
+bytes_reallocated = 243509
+net_bytes = 243509

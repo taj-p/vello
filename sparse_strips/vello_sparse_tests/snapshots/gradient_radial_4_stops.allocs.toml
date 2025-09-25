@@ -1,0 +1,62 @@
+test = "gradient_radial_4_stops"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_4_stops_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 112967
+bytes_deallocated = 0
+bytes_reallocated = 112967
+net_bytes = 112967
+
+[[instances]]
+name = "gradient_radial_4_stops_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 112967
+bytes_deallocated = 0
+bytes_reallocated = 112967
+net_bytes = 112967
+
+[[instances]]
+name = "gradient_radial_4_stops_cpu_multithreaded"
+allocations = 88
+deallocations = 42
+reallocations = 56
+bytes_allocated = 115727
+bytes_deallocated = 0
+bytes_reallocated = 115727
+net_bytes = 115727
+
+[[instances]]
+name = "gradient_radial_4_stops_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 112967
+bytes_deallocated = 0
+bytes_reallocated = 112967
+net_bytes = 112967
+
+[[instances]]
+name = "gradient_radial_4_stops_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 112967
+bytes_deallocated = 0
+bytes_reallocated = 112967
+net_bytes = 112967
+
+[[instances]]
+name = "gradient_radial_4_stops_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 57
+bytes_allocated = 177495
+bytes_deallocated = 0
+bytes_reallocated = 177495
+net_bytes = 177495

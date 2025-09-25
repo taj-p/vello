@@ -1,0 +1,62 @@
+test = "mix_darken"
+units = "bytes"
+
+[[instances]]
+name = "mix_darken_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 137299
+bytes_deallocated = 0
+bytes_reallocated = 137299
+net_bytes = 137299
+
+[[instances]]
+name = "mix_darken_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 137299
+bytes_deallocated = 0
+bytes_reallocated = 137299
+net_bytes = 137299
+
+[[instances]]
+name = "mix_darken_cpu_multithreaded"
+allocations = 102
+deallocations = 53
+reallocations = 88
+bytes_allocated = 175467
+bytes_deallocated = 0
+bytes_reallocated = 175467
+net_bytes = 175467
+
+[[instances]]
+name = "mix_darken_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 124953
+bytes_deallocated = 0
+bytes_reallocated = 124953
+net_bytes = 124953
+
+[[instances]]
+name = "mix_darken_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 124953
+bytes_deallocated = 0
+bytes_reallocated = 124953
+net_bytes = 124953
+
+[[instances]]
+name = "mix_darken_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 191290
+bytes_deallocated = 0
+bytes_reallocated = 191290
+net_bytes = 191290

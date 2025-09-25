@@ -248,13 +248,19 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                     check_ref, get_ctx
                 };
                 use vello_cpu::{RenderContext, RenderMode};
+                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, save_alloc_stats};
 
                 let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level, #render_mode);
-                #input_fn_name(&mut ctx);
-                ctx.flush();
-                if !#no_ref {
-                    check_ref(&ctx, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
+                let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+                {
+                    #input_fn_name(&mut ctx);
+                    ctx.flush();
+                    if !#no_ref {
+                        check_ref(&ctx, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
+                    }
                 }
+                let alloc_stats = alloc_span.end();
+                save_alloc_stats(alloc_stats, #input_fn_name_str, #fn_name_str);
             }
         }
     };
@@ -434,13 +440,19 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             };
             use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
+            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, save_alloc_stats};
 
             let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback", RenderMode::OptimizeSpeed);
-            #input_fn_name(&mut ctx);
-            ctx.flush();
-            if !#no_ref {
-                check_ref(&ctx, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, #diff_pixels, false, #reference_image_name);
+            let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+            {
+                #input_fn_name(&mut ctx);
+                ctx.flush();
+                if !#no_ref {
+                    check_ref(&ctx, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, #diff_pixels, false, #reference_image_name);
+                }
             }
+            let alloc_stats = alloc_span.end();
+            save_alloc_stats(alloc_stats, #input_fn_name_str, #hybrid_fn_name_str);
         }
 
         #ignore_hybrid_webgl

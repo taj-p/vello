@@ -1,0 +1,62 @@
+test = "composed_layers_nesting"
+units = "bytes"
+
+[[instances]]
+name = "composed_layers_nesting_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 17
+bytes_allocated = 63315
+bytes_deallocated = 0
+bytes_reallocated = 63315
+net_bytes = 63315
+
+[[instances]]
+name = "composed_layers_nesting_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 17
+bytes_allocated = 63315
+bytes_deallocated = 0
+bytes_reallocated = 63315
+net_bytes = 63315
+
+[[instances]]
+name = "composed_layers_nesting_cpu_multithreaded"
+allocations = 64
+deallocations = 47
+reallocations = 27
+bytes_allocated = 66891
+bytes_deallocated = 0
+bytes_reallocated = 66891
+net_bytes = 66891
+
+[[instances]]
+name = "composed_layers_nesting_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 17
+bytes_allocated = 26451
+bytes_deallocated = 0
+bytes_reallocated = 26451
+net_bytes = 26451
+
+[[instances]]
+name = "composed_layers_nesting_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 17
+bytes_allocated = 26451
+bytes_deallocated = 0
+bytes_reallocated = 26451
+net_bytes = 26451
+
+[[instances]]
+name = "composed_layers_nesting_hybrid"
+allocations = 325
+deallocations = 295
+reallocations = 67
+bytes_allocated = 53951
+bytes_deallocated = 0
+bytes_reallocated = 53951
+net_bytes = 53951

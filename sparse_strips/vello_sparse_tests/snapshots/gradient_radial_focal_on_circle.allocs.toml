@@ -1,0 +1,62 @@
+test = "gradient_radial_focal_on_circle"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 92977
+bytes_deallocated = 0
+bytes_reallocated = 92977
+net_bytes = 92977
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 92977
+bytes_deallocated = 0
+bytes_reallocated = 92977
+net_bytes = 92977
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_cpu_multithreaded"
+allocations = 88
+deallocations = 50
+reallocations = 55
+bytes_allocated = 95737
+bytes_deallocated = 0
+bytes_reallocated = 95737
+net_bytes = 95737
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 92977
+bytes_deallocated = 0
+bytes_reallocated = 92977
+net_bytes = 92977
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 92977
+bytes_deallocated = 0
+bytes_reallocated = 92977
+net_bytes = 92977
+
+[[instances]]
+name = "gradient_radial_focal_on_circle_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 56
+bytes_allocated = 157505
+bytes_deallocated = 0
+bytes_reallocated = 157505
+net_bytes = 157505

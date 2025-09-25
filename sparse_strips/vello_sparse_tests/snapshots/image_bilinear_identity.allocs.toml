@@ -1,0 +1,62 @@
+test = "image_bilinear_identity"
+units = "bytes"
+
+[[instances]]
+name = "image_bilinear_identity_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 85708
+bytes_deallocated = 0
+bytes_reallocated = 85708
+net_bytes = 85708
+
+[[instances]]
+name = "image_bilinear_identity_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 85708
+bytes_deallocated = 0
+bytes_reallocated = 85708
+net_bytes = 85708
+
+[[instances]]
+name = "image_bilinear_identity_cpu_multithreaded"
+allocations = 107
+deallocations = 60
+reallocations = 60
+bytes_allocated = 88660
+bytes_deallocated = 0
+bytes_reallocated = 88660
+net_bytes = 88660
+
+[[instances]]
+name = "image_bilinear_identity_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 85708
+bytes_deallocated = 0
+bytes_reallocated = 85708
+net_bytes = 85708
+
+[[instances]]
+name = "image_bilinear_identity_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 41
+bytes_allocated = 85708
+bytes_deallocated = 0
+bytes_reallocated = 85708
+net_bytes = 85708
+
+[[instances]]
+name = "image_bilinear_identity_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 58
+bytes_allocated = 121123
+bytes_deallocated = 0
+bytes_reallocated = 121123
+net_bytes = 121123

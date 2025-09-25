@@ -1,0 +1,62 @@
+test = "mix_modes_non_gradient_test_matrix"
+units = "bytes"
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 227
+bytes_allocated = 371792
+bytes_deallocated = 0
+bytes_reallocated = 371792
+net_bytes = 371792
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 227
+bytes_allocated = 371792
+bytes_deallocated = 0
+bytes_reallocated = 371792
+net_bytes = 371792
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_cpu_multithreaded"
+allocations = 136
+deallocations = 44
+reallocations = 396
+bytes_allocated = 550160
+bytes_deallocated = 0
+bytes_reallocated = 550160
+net_bytes = 550160
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 227
+bytes_allocated = 359486
+bytes_deallocated = 0
+bytes_reallocated = 359486
+net_bytes = 359486
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 227
+bytes_allocated = 359486
+bytes_deallocated = 0
+bytes_reallocated = 359486
+net_bytes = 359486
+
+[[instances]]
+name = "mix_modes_non_gradient_test_matrix_hybrid"
+allocations = 1634
+deallocations = 1565
+reallocations = 959
+bytes_allocated = 607608
+bytes_deallocated = 0
+bytes_reallocated = 607608
+net_bytes = 607608

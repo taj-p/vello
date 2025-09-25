@@ -374,8 +374,6 @@ impl Renderer for HybridRenderer {
         let width = self.scene.width();
         let height = self.scene.height();
 
-        // for image in image_cache.images {}
-
         let render_size = vello_hybrid::RenderSize {
             width: width.into(),
             height: height.into(),

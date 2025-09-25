@@ -1,0 +1,62 @@
+test = "clip_with_translation"
+units = "bytes"
+
+[[instances]]
+name = "clip_with_translation_cpu_f32_neon"
+allocations = 38
+deallocations = 32
+reallocations = 49
+bytes_allocated = 78817
+bytes_deallocated = 0
+bytes_reallocated = 78817
+net_bytes = 78817
+
+[[instances]]
+name = "clip_with_translation_cpu_f32_scalar"
+allocations = 38
+deallocations = 32
+reallocations = 49
+bytes_allocated = 78817
+bytes_deallocated = 0
+bytes_reallocated = 78817
+net_bytes = 78817
+
+[[instances]]
+name = "clip_with_translation_cpu_multithreaded"
+allocations = 102
+deallocations = 56
+reallocations = 70
+bytes_allocated = 100409
+bytes_deallocated = 0
+bytes_reallocated = 100409
+net_bytes = 100409
+
+[[instances]]
+name = "clip_with_translation_cpu_u8_neon"
+allocations = 38
+deallocations = 32
+reallocations = 49
+bytes_allocated = 66529
+bytes_deallocated = 0
+bytes_reallocated = 66529
+net_bytes = 66529
+
+[[instances]]
+name = "clip_with_translation_cpu_u8_scalar"
+allocations = 38
+deallocations = 32
+reallocations = 49
+bytes_allocated = 66529
+bytes_deallocated = 0
+bytes_reallocated = 66529
+net_bytes = 66529
+
+[[instances]]
+name = "clip_with_translation_hybrid"
+allocations = 235
+deallocations = 208
+reallocations = 80
+bytes_allocated = 99737
+bytes_deallocated = 0
+bytes_reallocated = 99737
+net_bytes = 99737

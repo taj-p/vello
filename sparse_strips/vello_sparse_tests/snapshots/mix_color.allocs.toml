@@ -1,0 +1,62 @@
+test = "mix_color"
+units = "bytes"
+
+[[instances]]
+name = "mix_color_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 133022
+bytes_deallocated = 0
+bytes_reallocated = 133022
+net_bytes = 133022
+
+[[instances]]
+name = "mix_color_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 133022
+bytes_deallocated = 0
+bytes_reallocated = 133022
+net_bytes = 133022
+
+[[instances]]
+name = "mix_color_cpu_multithreaded"
+allocations = 116
+deallocations = 64
+reallocations = 88
+bytes_allocated = 171190
+bytes_deallocated = 0
+bytes_reallocated = 171190
+net_bytes = 171190
+
+[[instances]]
+name = "mix_color_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 120724
+bytes_deallocated = 0
+bytes_reallocated = 120724
+net_bytes = 120724
+
+[[instances]]
+name = "mix_color_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 120724
+bytes_deallocated = 0
+bytes_reallocated = 120724
+net_bytes = 120724
+
+[[instances]]
+name = "mix_color_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 186999
+bytes_deallocated = 0
+bytes_reallocated = 186999
+net_bytes = 186999

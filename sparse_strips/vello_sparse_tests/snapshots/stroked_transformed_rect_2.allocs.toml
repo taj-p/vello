@@ -1,0 +1,62 @@
+test = "stroked_transformed_rect_2"
+units = "bytes"
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_f32_neon"
+allocations = 33
+deallocations = 29
+reallocations = 25
+bytes_allocated = 19134
+bytes_deallocated = 0
+bytes_reallocated = 19134
+net_bytes = 19134
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_f32_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 25
+bytes_allocated = 19134
+bytes_deallocated = 0
+bytes_reallocated = 19134
+net_bytes = 19134
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_multithreaded"
+allocations = 76
+deallocations = 51
+reallocations = 37
+bytes_allocated = 20358
+bytes_deallocated = 0
+bytes_reallocated = 20358
+net_bytes = 20358
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_u8_neon"
+allocations = 33
+deallocations = 29
+reallocations = 25
+bytes_allocated = 19134
+bytes_deallocated = 0
+bytes_reallocated = 19134
+net_bytes = 19134
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_u8_scalar"
+allocations = 33
+deallocations = 29
+reallocations = 25
+bytes_allocated = 19134
+bytes_deallocated = 0
+bytes_reallocated = 19134
+net_bytes = 19134
+
+[[instances]]
+name = "stroked_transformed_rect_2_hybrid"
+allocations = 157
+deallocations = 133
+reallocations = 40
+bytes_allocated = 53198
+bytes_deallocated = 0
+bytes_reallocated = 53198
+net_bytes = 53198

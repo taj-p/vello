@@ -1,0 +1,62 @@
+test = "mix_overlay"
+units = "bytes"
+
+[[instances]]
+name = "mix_overlay_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131032
+bytes_deallocated = 0
+bytes_reallocated = 131032
+net_bytes = 131032
+
+[[instances]]
+name = "mix_overlay_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131032
+bytes_deallocated = 0
+bytes_reallocated = 131032
+net_bytes = 131032
+
+[[instances]]
+name = "mix_overlay_cpu_multithreaded"
+allocations = 110
+deallocations = 59
+reallocations = 88
+bytes_allocated = 169200
+bytes_deallocated = 0
+bytes_reallocated = 169200
+net_bytes = 169200
+
+[[instances]]
+name = "mix_overlay_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118730
+bytes_deallocated = 0
+bytes_reallocated = 118730
+net_bytes = 118730
+
+[[instances]]
+name = "mix_overlay_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 118730
+bytes_deallocated = 0
+bytes_reallocated = 118730
+net_bytes = 118730
+
+[[instances]]
+name = "mix_overlay_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 185031
+bytes_deallocated = 0
+bytes_reallocated = 185031
+net_bytes = 185031

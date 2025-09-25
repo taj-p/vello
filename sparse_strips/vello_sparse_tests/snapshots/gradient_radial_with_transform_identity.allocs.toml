@@ -1,0 +1,62 @@
+test = "gradient_radial_with_transform_identity"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_cpu_f32_neon"
+allocations = 34
+deallocations = 30
+reallocations = 32
+bytes_allocated = 73843
+bytes_deallocated = 0
+bytes_reallocated = 73843
+net_bytes = 73843
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_cpu_f32_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 32
+bytes_allocated = 73843
+bytes_deallocated = 0
+bytes_reallocated = 73843
+net_bytes = 73843
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_cpu_multithreaded"
+allocations = 91
+deallocations = 48
+reallocations = 49
+bytes_allocated = 76667
+bytes_deallocated = 0
+bytes_reallocated = 76667
+net_bytes = 76667
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_cpu_u8_neon"
+allocations = 34
+deallocations = 30
+reallocations = 32
+bytes_allocated = 73843
+bytes_deallocated = 0
+bytes_reallocated = 73843
+net_bytes = 73843
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_cpu_u8_scalar"
+allocations = 34
+deallocations = 30
+reallocations = 32
+bytes_allocated = 73843
+bytes_deallocated = 0
+bytes_reallocated = 73843
+net_bytes = 73843
+
+[[instances]]
+name = "gradient_radial_with_transform_identity_hybrid"
+allocations = 213
+deallocations = 186
+reallocations = 49
+bytes_allocated = 138371
+bytes_deallocated = 0
+bytes_reallocated = 138371
+net_bytes = 138371

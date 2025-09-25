@@ -1,0 +1,62 @@
+test = "mix_compose_combined_test_matrix"
+units = "bytes"
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 348
+bytes_allocated = 1921250
+bytes_deallocated = 0
+bytes_reallocated = 1921250
+net_bytes = 1921250
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 348
+bytes_allocated = 1921250
+bytes_deallocated = 0
+bytes_reallocated = 1921250
+net_bytes = 1921250
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_multithreaded"
+allocations = 154
+deallocations = 54
+reallocations = 534
+bytes_allocated = 2122842
+bytes_deallocated = 0
+bytes_reallocated = 2122842
+net_bytes = 2122842
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 348
+bytes_allocated = 1884358
+bytes_deallocated = 0
+bytes_reallocated = 1884358
+net_bytes = 1884358
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 348
+bytes_allocated = 1884358
+bytes_deallocated = 0
+bytes_reallocated = 1884358
+net_bytes = 1884358
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_hybrid"
+allocations = 19986
+deallocations = 19016
+reallocations = 5404
+bytes_allocated = 3216204
+bytes_deallocated = 0
+bytes_reallocated = 3216204
+net_bytes = 3216204

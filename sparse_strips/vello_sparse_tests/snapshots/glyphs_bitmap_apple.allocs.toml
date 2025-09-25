@@ -1,0 +1,52 @@
+test = "glyphs_bitmap_apple"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_bitmap_apple_cpu_f32_neon"
+allocations = 84
+deallocations = 69
+reallocations = 57
+bytes_allocated = 176935
+bytes_deallocated = 0
+bytes_reallocated = 176935
+net_bytes = 176935
+
+[[instances]]
+name = "glyphs_bitmap_apple_cpu_f32_scalar"
+allocations = 84
+deallocations = 69
+reallocations = 57
+bytes_allocated = 176935
+bytes_deallocated = 0
+bytes_reallocated = 176935
+net_bytes = 176935
+
+[[instances]]
+name = "glyphs_bitmap_apple_cpu_multithreaded"
+allocations = 138
+deallocations = 85
+reallocations = 83
+bytes_allocated = 184991
+bytes_deallocated = 0
+bytes_reallocated = 184991
+net_bytes = 184991
+
+[[instances]]
+name = "glyphs_bitmap_apple_cpu_u8_neon"
+allocations = 84
+deallocations = 69
+reallocations = 57
+bytes_allocated = 176853
+bytes_deallocated = 0
+bytes_reallocated = 176853
+net_bytes = 176853
+
+[[instances]]
+name = "glyphs_bitmap_apple_cpu_u8_scalar"
+allocations = 84
+deallocations = 69
+reallocations = 57
+bytes_allocated = 176853
+bytes_deallocated = 0
+bytes_reallocated = 176853
+net_bytes = 176853

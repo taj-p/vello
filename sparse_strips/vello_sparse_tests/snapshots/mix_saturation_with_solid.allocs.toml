@@ -1,0 +1,62 @@
+test = "mix_saturation_with_solid"
+units = "bytes"
+
+[[instances]]
+name = "mix_saturation_with_solid_cpu_f32_neon"
+allocations = 31
+deallocations = 29
+reallocations = 59
+bytes_allocated = 81283
+bytes_deallocated = 0
+bytes_reallocated = 81283
+net_bytes = 81283
+
+[[instances]]
+name = "mix_saturation_with_solid_cpu_f32_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 59
+bytes_allocated = 81283
+bytes_deallocated = 0
+bytes_reallocated = 81283
+net_bytes = 81283
+
+[[instances]]
+name = "mix_saturation_with_solid_cpu_multithreaded"
+allocations = 98
+deallocations = 53
+reallocations = 81
+bytes_allocated = 119259
+bytes_deallocated = 0
+bytes_reallocated = 119259
+net_bytes = 119259
+
+[[instances]]
+name = "mix_saturation_with_solid_cpu_u8_neon"
+allocations = 31
+deallocations = 29
+reallocations = 59
+bytes_allocated = 68995
+bytes_deallocated = 0
+bytes_reallocated = 68995
+net_bytes = 68995
+
+[[instances]]
+name = "mix_saturation_with_solid_cpu_u8_scalar"
+allocations = 31
+deallocations = 29
+reallocations = 59
+bytes_allocated = 68995
+bytes_deallocated = 0
+bytes_reallocated = 68995
+net_bytes = 68995
+
+[[instances]]
+name = "mix_saturation_with_solid_hybrid"
+allocations = 251
+deallocations = 227
+reallocations = 109
+bytes_allocated = 106759
+bytes_deallocated = 0
+bytes_reallocated = 106759
+net_bytes = 106759

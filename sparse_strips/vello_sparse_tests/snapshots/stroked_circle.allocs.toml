@@ -1,0 +1,62 @@
+test = "stroked_circle"
+units = "bytes"
+
+[[instances]]
+name = "stroked_circle_cpu_f32_neon"
+allocations = 35
+deallocations = 31
+reallocations = 30
+bytes_allocated = 73234
+bytes_deallocated = 0
+bytes_reallocated = 73234
+net_bytes = 73234
+
+[[instances]]
+name = "stroked_circle_cpu_f32_scalar"
+allocations = 35
+deallocations = 31
+reallocations = 30
+bytes_allocated = 73234
+bytes_deallocated = 0
+bytes_reallocated = 73234
+net_bytes = 73234
+
+[[instances]]
+name = "stroked_circle_cpu_multithreaded"
+allocations = 93
+deallocations = 46
+reallocations = 46
+bytes_allocated = 76050
+bytes_deallocated = 0
+bytes_reallocated = 76050
+net_bytes = 76050
+
+[[instances]]
+name = "stroked_circle_cpu_u8_neon"
+allocations = 35
+deallocations = 31
+reallocations = 30
+bytes_allocated = 73234
+bytes_deallocated = 0
+bytes_reallocated = 73234
+net_bytes = 73234
+
+[[instances]]
+name = "stroked_circle_cpu_u8_scalar"
+allocations = 35
+deallocations = 31
+reallocations = 30
+bytes_allocated = 73234
+bytes_deallocated = 0
+bytes_reallocated = 73234
+net_bytes = 73234
+
+[[instances]]
+name = "stroked_circle_hybrid"
+allocations = 210
+deallocations = 185
+reallocations = 47
+bytes_allocated = 109218
+bytes_deallocated = 0
+bytes_reallocated = 109218
+net_bytes = 109218

@@ -1,0 +1,62 @@
+test = "image_bicubic_10x_scale_2"
+units = "bytes"
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_cpu_f32_neon"
+allocations = 43
+deallocations = 39
+reallocations = 42
+bytes_allocated = 132450
+bytes_deallocated = 0
+bytes_reallocated = 132450
+net_bytes = 132450
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_cpu_f32_scalar"
+allocations = 43
+deallocations = 39
+reallocations = 42
+bytes_allocated = 132450
+bytes_deallocated = 0
+bytes_reallocated = 132450
+net_bytes = 132450
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_cpu_multithreaded"
+allocations = 107
+deallocations = 62
+reallocations = 61
+bytes_allocated = 135402
+bytes_deallocated = 0
+bytes_reallocated = 135402
+net_bytes = 135402
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_cpu_u8_neon"
+allocations = 43
+deallocations = 39
+reallocations = 42
+bytes_allocated = 132450
+bytes_deallocated = 0
+bytes_reallocated = 132450
+net_bytes = 132450
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_cpu_u8_scalar"
+allocations = 43
+deallocations = 39
+reallocations = 42
+bytes_allocated = 132450
+bytes_deallocated = 0
+bytes_reallocated = 132450
+net_bytes = 132450
+
+[[instances]]
+name = "image_bicubic_10x_scale_2_hybrid"
+allocations = 244
+deallocations = 218
+reallocations = 60
+bytes_allocated = 167351
+bytes_deallocated = 0
+bytes_reallocated = 167351
+net_bytes = 167351

@@ -1,0 +1,62 @@
+test = "mix_normal"
+units = "bytes"
+
+[[instances]]
+name = "mix_normal_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 140293
+bytes_deallocated = 0
+bytes_reallocated = 140293
+net_bytes = 140293
+
+[[instances]]
+name = "mix_normal_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 140293
+bytes_deallocated = 0
+bytes_reallocated = 140293
+net_bytes = 140293
+
+[[instances]]
+name = "mix_normal_cpu_multithreaded"
+allocations = 108
+deallocations = 61
+reallocations = 88
+bytes_allocated = 178461
+bytes_deallocated = 0
+bytes_reallocated = 178461
+net_bytes = 178461
+
+[[instances]]
+name = "mix_normal_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 127979
+bytes_deallocated = 0
+bytes_reallocated = 127979
+net_bytes = 127979
+
+[[instances]]
+name = "mix_normal_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 127979
+bytes_deallocated = 0
+bytes_reallocated = 127979
+net_bytes = 127979
+
+[[instances]]
+name = "mix_normal_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 194288
+bytes_deallocated = 0
+bytes_reallocated = 194288
+net_bytes = 194288

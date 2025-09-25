@@ -1,0 +1,62 @@
+test = "image_repeat_x_repeat_y"
+units = "bytes"
+
+[[instances]]
+name = "image_repeat_x_repeat_y_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 40
+bytes_allocated = 69254
+bytes_deallocated = 0
+bytes_reallocated = 69254
+net_bytes = 69254
+
+[[instances]]
+name = "image_repeat_x_repeat_y_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 40
+bytes_allocated = 69254
+bytes_deallocated = 0
+bytes_reallocated = 69254
+net_bytes = 69254
+
+[[instances]]
+name = "image_repeat_x_repeat_y_cpu_multithreaded"
+allocations = 111
+deallocations = 64
+reallocations = 59
+bytes_allocated = 72206
+bytes_deallocated = 0
+bytes_reallocated = 72206
+net_bytes = 72206
+
+[[instances]]
+name = "image_repeat_x_repeat_y_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 40
+bytes_allocated = 69254
+bytes_deallocated = 0
+bytes_reallocated = 69254
+net_bytes = 69254
+
+[[instances]]
+name = "image_repeat_x_repeat_y_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 40
+bytes_allocated = 69254
+bytes_deallocated = 0
+bytes_reallocated = 69254
+net_bytes = 69254
+
+[[instances]]
+name = "image_repeat_x_repeat_y_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 57
+bytes_allocated = 104669
+bytes_deallocated = 0
+bytes_reallocated = 104669
+net_bytes = 104669

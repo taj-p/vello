@@ -1,0 +1,62 @@
+test = "incorrect_filling_2"
+units = "bytes"
+
+[[instances]]
+name = "incorrect_filling_2_cpu_f32_neon"
+allocations = 30
+deallocations = 30
+reallocations = 23
+bytes_allocated = 28175
+bytes_deallocated = 0
+bytes_reallocated = 28175
+net_bytes = 28175
+
+[[instances]]
+name = "incorrect_filling_2_cpu_f32_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 23
+bytes_allocated = 28175
+bytes_deallocated = 0
+bytes_reallocated = 28175
+net_bytes = 28175
+
+[[instances]]
+name = "incorrect_filling_2_cpu_multithreaded"
+allocations = 78
+deallocations = 47
+reallocations = 36
+bytes_allocated = 29655
+bytes_deallocated = 0
+bytes_reallocated = 29655
+net_bytes = 29655
+
+[[instances]]
+name = "incorrect_filling_2_cpu_u8_neon"
+allocations = 31
+deallocations = 35
+reallocations = 23
+bytes_allocated = 28175
+bytes_deallocated = 0
+bytes_reallocated = 28175
+net_bytes = 28175
+
+[[instances]]
+name = "incorrect_filling_2_cpu_u8_scalar"
+allocations = 30
+deallocations = 30
+reallocations = 23
+bytes_allocated = 28175
+bytes_deallocated = 0
+bytes_reallocated = 28175
+net_bytes = 28175
+
+[[instances]]
+name = "incorrect_filling_2_hybrid"
+allocations = 178
+deallocations = 157
+reallocations = 39
+bytes_allocated = 62879
+bytes_deallocated = 0
+bytes_reallocated = 62879
+net_bytes = 62879

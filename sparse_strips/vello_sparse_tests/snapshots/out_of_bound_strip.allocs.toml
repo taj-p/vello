@@ -1,0 +1,62 @@
+test = "out_of_bound_strip"
+units = "bytes"
+
+[[instances]]
+name = "out_of_bound_strip_cpu_f32_neon"
+allocations = 4
+deallocations = 1
+reallocations = 2
+bytes_allocated = 288
+bytes_deallocated = 0
+bytes_reallocated = 288
+net_bytes = 288
+
+[[instances]]
+name = "out_of_bound_strip_cpu_f32_scalar"
+allocations = 4
+deallocations = 1
+reallocations = 2
+bytes_allocated = 288
+bytes_deallocated = 0
+bytes_reallocated = 288
+net_bytes = 288
+
+[[instances]]
+name = "out_of_bound_strip_cpu_multithreaded"
+allocations = 94
+deallocations = 18
+reallocations = 21
+bytes_allocated = 5608
+bytes_deallocated = 0
+bytes_reallocated = 5608
+net_bytes = 5608
+
+[[instances]]
+name = "out_of_bound_strip_cpu_u8_neon"
+allocations = 4
+deallocations = 1
+reallocations = 2
+bytes_allocated = 288
+bytes_deallocated = 0
+bytes_reallocated = 288
+net_bytes = 288
+
+[[instances]]
+name = "out_of_bound_strip_cpu_u8_scalar"
+allocations = 4
+deallocations = 1
+reallocations = 2
+bytes_allocated = 288
+bytes_deallocated = 0
+bytes_reallocated = 288
+net_bytes = 288
+
+[[instances]]
+name = "out_of_bound_strip_hybrid"
+allocations = 4
+deallocations = 1
+reallocations = 2
+bytes_allocated = 288
+bytes_deallocated = 0
+bytes_reallocated = 288
+net_bytes = 288

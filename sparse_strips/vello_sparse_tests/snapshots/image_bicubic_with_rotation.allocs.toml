@@ -1,0 +1,62 @@
+test = "image_bicubic_with_rotation"
+units = "bytes"
+
+[[instances]]
+name = "image_bicubic_with_rotation_cpu_f32_neon"
+allocations = 45
+deallocations = 41
+reallocations = 43
+bytes_allocated = 144834
+bytes_deallocated = 0
+bytes_reallocated = 144834
+net_bytes = 144834
+
+[[instances]]
+name = "image_bicubic_with_rotation_cpu_f32_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 43
+bytes_allocated = 144834
+bytes_deallocated = 0
+bytes_reallocated = 144834
+net_bytes = 144834
+
+[[instances]]
+name = "image_bicubic_with_rotation_cpu_multithreaded"
+allocations = 106
+deallocations = 56
+reallocations = 62
+bytes_allocated = 147786
+bytes_deallocated = 0
+bytes_reallocated = 147786
+net_bytes = 147786
+
+[[instances]]
+name = "image_bicubic_with_rotation_cpu_u8_neon"
+allocations = 45
+deallocations = 41
+reallocations = 43
+bytes_allocated = 144834
+bytes_deallocated = 0
+bytes_reallocated = 144834
+net_bytes = 144834
+
+[[instances]]
+name = "image_bicubic_with_rotation_cpu_u8_scalar"
+allocations = 45
+deallocations = 41
+reallocations = 43
+bytes_allocated = 144834
+bytes_deallocated = 0
+bytes_reallocated = 144834
+net_bytes = 144834
+
+[[instances]]
+name = "image_bicubic_with_rotation_hybrid"
+allocations = 246
+deallocations = 220
+reallocations = 60
+bytes_allocated = 180435
+bytes_deallocated = 0
+bytes_reallocated = 180435
+net_bytes = 180435

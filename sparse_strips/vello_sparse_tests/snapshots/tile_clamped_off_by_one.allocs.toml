@@ -1,0 +1,62 @@
+test = "tile_clamped_off_by_one"
+units = "bytes"
+
+[[instances]]
+name = "tile_clamped_off_by_one_cpu_f32_neon"
+allocations = 33
+deallocations = 31
+reallocations = 20
+bytes_allocated = 43699
+bytes_deallocated = 0
+bytes_reallocated = 43699
+net_bytes = 43699
+
+[[instances]]
+name = "tile_clamped_off_by_one_cpu_f32_scalar"
+allocations = 33
+deallocations = 31
+reallocations = 20
+bytes_allocated = 43699
+bytes_deallocated = 0
+bytes_reallocated = 43699
+net_bytes = 43699
+
+[[instances]]
+name = "tile_clamped_off_by_one_cpu_multithreaded"
+allocations = 69
+deallocations = 46
+reallocations = 30
+bytes_allocated = 77579
+bytes_deallocated = 0
+bytes_reallocated = 77579
+net_bytes = 77579
+
+[[instances]]
+name = "tile_clamped_off_by_one_cpu_u8_neon"
+allocations = 33
+deallocations = 31
+reallocations = 20
+bytes_allocated = 31411
+bytes_deallocated = 0
+bytes_reallocated = 31411
+net_bytes = 31411
+
+[[instances]]
+name = "tile_clamped_off_by_one_cpu_u8_scalar"
+allocations = 33
+deallocations = 31
+reallocations = 20
+bytes_allocated = 31411
+bytes_deallocated = 0
+bytes_reallocated = 31411
+net_bytes = 31411
+
+[[instances]]
+name = "tile_clamped_off_by_one_hybrid"
+allocations = 173
+deallocations = 149
+reallocations = 43
+bytes_allocated = 62075
+bytes_deallocated = 0
+bytes_reallocated = 62075
+net_bytes = 62075

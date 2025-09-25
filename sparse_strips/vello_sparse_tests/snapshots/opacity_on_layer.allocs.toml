@@ -1,0 +1,62 @@
+test = "opacity_on_layer"
+units = "bytes"
+
+[[instances]]
+name = "opacity_on_layer_cpu_f32_neon"
+allocations = 36
+deallocations = 35
+reallocations = 73
+bytes_allocated = 92342
+bytes_deallocated = 0
+bytes_reallocated = 92342
+net_bytes = 92342
+
+[[instances]]
+name = "opacity_on_layer_cpu_f32_scalar"
+allocations = 36
+deallocations = 35
+reallocations = 73
+bytes_allocated = 92342
+bytes_deallocated = 0
+bytes_reallocated = 92342
+net_bytes = 92342
+
+[[instances]]
+name = "opacity_on_layer_cpu_multithreaded"
+allocations = 99
+deallocations = 57
+reallocations = 96
+bytes_allocated = 131662
+bytes_deallocated = 0
+bytes_reallocated = 131662
+net_bytes = 131662
+
+[[instances]]
+name = "opacity_on_layer_cpu_u8_neon"
+allocations = 36
+deallocations = 35
+reallocations = 73
+bytes_allocated = 80034
+bytes_deallocated = 0
+bytes_reallocated = 80034
+net_bytes = 80034
+
+[[instances]]
+name = "opacity_on_layer_cpu_u8_scalar"
+allocations = 36
+deallocations = 35
+reallocations = 73
+bytes_allocated = 80034
+bytes_deallocated = 0
+bytes_reallocated = 80034
+net_bytes = 80034
+
+[[instances]]
+name = "opacity_on_layer_hybrid"
+allocations = 255
+deallocations = 231
+reallocations = 122
+bytes_allocated = 117558
+bytes_deallocated = 0
+bytes_reallocated = 117558
+net_bytes = 117558

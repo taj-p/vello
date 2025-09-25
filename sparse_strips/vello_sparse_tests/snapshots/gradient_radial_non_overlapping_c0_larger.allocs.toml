@@ -1,0 +1,62 @@
+test = "gradient_radial_non_overlapping_c0_larger"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 95397
+bytes_deallocated = 0
+bytes_reallocated = 95397
+net_bytes = 95397
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 95397
+bytes_deallocated = 0
+bytes_reallocated = 95397
+net_bytes = 95397
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_cpu_multithreaded"
+allocations = 94
+deallocations = 50
+reallocations = 55
+bytes_allocated = 98157
+bytes_deallocated = 0
+bytes_reallocated = 98157
+net_bytes = 98157
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 95397
+bytes_deallocated = 0
+bytes_reallocated = 95397
+net_bytes = 95397
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 39
+bytes_allocated = 95397
+bytes_deallocated = 0
+bytes_reallocated = 95397
+net_bytes = 95397
+
+[[instances]]
+name = "gradient_radial_non_overlapping_c0_larger_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 56
+bytes_allocated = 159925
+bytes_deallocated = 0
+bytes_reallocated = 159925
+net_bytes = 159925

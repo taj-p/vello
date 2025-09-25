@@ -1,0 +1,62 @@
+test = "recording_glyphs"
+units = "bytes"
+
+[[instances]]
+name = "recording_glyphs_cpu_f32_neon"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 179844
+bytes_deallocated = 0
+bytes_reallocated = 179844
+net_bytes = 179844
+
+[[instances]]
+name = "recording_glyphs_cpu_f32_scalar"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 179844
+bytes_deallocated = 0
+bytes_reallocated = 179844
+net_bytes = 179844
+
+[[instances]]
+name = "recording_glyphs_cpu_multithreaded"
+allocations = 156
+deallocations = 86
+reallocations = 119
+bytes_allocated = 180468
+bytes_deallocated = 0
+bytes_reallocated = 180468
+net_bytes = 180468
+
+[[instances]]
+name = "recording_glyphs_cpu_u8_neon"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 180596
+bytes_deallocated = 0
+bytes_reallocated = 180596
+net_bytes = 180596
+
+[[instances]]
+name = "recording_glyphs_cpu_u8_scalar"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 180596
+bytes_deallocated = 0
+bytes_reallocated = 180596
+net_bytes = 180596
+
+[[instances]]
+name = "recording_glyphs_hybrid"
+allocations = 276
+deallocations = 238
+reallocations = 110
+bytes_allocated = 217454
+bytes_deallocated = 0
+bytes_reallocated = 217454
+net_bytes = 217454

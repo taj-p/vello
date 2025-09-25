@@ -1,0 +1,62 @@
+test = "image_with_multiple_clip_layers"
+units = "bytes"
+
+[[instances]]
+name = "image_with_multiple_clip_layers_cpu_f32_neon"
+allocations = 51
+deallocations = 45
+reallocations = 49
+bytes_allocated = 119356
+bytes_deallocated = 0
+bytes_reallocated = 119356
+net_bytes = 119356
+
+[[instances]]
+name = "image_with_multiple_clip_layers_cpu_f32_scalar"
+allocations = 51
+deallocations = 45
+reallocations = 49
+bytes_allocated = 119356
+bytes_deallocated = 0
+bytes_reallocated = 119356
+net_bytes = 119356
+
+[[instances]]
+name = "image_with_multiple_clip_layers_cpu_multithreaded"
+allocations = 116
+deallocations = 70
+reallocations = 75
+bytes_allocated = 222996
+bytes_deallocated = 0
+bytes_reallocated = 222996
+net_bytes = 222996
+
+[[instances]]
+name = "image_with_multiple_clip_layers_cpu_u8_neon"
+allocations = 51
+deallocations = 45
+reallocations = 49
+bytes_allocated = 82484
+bytes_deallocated = 0
+bytes_reallocated = 82484
+net_bytes = 82484
+
+[[instances]]
+name = "image_with_multiple_clip_layers_cpu_u8_scalar"
+allocations = 51
+deallocations = 45
+reallocations = 49
+bytes_allocated = 82484
+bytes_deallocated = 0
+bytes_reallocated = 82484
+net_bytes = 82484
+
+[[instances]]
+name = "image_with_multiple_clip_layers_hybrid"
+allocations = 296
+deallocations = 266
+reallocations = 94
+bytes_allocated = 109895
+bytes_deallocated = 0
+bytes_reallocated = 109895
+net_bytes = 109895

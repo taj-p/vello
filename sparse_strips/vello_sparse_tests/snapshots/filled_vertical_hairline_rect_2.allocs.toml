@@ -1,0 +1,62 @@
+test = "filled_vertical_hairline_rect_2"
+units = "bytes"
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_cpu_f32_neon"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16479
+bytes_deallocated = 0
+bytes_reallocated = 16479
+net_bytes = 16479
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_cpu_f32_scalar"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16479
+bytes_deallocated = 0
+bytes_reallocated = 16479
+net_bytes = 16479
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_cpu_multithreaded"
+allocations = 68
+deallocations = 49
+reallocations = 21
+bytes_allocated = 17063
+bytes_deallocated = 0
+bytes_reallocated = 17063
+net_bytes = 17063
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_cpu_u8_neon"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16479
+bytes_deallocated = 0
+bytes_reallocated = 16479
+net_bytes = 16479
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_cpu_u8_scalar"
+allocations = 28
+deallocations = 27
+reallocations = 13
+bytes_allocated = 16479
+bytes_deallocated = 0
+bytes_reallocated = 16479
+net_bytes = 16479
+
+[[instances]]
+name = "filled_vertical_hairline_rect_2_hybrid"
+allocations = 137
+deallocations = 116
+reallocations = 27
+bytes_allocated = 50223
+bytes_deallocated = 0
+bytes_reallocated = 50223
+net_bytes = 50223

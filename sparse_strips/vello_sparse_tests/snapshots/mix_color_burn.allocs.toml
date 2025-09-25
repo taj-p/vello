@@ -1,0 +1,62 @@
+test = "mix_color_burn"
+units = "bytes"
+
+[[instances]]
+name = "mix_color_burn_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 62
+bytes_allocated = 119933
+bytes_deallocated = 0
+bytes_reallocated = 119933
+net_bytes = 119933
+
+[[instances]]
+name = "mix_color_burn_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 62
+bytes_allocated = 119933
+bytes_deallocated = 0
+bytes_reallocated = 119933
+net_bytes = 119933
+
+[[instances]]
+name = "mix_color_burn_cpu_multithreaded"
+allocations = 115
+deallocations = 63
+reallocations = 87
+bytes_allocated = 158101
+bytes_deallocated = 0
+bytes_reallocated = 158101
+net_bytes = 158101
+
+[[instances]]
+name = "mix_color_burn_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 62
+bytes_allocated = 107615
+bytes_deallocated = 0
+bytes_reallocated = 107615
+net_bytes = 107615
+
+[[instances]]
+name = "mix_color_burn_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 62
+bytes_allocated = 107615
+bytes_deallocated = 0
+bytes_reallocated = 107615
+net_bytes = 107615
+
+[[instances]]
+name = "mix_color_burn_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 114
+bytes_allocated = 173938
+bytes_deallocated = 0
+bytes_reallocated = 173938
+net_bytes = 173938

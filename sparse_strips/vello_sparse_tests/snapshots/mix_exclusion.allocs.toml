@@ -1,0 +1,62 @@
+test = "mix_exclusion"
+units = "bytes"
+
+[[instances]]
+name = "mix_exclusion_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 140640
+bytes_deallocated = 0
+bytes_reallocated = 140640
+net_bytes = 140640
+
+[[instances]]
+name = "mix_exclusion_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 140640
+bytes_deallocated = 0
+bytes_reallocated = 140640
+net_bytes = 140640
+
+[[instances]]
+name = "mix_exclusion_cpu_multithreaded"
+allocations = 114
+deallocations = 63
+reallocations = 88
+bytes_allocated = 178808
+bytes_deallocated = 0
+bytes_reallocated = 178808
+net_bytes = 178808
+
+[[instances]]
+name = "mix_exclusion_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 128314
+bytes_deallocated = 0
+bytes_reallocated = 128314
+net_bytes = 128314
+
+[[instances]]
+name = "mix_exclusion_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 128314
+bytes_deallocated = 0
+bytes_reallocated = 128314
+net_bytes = 128314
+
+[[instances]]
+name = "mix_exclusion_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 194613
+bytes_deallocated = 0
+bytes_reallocated = 194613
+net_bytes = 194613

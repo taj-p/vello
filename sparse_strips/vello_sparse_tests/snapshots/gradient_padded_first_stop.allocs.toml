@@ -1,0 +1,62 @@
+test = "gradient_padded_first_stop"
+units = "bytes"
+
+[[instances]]
+name = "gradient_padded_first_stop_cpu_f32_neon"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 105684
+bytes_deallocated = 0
+bytes_reallocated = 105684
+net_bytes = 105684
+
+[[instances]]
+name = "gradient_padded_first_stop_cpu_f32_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 105684
+bytes_deallocated = 0
+bytes_reallocated = 105684
+net_bytes = 105684
+
+[[instances]]
+name = "gradient_padded_first_stop_cpu_multithreaded"
+allocations = 92
+deallocations = 50
+reallocations = 56
+bytes_allocated = 108444
+bytes_deallocated = 0
+bytes_reallocated = 108444
+net_bytes = 108444
+
+[[instances]]
+name = "gradient_padded_first_stop_cpu_u8_neon"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 105684
+bytes_deallocated = 0
+bytes_reallocated = 105684
+net_bytes = 105684
+
+[[instances]]
+name = "gradient_padded_first_stop_cpu_u8_scalar"
+allocations = 32
+deallocations = 28
+reallocations = 40
+bytes_allocated = 105684
+bytes_deallocated = 0
+bytes_reallocated = 105684
+net_bytes = 105684
+
+[[instances]]
+name = "gradient_padded_first_stop_hybrid"
+allocations = 211
+deallocations = 184
+reallocations = 57
+bytes_allocated = 172260
+bytes_deallocated = 0
+bytes_reallocated = 172260
+net_bytes = 172260

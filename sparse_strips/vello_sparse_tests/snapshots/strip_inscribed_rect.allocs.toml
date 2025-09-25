@@ -1,0 +1,62 @@
+test = "strip_inscribed_rect"
+units = "bytes"
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_f32_neon"
+allocations = 30
+deallocations = 29
+reallocations = 14
+bytes_allocated = 14906
+bytes_deallocated = 0
+bytes_reallocated = 14906
+net_bytes = 14906
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_f32_scalar"
+allocations = 30
+deallocations = 29
+reallocations = 14
+bytes_allocated = 14906
+bytes_deallocated = 0
+bytes_reallocated = 14906
+net_bytes = 14906
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_multithreaded"
+allocations = 72
+deallocations = 51
+reallocations = 23
+bytes_allocated = 15618
+bytes_deallocated = 0
+bytes_reallocated = 15618
+net_bytes = 15618
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_u8_neon"
+allocations = 30
+deallocations = 29
+reallocations = 14
+bytes_allocated = 14906
+bytes_deallocated = 0
+bytes_reallocated = 14906
+net_bytes = 14906
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_u8_scalar"
+allocations = 30
+deallocations = 29
+reallocations = 14
+bytes_allocated = 14906
+bytes_deallocated = 0
+bytes_reallocated = 14906
+net_bytes = 14906
+
+[[instances]]
+name = "strip_inscribed_rect_hybrid"
+allocations = 145
+deallocations = 124
+reallocations = 28
+bytes_allocated = 48650
+bytes_deallocated = 0
+bytes_reallocated = 48650
+net_bytes = 48650

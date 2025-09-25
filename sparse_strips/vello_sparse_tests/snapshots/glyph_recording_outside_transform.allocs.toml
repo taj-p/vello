@@ -1,0 +1,62 @@
+test = "glyph_recording_outside_transform"
+units = "bytes"
+
+[[instances]]
+name = "glyph_recording_outside_transform_cpu_f32_neon"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 179861
+bytes_deallocated = 0
+bytes_reallocated = 179861
+net_bytes = 179861
+
+[[instances]]
+name = "glyph_recording_outside_transform_cpu_f32_scalar"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 179861
+bytes_deallocated = 0
+bytes_reallocated = 179861
+net_bytes = 179861
+
+[[instances]]
+name = "glyph_recording_outside_transform_cpu_multithreaded"
+allocations = 147
+deallocations = 78
+reallocations = 119
+bytes_allocated = 180485
+bytes_deallocated = 0
+bytes_reallocated = 180485
+net_bytes = 180485
+
+[[instances]]
+name = "glyph_recording_outside_transform_cpu_u8_neon"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 180613
+bytes_deallocated = 0
+bytes_reallocated = 180613
+net_bytes = 180613
+
+[[instances]]
+name = "glyph_recording_outside_transform_cpu_u8_scalar"
+allocations = 70
+deallocations = 53
+reallocations = 97
+bytes_allocated = 180613
+bytes_deallocated = 0
+bytes_reallocated = 180613
+net_bytes = 180613
+
+[[instances]]
+name = "glyph_recording_outside_transform_hybrid"
+allocations = 276
+deallocations = 238
+reallocations = 110
+bytes_allocated = 217471
+bytes_deallocated = 0
+bytes_reallocated = 217471
+net_bytes = 217471

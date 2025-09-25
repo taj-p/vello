@@ -1,0 +1,62 @@
+test = "mix_hue"
+units = "bytes"
+
+[[instances]]
+name = "mix_hue_cpu_f32_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131917
+bytes_deallocated = 0
+bytes_reallocated = 131917
+net_bytes = 131917
+
+[[instances]]
+name = "mix_hue_cpu_f32_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 131917
+bytes_deallocated = 0
+bytes_reallocated = 131917
+net_bytes = 131917
+
+[[instances]]
+name = "mix_hue_cpu_multithreaded"
+allocations = 111
+deallocations = 61
+reallocations = 88
+bytes_allocated = 170085
+bytes_deallocated = 0
+bytes_reallocated = 170085
+net_bytes = 170085
+
+[[instances]]
+name = "mix_hue_cpu_u8_neon"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 119627
+bytes_deallocated = 0
+bytes_reallocated = 119627
+net_bytes = 119627
+
+[[instances]]
+name = "mix_hue_cpu_u8_scalar"
+allocations = 49
+deallocations = 40
+reallocations = 63
+bytes_allocated = 119627
+bytes_deallocated = 0
+bytes_reallocated = 119627
+net_bytes = 119627
+
+[[instances]]
+name = "mix_hue_hybrid"
+allocations = 299
+deallocations = 263
+reallocations = 115
+bytes_allocated = 185896
+bytes_deallocated = 0
+bytes_reallocated = 185896
+net_bytes = 185896
