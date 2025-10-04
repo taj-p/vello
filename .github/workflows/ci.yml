@@ -281,15 +281,21 @@ jobs:
         with:
           save-if: ${{ github.event_name != 'merge_group' }}
 
-      - name: cargo nextest
+      - name: cargo nextest (excluding vello_sparse_tests)
         # TODO: Maybe use --release; the CPU shaders are extremely slow when unoptimised
-        run: cargo nextest run --workspace --locked --all-features --no-fail-fast
+        run: cargo nextest run --workspace --locked --all-features --no-fail-fast --exclude vello_sparse_tests
         env:
           VELLO_CI_GPU_SUPPORT: ${{ matrix.gpu }}
           # We are experimenting with git lfs, and we don't expect to run out of bandwidth.
           # However, if we do, the tests are designed to be robust against that, if this environment variable is set.
           # If we do run out of bandwidth, uncomment the following line and inform @DJMcNab.
           # VELLO_SKIP_LFS_SNAPSHOTS: all
+
+      - name: cargo test (vello_sparse_tests allocs)
+        run: cargo test -p vello_sparse_tests --release --locked -- --test-threads=1
+        env:
+          VELLO_CI_GPU_SUPPORT: ${{ matrix.gpu }}
+          TEST_ALLOCS: 1
       
       - name: Upload test results due to failure
         uses: actions/upload-artifact@v4

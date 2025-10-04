@@ -81,7 +81,7 @@ unsafe impl GlobalAlloc for &AllocationTracker {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub(crate) struct AllocationStats {
     pub allocations: usize,
     pub deallocations: usize,
@@ -153,7 +153,11 @@ pub(crate) struct AllocInstance {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn save_alloc_stats(alloc_stats: AllocationStats, file_path: &str, instance_name: &str) {
+pub(crate) fn process_alloc_stats(
+    alloc_stats: AllocationStats,
+    file_path: &str,
+    instance_name: &str,
+) {
     // Do nothing on wasm32.
 }
 
@@ -163,14 +167,15 @@ pub(crate) enum RunType {
 }
 
 #[cfg(target_arch = "wasm32")]
-pub(crate) fn save_allocs_requested() -> bool {
+pub(crate) fn should_process_allocs() -> bool {
     false
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn save_allocs_requested() -> bool {
+pub(crate) fn should_process_allocs() -> bool {
     let save_allocs = std::env::var("SAVE_ALLOCS").map_or(false, |v| v == "1");
-    if !save_allocs {
+    let test_allocs = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
+    if !save_allocs && !test_allocs {
         return false;
     }
     assert!(
@@ -202,7 +207,7 @@ pub(crate) fn save_allocs_requested() -> bool {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn save_alloc_stats(
+pub(crate) fn process_alloc_stats(
     run_type: RunType,
     alloc_stats: AllocationStats,
     file_path: &str,
@@ -211,6 +216,10 @@ pub(crate) fn save_alloc_stats(
     use std::io::Write;
     use std::thread;
     use std::time::Duration;
+
+    if !should_process_allocs() {
+        return;
+    }
 
     let dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../vello_sparse_tests/snapshots");
@@ -245,6 +254,24 @@ pub(crate) fn save_alloc_stats(
     };
     file_data.test = test_name.to_string();
     file_data.units = "bytes".to_string();
+
+    let is_test_mode = std::env::var("TEST_MODE").map_or(false, |v| v == "1");
+    if is_test_mode {
+        let expected_stats = file_data
+            .instances
+            .iter()
+            .find(|i| i.name == instance_name)
+            .map(|i| match run_type {
+                RunType::Cold => &i.cold,
+                RunType::Warm => &i.warm,
+            });
+
+        if let Some(expected_stats) = expected_stats {
+            assert_eq!(alloc_stats, *expected_stats);
+        }
+        // TODO: Handle missing entry?
+        return;
+    }
 
     if let Some(inst) = file_data
         .instances
