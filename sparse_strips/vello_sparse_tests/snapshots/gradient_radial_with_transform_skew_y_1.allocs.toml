@@ -81,11 +81,11 @@ bytes_reallocated = 2048
 name = "gradient_radial_with_transform_skew_y_1_hybrid"
 
 [instances.cold]
-allocations = 175
-deallocations = 196
+allocations = 172
+deallocations = 146
 reallocations = 40
-bytes_allocated = 103567
-bytes_deallocated = 68289
+bytes_allocated = 101383
+bytes_deallocated = 53681
 bytes_reallocated = 69584
 
 [instances.warm]

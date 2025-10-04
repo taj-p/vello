@@ -43,11 +43,11 @@ bytes_reallocated = 1753088
 name = "mix_compose_combined_test_matrix_cpu_u8_neon"
 
 [instances.cold]
-allocations = 6
-deallocations = 9
+allocations = 5
+deallocations = 3
 reallocations = 328
-bytes_allocated = 1721496
-bytes_deallocated = 23744
+bytes_allocated = 1719424
+bytes_deallocated = 23360
 bytes_reallocated = 1708000
 
 [instances.warm]

@@ -81,11 +81,11 @@ bytes_reallocated = 2048
 name = "gradient_sweep_with_transform_scale_non_uniform_hybrid"
 
 [instances.cold]
-allocations = 175
-deallocations = 195
+allocations = 172
+deallocations = 146
 reallocations = 29
-bytes_allocated = 100943
-bytes_deallocated = 67665
+bytes_allocated = 98759
+bytes_deallocated = 53169
 bytes_reallocated = 67472
 
 [instances.warm]
