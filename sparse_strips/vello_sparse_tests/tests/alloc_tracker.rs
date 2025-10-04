@@ -342,6 +342,6 @@ pub(crate) fn process_alloc_stats(
         .truncate(true)
         .open(&tmp_path)
         .unwrap();
-    let _ = tmp.write_all(out.as_bytes());
-    let _ = std::fs::rename(&tmp_path, &summary_path);
+    tmp.write_all(out.as_bytes()).unwrap();
+    std::fs::rename(&tmp_path, &summary_path).unwrap();
 }
