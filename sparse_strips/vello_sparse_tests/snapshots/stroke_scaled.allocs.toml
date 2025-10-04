@@ -1,0 +1,97 @@
+test = "stroke_scaled"
+units = "bytes"
+
+[[instances]]
+name = "stroke_scaled_cpu_f32_neon"
+
+[instances.cold]
+allocations = 12
+deallocations = 8
+reallocations = 47
+bytes_allocated = 42472
+bytes_deallocated = 23336
+bytes_reallocated = 18544
+
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 42568
+bytes_deallocated = 23336
+bytes_reallocated = 19536
+
+[[instances]]
+name = "stroke_scaled_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 12
+deallocations = 8
+reallocations = 47
+bytes_allocated = 42472
+bytes_deallocated = 23336
+bytes_reallocated = 18544
+
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 42568
+bytes_deallocated = 23336
+bytes_reallocated = 19536
+
+[[instances]]
+name = "stroke_scaled_cpu_u8_neon"
+
+[instances.cold]
+allocations = 12
+deallocations = 8
+reallocations = 47
+bytes_allocated = 30184
+bytes_deallocated = 11048
+bytes_reallocated = 18544
+
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 30280
+bytes_deallocated = 11048
+bytes_reallocated = 19536
+
+[[instances]]
+name = "stroke_scaled_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 12
+deallocations = 8
+reallocations = 47
+bytes_allocated = 30184
+bytes_deallocated = 11048
+bytes_reallocated = 18544
+
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 30280
+bytes_deallocated = 11048
+bytes_reallocated = 19536
+
+[[instances]]
+name = "stroke_scaled_hybrid"
+
+[instances.cold]
+allocations = 172
+deallocations = 148
+reallocations = 63
+bytes_allocated = 81915
+bytes_deallocated = 59145
+bytes_reallocated = 56896
+
+[instances.warm]
+allocations = 135
+deallocations = 134
+reallocations = 9
+bytes_allocated = 24209
+bytes_deallocated = 24149
+bytes_reallocated = 5504

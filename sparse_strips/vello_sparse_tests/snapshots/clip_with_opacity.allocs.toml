@@ -1,0 +1,97 @@
+test = "clip_with_opacity"
+units = "bytes"
+
+[[instances]]
+name = "clip_with_opacity_cpu_f32_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 46
+bytes_allocated = 53168
+bytes_deallocated = 39440
+bytes_reallocated = 29856
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 5
+bytes_allocated = 44176
+bytes_deallocated = 39440
+bytes_reallocated = 21344
+
+[[instances]]
+name = "clip_with_opacity_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 46
+bytes_allocated = 53168
+bytes_deallocated = 39440
+bytes_reallocated = 29856
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 5
+bytes_allocated = 44176
+bytes_deallocated = 39440
+bytes_reallocated = 21344
+
+[[instances]]
+name = "clip_with_opacity_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 46
+bytes_allocated = 28592
+bytes_deallocated = 14864
+bytes_reallocated = 17568
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 5
+bytes_allocated = 19600
+bytes_deallocated = 14864
+bytes_reallocated = 9056
+
+[[instances]]
+name = "clip_with_opacity_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 46
+bytes_allocated = 28592
+bytes_deallocated = 14864
+bytes_reallocated = 17568
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 5
+bytes_allocated = 19600
+bytes_deallocated = 14864
+bytes_reallocated = 9056
+
+[[instances]]
+name = "clip_with_opacity_hybrid"
+
+[instances.cold]
+allocations = 191
+deallocations = 169
+reallocations = 75
+bytes_allocated = 76206
+bytes_deallocated = 59292
+bytes_reallocated = 51248
+
+[instances.warm]
+allocations = 156
+deallocations = 155
+reallocations = 21
+bytes_allocated = 22924
+bytes_deallocated = 22864
+bytes_reallocated = 3664

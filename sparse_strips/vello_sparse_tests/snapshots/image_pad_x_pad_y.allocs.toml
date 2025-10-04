@@ -1,0 +1,97 @@
+test = "image_pad_x_pad_y"
+units = "bytes"
+
+[[instances]]
+name = "image_pad_x_pad_y_cpu_f32_neon"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 24
+bytes_allocated = 135298
+bytes_deallocated = 126466
+bytes_reallocated = 6903
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 126914
+bytes_deallocated = 126466
+bytes_reallocated = 55
+
+[[instances]]
+name = "image_pad_x_pad_y_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 24
+bytes_allocated = 135298
+bytes_deallocated = 126466
+bytes_reallocated = 6903
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 126914
+bytes_deallocated = 126466
+bytes_reallocated = 55
+
+[[instances]]
+name = "image_pad_x_pad_y_cpu_u8_neon"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 24
+bytes_allocated = 123010
+bytes_deallocated = 114178
+bytes_reallocated = 6903
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114626
+bytes_deallocated = 114178
+bytes_reallocated = 55
+
+[[instances]]
+name = "image_pad_x_pad_y_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 24
+bytes_allocated = 123010
+bytes_deallocated = 114178
+bytes_reallocated = 6903
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114626
+bytes_deallocated = 114178
+bytes_reallocated = 55
+
+[[instances]]
+name = "image_pad_x_pad_y_hybrid"
+
+[instances.cold]
+allocations = 205
+deallocations = 180
+reallocations = 40
+bytes_allocated = 176004
+bytes_deallocated = 162987
+bytes_reallocated = 42254
+
+[instances.warm]
+allocations = 169
+deallocations = 165
+reallocations = 8
+bytes_allocated = 127779
+bytes_deallocated = 127339
+bytes_reallocated = 1767

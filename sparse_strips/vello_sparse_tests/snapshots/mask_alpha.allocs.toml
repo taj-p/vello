@@ -1,0 +1,78 @@
+test = "mask_alpha"
+units = "bytes"
+
+[[instances]]
+name = "mask_alpha_cpu_f32_neon"
+
+[instances.cold]
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 126668
+bytes_deallocated = 102412
+bytes_reallocated = 34000
+
+[instances.warm]
+allocations = 40
+deallocations = 39
+reallocations = 44
+bytes_allocated = 130604
+bytes_deallocated = 102412
+bytes_reallocated = 38288
+
+[[instances]]
+name = "mask_alpha_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 126668
+bytes_deallocated = 102412
+bytes_reallocated = 34000
+
+[instances.warm]
+allocations = 40
+deallocations = 39
+reallocations = 44
+bytes_allocated = 130604
+bytes_deallocated = 102412
+bytes_reallocated = 38288
+
+[[instances]]
+name = "mask_alpha_cpu_u8_neon"
+
+[instances.cold]
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 102092
+bytes_deallocated = 77836
+bytes_reallocated = 21712
+
+[instances.warm]
+allocations = 40
+deallocations = 39
+reallocations = 44
+bytes_allocated = 106028
+bytes_deallocated = 77836
+bytes_reallocated = 26000
+
+[[instances]]
+name = "mask_alpha_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 102092
+bytes_deallocated = 77836
+bytes_reallocated = 21712
+
+[instances.warm]
+allocations = 40
+deallocations = 39
+reallocations = 44
+bytes_allocated = 106028
+bytes_deallocated = 77836
+bytes_reallocated = 26000

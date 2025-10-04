@@ -1,0 +1,97 @@
+test = "tricky_strokes"
+units = "bytes"
+
+[[instances]]
+name = "tricky_strokes_cpu_f32_neon"
+
+[instances.cold]
+allocations = 283
+deallocations = 46
+reallocations = 364
+bytes_allocated = 262768
+bytes_deallocated = 100912
+bytes_reallocated = 128928
+
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 278288
+bytes_deallocated = 100912
+bytes_reallocated = 182736
+
+[[instances]]
+name = "tricky_strokes_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 283
+deallocations = 46
+reallocations = 364
+bytes_allocated = 262768
+bytes_deallocated = 100912
+bytes_reallocated = 128928
+
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 278288
+bytes_deallocated = 100912
+bytes_reallocated = 182736
+
+[[instances]]
+name = "tricky_strokes_cpu_u8_neon"
+
+[instances.cold]
+allocations = 283
+deallocations = 46
+reallocations = 364
+bytes_allocated = 250480
+bytes_deallocated = 88624
+bytes_reallocated = 128928
+
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 266000
+bytes_deallocated = 88624
+bytes_reallocated = 182736
+
+[[instances]]
+name = "tricky_strokes_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 283
+deallocations = 46
+reallocations = 364
+bytes_allocated = 250480
+bytes_deallocated = 88624
+bytes_reallocated = 128928
+
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 266000
+bytes_deallocated = 88624
+bytes_reallocated = 182736
+
+[[instances]]
+name = "tricky_strokes_hybrid"
+
+[instances.cold]
+allocations = 2991
+deallocations = 2967
+reallocations = 423
+bytes_allocated = 617035
+bytes_deallocated = 479065
+bytes_reallocated = 253840
+
+[instances.warm]
+allocations = 2954
+deallocations = 2953
+reallocations = 25
+bytes_allocated = 425905
+bytes_deallocated = 425845
+bytes_reallocated = 87360

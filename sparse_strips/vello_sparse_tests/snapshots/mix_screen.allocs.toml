@@ -1,0 +1,97 @@
+test = "mix_screen"
+units = "bytes"
+
+[[instances]]
+name = "mix_screen_cpu_f32_neon"
+
+[instances.cold]
+allocations = 25
+deallocations = 16
+reallocations = 46
+bytes_allocated = 251309
+bytes_deallocated = 193861
+bytes_reallocated = 29687
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 253293
+bytes_deallocated = 193981
+bytes_reallocated = 33335
+
+[[instances]]
+name = "mix_screen_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 25
+deallocations = 16
+reallocations = 46
+bytes_allocated = 251309
+bytes_deallocated = 193861
+bytes_reallocated = 29687
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 253293
+bytes_deallocated = 193981
+bytes_reallocated = 33335
+
+[[instances]]
+name = "mix_screen_cpu_u8_neon"
+
+[instances.cold]
+allocations = 25
+deallocations = 16
+reallocations = 46
+bytes_allocated = 214409
+bytes_deallocated = 169285
+bytes_reallocated = 17399
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047
+
+[[instances]]
+name = "mix_screen_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 25
+deallocations = 16
+reallocations = 46
+bytes_allocated = 214409
+bytes_deallocated = 169285
+bytes_reallocated = 17399
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047
+
+[[instances]]
+name = "mix_screen_hybrid"
+
+[instances.cold]
+allocations = 261
+deallocations = 227
+reallocations = 98
+bytes_allocated = 308105
+bytes_deallocated = 250100
+bytes_reallocated = 83666
+
+[instances.warm]
+allocations = 218
+deallocations = 211
+reallocations = 37
+bytes_allocated = 214224
+bytes_deallocated = 213328
+bytes_reallocated = 6535

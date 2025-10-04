@@ -1,0 +1,97 @@
+test = "clip_rectangle_and_circle"
+units = "bytes"
+
+[[instances]]
+name = "clip_rectangle_and_circle_cpu_f32_neon"
+
+[instances.cold]
+allocations = 16
+deallocations = 9
+reallocations = 51
+bytes_allocated = 98344
+bytes_deallocated = 72904
+bytes_reallocated = 73384
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 94216
+bytes_deallocated = 72904
+bytes_reallocated = 70912
+
+[[instances]]
+name = "clip_rectangle_and_circle_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 16
+deallocations = 9
+reallocations = 51
+bytes_allocated = 98344
+bytes_deallocated = 72904
+bytes_reallocated = 73384
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 94216
+bytes_deallocated = 72904
+bytes_reallocated = 70912
+
+[[instances]]
+name = "clip_rectangle_and_circle_cpu_u8_neon"
+
+[instances.cold]
+allocations = 16
+deallocations = 9
+reallocations = 51
+bytes_allocated = 49192
+bytes_deallocated = 23752
+bytes_reallocated = 36520
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 45064
+bytes_deallocated = 23752
+bytes_reallocated = 34048
+
+[[instances]]
+name = "clip_rectangle_and_circle_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 16
+deallocations = 9
+reallocations = 51
+bytes_allocated = 49192
+bytes_deallocated = 23752
+bytes_reallocated = 36520
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 45064
+bytes_deallocated = 23752
+bytes_reallocated = 34048
+
+[[instances]]
+name = "clip_rectangle_and_circle_hybrid"
+
+[instances.cold]
+allocations = 222
+deallocations = 195
+reallocations = 95
+bytes_allocated = 94749
+bytes_deallocated = 65743
+bytes_reallocated = 65948
+
+[instances.warm]
+allocations = 183
+deallocations = 182
+reallocations = 32
+bytes_allocated = 28611
+bytes_deallocated = 28551
+bytes_reallocated = 6672

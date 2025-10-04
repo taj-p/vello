@@ -1,0 +1,97 @@
+test = "glyphs_skewed_unhinted"
+units = "bytes"
+
+[[instances]]
+name = "glyphs_skewed_unhinted_cpu_f32_neon"
+
+[instances.cold]
+allocations = 17
+deallocations = 7
+reallocations = 49
+bytes_allocated = 55956
+bytes_deallocated = 23996
+bytes_reallocated = 29168
+
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 39
+bytes_allocated = 41352
+bytes_deallocated = 24216
+bytes_reallocated = 14352
+
+[[instances]]
+name = "glyphs_skewed_unhinted_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 17
+deallocations = 7
+reallocations = 49
+bytes_allocated = 55956
+bytes_deallocated = 23996
+bytes_reallocated = 29168
+
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 39
+bytes_allocated = 41352
+bytes_deallocated = 24216
+bytes_reallocated = 14352
+
+[[instances]]
+name = "glyphs_skewed_unhinted_cpu_u8_neon"
+
+[instances.cold]
+allocations = 17
+deallocations = 7
+reallocations = 49
+bytes_allocated = 43668
+bytes_deallocated = 11708
+bytes_reallocated = 29168
+
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 39
+bytes_allocated = 29064
+bytes_deallocated = 11928
+bytes_reallocated = 14352
+
+[[instances]]
+name = "glyphs_skewed_unhinted_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 17
+deallocations = 7
+reallocations = 49
+bytes_allocated = 43668
+bytes_deallocated = 11708
+bytes_reallocated = 29168
+
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 39
+bytes_allocated = 29064
+bytes_deallocated = 11928
+bytes_reallocated = 14352
+
+[[instances]]
+name = "glyphs_skewed_unhinted_hybrid"
+
+[instances.cold]
+allocations = 210
+deallocations = 180
+reallocations = 65
+bytes_allocated = 96959
+bytes_deallocated = 61365
+bytes_reallocated = 67520
+
+[instances.warm]
+allocations = 175
+deallocations = 165
+reallocations = 29
+bytes_allocated = 37817
+bytes_deallocated = 26541
+bytes_reallocated = 13632

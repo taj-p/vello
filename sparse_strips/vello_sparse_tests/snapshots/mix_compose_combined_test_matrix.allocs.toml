@@ -1,0 +1,97 @@
+test = "mix_compose_combined_test_matrix"
+units = "bytes"
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_f32_neon"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 328
+bytes_allocated = 1768576
+bytes_deallocated = 72512
+bytes_reallocated = 1744864
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1776448
+bytes_deallocated = 72512
+bytes_reallocated = 1753088
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 328
+bytes_allocated = 1768576
+bytes_deallocated = 72512
+bytes_reallocated = 1744864
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1776448
+bytes_deallocated = 72512
+bytes_reallocated = 1753088
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 53
+reallocations = 328
+bytes_allocated = 1721608
+bytes_deallocated = 37904
+bytes_reallocated = 1708000
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1727296
+bytes_deallocated = 23360
+bytes_reallocated = 1716224
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 328
+bytes_allocated = 1719424
+bytes_deallocated = 23360
+bytes_reallocated = 1708000
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1727296
+bytes_deallocated = 23360
+bytes_reallocated = 1716224
+
+[[instances]]
+name = "mix_compose_combined_test_matrix_hybrid"
+
+[instances.cold]
+allocations = 19947
+deallocations = 18979
+reallocations = 5384
+bytes_allocated = 4920586
+bytes_deallocated = 2868372
+bytes_reallocated = 3039820
+
+[instances.warm]
+allocations = 19914
+deallocations = 19913
+reallocations = 4956
+bytes_allocated = 2966464
+bytes_deallocated = 2966404
+bytes_reallocated = 1080176

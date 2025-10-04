@@ -1,0 +1,97 @@
+test = "gradient_with_color_spaces_3"
+units = "bytes"
+
+[[instances]]
+name = "gradient_with_color_spaces_3_cpu_f32_neon"
+
+[instances.cold]
+allocations = 16
+deallocations = 8
+reallocations = 30
+bytes_allocated = 185820
+bytes_deallocated = 25264
+bytes_reallocated = 10848
+
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 175868
+bytes_deallocated = 25264
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_with_color_spaces_3_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 16
+deallocations = 8
+reallocations = 30
+bytes_allocated = 185820
+bytes_deallocated = 25264
+bytes_reallocated = 10848
+
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 175868
+bytes_deallocated = 25264
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_with_color_spaces_3_cpu_u8_neon"
+
+[instances.cold]
+allocations = 16
+deallocations = 8
+reallocations = 30
+bytes_allocated = 62832
+bytes_deallocated = 12976
+bytes_reallocated = 10848
+
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 52880
+bytes_deallocated = 12976
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_with_color_spaces_3_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 16
+deallocations = 8
+reallocations = 30
+bytes_allocated = 62832
+bytes_deallocated = 12976
+bytes_reallocated = 10848
+
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 52880
+bytes_deallocated = 12976
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_with_color_spaces_3_hybrid"
+
+[instances.cold]
+allocations = 232
+deallocations = 196
+reallocations = 51
+bytes_allocated = 200270
+bytes_deallocated = 63614
+bytes_reallocated = 127472
+
+[instances.warm]
+allocations = 162
+deallocations = 158
+reallocations = 15
+bytes_allocated = 25155
+bytes_deallocated = 23403
+bytes_reallocated = 4432

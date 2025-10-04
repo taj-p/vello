@@ -1,0 +1,97 @@
+test = "recording_can_be_repeatedly_executed_in_layers"
+units = "bytes"
+
+[[instances]]
+name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_neon"
+
+[instances.cold]
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 171128
+bytes_deallocated = 46296
+bytes_reallocated = 144368
+
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 175576
+bytes_deallocated = 46296
+bytes_reallocated = 149168
+
+[[instances]]
+name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 171128
+bytes_deallocated = 46296
+bytes_reallocated = 144368
+
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 175576
+bytes_deallocated = 46296
+bytes_reallocated = 149168
+
+[[instances]]
+name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_neon"
+
+[instances.cold]
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 146552
+bytes_deallocated = 21720
+bytes_reallocated = 132080
+
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 151000
+bytes_deallocated = 21720
+bytes_reallocated = 136880
+
+[[instances]]
+name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 146552
+bytes_deallocated = 21720
+bytes_reallocated = 132080
+
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 151000
+bytes_deallocated = 21720
+bytes_reallocated = 136880
+
+[[instances]]
+name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
+
+[instances.cold]
+allocations = 789
+deallocations = 741
+reallocations = 389
+bytes_allocated = 316121
+bytes_deallocated = 173539
+bytes_reallocated = 224572
+
+[instances.warm]
+allocations = 756
+deallocations = 755
+reallocations = 220
+bytes_allocated = 138519
+bytes_deallocated = 138459
+bytes_reallocated = 52096

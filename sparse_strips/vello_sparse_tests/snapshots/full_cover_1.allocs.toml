@@ -1,0 +1,97 @@
+test = "full_cover_1"
+units = "bytes"
+
+[[instances]]
+name = "full_cover_1_cpu_f32_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21136
+bytes_deallocated = 21072
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 21520
+bytes_deallocated = 21072
+bytes_reallocated = 672
+
+[[instances]]
+name = "full_cover_1_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21136
+bytes_deallocated = 21072
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 21520
+bytes_deallocated = 21072
+bytes_reallocated = 672
+
+[[instances]]
+name = "full_cover_1_cpu_u8_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 8848
+bytes_deallocated = 8784
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 9232
+bytes_deallocated = 8784
+bytes_reallocated = 672
+
+[[instances]]
+name = "full_cover_1_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 8848
+bytes_deallocated = 8784
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 9232
+bytes_deallocated = 8784
+bytes_reallocated = 672
+
+[[instances]]
+name = "full_cover_1_hybrid"
+
+[instances.cold]
+allocations = 95
+deallocations = 75
+reallocations = 13
+bytes_allocated = 46347
+bytes_deallocated = 42649
+bytes_reallocated = 33680
+
+[instances.warm]
+allocations = 62
+deallocations = 61
+reallocations = 2
+bytes_allocated = 8369
+bytes_deallocated = 8309
+bytes_reallocated = 384

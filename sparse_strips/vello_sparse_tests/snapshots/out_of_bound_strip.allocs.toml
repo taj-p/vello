@@ -1,0 +1,97 @@
+test = "out_of_bound_strip"
+units = "bytes"
+
+[[instances]]
+name = "out_of_bound_strip_cpu_f32_neon"
+
+[instances.cold]
+allocations = 7
+deallocations = 4
+reallocations = 2
+bytes_allocated = 26272
+bytes_deallocated = 25312
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 0
+bytes_allocated = 25312
+bytes_deallocated = 25312
+bytes_reallocated = 0
+
+[[instances]]
+name = "out_of_bound_strip_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 7
+deallocations = 4
+reallocations = 2
+bytes_allocated = 26272
+bytes_deallocated = 25312
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 0
+bytes_allocated = 25312
+bytes_deallocated = 25312
+bytes_reallocated = 0
+
+[[instances]]
+name = "out_of_bound_strip_cpu_u8_neon"
+
+[instances.cold]
+allocations = 9
+deallocations = 9
+reallocations = 2
+bytes_allocated = 14096
+bytes_deallocated = 14864
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 0
+bytes_allocated = 13024
+bytes_deallocated = 13024
+bytes_reallocated = 0
+
+[[instances]]
+name = "out_of_bound_strip_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 7
+deallocations = 4
+reallocations = 2
+bytes_allocated = 13984
+bytes_deallocated = 13024
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 0
+bytes_allocated = 13024
+bytes_deallocated = 13024
+bytes_reallocated = 0
+
+[[instances]]
+name = "out_of_bound_strip_hybrid"
+
+[instances.cold]
+allocations = 284
+deallocations = 261
+reallocations = 17
+bytes_allocated = 70187
+bytes_deallocated = 65593
+bytes_reallocated = 36080
+
+[instances.warm]
+allocations = 217
+deallocations = 217
+reallocations = 0
+bytes_allocated = 25094
+bytes_deallocated = 25094
+bytes_reallocated = 0

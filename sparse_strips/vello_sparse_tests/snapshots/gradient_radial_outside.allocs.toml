@@ -1,0 +1,97 @@
+test = "gradient_radial_outside"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_outside_cpu_f32_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 2
+bytes_allocated = 40752
+bytes_deallocated = 21464
+bytes_reallocated = 1248
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 41936
+bytes_deallocated = 21464
+bytes_reallocated = 3968
+
+[[instances]]
+name = "gradient_radial_outside_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 2
+bytes_allocated = 40752
+bytes_deallocated = 21464
+bytes_reallocated = 1248
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 41936
+bytes_deallocated = 21464
+bytes_reallocated = 3968
+
+[[instances]]
+name = "gradient_radial_outside_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 2
+bytes_allocated = 16140
+bytes_deallocated = 9176
+bytes_reallocated = 1248
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 17324
+bytes_deallocated = 9176
+bytes_reallocated = 3968
+
+[[instances]]
+name = "gradient_radial_outside_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 2
+bytes_allocated = 16140
+bytes_deallocated = 9176
+bytes_reallocated = 1248
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 17324
+bytes_deallocated = 9176
+bytes_reallocated = 3968
+
+[[instances]]
+name = "gradient_radial_outside_hybrid"
+
+[instances.cold]
+allocations = 136
+deallocations = 110
+reallocations = 17
+bytes_allocated = 91451
+bytes_deallocated = 47657
+bytes_reallocated = 64432
+
+[instances.warm]
+allocations = 96
+deallocations = 94
+reallocations = 5
+bytes_allocated = 12681
+bytes_deallocated = 12549
+bytes_reallocated = 944

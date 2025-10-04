@@ -1,0 +1,97 @@
+test = "incorrect_filling_7"
+units = "bytes"
+
+[[instances]]
+name = "incorrect_filling_7_cpu_f32_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21760
+bytes_deallocated = 21504
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 21504
+bytes_deallocated = 21504
+bytes_reallocated = 224
+
+[[instances]]
+name = "incorrect_filling_7_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21760
+bytes_deallocated = 21504
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 21504
+bytes_deallocated = 21504
+bytes_reallocated = 224
+
+[[instances]]
+name = "incorrect_filling_7_cpu_u8_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 9472
+bytes_deallocated = 9216
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 9216
+bytes_deallocated = 9216
+bytes_reallocated = 224
+
+[[instances]]
+name = "incorrect_filling_7_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 9472
+bytes_deallocated = 9216
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 9216
+bytes_deallocated = 9216
+bytes_reallocated = 224
+
+[[instances]]
+name = "incorrect_filling_7_hybrid"
+
+[instances.cold]
+allocations = 113
+deallocations = 93
+reallocations = 15
+bytes_allocated = 48987
+bytes_deallocated = 45097
+bytes_reallocated = 34352
+
+[instances.warm]
+allocations = 80
+deallocations = 79
+reallocations = 2
+bytes_allocated = 10145
+bytes_deallocated = 10085
+bytes_reallocated = 384

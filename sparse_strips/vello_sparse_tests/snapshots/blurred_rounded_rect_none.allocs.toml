@@ -1,0 +1,78 @@
+test = "blurred_rounded_rect_none"
+units = "bytes"
+
+[[instances]]
+name = "blurred_rounded_rect_none_cpu_f32_neon"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 27976
+bytes_deallocated = 22280
+bytes_reallocated = 4160
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 24328
+bytes_deallocated = 22280
+bytes_reallocated = 2048
+
+[[instances]]
+name = "blurred_rounded_rect_none_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 27976
+bytes_deallocated = 22280
+bytes_reallocated = 4160
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 24328
+bytes_deallocated = 22280
+bytes_reallocated = 2048
+
+[[instances]]
+name = "blurred_rounded_rect_none_cpu_u8_neon"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 15688
+bytes_deallocated = 9992
+bytes_reallocated = 4160
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 12040
+bytes_deallocated = 9992
+bytes_reallocated = 2048
+
+[[instances]]
+name = "blurred_rounded_rect_none_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 15688
+bytes_deallocated = 9992
+bytes_reallocated = 4160
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 12040
+bytes_deallocated = 9992
+bytes_reallocated = 2048

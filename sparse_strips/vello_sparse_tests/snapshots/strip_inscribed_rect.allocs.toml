@@ -1,0 +1,97 @@
+test = "strip_inscribed_rect"
+units = "bytes"
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_f32_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 3
+reallocations = 3
+bytes_allocated = 21672
+bytes_deallocated = 20840
+bytes_reallocated = 608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 21000
+bytes_deallocated = 20840
+bytes_reallocated = 160
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 3
+reallocations = 3
+bytes_allocated = 21672
+bytes_deallocated = 20840
+bytes_reallocated = 608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 21000
+bytes_deallocated = 20840
+bytes_reallocated = 160
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_u8_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9384
+bytes_deallocated = 8552
+bytes_reallocated = 608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 8712
+bytes_deallocated = 8552
+bytes_reallocated = 160
+
+[[instances]]
+name = "strip_inscribed_rect_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9384
+bytes_deallocated = 8552
+bytes_reallocated = 608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 1
+bytes_allocated = 8712
+bytes_deallocated = 8552
+bytes_reallocated = 160
+
+[[instances]]
+name = "strip_inscribed_rect_hybrid"
+
+[instances.cold]
+allocations = 104
+deallocations = 84
+reallocations = 15
+bytes_allocated = 47867
+bytes_deallocated = 43849
+bytes_reallocated = 34160
+
+[instances.warm]
+allocations = 71
+deallocations = 70
+reallocations = 2
+bytes_allocated = 9233
+bytes_deallocated = 9173
+bytes_reallocated = 384

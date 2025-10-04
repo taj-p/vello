@@ -1,0 +1,97 @@
+test = "image_with_transform_scale"
+units = "bytes"
+
+[[instances]]
+name = "image_with_transform_scale_cpu_f32_neon"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 128962
+bytes_deallocated = 126466
+bytes_reallocated = 2103
+
+[[instances]]
+name = "image_with_transform_scale_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 128962
+bytes_deallocated = 126466
+bytes_reallocated = 2103
+
+[[instances]]
+name = "image_with_transform_scale_cpu_u8_neon"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
+
+[[instances]]
+name = "image_with_transform_scale_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
+
+[[instances]]
+name = "image_with_transform_scale_hybrid"
+
+[instances.cold]
+allocations = 205
+deallocations = 180
+reallocations = 30
+bytes_allocated = 171780
+bytes_deallocated = 162603
+bytes_reallocated = 38414
+
+[instances.warm]
+allocations = 169
+deallocations = 165
+reallocations = 8
+bytes_allocated = 127395
+bytes_deallocated = 126955
+bytes_reallocated = 1767

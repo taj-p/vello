@@ -1,0 +1,97 @@
+test = "no_anti_aliasing_clip_path"
+units = "bytes"
+
+[[instances]]
+name = "no_anti_aliasing_clip_path_cpu_f32_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 43
+bytes_allocated = 52040
+bytes_deallocated = 39528
+bytes_reallocated = 28640
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 16
+bytes_allocated = 50024
+bytes_deallocated = 39528
+bytes_reallocated = 27104
+
+[[instances]]
+name = "no_anti_aliasing_clip_path_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 43
+bytes_allocated = 52040
+bytes_deallocated = 39528
+bytes_reallocated = 28640
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 16
+bytes_allocated = 50024
+bytes_deallocated = 39528
+bytes_reallocated = 27104
+
+[[instances]]
+name = "no_anti_aliasing_clip_path_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 43
+bytes_allocated = 27464
+bytes_deallocated = 14952
+bytes_reallocated = 16352
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 16
+bytes_allocated = 25448
+bytes_deallocated = 14952
+bytes_reallocated = 14816
+
+[[instances]]
+name = "no_anti_aliasing_clip_path_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 43
+bytes_allocated = 27464
+bytes_deallocated = 14952
+bytes_reallocated = 16352
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 16
+bytes_allocated = 25448
+bytes_deallocated = 14952
+bytes_reallocated = 14816
+
+[[instances]]
+name = "no_anti_aliasing_clip_path_hybrid"
+
+[instances.cold]
+allocations = 191
+deallocations = 169
+reallocations = 72
+bytes_allocated = 75366
+bytes_deallocated = 59668
+bytes_reallocated = 50032
+
+[instances.warm]
+allocations = 156
+deallocations = 155
+reallocations = 22
+bytes_allocated = 24580
+bytes_deallocated = 24520
+bytes_reallocated = 4944

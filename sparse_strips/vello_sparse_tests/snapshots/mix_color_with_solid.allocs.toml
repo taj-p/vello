@@ -1,0 +1,97 @@
+test = "mix_color_with_solid"
+units = "bytes"
+
+[[instances]]
+name = "mix_color_with_solid_cpu_f32_neon"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 45
+bytes_allocated = 52264
+bytes_deallocated = 38664
+bytes_reallocated = 29632
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 55560
+bytes_deallocated = 38664
+bytes_reallocated = 33280
+
+[[instances]]
+name = "mix_color_with_solid_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 45
+bytes_allocated = 52264
+bytes_deallocated = 38664
+bytes_reallocated = 29632
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 55560
+bytes_deallocated = 38664
+bytes_reallocated = 33280
+
+[[instances]]
+name = "mix_color_with_solid_cpu_u8_neon"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 45
+bytes_allocated = 27688
+bytes_deallocated = 14088
+bytes_reallocated = 17344
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 30984
+bytes_deallocated = 14088
+bytes_reallocated = 20992
+
+[[instances]]
+name = "mix_color_with_solid_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 45
+bytes_allocated = 27688
+bytes_deallocated = 14088
+bytes_reallocated = 17344
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 30984
+bytes_deallocated = 14088
+bytes_reallocated = 20992
+
+[[instances]]
+name = "mix_color_with_solid_hybrid"
+
+[instances.cold]
+allocations = 211
+deallocations = 189
+reallocations = 95
+bytes_allocated = 81613
+bytes_deallocated = 64447
+bytes_reallocated = 55092
+
+[instances.warm]
+allocations = 177
+deallocations = 176
+reallocations = 35
+bytes_allocated = 27315
+bytes_deallocated = 27255
+bytes_reallocated = 6352

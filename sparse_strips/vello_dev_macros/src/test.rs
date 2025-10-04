@@ -249,19 +249,30 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 };
                 use vello_cpu::{RenderContext, RenderMode};
                 use vello_common::pixmap::Pixmap;
-                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, save_alloc_stats};
+                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, AllocationStats, save_alloc_stats, RunType};
 
                 let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level, #render_mode);
-                let mut pixmap = Pixmap::new(#width, #height);
-                let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
-                {
-                    #input_fn_name(&mut ctx);
-                    ctx.flush();
-                    ctx.render_to_pixmap(&mut pixmap);
+                let f = |mut ctx: RenderContext| -> (RenderContext, Pixmap, AllocationStats) {
+                    let mut pixmap = Pixmap::new(#width, #height);
+                    let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+                    {
+                        #input_fn_name(&mut ctx);
+                        ctx.flush();
+                        ctx.render_to_pixmap(&mut pixmap);
+                    }
+                    (ctx, pixmap, alloc_span.end())
+                };
+                let (ctx, pixmap, alloc_stats) = f(ctx);
+                // Multithreaded allocations are not deterministic.
+                if #num_threads <= 1 {
+                    save_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #fn_name_str);
                 }
-                save_alloc_stats(alloc_span.end(), #input_fn_name_str, #fn_name_str);
                 if !#no_ref {
                     check_ref(pixmap, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
+                }
+                if #num_threads <= 1 {
+                    let (_, pixmap, alloc_stats) = f(ctx);
+                    save_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #fn_name_str);
                 }
             }
         }
@@ -443,21 +454,28 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
             use vello_common::pixmap::Pixmap;
-            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, save_alloc_stats};
+            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, save_alloc_stats, RunType, AllocationStats};
 
             let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback", RenderMode::OptimizeSpeed);
+            let f = |mut ctx: HybridRenderer| -> (HybridRenderer, AllocationStats) {
+                let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+                {
+                    #input_fn_name(&mut ctx);
+                    ctx.flush();
+                    ctx.render();
+                }
+                (ctx, alloc_span.end())
+            };
+            let (mut ctx, alloc_stats) = f(ctx);
+            save_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str);
             let mut pixmap = Pixmap::new(#width, #height);
-            let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
-            {
-                #input_fn_name(&mut ctx);
-                ctx.flush();
-                ctx.render();
-            }
-            save_alloc_stats(alloc_span.end(), #input_fn_name_str, #hybrid_fn_name_str);
             ctx.copy_to_pixmap(&mut pixmap);
             if !#no_ref {
                 check_ref(pixmap, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, #diff_pixels, false, #reference_image_name);
             }
+            ctx.reset();
+            let (_, alloc_stats) = f(ctx);
+            save_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str);
         }
 
         #ignore_hybrid_webgl

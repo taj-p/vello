@@ -1,0 +1,97 @@
+test = "clip_rectangle_with_star_evenodd"
+units = "bytes"
+
+[[instances]]
+name = "clip_rectangle_with_star_evenodd_cpu_f32_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 40
+bytes_allocated = 51080
+bytes_deallocated = 39528
+bytes_reallocated = 27680
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 50984
+bytes_deallocated = 39528
+bytes_reallocated = 28064
+
+[[instances]]
+name = "clip_rectangle_with_star_evenodd_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 40
+bytes_allocated = 51080
+bytes_deallocated = 39528
+bytes_reallocated = 27680
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 50984
+bytes_deallocated = 39528
+bytes_reallocated = 28064
+
+[[instances]]
+name = "clip_rectangle_with_star_evenodd_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 40
+bytes_allocated = 26504
+bytes_deallocated = 14952
+bytes_reallocated = 15392
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 26408
+bytes_deallocated = 14952
+bytes_reallocated = 15776
+
+[[instances]]
+name = "clip_rectangle_with_star_evenodd_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 5
+reallocations = 40
+bytes_allocated = 26504
+bytes_deallocated = 14952
+bytes_reallocated = 15392
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 26408
+bytes_deallocated = 14952
+bytes_reallocated = 15776
+
+[[instances]]
+name = "clip_rectangle_with_star_evenodd_hybrid"
+
+[instances.cold]
+allocations = 191
+deallocations = 169
+reallocations = 69
+bytes_allocated = 74294
+bytes_deallocated = 59556
+bytes_reallocated = 49072
+
+[instances.warm]
+allocations = 156
+deallocations = 155
+reallocations = 22
+bytes_allocated = 24468
+bytes_deallocated = 24408
+bytes_reallocated = 4944

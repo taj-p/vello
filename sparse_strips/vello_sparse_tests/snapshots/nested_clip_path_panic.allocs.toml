@@ -1,0 +1,97 @@
+test = "nested_clip_path_panic"
+units = "bytes"
+
+[[instances]]
+name = "nested_clip_path_panic_cpu_f32_neon"
+
+[instances.cold]
+allocations = 9
+deallocations = 7
+reallocations = 4
+bytes_allocated = 21912
+bytes_deallocated = 21560
+bytes_reallocated = 544
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 2
+bytes_allocated = 21560
+bytes_deallocated = 21560
+bytes_reallocated = 448
+
+[[instances]]
+name = "nested_clip_path_panic_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 9
+deallocations = 7
+reallocations = 4
+bytes_allocated = 21912
+bytes_deallocated = 21560
+bytes_reallocated = 544
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 2
+bytes_allocated = 21560
+bytes_deallocated = 21560
+bytes_reallocated = 448
+
+[[instances]]
+name = "nested_clip_path_panic_cpu_u8_neon"
+
+[instances.cold]
+allocations = 9
+deallocations = 7
+reallocations = 4
+bytes_allocated = 9624
+bytes_deallocated = 9272
+bytes_reallocated = 544
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 2
+bytes_allocated = 9272
+bytes_deallocated = 9272
+bytes_reallocated = 448
+
+[[instances]]
+name = "nested_clip_path_panic_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 9
+deallocations = 7
+reallocations = 4
+bytes_allocated = 9624
+bytes_deallocated = 9272
+bytes_reallocated = 544
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 2
+bytes_allocated = 9272
+bytes_deallocated = 9272
+bytes_reallocated = 448
+
+[[instances]]
+name = "nested_clip_path_panic_hybrid"
+
+[instances.cold]
+allocations = 109
+deallocations = 137
+reallocations = 14
+bytes_allocated = 53515
+bytes_deallocated = 61121
+bytes_reallocated = 33856
+
+[instances.warm]
+allocations = 34
+deallocations = 34
+reallocations = 2
+bytes_allocated = 6958
+bytes_deallocated = 6958
+bytes_reallocated = 448

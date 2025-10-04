@@ -1,0 +1,97 @@
+test = "gradient_on_3_wide_tiles"
+units = "bytes"
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_f32_neon"
+
+[instances.cold]
+allocations = 14
+deallocations = 4
+reallocations = 2
+bytes_allocated = 29388
+bytes_deallocated = 22232
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 28844
+bytes_deallocated = 22232
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 14
+deallocations = 4
+reallocations = 2
+bytes_allocated = 29388
+bytes_deallocated = 22232
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 28844
+bytes_deallocated = 22232
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_u8_neon"
+
+[instances.cold]
+allocations = 14
+deallocations = 4
+reallocations = 2
+bytes_allocated = 13992
+bytes_deallocated = 9944
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 13448
+bytes_deallocated = 9944
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 14
+deallocations = 4
+reallocations = 2
+bytes_allocated = 13992
+bytes_deallocated = 9944
+bytes_reallocated = 480
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 13448
+bytes_deallocated = 9944
+bytes_reallocated = 2432
+
+[[instances]]
+name = "gradient_on_3_wide_tiles_hybrid"
+
+[instances.cold]
+allocations = 169
+deallocations = 143
+reallocations = 17
+bytes_allocated = 91087
+bytes_deallocated = 51169
+bytes_reallocated = 66736
+
+[instances.warm]
+allocations = 129
+deallocations = 127
+reallocations = 5
+bytes_allocated = 16069
+bytes_deallocated = 15973
+bytes_reallocated = 944

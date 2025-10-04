@@ -1,0 +1,97 @@
+test = "recording_is_executed_with_multiple_transforms"
+units = "bytes"
+
+[[instances]]
+name = "recording_is_executed_with_multiple_transforms_cpu_f32_neon"
+
+[instances.cold]
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 31924
+bytes_deallocated = 28248
+bytes_reallocated = 4752
+
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 31816
+bytes_deallocated = 28248
+bytes_reallocated = 5552
+
+[[instances]]
+name = "recording_is_executed_with_multiple_transforms_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 31924
+bytes_deallocated = 28248
+bytes_reallocated = 4752
+
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 31816
+bytes_deallocated = 28248
+bytes_reallocated = 5552
+
+[[instances]]
+name = "recording_is_executed_with_multiple_transforms_cpu_u8_neon"
+
+[instances.cold]
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 19636
+bytes_deallocated = 15960
+bytes_reallocated = 4752
+
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 19528
+bytes_deallocated = 15960
+bytes_reallocated = 5552
+
+[[instances]]
+name = "recording_is_executed_with_multiple_transforms_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 19636
+bytes_deallocated = 15960
+bytes_reallocated = 4752
+
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 19528
+bytes_deallocated = 15960
+bytes_reallocated = 5552
+
+[[instances]]
+name = "recording_is_executed_with_multiple_transforms_hybrid"
+
+[instances.cold]
+allocations = 150
+deallocations = 121
+reallocations = 38
+bytes_allocated = 63127
+bytes_deallocated = 56073
+bytes_reallocated = 40064
+
+[instances.warm]
+allocations = 115
+deallocations = 107
+reallocations = 19
+bytes_allocated = 21969
+bytes_deallocated = 20325
+bytes_reallocated = 4800

@@ -1,0 +1,97 @@
+test = "gradient_radial_spread_method_reflect"
+units = "bytes"
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_f32_neon"
+
+[instances.cold]
+allocations = 9
+deallocations = 5
+reallocations = 23
+bytes_allocated = 96860
+bytes_deallocated = 22640
+bytes_reallocated = 6848
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 88476
+bytes_deallocated = 22640
+bytes_reallocated = 0
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 9
+deallocations = 5
+reallocations = 23
+bytes_allocated = 96860
+bytes_deallocated = 22640
+bytes_reallocated = 6848
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 88476
+bytes_deallocated = 22640
+bytes_reallocated = 0
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_u8_neon"
+
+[instances.cold]
+allocations = 9
+deallocations = 5
+reallocations = 23
+bytes_allocated = 35384
+bytes_deallocated = 10352
+bytes_reallocated = 6848
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 27000
+bytes_deallocated = 10352
+bytes_reallocated = 0
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 9
+deallocations = 5
+reallocations = 23
+bytes_allocated = 35384
+bytes_deallocated = 10352
+bytes_reallocated = 6848
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 27000
+bytes_deallocated = 10352
+bytes_reallocated = 0
+
+[[instances]]
+name = "gradient_radial_spread_method_reflect_hybrid"
+
+[instances.cold]
+allocations = 173
+deallocations = 147
+reallocations = 39
+bytes_allocated = 115703
+bytes_deallocated = 53841
+bytes_reallocated = 59024
+
+[instances.warm]
+allocations = 133
+deallocations = 131
+reallocations = 6
+bytes_allocated = 17885
+bytes_deallocated = 17573
+bytes_reallocated = 1584

@@ -1,0 +1,97 @@
+test = "triangle_exceeding_viewport_2"
+units = "bytes"
+
+[[instances]]
+name = "triangle_exceeding_viewport_2_cpu_f32_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 21136
+bytes_deallocated = 20848
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21168
+bytes_deallocated = 20848
+bytes_reallocated = 320
+
+[[instances]]
+name = "triangle_exceeding_viewport_2_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 21136
+bytes_deallocated = 20848
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 21168
+bytes_deallocated = 20848
+bytes_reallocated = 320
+
+[[instances]]
+name = "triangle_exceeding_viewport_2_cpu_u8_neon"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 8848
+bytes_deallocated = 8560
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 8880
+bytes_deallocated = 8560
+bytes_reallocated = 320
+
+[[instances]]
+name = "triangle_exceeding_viewport_2_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 4
+deallocations = 4
+reallocations = 4
+bytes_allocated = 8848
+bytes_deallocated = 8560
+bytes_reallocated = 288
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 8880
+bytes_deallocated = 8560
+bytes_reallocated = 320
+
+[[instances]]
+name = "triangle_exceeding_viewport_2_hybrid"
+
+[instances.cold]
+allocations = 95
+deallocations = 75
+reallocations = 15
+bytes_allocated = 46347
+bytes_deallocated = 42425
+bytes_reallocated = 33680
+
+[instances.warm]
+allocations = 62
+deallocations = 61
+reallocations = 1
+bytes_allocated = 8113
+bytes_deallocated = 8053
+bytes_reallocated = 160

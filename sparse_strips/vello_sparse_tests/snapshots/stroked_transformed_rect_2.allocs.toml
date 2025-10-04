@@ -1,0 +1,97 @@
+test = "stroked_transformed_rect_2"
+units = "bytes"
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_f32_neon"
+
+[instances.cold]
+allocations = 7
+deallocations = 3
+reallocations = 12
+bytes_allocated = 27424
+bytes_deallocated = 21056
+bytes_reallocated = 4968
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 21696
+bytes_deallocated = 21056
+bytes_reallocated = 640
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 7
+deallocations = 3
+reallocations = 12
+bytes_allocated = 27424
+bytes_deallocated = 21056
+bytes_reallocated = 4968
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 21696
+bytes_deallocated = 21056
+bytes_reallocated = 640
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_u8_neon"
+
+[instances.cold]
+allocations = 7
+deallocations = 3
+reallocations = 12
+bytes_allocated = 15136
+bytes_deallocated = 8768
+bytes_reallocated = 4968
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 9408
+bytes_deallocated = 8768
+bytes_reallocated = 640
+
+[[instances]]
+name = "stroked_transformed_rect_2_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 7
+deallocations = 3
+reallocations = 12
+bytes_allocated = 15136
+bytes_deallocated = 8768
+bytes_reallocated = 4968
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 9408
+bytes_deallocated = 8768
+bytes_reallocated = 640
+
+[[instances]]
+name = "stroked_transformed_rect_2_hybrid"
+
+[instances.cold]
+allocations = 125
+deallocations = 153
+reallocations = 25
+bytes_allocated = 61347
+bytes_deallocated = 63433
+bytes_reallocated = 38840
+
+[instances.warm]
+allocations = 80
+deallocations = 79
+reallocations = 2
+bytes_allocated = 10193
+bytes_deallocated = 10133
+bytes_reallocated = 384

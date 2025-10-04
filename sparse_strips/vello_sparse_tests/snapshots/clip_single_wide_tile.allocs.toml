@@ -1,0 +1,97 @@
+test = "clip_single_wide_tile"
+units = "bytes"
+
+[[instances]]
+name = "clip_single_wide_tile_cpu_f32_neon"
+
+[instances.cold]
+allocations = 12
+deallocations = 9
+reallocations = 11
+bytes_allocated = 73208
+bytes_deallocated = 71192
+bytes_reallocated = 51360
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 72728
+bytes_deallocated = 71192
+bytes_reallocated = 51360
+
+[[instances]]
+name = "clip_single_wide_tile_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 12
+deallocations = 9
+reallocations = 11
+bytes_allocated = 73208
+bytes_deallocated = 71192
+bytes_reallocated = 51360
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 72728
+bytes_deallocated = 71192
+bytes_reallocated = 51360
+
+[[instances]]
+name = "clip_single_wide_tile_cpu_u8_neon"
+
+[instances.cold]
+allocations = 12
+deallocations = 9
+reallocations = 11
+bytes_allocated = 24056
+bytes_deallocated = 22040
+bytes_reallocated = 14496
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 23576
+bytes_deallocated = 22040
+bytes_reallocated = 14496
+
+[[instances]]
+name = "clip_single_wide_tile_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 12
+deallocations = 9
+reallocations = 11
+bytes_allocated = 24056
+bytes_deallocated = 22040
+bytes_reallocated = 14496
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 23576
+bytes_deallocated = 22040
+bytes_reallocated = 14496
+
+[[instances]]
+name = "clip_single_wide_tile_hybrid"
+
+[instances.cold]
+allocations = 211
+deallocations = 185
+reallocations = 47
+bytes_allocated = 61254
+bytes_deallocated = 54712
+bytes_reallocated = 39652
+
+[instances.warm]
+allocations = 156
+deallocations = 155
+reallocations = 20
+bytes_allocated = 18581
+bytes_deallocated = 18521
+bytes_reallocated = 3296

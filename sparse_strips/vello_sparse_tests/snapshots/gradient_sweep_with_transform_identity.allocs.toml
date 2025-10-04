@@ -1,0 +1,97 @@
+test = "gradient_sweep_with_transform_identity"
+units = "bytes"
+
+[[instances]]
+name = "gradient_sweep_with_transform_identity_cpu_f32_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 43436
+bytes_deallocated = 22352
+bytes_reallocated = 3008
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 40940
+bytes_deallocated = 22352
+bytes_reallocated = 2048
+
+[[instances]]
+name = "gradient_sweep_with_transform_identity_cpu_f32_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 43436
+bytes_deallocated = 22352
+bytes_reallocated = 3008
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 40940
+bytes_deallocated = 22352
+bytes_reallocated = 2048
+
+[[instances]]
+name = "gradient_sweep_with_transform_identity_cpu_u8_neon"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 18824
+bytes_deallocated = 10064
+bytes_reallocated = 3008
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048
+
+[[instances]]
+name = "gradient_sweep_with_transform_identity_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 18824
+bytes_deallocated = 10064
+bytes_reallocated = 3008
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048
+
+[[instances]]
+name = "gradient_sweep_with_transform_identity_hybrid"
+
+[instances.cold]
+allocations = 172
+deallocations = 146
+reallocations = 29
+bytes_allocated = 98759
+bytes_deallocated = 53169
+bytes_reallocated = 67472
+
+[instances.warm]
+allocations = 132
+deallocations = 130
+reallocations = 6
+bytes_allocated = 17165
+bytes_deallocated = 16997
+bytes_reallocated = 1584
