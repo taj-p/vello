@@ -293,13 +293,6 @@ pub(crate) fn process_alloc_stats(
 
     let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
     if is_test_mode {
-        // Load consolidated summary and look up expected stats for this test/instance
-        let summary_path = dir.join("allocs.toml");
-        let summary: AllocsFile = match std::fs::read_to_string(&summary_path) {
-            Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
-            _ => AllocsFile::default(),
-        };
-
         let backend_stats = match backend {
             Backend::Cpu => &test_entry.cpu,
             Backend::Vulkan => &test_entry.vulkan,
