@@ -249,7 +249,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 };
                 use vello_cpu::{RenderContext, RenderMode};
                 use vello_common::pixmap::Pixmap;
-                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, AllocationStats, process_alloc_stats, RunType, should_process_allocs};
+                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, AllocationStats, process_alloc_stats, RunType, should_process_allocs, Backend};
                 let process_allocs = should_process_allocs();
 
                 let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level, #render_mode);
@@ -266,14 +266,14 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 let (ctx, pixmap, alloc_stats) = f(ctx);
                 // Multithreaded allocations are not deterministic.
                 if process_allocs && #num_threads <= 1 {
-                    process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #fn_name_str, None);
+                    process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, Backend::Cpu);
                 }
                 if !#no_ref {
                     check_ref(pixmap, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
                 }
                 if process_allocs && #num_threads <= 1 {
                     let (_, pixmap, alloc_stats) = f(ctx);
-                    process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #fn_name_str, None);
+                    process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, Backend::Cpu);
                 }
             }
         }
@@ -455,7 +455,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
             use vello_common::pixmap::Pixmap;
-            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, process_alloc_stats, RunType, AllocationStats, should_process_allocs};
+            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, process_alloc_stats, RunType, AllocationStats, should_process_allocs, Backend};
             let process_allocs = should_process_allocs();
 
             let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback", RenderMode::OptimizeSpeed);
@@ -469,9 +469,9 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 (ctx, alloc_span.end())
             };
             let (mut ctx, alloc_stats) = f(ctx);
-            let backend = ctx.backend().to_str();
+            let backend = ctx.backend().into();
             if process_allocs {
-                process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str, Some(backend));
+                process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, backend);
             }
             let mut pixmap = Pixmap::new(#width, #height);
             ctx.copy_to_pixmap(&mut pixmap);
@@ -481,7 +481,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             ctx.reset();
             let (_, alloc_stats) = f(ctx);
             if process_allocs {
-                process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str, Some(backend));
+                process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, backend);
             }
         }
 

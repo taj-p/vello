@@ -158,21 +158,22 @@ impl<'a> AllocationSpan<'a> {
 }
 
 #[derive(Serialize, Deserialize, Default, Clone)]
-pub(crate) struct AllocFile {
-    pub test: String,
+pub(crate) struct AllocsFile {
     pub units: String,
-    pub instances: Vec<AllocInstance>,
+    pub tests: Vec<AllocsTest>,
 }
 
 #[derive(Serialize, Deserialize, Default, Clone)]
-pub(crate) struct AllocsSummary {
-    pub units: String,
-    pub tests: Vec<AllocFile>,
+pub(crate) struct AllocsTest {
+    pub test: String,
+    pub cpu: AllocInstance,
+    pub metal: AllocInstance,
+    pub dx12: AllocInstance,
+    pub vulkan: AllocInstance,
 }
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub(crate) struct AllocInstance {
-    pub name: String,
     pub cold: AllocationStats,
     pub warm: AllocationStats,
 }
@@ -231,24 +232,37 @@ pub(crate) fn should_process_allocs() -> bool {
     return true;
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(crate) enum Backend {
+    Cpu,
+    Vulkan,
+    Metal,
+    Dx12,
+}
+
+impl Into<Backend> for wgpu::Backend {
+    fn into(self) -> Backend {
+        match self {
+            wgpu::Backend::Vulkan => Backend::Vulkan,
+            wgpu::Backend::Metal => Backend::Metal,
+            wgpu::Backend::Dx12 => Backend::Dx12,
+            _ => unimplemented!("Backend {:?} not supported", self),
+        }
+    }
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn process_alloc_stats(
     run_type: RunType,
     alloc_stats: AllocationStats,
     file_path: &str,
-    instance_name: &str,
-    instance_name_suffix: Option<&str>,
+    backend: Backend,
 ) {
     use std::io::Write;
 
     if !should_process_allocs() {
         return;
     }
-
-    let instance_name = match instance_name_suffix {
-        Some(suffix) => &format!("{instance_name}_{suffix}"),
-        None => instance_name,
-    };
 
     let dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../vello_sparse_tests/snapshots");
@@ -258,22 +272,21 @@ pub(crate) fn process_alloc_stats(
     let summary_path = dir.join("allocs.toml");
     let test_name = file_path;
 
-    let mut summary: AllocsSummary = match std::fs::read_to_string(&summary_path) {
+    let mut summary: AllocsFile = match std::fs::read_to_string(&summary_path) {
         Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
-        _ => AllocsSummary::default(),
+        _ => AllocsFile::default(),
     };
     if summary.units.is_empty() {
         summary.units = "bytes".to_string();
     }
     // Find or create the test entry
-    let test_entry: &mut AllocFile =
+    let test_entry: &mut AllocsTest =
         if let Some(entry) = summary.tests.iter_mut().find(|t| t.test == test_name) {
             entry
         } else {
-            summary.tests.push(AllocFile {
+            summary.tests.push(AllocsTest {
                 test: test_name.to_string(),
-                units: summary.units.clone(),
-                instances: Vec::new(),
+                ..Default::default()
             });
             summary.tests.last_mut().unwrap()
         };
@@ -282,59 +295,49 @@ pub(crate) fn process_alloc_stats(
     if is_test_mode {
         // Load consolidated summary and look up expected stats for this test/instance
         let summary_path = dir.join("allocs.toml");
-        let summary: AllocsSummary = match std::fs::read_to_string(&summary_path) {
+        let summary: AllocsFile = match std::fs::read_to_string(&summary_path) {
             Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
-            _ => AllocsSummary::default(),
+            _ => AllocsFile::default(),
         };
 
-        let expected_stats = summary
-            .tests
-            .iter()
-            .find(|t| t.test == test_name)
-            .and_then(|t| t.instances.iter().find(|i| i.name == instance_name))
-            .map(|i| match run_type {
-                RunType::Cold => &i.cold,
-                RunType::Warm => &i.warm,
-            });
+        let backend_stats = match backend {
+            Backend::Cpu => &test_entry.cpu,
+            Backend::Vulkan => &test_entry.vulkan,
+            Backend::Metal => &test_entry.metal,
+            Backend::Dx12 => &test_entry.dx12,
+        };
 
-        if let Some(expected_stats) = expected_stats {
-            assert!(
-                alloc_stats.approx_eq(expected_stats, 0, 100),
-                "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
-            );
-        }
+        let expected_stats = match run_type {
+            RunType::Cold => &backend_stats.cold,
+            RunType::Warm => &backend_stats.warm,
+        };
+
+        assert!(
+            alloc_stats.approx_eq(expected_stats, 0, 100),
+            "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
+        );
         return;
     }
 
-    if let Some(inst) = test_entry
-        .instances
-        .iter_mut()
-        .find(|i| i.name == instance_name)
-    {
-        let stats = match run_type {
-            RunType::Cold => &mut inst.cold,
-            RunType::Warm => &mut inst.warm,
-        };
+    let backend_stats = match backend {
+        Backend::Cpu => &mut test_entry.cpu,
+        Backend::Vulkan => &mut test_entry.vulkan,
+        Backend::Metal => &mut test_entry.metal,
+        Backend::Dx12 => &mut test_entry.dx12,
+    };
 
-        stats.allocations = alloc_stats.allocations;
-        stats.deallocations = alloc_stats.deallocations;
-        stats.reallocations = alloc_stats.reallocations;
-        stats.bytes_allocated = alloc_stats.bytes_allocated;
-        stats.bytes_deallocated = alloc_stats.bytes_deallocated;
-        stats.bytes_reallocated = alloc_stats.bytes_reallocated;
-    } else {
-        let (cold_stats, warm_stats) = match run_type {
-            RunType::Cold => (alloc_stats, AllocationStats::default()),
-            RunType::Warm => (AllocationStats::default(), alloc_stats),
-        };
+    let stats = match run_type {
+        RunType::Cold => &mut backend_stats.cold,
+        RunType::Warm => &mut backend_stats.warm,
+    };
 
-        test_entry.instances.push(AllocInstance {
-            name: instance_name.to_string(),
-            cold: cold_stats,
-            warm: warm_stats,
-        });
-    }
-    test_entry.instances.sort_by(|a, b| a.name.cmp(&b.name));
+    stats.allocations = alloc_stats.allocations;
+    stats.deallocations = alloc_stats.deallocations;
+    stats.reallocations = alloc_stats.reallocations;
+    stats.bytes_allocated = alloc_stats.bytes_allocated;
+    stats.bytes_deallocated = alloc_stats.bytes_deallocated;
+    stats.bytes_reallocated = alloc_stats.bytes_reallocated;
+
     summary.tests.sort_by(|a, b| a.test.cmp(&b.test));
 
     let out = toml::to_string_pretty(&summary).unwrap();
