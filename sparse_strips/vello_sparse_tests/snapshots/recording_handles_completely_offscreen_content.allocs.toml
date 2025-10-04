@@ -78,7 +78,7 @@ bytes_deallocated = 9992
 bytes_reallocated = 672
 
 [[instances]]
-name = "recording_handles_completely_offscreen_content_hybrid"
+name = "recording_handles_completely_offscreen_content_hybrid_metal"
 
 [instances.cold]
 allocations = 107

@@ -78,7 +78,7 @@ bytes_deallocated = 15168
 bytes_reallocated = 274432
 
 [[instances]]
-name = "mix_modes_non_gradient_test_matrix_hybrid"
+name = "mix_modes_non_gradient_test_matrix_hybrid_metal"
 
 [instances.cold]
 allocations = 1595

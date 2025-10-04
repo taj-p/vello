@@ -78,7 +78,7 @@ bytes_deallocated = 24688
 bytes_reallocated = 23616
 
 [[instances]]
-name = "clip_with_multiple_transforms_hybrid"
+name = "clip_with_multiple_transforms_hybrid_metal"
 
 [instances.cold]
 allocations = 221

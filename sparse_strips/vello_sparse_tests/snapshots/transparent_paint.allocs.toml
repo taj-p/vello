@@ -78,7 +78,7 @@ bytes_deallocated = 10216
 bytes_reallocated = 10176
 
 [[instances]]
-name = "transparent_paint_hybrid"
+name = "transparent_paint_hybrid_metal"
 
 [instances.cold]
 allocations = 108

@@ -78,7 +78,7 @@ bytes_deallocated = 19744
 bytes_reallocated = 15024
 
 [[instances]]
-name = "recording_mixed_with_direct_drawing_hybrid"
+name = "recording_mixed_with_direct_drawing_hybrid_metal"
 
 [instances.cold]
 allocations = 259

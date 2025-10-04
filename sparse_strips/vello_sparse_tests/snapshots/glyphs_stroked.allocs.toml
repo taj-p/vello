@@ -78,7 +78,7 @@ bytes_deallocated = 14656
 bytes_reallocated = 15696
 
 [[instances]]
-name = "glyphs_stroked_hybrid"
+name = "glyphs_stroked_hybrid_metal"
 
 [instances.cold]
 allocations = 229

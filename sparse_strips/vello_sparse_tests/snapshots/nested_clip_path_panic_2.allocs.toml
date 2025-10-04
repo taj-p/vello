@@ -78,7 +78,7 @@ bytes_deallocated = 22008
 bytes_reallocated = 13856
 
 [[instances]]
-name = "nested_clip_path_panic_2_hybrid"
+name = "nested_clip_path_panic_2_hybrid_metal"
 
 [instances.cold]
 allocations = 146

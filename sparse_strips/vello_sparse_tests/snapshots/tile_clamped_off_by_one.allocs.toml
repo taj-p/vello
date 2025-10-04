@@ -78,7 +78,7 @@ bytes_deallocated = 13656
 bytes_reallocated = 6080
 
 [[instances]]
-name = "tile_clamped_off_by_one_hybrid"
+name = "tile_clamped_off_by_one_hybrid_metal"
 
 [instances.cold]
 allocations = 134

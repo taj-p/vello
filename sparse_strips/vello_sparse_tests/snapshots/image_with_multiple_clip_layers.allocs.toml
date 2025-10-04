@@ -78,7 +78,7 @@ bytes_deallocated = 127008
 bytes_reallocated = 24343
 
 [[instances]]
-name = "image_with_multiple_clip_layers_hybrid"
+name = "image_with_multiple_clip_layers_hybrid_metal"
 
 [instances.cold]
 allocations = 256

@@ -78,7 +78,7 @@ bytes_deallocated = 8560
 bytes_reallocated = 576
 
 [[instances]]
-name = "triangle_exceeding_viewport_1_hybrid"
+name = "triangle_exceeding_viewport_1_hybrid_metal"
 
 [instances.cold]
 allocations = 95

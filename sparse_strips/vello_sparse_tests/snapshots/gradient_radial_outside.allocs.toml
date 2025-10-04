@@ -78,7 +78,7 @@ bytes_deallocated = 9176
 bytes_reallocated = 3968
 
 [[instances]]
-name = "gradient_radial_outside_hybrid"
+name = "gradient_radial_outside_hybrid_metal"
 
 [instances.cold]
 allocations = 136

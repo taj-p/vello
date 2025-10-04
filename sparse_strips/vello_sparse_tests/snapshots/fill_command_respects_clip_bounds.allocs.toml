@@ -78,7 +78,7 @@ bytes_deallocated = 45544
 bytes_reallocated = 20512
 
 [[instances]]
-name = "fill_command_respects_clip_bounds_hybrid"
+name = "fill_command_respects_clip_bounds_hybrid_metal"
 
 [instances.cold]
 allocations = 1495

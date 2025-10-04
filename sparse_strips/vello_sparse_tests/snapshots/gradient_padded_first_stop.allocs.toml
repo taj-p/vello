@@ -78,7 +78,7 @@ bytes_deallocated = 10040
 bytes_reallocated = 0
 
 [[instances]]
-name = "gradient_padded_first_stop_hybrid"
+name = "gradient_padded_first_stop_hybrid_metal"
 
 [instances.cold]
 allocations = 172

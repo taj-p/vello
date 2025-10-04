@@ -78,7 +78,7 @@ bytes_deallocated = 10528
 bytes_reallocated = 1248
 
 [[instances]]
-name = "clip_completely_in_out_of_bounds_wide_tile_hybrid"
+name = "clip_completely_in_out_of_bounds_wide_tile_hybrid_metal"
 
 [instances.cold]
 allocations = 167

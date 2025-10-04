@@ -78,7 +78,7 @@ bytes_deallocated = 8768
 bytes_reallocated = 1600
 
 [[instances]]
-name = "filled_transformed_rect_3_hybrid"
+name = "filled_transformed_rect_3_hybrid_metal"
 
 [instances.cold]
 allocations = 113

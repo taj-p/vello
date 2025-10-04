@@ -78,7 +78,7 @@ bytes_deallocated = 8712
 bytes_reallocated = 224
 
 [[instances]]
-name = "shape_at_wide_tile_boundary_hybrid"
+name = "shape_at_wide_tile_boundary_hybrid_metal"
 
 [instances.cold]
 allocations = 92

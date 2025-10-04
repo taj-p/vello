@@ -78,7 +78,7 @@ bytes_deallocated = 9152
 bytes_reallocated = 3968
 
 [[instances]]
-name = "gradient_color_alpha_hybrid"
+name = "gradient_color_alpha_hybrid_metal"
 
 [instances.cold]
 allocations = 136

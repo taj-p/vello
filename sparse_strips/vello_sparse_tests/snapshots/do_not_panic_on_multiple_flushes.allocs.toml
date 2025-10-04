@@ -78,7 +78,7 @@ bytes_deallocated = 9992
 bytes_reallocated = 0
 
 [[instances]]
-name = "do_not_panic_on_multiple_flushes_hybrid"
+name = "do_not_panic_on_multiple_flushes_hybrid_metal"
 
 [instances.cold]
 allocations = 166

@@ -78,7 +78,7 @@ bytes_deallocated = 16624
 bytes_reallocated = 26656
 
 [[instances]]
-name = "clip_triangle_with_star_hybrid"
+name = "clip_triangle_with_star_hybrid_metal"
 
 [instances.cold]
 allocations = 194

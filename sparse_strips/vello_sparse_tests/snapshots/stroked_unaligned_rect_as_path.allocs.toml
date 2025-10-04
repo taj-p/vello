@@ -78,7 +78,7 @@ bytes_deallocated = 9216
 bytes_reallocated = 544
 
 [[instances]]
-name = "stroked_unaligned_rect_as_path_hybrid"
+name = "stroked_unaligned_rect_as_path_hybrid_metal"
 
 [instances.cold]
 allocations = 116

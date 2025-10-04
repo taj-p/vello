@@ -78,7 +78,7 @@ bytes_deallocated = 10064
 bytes_reallocated = 0
 
 [[instances]]
-name = "gradient_radial_focal_on_circle_hybrid"
+name = "gradient_radial_focal_on_circle_hybrid_metal"
 
 [instances.cold]
 allocations = 172

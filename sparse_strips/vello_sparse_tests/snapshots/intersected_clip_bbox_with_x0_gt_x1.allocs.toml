@@ -78,7 +78,7 @@ bytes_deallocated = 9432
 bytes_reallocated = 704
 
 [[instances]]
-name = "intersected_clip_bbox_with_x0_gt_x1_hybrid"
+name = "intersected_clip_bbox_with_x0_gt_x1_hybrid_metal"
 
 [instances.cold]
 allocations = 106

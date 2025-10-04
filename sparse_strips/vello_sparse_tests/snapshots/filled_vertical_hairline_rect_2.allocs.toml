@@ -78,7 +78,7 @@ bytes_deallocated = 8408
 bytes_reallocated = 320
 
 [[instances]]
-name = "filled_vertical_hairline_rect_2_hybrid"
+name = "filled_vertical_hairline_rect_2_hybrid_metal"
 
 [instances.cold]
 allocations = 98

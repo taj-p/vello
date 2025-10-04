@@ -78,7 +78,7 @@ bytes_deallocated = 9992
 bytes_reallocated = 7616
 
 [[instances]]
-name = "basic_alpha_compositing_hybrid"
+name = "basic_alpha_compositing_hybrid_metal"
 
 [instances.cold]
 allocations = 165

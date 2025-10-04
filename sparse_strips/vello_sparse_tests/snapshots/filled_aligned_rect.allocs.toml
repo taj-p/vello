@@ -78,7 +78,7 @@ bytes_deallocated = 8552
 bytes_reallocated = 1792
 
 [[instances]]
-name = "filled_aligned_rect_hybrid"
+name = "filled_aligned_rect_hybrid_metal"
 
 [instances.cold]
 allocations = 104

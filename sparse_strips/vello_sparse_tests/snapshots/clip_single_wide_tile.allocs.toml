@@ -78,7 +78,7 @@ bytes_deallocated = 22040
 bytes_reallocated = 14496
 
 [[instances]]
-name = "clip_single_wide_tile_hybrid"
+name = "clip_single_wide_tile_hybrid_metal"
 
 [instances.cold]
 allocations = 211

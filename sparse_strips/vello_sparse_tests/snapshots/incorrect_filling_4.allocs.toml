@@ -78,7 +78,7 @@ bytes_deallocated = 10240
 bytes_reallocated = 672
 
 [[instances]]
-name = "incorrect_filling_4_hybrid"
+name = "incorrect_filling_4_hybrid_metal"
 
 [instances.cold]
 allocations = 137

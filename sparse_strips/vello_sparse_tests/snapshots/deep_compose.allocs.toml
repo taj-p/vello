@@ -78,7 +78,7 @@ bytes_deallocated = 76752
 bytes_reallocated = 135104
 
 [[instances]]
-name = "deep_compose_hybrid"
+name = "deep_compose_hybrid_metal"
 
 [instances.cold]
 allocations = 550

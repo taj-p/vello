@@ -78,7 +78,7 @@ bytes_deallocated = 15688
 bytes_reallocated = 6048
 
 [[instances]]
-name = "recording_can_be_cleared_hybrid"
+name = "recording_can_be_cleared_hybrid_metal"
 
 [instances.cold]
 allocations = 171

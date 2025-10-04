@@ -78,7 +78,7 @@ bytes_deallocated = 22280
 bytes_reallocated = 35584
 
 [[instances]]
-name = "opacity_nested_on_layer_hybrid"
+name = "opacity_nested_on_layer_hybrid_metal"
 
 [instances.cold]
 allocations = 253

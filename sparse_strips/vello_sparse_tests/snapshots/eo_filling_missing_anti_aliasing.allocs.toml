@@ -78,7 +78,7 @@ bytes_deallocated = 9576
 bytes_reallocated = 5792
 
 [[instances]]
-name = "eo_filling_missing_anti_aliasing_hybrid"
+name = "eo_filling_missing_anti_aliasing_hybrid_metal"
 
 [instances.cold]
 allocations = 128

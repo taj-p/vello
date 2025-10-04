@@ -78,7 +78,7 @@ bytes_deallocated = 10536
 bytes_reallocated = 7680
 
 [[instances]]
-name = "stroked_circle_hybrid"
+name = "stroked_circle_hybrid_metal"
 
 [instances.cold]
 allocations = 169

@@ -78,7 +78,7 @@ bytes_deallocated = 23560
 bytes_reallocated = 18592
 
 [[instances]]
-name = "clip_wrong_command_hybrid"
+name = "clip_wrong_command_hybrid_metal"
 
 [instances.cold]
 allocations = 187

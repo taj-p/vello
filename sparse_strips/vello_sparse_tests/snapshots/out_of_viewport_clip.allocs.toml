@@ -78,7 +78,7 @@ bytes_deallocated = 10440
 bytes_reallocated = 2272
 
 [[instances]]
-name = "out_of_viewport_clip_hybrid"
+name = "out_of_viewport_clip_hybrid_metal"
 
 [instances.cold]
 allocations = 167

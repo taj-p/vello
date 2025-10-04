@@ -78,7 +78,7 @@ bytes_deallocated = 14088
 bytes_reallocated = 20992
 
 [[instances]]
-name = "mix_with_transparent_bg_hybrid"
+name = "mix_with_transparent_bg_hybrid_metal"
 
 [instances.cold]
 allocations = 240

@@ -78,7 +78,7 @@ bytes_deallocated = 114178
 bytes_reallocated = 2103
 
 [[instances]]
-name = "image_with_transform_scale_and_translate_hybrid"
+name = "image_with_transform_scale_and_translate_hybrid_metal"
 
 [instances.cold]
 allocations = 205

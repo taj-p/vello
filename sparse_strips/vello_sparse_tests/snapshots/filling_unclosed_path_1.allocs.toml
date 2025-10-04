@@ -78,7 +78,7 @@ bytes_deallocated = 10216
 bytes_reallocated = 2048
 
 [[instances]]
-name = "filling_unclosed_path_1_hybrid"
+name = "filling_unclosed_path_1_hybrid_metal"
 
 [instances.cold]
 allocations = 164

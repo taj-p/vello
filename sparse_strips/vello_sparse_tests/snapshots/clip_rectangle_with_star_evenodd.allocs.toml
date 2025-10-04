@@ -78,7 +78,7 @@ bytes_deallocated = 14952
 bytes_reallocated = 15776
 
 [[instances]]
-name = "clip_rectangle_with_star_evenodd_hybrid"
+name = "clip_rectangle_with_star_evenodd_hybrid_metal"
 
 [instances.cold]
 allocations = 191

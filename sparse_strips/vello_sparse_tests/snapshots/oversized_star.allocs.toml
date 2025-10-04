@@ -78,7 +78,7 @@ bytes_deallocated = 11832
 bytes_reallocated = 20320
 
 [[instances]]
-name = "oversized_star_hybrid"
+name = "oversized_star_hybrid_metal"
 
 [instances.cold]
 allocations = 168

@@ -78,7 +78,7 @@ bytes_deallocated = 114178
 bytes_reallocated = 2103
 
 [[instances]]
-name = "image_with_transform_skew_y_1_hybrid"
+name = "image_with_transform_skew_y_1_hybrid_metal"
 
 [instances.cold]
 allocations = 205

@@ -78,7 +78,7 @@ bytes_deallocated = 10560
 bytes_reallocated = 4224
 
 [[instances]]
-name = "filled_fully_overflowing_circle_hybrid"
+name = "filled_fully_overflowing_circle_hybrid_metal"
 
 [instances.cold]
 allocations = 165

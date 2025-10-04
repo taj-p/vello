@@ -78,7 +78,7 @@ bytes_deallocated = 10440
 bytes_reallocated = 1664
 
 [[instances]]
-name = "filling_nonzero_rule_hybrid"
+name = "filling_nonzero_rule_hybrid_metal"
 
 [instances.cold]
 allocations = 164

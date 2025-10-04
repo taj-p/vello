@@ -78,7 +78,7 @@ bytes_deallocated = 113584
 bytes_reallocated = 55
 
 [[instances]]
-name = "image_bilinear_identity_hybrid"
+name = "image_bilinear_identity_hybrid_metal"
 
 [instances.cold]
 allocations = 205

@@ -78,7 +78,7 @@ bytes_deallocated = 8552
 bytes_reallocated = 160
 
 [[instances]]
-name = "strip_inscribed_rect_hybrid"
+name = "strip_inscribed_rect_hybrid_metal"
 
 [instances.cold]
 allocations = 104

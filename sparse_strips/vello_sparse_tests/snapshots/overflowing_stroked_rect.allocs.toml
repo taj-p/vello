@@ -78,7 +78,7 @@ bytes_deallocated = 8768
 bytes_reallocated = 480
 
 [[instances]]
-name = "overflowing_stroked_rect_hybrid"
+name = "overflowing_stroked_rect_hybrid_metal"
 
 [instances.cold]
 allocations = 116

@@ -78,7 +78,7 @@ bytes_deallocated = 153072
 bytes_reallocated = 333312
 
 [[instances]]
-name = "clip_deeply_nested_circles_hybrid"
+name = "clip_deeply_nested_circles_hybrid_metal"
 
 [instances.cold]
 allocations = 874

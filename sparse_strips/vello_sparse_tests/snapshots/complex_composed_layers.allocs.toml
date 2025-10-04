@@ -78,7 +78,7 @@ bytes_deallocated = 76712
 bytes_reallocated = 159424
 
 [[instances]]
-name = "complex_composed_layers_hybrid"
+name = "complex_composed_layers_hybrid_metal"
 
 [instances.cold]
 allocations = 616

@@ -78,7 +78,7 @@ bytes_deallocated = 11048
 bytes_reallocated = 19536
 
 [[instances]]
-name = "stroke_scaled_hybrid"
+name = "stroke_scaled_hybrid_metal"
 
 [instances.cold]
 allocations = 172

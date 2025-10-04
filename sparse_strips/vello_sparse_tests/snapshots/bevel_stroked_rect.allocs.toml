@@ -78,7 +78,7 @@ bytes_deallocated = 8768
 bytes_reallocated = 1664
 
 [[instances]]
-name = "bevel_stroked_rect_hybrid"
+name = "bevel_stroked_rect_hybrid_metal"
 
 [instances.cold]
 allocations = 117

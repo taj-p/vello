@@ -78,7 +78,7 @@ bytes_deallocated = 13024
 bytes_reallocated = 0
 
 [[instances]]
-name = "out_of_bound_strip_hybrid"
+name = "out_of_bound_strip_hybrid_metal"
 
 [instances.cold]
 allocations = 284

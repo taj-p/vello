@@ -78,7 +78,7 @@ bytes_deallocated = 15960
 bytes_reallocated = 5552
 
 [[instances]]
-name = "recording_is_executed_with_multiple_transforms_hybrid"
+name = "recording_is_executed_with_multiple_transforms_hybrid_metal"
 
 [instances.cold]
 allocations = 150

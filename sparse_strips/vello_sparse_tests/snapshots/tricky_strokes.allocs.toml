@@ -78,7 +78,7 @@ bytes_deallocated = 88624
 bytes_reallocated = 182736
 
 [[instances]]
-name = "tricky_strokes_hybrid"
+name = "tricky_strokes_hybrid_metal"
 
 [instances.cold]
 allocations = 2991

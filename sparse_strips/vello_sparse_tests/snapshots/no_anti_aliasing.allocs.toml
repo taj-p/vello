@@ -78,7 +78,7 @@ bytes_deallocated = 9992
 bytes_reallocated = 2048
 
 [[instances]]
-name = "no_anti_aliasing_hybrid"
+name = "no_anti_aliasing_hybrid_metal"
 
 [instances.cold]
 allocations = 164

@@ -103,16 +103,23 @@ impl AllocationStats {
         }
     }
 
-    fn approx_eq(&self, other: &AllocationStats, threshold: usize) -> bool {
-        let threshold = threshold as isize;
-        (self.allocations as isize - other.allocations as isize).abs() <= threshold
-            && (self.deallocations as isize - other.deallocations as isize).abs() <= threshold
-            && (self.reallocations as isize - other.reallocations as isize).abs() <= threshold
-            && (self.bytes_allocated as isize - other.bytes_allocated as isize).abs() <= threshold
+    fn approx_eq(
+        &self,
+        other: &AllocationStats,
+        count_threshold: usize,
+        bytes_threshold: usize,
+    ) -> bool {
+        let count_threshold = count_threshold as isize;
+        let bytes_threshold = bytes_threshold as isize;
+        (self.allocations as isize - other.allocations as isize).abs() <= count_threshold
+            && (self.deallocations as isize - other.deallocations as isize).abs() <= count_threshold
+            && (self.reallocations as isize - other.reallocations as isize).abs() <= count_threshold
+            && (self.bytes_allocated as isize - other.bytes_allocated as isize).abs()
+                <= bytes_threshold
             && (self.bytes_deallocated as isize - other.bytes_deallocated as isize).abs()
-                <= threshold
+                <= bytes_threshold
             && (self.bytes_reallocated as isize - other.bytes_reallocated as isize).abs()
-                <= threshold
+                <= bytes_threshold
     }
 }
 
@@ -224,12 +231,18 @@ pub(crate) fn process_alloc_stats(
     alloc_stats: AllocationStats,
     file_path: &str,
     instance_name: &str,
+    instance_name_suffix: Option<&str>,
 ) {
     use std::io::Write;
 
     if !should_process_allocs() {
         return;
     }
+
+    let instance_name = match instance_name_suffix {
+        Some(suffix) => &format!("{instance_name}_{suffix}"),
+        None => instance_name,
+    };
 
     let dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../vello_sparse_tests/snapshots");
@@ -259,7 +272,7 @@ pub(crate) fn process_alloc_stats(
 
         if let Some(expected_stats) = expected_stats {
             assert!(
-                alloc_stats.approx_eq(expected_stats, 100),
+                alloc_stats.approx_eq(expected_stats, 0, 100),
                 "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
             );
         }

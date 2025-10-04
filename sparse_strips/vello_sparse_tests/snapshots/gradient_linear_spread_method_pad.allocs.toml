@@ -78,7 +78,7 @@ bytes_deallocated = 10064
 bytes_reallocated = 0
 
 [[instances]]
-name = "gradient_linear_spread_method_pad_hybrid"
+name = "gradient_linear_spread_method_pad_hybrid_metal"
 
 [instances.cold]
 allocations = 172

@@ -78,7 +78,7 @@ bytes_deallocated = 12432
 bytes_reallocated = 4864
 
 [[instances]]
-name = "repeatedly_compose_to_bottom_layer_hybrid"
+name = "repeatedly_compose_to_bottom_layer_hybrid_metal"
 
 [instances.cold]
 allocations = 224

@@ -78,7 +78,7 @@ bytes_deallocated = 8784
 bytes_reallocated = 672
 
 [[instances]]
-name = "full_cover_1_hybrid"
+name = "full_cover_1_hybrid_metal"
 
 [instances.cold]
 allocations = 95

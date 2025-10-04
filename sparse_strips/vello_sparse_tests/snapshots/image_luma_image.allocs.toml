@@ -78,7 +78,7 @@ bytes_deallocated = 113979
 bytes_reallocated = 55
 
 [[instances]]
-name = "image_luma_image_hybrid"
+name = "image_luma_image_hybrid_metal"
 
 [instances.cold]
 allocations = 206

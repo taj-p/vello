@@ -78,7 +78,7 @@ bytes_deallocated = 14088
 bytes_reallocated = 20992
 
 [[instances]]
-name = "mix_saturation_with_solid_hybrid"
+name = "mix_saturation_with_solid_hybrid_metal"
 
 [instances.cold]
 allocations = 211

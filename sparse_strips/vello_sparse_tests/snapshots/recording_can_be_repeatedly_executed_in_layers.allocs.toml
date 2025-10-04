@@ -78,7 +78,7 @@ bytes_deallocated = 21720
 bytes_reallocated = 136880
 
 [[instances]]
-name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
+name = "recording_can_be_repeatedly_executed_in_layers_hybrid_metal"
 
 [instances.cold]
 allocations = 789

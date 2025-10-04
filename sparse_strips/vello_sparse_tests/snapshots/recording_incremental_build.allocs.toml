@@ -78,7 +78,7 @@ bytes_deallocated = 22424
 bytes_reallocated = 25424
 
 [[instances]]
-name = "recording_incremental_build_hybrid"
+name = "recording_incremental_build_hybrid_metal"
 
 [instances.cold]
 allocations = 180

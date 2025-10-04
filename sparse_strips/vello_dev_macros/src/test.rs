@@ -266,14 +266,14 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 let (ctx, pixmap, alloc_stats) = f(ctx);
                 // Multithreaded allocations are not deterministic.
                 if process_allocs && #num_threads <= 1 {
-                    process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #fn_name_str);
+                    process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #fn_name_str, None);
                 }
                 if !#no_ref {
                     check_ref(pixmap, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
                 }
                 if process_allocs && #num_threads <= 1 {
                     let (_, pixmap, alloc_stats) = f(ctx);
-                    process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #fn_name_str);
+                    process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #fn_name_str, None);
                 }
             }
         }
@@ -469,8 +469,9 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 (ctx, alloc_span.end())
             };
             let (mut ctx, alloc_stats) = f(ctx);
+            let backend = ctx.backend().to_str();
             if process_allocs {
-                process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str);
+                process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str, Some(backend));
             }
             let mut pixmap = Pixmap::new(#width, #height);
             ctx.copy_to_pixmap(&mut pixmap);
@@ -480,7 +481,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             ctx.reset();
             let (_, alloc_stats) = f(ctx);
             if process_allocs {
-                process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str);
+                process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, #hybrid_fn_name_str, Some(backend));
             }
         }
 

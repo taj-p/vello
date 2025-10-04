@@ -78,7 +78,7 @@ bytes_deallocated = 23360
 bytes_reallocated = 1716224
 
 [[instances]]
-name = "mix_compose_combined_test_matrix_hybrid"
+name = "mix_compose_combined_test_matrix_hybrid_metal"
 
 [instances.cold]
 allocations = 19947

@@ -78,7 +78,7 @@ bytes_deallocated = 10064
 bytes_reallocated = 0
 
 [[instances]]
-name = "gradient_radial_non_overlapping_c0_larger_hybrid"
+name = "gradient_radial_non_overlapping_c0_larger_hybrid_metal"
 
 [instances.cold]
 allocations = 172
