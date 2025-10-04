@@ -148,6 +148,45 @@ pub(crate) enum RunType {
     Warm,
 }
 
+#[cfg(target_arch = "wasm32")]
+pub(crate) fn save_allocs_requested() -> bool {
+    false
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) fn save_allocs_requested() -> bool {
+    let save_allocs = std::env::var("SAVE_ALLOCS").map_or(false, |v| v == "1");
+    if !save_allocs {
+        return false;
+    }
+    assert!(
+        !cfg!(debug_assertions),
+        "Saving allocation stats requires --release",
+    );
+    let args: Vec<String> = std::env::args().collect();
+    let mut test_threads_ok = false;
+    for i in 0..args.len() {
+        if args[i] == "--test-threads=1" {
+            test_threads_ok = true;
+            break;
+        }
+        if args[i] == "--test-threads" {
+            if let Some(next) = args.get(i + 1) {
+                if next == "1" {
+                    test_threads_ok = true;
+                    break;
+                }
+            }
+        }
+    }
+    test_threads_ok |= std::env::var("RUST_TEST_THREADS").map_or(false, |v| v == "1");
+    assert!(
+        test_threads_ok,
+        "Saving allocation stats requires running with -- --test-threads=1",
+    );
+    return true;
+}
+
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn save_alloc_stats(
     run_type: RunType,
