@@ -228,25 +228,6 @@ pub(crate) fn process_alloc_stats(
     }
     let test_name = file_path;
     let file_path = dir.join(format!("{}.allocs.toml", file_path));
-    let lock_path = dir.join(".allocs.lock");
-
-    loop {
-        match std::fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&lock_path)
-        {
-            Ok(_) => break,
-            Err(e) => {
-                if e.kind() == std::io::ErrorKind::AlreadyExists {
-                    thread::sleep(Duration::from_millis(10));
-                    continue;
-                } else {
-                    break;
-                }
-            }
-        }
-    }
 
     let mut file_data: AllocFile = match std::fs::read_to_string(&file_path) {
         Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
@@ -255,7 +236,7 @@ pub(crate) fn process_alloc_stats(
     file_data.test = test_name.to_string();
     file_data.units = "bytes".to_string();
 
-    let is_test_mode = std::env::var("TEST_MODE").map_or(false, |v| v == "1");
+    let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
     if is_test_mode {
         let expected_stats = file_data
             .instances
@@ -314,6 +295,4 @@ pub(crate) fn process_alloc_stats(
         .unwrap();
     let _ = tmp.write_all(out.as_bytes());
     let _ = std::fs::rename(&tmp_path, &file_path);
-
-    let _ = std::fs::remove_file(&lock_path);
 }
