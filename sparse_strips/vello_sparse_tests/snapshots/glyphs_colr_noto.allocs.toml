@@ -3,50 +3,50 @@ units = "bytes"
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_f32_neon"
-allocations = 321
-deallocations = 306
-reallocations = 455
-bytes_allocated = 622898
-bytes_deallocated = 0
-bytes_reallocated = 622898
-net_bytes = 622898
+allocations = 297
+deallocations = 282
+reallocations = 437
+bytes_allocated = 705988
+bytes_deallocated = 640092
+bytes_reallocated = 440352
+net_bytes = 65896
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_f32_scalar"
-allocations = 321
-deallocations = 306
-reallocations = 455
-bytes_allocated = 622898
-bytes_deallocated = 0
-bytes_reallocated = 622898
-net_bytes = 622898
+allocations = 297
+deallocations = 282
+reallocations = 437
+bytes_allocated = 705988
+bytes_deallocated = 640092
+bytes_reallocated = 440352
+net_bytes = 65896
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_multithreaded"
-allocations = 375
-deallocations = 321
-reallocations = 481
-bytes_allocated = 630954
-bytes_deallocated = 0
-bytes_reallocated = 630954
-net_bytes = 630954
+allocations = 351
+deallocations = 305
+reallocations = 463
+bytes_allocated = 825300
+bytes_deallocated = 748004
+bytes_reallocated = 448408
+net_bytes = 77296
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_u8_neon"
-allocations = 321
-deallocations = 306
-reallocations = 455
-bytes_allocated = 475518
-bytes_deallocated = 0
-bytes_reallocated = 475518
-net_bytes = 475518
+allocations = 297
+deallocations = 282
+reallocations = 437
+bytes_allocated = 481588
+bytes_deallocated = 415692
+bytes_reallocated = 292896
+net_bytes = 65896
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_u8_scalar"
-allocations = 321
-deallocations = 306
-reallocations = 455
-bytes_allocated = 475518
-bytes_deallocated = 0
-bytes_reallocated = 475518
-net_bytes = 475518
+allocations = 297
+deallocations = 282
+reallocations = 437
+bytes_allocated = 481588
+bytes_deallocated = 415692
+bytes_reallocated = 292896
+net_bytes = 65896

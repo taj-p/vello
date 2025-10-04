@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_f32_neon"
-allocations = 113
-deallocations = 106
-reallocations = 190
-bytes_allocated = 864786
-bytes_deallocated = 0
-bytes_reallocated = 864786
-net_bytes = 864786
+allocations = 89
+deallocations = 82
+reallocations = 172
+bytes_allocated = 758352
+bytes_deallocated = 546288
+bytes_reallocated = 723016
+net_bytes = 212064
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_f32_scalar"
-allocations = 113
-deallocations = 106
-reallocations = 190
-bytes_allocated = 864786
-bytes_deallocated = 0
-bytes_reallocated = 864786
-net_bytes = 864786
+allocations = 89
+deallocations = 82
+reallocations = 172
+bytes_allocated = 758352
+bytes_deallocated = 546288
+bytes_reallocated = 723016
+net_bytes = 212064
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_multithreaded"
-allocations = 199
-deallocations = 126
-reallocations = 330
-bytes_allocated = 1700138
-bytes_deallocated = 0
-bytes_reallocated = 1700138
-net_bytes = 1700138
+allocations = 180
+deallocations = 104
+reallocations = 312
+bytes_allocated = 1745488
+bytes_deallocated = 1440672
+bytes_reallocated = 1558368
+net_bytes = 304816
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_u8_neon"
-allocations = 113
-deallocations = 106
-reallocations = 190
-bytes_allocated = 483982
-bytes_deallocated = 0
-bytes_reallocated = 483982
-net_bytes = 483982
+allocations = 89
+deallocations = 82
+reallocations = 172
+bytes_allocated = 365136
+bytes_deallocated = 153072
+bytes_reallocated = 342088
+net_bytes = 212064
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_u8_scalar"
-allocations = 113
-deallocations = 106
-reallocations = 190
-bytes_allocated = 483982
-bytes_deallocated = 0
-bytes_reallocated = 483982
-net_bytes = 483982
+allocations = 89
+deallocations = 82
+reallocations = 172
+bytes_allocated = 365136
+bytes_deallocated = 153072
+bytes_reallocated = 342088
+net_bytes = 212064
 
 [[instances]]
 name = "clip_deeply_nested_circles_hybrid"
-allocations = 912
-deallocations = 856
-reallocations = 529
-bytes_allocated = 482568
-bytes_deallocated = 0
-bytes_reallocated = 482568
-net_bytes = 482568
+allocations = 888
+deallocations = 832
+reallocations = 511
+bytes_allocated = 456067
+bytes_deallocated = 228845
+bytes_reallocated = 340788
+net_bytes = 227222

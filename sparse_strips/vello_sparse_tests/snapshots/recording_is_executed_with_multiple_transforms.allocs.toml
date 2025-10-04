@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_f32_neon"
-allocations = 50
-deallocations = 40
-reallocations = 35
-bytes_allocated = 22906
-bytes_deallocated = 0
-bytes_reallocated = 22906
-net_bytes = 22906
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 31924
+bytes_deallocated = 28248
+bytes_reallocated = 4752
+net_bytes = 3676
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_f32_scalar"
-allocations = 50
-deallocations = 40
-reallocations = 35
-bytes_allocated = 22906
-bytes_deallocated = 0
-bytes_reallocated = 22906
-net_bytes = 22906
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 31924
+bytes_deallocated = 28248
+bytes_reallocated = 4752
+net_bytes = 3676
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_multithreaded"
-allocations = 102
-deallocations = 60
-reallocations = 56
-bytes_allocated = 26770
-bytes_deallocated = 0
-bytes_reallocated = 26770
-net_bytes = 26770
+allocations = 83
+deallocations = 42
+reallocations = 43
+bytes_allocated = 147788
+bytes_deallocated = 136328
+bytes_reallocated = 8616
+net_bytes = 11460
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_u8_neon"
-allocations = 50
-deallocations = 40
-reallocations = 35
-bytes_allocated = 22906
-bytes_deallocated = 0
-bytes_reallocated = 22906
-net_bytes = 22906
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 19636
+bytes_deallocated = 15960
+bytes_reallocated = 4752
+net_bytes = 3676
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_u8_scalar"
-allocations = 50
-deallocations = 40
-reallocations = 35
-bytes_allocated = 22906
-bytes_deallocated = 0
-bytes_reallocated = 22906
-net_bytes = 22906
+allocations = 24
+deallocations = 14
+reallocations = 22
+bytes_allocated = 19636
+bytes_deallocated = 15960
+bytes_reallocated = 4752
+net_bytes = 3676
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_hybrid"
-allocations = 191
-deallocations = 161
-reallocations = 53
-bytes_allocated = 58410
-bytes_deallocated = 0
-bytes_reallocated = 58410
-net_bytes = 58410
+allocations = 165
+deallocations = 135
+reallocations = 40
+bytes_allocated = 64340
+bytes_deallocated = 57254
+bytes_reallocated = 40256
+net_bytes = 7086

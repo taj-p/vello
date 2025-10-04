@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_f32_neon"
-allocations = 1
-deallocations = 0
+allocations = 4
+deallocations = 3
 reallocations = 2
-bytes_allocated = 384
-bytes_deallocated = 0
+bytes_allocated = 22888
+bytes_deallocated = 22280
 bytes_reallocated = 384
-net_bytes = 384
+net_bytes = 608
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_f32_scalar"
-allocations = 1
-deallocations = 0
+allocations = 4
+deallocations = 3
 reallocations = 2
-bytes_allocated = 384
-bytes_deallocated = 0
+bytes_allocated = 22888
+bytes_deallocated = 22280
 bytes_reallocated = 384
-net_bytes = 384
+net_bytes = 608
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_multithreaded"
-allocations = 77
-deallocations = 31
-reallocations = 18
-bytes_allocated = 2648
-bytes_deallocated = 0
-bytes_reallocated = 2648
-net_bytes = 2648
+allocations = 84
+deallocations = 32
+reallocations = 19
+bytes_allocated = 152016
+bytes_deallocated = 133712
+bytes_reallocated = 2664
+net_bytes = 18304
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_u8_neon"
-allocations = 1
-deallocations = 0
+allocations = 4
+deallocations = 3
 reallocations = 2
-bytes_allocated = 384
-bytes_deallocated = 0
+bytes_allocated = 10600
+bytes_deallocated = 9992
 bytes_reallocated = 384
-net_bytes = 384
+net_bytes = 608
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_u8_scalar"
-allocations = 1
-deallocations = 0
+allocations = 4
+deallocations = 3
 reallocations = 2
-bytes_allocated = 384
-bytes_deallocated = 0
+bytes_allocated = 10600
+bytes_deallocated = 9992
 bytes_reallocated = 384
-net_bytes = 384
+net_bytes = 608
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_hybrid"
-allocations = 3
-deallocations = 3
-reallocations = 4
-bytes_allocated = 832
-bytes_deallocated = 0
-bytes_reallocated = 832
-net_bytes = 832
+allocations = 181
+deallocations = 160
+reallocations = 20
+bytes_allocated = 57384
+bytes_deallocated = 53558
+bytes_reallocated = 35536
+net_bytes = 3826

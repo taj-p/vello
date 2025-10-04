@@ -3,50 +3,50 @@ units = "bytes"
 
 [[instances]]
 name = "blurred_rounded_rect_none_cpu_f32_neon"
-allocations = 31
-deallocations = 29
-reallocations = 32
-bytes_allocated = 55631
-bytes_deallocated = 0
-bytes_reallocated = 55631
-net_bytes = 55631
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 27976
+bytes_deallocated = 22280
+bytes_reallocated = 4160
+net_bytes = 5696
 
 [[instances]]
 name = "blurred_rounded_rect_none_cpu_f32_scalar"
-allocations = 31
-deallocations = 29
-reallocations = 32
-bytes_allocated = 55631
-bytes_deallocated = 0
-bytes_reallocated = 55631
-net_bytes = 55631
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 27976
+bytes_deallocated = 22280
+bytes_reallocated = 4160
+net_bytes = 5696
 
 [[instances]]
 name = "blurred_rounded_rect_none_cpu_multithreaded"
-allocations = 85
-deallocations = 43
-reallocations = 48
-bytes_allocated = 58391
-bytes_deallocated = 0
-bytes_reallocated = 58391
-net_bytes = 58391
+allocations = 71
+deallocations = 27
+reallocations = 34
+bytes_allocated = 147976
+bytes_deallocated = 130168
+bytes_reallocated = 6920
+net_bytes = 17808
 
 [[instances]]
 name = "blurred_rounded_rect_none_cpu_u8_neon"
-allocations = 31
-deallocations = 29
-reallocations = 32
-bytes_allocated = 55631
-bytes_deallocated = 0
-bytes_reallocated = 55631
-net_bytes = 55631
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 15688
+bytes_deallocated = 9992
+bytes_reallocated = 4160
+net_bytes = 5696
 
 [[instances]]
 name = "blurred_rounded_rect_none_cpu_u8_scalar"
-allocations = 31
-deallocations = 29
-reallocations = 32
-bytes_allocated = 55631
-bytes_deallocated = 0
-bytes_reallocated = 55631
-net_bytes = 55631
+allocations = 5
+deallocations = 3
+reallocations = 18
+bytes_allocated = 15688
+bytes_deallocated = 9992
+bytes_reallocated = 4160
+net_bytes = 5696

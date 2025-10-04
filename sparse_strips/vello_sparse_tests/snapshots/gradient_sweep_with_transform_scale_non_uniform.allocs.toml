@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_cpu_f32_neon"
-allocations = 32
-deallocations = 28
-reallocations = 28
-bytes_allocated = 81735
-bytes_deallocated = 0
-bytes_reallocated = 81735
-net_bytes = 81735
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 43436
+bytes_deallocated = 22352
+bytes_reallocated = 3008
+net_bytes = 21084
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_cpu_f32_scalar"
-allocations = 32
-deallocations = 28
-reallocations = 28
-bytes_allocated = 81735
-bytes_deallocated = 0
-bytes_reallocated = 81735
-net_bytes = 81735
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 43436
+bytes_deallocated = 22352
+bytes_reallocated = 3008
+net_bytes = 21084
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_cpu_multithreaded"
-allocations = 89
-deallocations = 46
-reallocations = 45
-bytes_allocated = 84559
-bytes_deallocated = 0
-bytes_reallocated = 84559
-net_bytes = 84559
+allocations = 66
+deallocations = 20
+reallocations = 31
+bytes_allocated = 187660
+bytes_deallocated = 149976
+bytes_reallocated = 5896
+net_bytes = 37684
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_cpu_u8_neon"
-allocations = 32
-deallocations = 28
-reallocations = 28
-bytes_allocated = 81735
-bytes_deallocated = 0
-bytes_reallocated = 81735
-net_bytes = 81735
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 18824
+bytes_deallocated = 10064
+bytes_reallocated = 3008
+net_bytes = 8760
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_cpu_u8_scalar"
-allocations = 32
-deallocations = 28
-reallocations = 28
-bytes_allocated = 81735
-bytes_deallocated = 0
-bytes_reallocated = 81735
-net_bytes = 81735
+allocations = 8
+deallocations = 4
+reallocations = 13
+bytes_allocated = 18824
+bytes_deallocated = 10064
+bytes_reallocated = 3008
+net_bytes = 8760
 
 [[instances]]
 name = "gradient_sweep_with_transform_scale_non_uniform_hybrid"
-allocations = 211
-deallocations = 184
-reallocations = 45
-bytes_allocated = 146263
-bytes_deallocated = 0
-bytes_reallocated = 146263
-net_bytes = 146263
+allocations = 187
+deallocations = 160
+reallocations = 30
+bytes_allocated = 99844
+bytes_deallocated = 54222
+bytes_reallocated = 67536
+net_bytes = 45622

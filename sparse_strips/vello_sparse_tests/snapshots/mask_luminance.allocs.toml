@@ -3,50 +3,50 @@ units = "bytes"
 
 [[instances]]
 name = "mask_luminance_cpu_f32_neon"
-allocations = 66
-deallocations = 63
-reallocations = 83
-bytes_allocated = 136304
-bytes_deallocated = 0
-bytes_reallocated = 136304
-net_bytes = 136304
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 126668
+bytes_deallocated = 102412
+bytes_reallocated = 34000
+net_bytes = 24256
 
 [[instances]]
 name = "mask_luminance_cpu_f32_scalar"
-allocations = 66
-deallocations = 63
-reallocations = 83
-bytes_allocated = 136304
-bytes_deallocated = 0
-bytes_reallocated = 136304
-net_bytes = 136304
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 126668
+bytes_deallocated = 102412
+bytes_reallocated = 34000
+net_bytes = 24256
 
 [[instances]]
 name = "mask_luminance_cpu_multithreaded"
-allocations = 119
-deallocations = 74
-reallocations = 108
-bytes_allocated = 174472
-bytes_deallocated = 0
-bytes_reallocated = 174472
-net_bytes = 174472
+allocations = 104
+deallocations = 61
+reallocations = 91
+bytes_allocated = 274428
+bytes_deallocated = 243084
+bytes_reallocated = 72168
+net_bytes = 31344
 
 [[instances]]
 name = "mask_luminance_cpu_u8_neon"
-allocations = 66
-deallocations = 63
-reallocations = 83
-bytes_allocated = 124016
-bytes_deallocated = 0
-bytes_reallocated = 124016
-net_bytes = 124016
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 102092
+bytes_deallocated = 77836
+bytes_reallocated = 21712
+net_bytes = 24256
 
 [[instances]]
 name = "mask_luminance_cpu_u8_scalar"
-allocations = 66
-deallocations = 63
-reallocations = 83
-bytes_allocated = 124016
-bytes_deallocated = 0
-bytes_reallocated = 124016
-net_bytes = 124016
+allocations = 42
+deallocations = 39
+reallocations = 66
+bytes_allocated = 102092
+bytes_deallocated = 77836
+bytes_reallocated = 21712
+net_bytes = 24256

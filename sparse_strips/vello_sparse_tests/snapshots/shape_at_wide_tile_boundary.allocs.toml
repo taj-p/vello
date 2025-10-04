@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_f32_neon"
-allocations = 1
-deallocations = 1
+allocations = 4
+deallocations = 4
 reallocations = 3
-bytes_allocated = 320
-bytes_deallocated = 0
+bytes_allocated = 21096
+bytes_deallocated = 21000
 bytes_reallocated = 320
-net_bytes = 320
+net_bytes = 96
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_f32_scalar"
-allocations = 1
-deallocations = 1
+allocations = 4
+deallocations = 4
 reallocations = 3
-bytes_allocated = 320
-bytes_deallocated = 0
+bytes_allocated = 21096
+bytes_deallocated = 21000
 bytes_reallocated = 320
-net_bytes = 320
+net_bytes = 96
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_multithreaded"
-allocations = 33
-deallocations = 19
-reallocations = 6
-bytes_allocated = 648
-bytes_deallocated = 0
-bytes_reallocated = 648
-net_bytes = 648
+allocations = 32
+deallocations = 21
+reallocations = 8
+bytes_allocated = 50440
+bytes_deallocated = 55032
+bytes_reallocated = 776
+net_bytes = 0
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_u8_neon"
-allocations = 1
-deallocations = 1
+allocations = 4
+deallocations = 4
 reallocations = 3
-bytes_allocated = 320
-bytes_deallocated = 0
+bytes_allocated = 8808
+bytes_deallocated = 8712
 bytes_reallocated = 320
-net_bytes = 320
+net_bytes = 96
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_u8_scalar"
-allocations = 1
-deallocations = 1
+allocations = 4
+deallocations = 4
 reallocations = 3
-bytes_allocated = 320
-bytes_deallocated = 0
+bytes_allocated = 8808
+bytes_deallocated = 8712
 bytes_reallocated = 320
-net_bytes = 320
+net_bytes = 96
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_hybrid"
-allocations = 1
-deallocations = 1
-reallocations = 3
-bytes_allocated = 320
-bytes_deallocated = 0
-bytes_reallocated = 320
-net_bytes = 320
+allocations = 107
+deallocations = 86
+reallocations = 15
+bytes_allocated = 47128
+bytes_deallocated = 43366
+bytes_reallocated = 33824
+net_bytes = 3762

@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_cpu_f32_neon"
-allocations = 4
-deallocations = 3
+allocations = 7
+deallocations = 6
 reallocations = 2
-bytes_allocated = 896
-bytes_deallocated = 0
+bytes_allocated = 22728
+bytes_deallocated = 22280
 bytes_reallocated = 896
-net_bytes = 896
+net_bytes = 448
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
+allocations = 7
+deallocations = 6
 reallocations = 2
-bytes_allocated = 896
-bytes_deallocated = 0
+bytes_allocated = 22728
+bytes_deallocated = 22280
 bytes_reallocated = 896
-net_bytes = 896
+net_bytes = 448
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_cpu_multithreaded"
-allocations = 34
-deallocations = 18
+allocations = 47
+deallocations = 30
 reallocations = 10
-bytes_allocated = 1328
-bytes_deallocated = 0
+bytes_allocated = 166944
+bytes_deallocated = 164896
 bytes_reallocated = 1328
-net_bytes = 1328
+net_bytes = 2048
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_cpu_u8_neon"
-allocations = 4
-deallocations = 3
+allocations = 7
+deallocations = 6
 reallocations = 2
-bytes_allocated = 896
-bytes_deallocated = 0
+bytes_allocated = 10440
+bytes_deallocated = 9992
 bytes_reallocated = 896
-net_bytes = 896
+net_bytes = 448
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_cpu_u8_scalar"
-allocations = 4
-deallocations = 3
+allocations = 7
+deallocations = 6
 reallocations = 2
-bytes_allocated = 896
-bytes_deallocated = 0
+bytes_allocated = 10440
+bytes_deallocated = 9992
 bytes_reallocated = 896
-net_bytes = 896
+net_bytes = 448
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_hybrid"
-allocations = 4
-deallocations = 4
-reallocations = 3
-bytes_allocated = 1120
-bytes_deallocated = 0
-bytes_reallocated = 1120
-net_bytes = 1120
+allocations = 122
+deallocations = 101
+reallocations = 17
+bytes_allocated = 50424
+bytes_deallocated = 46758
+bytes_reallocated = 34864
+net_bytes = 3666

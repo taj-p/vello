@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "out_of_bound_strip_cpu_f32_neon"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 2
-bytes_allocated = 288
-bytes_deallocated = 0
+bytes_allocated = 26272
+bytes_deallocated = 25312
 bytes_reallocated = 288
-net_bytes = 288
+net_bytes = 960
 
 [[instances]]
 name = "out_of_bound_strip_cpu_f32_scalar"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 2
-bytes_allocated = 288
-bytes_deallocated = 0
+bytes_allocated = 26272
+bytes_deallocated = 25312
 bytes_reallocated = 288
-net_bytes = 288
+net_bytes = 960
 
 [[instances]]
 name = "out_of_bound_strip_cpu_multithreaded"
-allocations = 94
-deallocations = 18
+allocations = 106
+deallocations = 25
 reallocations = 21
-bytes_allocated = 5608
-bytes_deallocated = 0
+bytes_allocated = 151008
+bytes_deallocated = 133120
 bytes_reallocated = 5608
-net_bytes = 5608
+net_bytes = 17888
 
 [[instances]]
 name = "out_of_bound_strip_cpu_u8_neon"
-allocations = 4
-deallocations = 1
+allocations = 8
+deallocations = 5
 reallocations = 2
-bytes_allocated = 288
-bytes_deallocated = 0
+bytes_allocated = 16056
+bytes_deallocated = 13056
 bytes_reallocated = 288
-net_bytes = 288
+net_bytes = 3000
 
 [[instances]]
 name = "out_of_bound_strip_cpu_u8_scalar"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 2
-bytes_allocated = 288
-bytes_deallocated = 0
+bytes_allocated = 13984
+bytes_deallocated = 13024
 bytes_reallocated = 288
-net_bytes = 288
+net_bytes = 960
 
 [[instances]]
 name = "out_of_bound_strip_hybrid"
-allocations = 4
-deallocations = 1
-reallocations = 2
-bytes_allocated = 288
-bytes_deallocated = 0
-bytes_reallocated = 288
-net_bytes = 288
+allocations = 299
+deallocations = 275
+reallocations = 19
+bytes_allocated = 71400
+bytes_deallocated = 66774
+bytes_reallocated = 36272
+net_bytes = 4626

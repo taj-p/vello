@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_cpu_f32_neon"
-allocations = 33
-deallocations = 29
-reallocations = 41
-bytes_allocated = 132311
-bytes_deallocated = 0
-bytes_reallocated = 132311
-net_bytes = 132311
+allocations = 8
+deallocations = 4
+reallocations = 23
+bytes_allocated = 47276
+bytes_deallocated = 22352
+bytes_reallocated = 6848
+net_bytes = 24924
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_cpu_f32_scalar"
-allocations = 33
-deallocations = 29
-reallocations = 41
-bytes_allocated = 132311
-bytes_deallocated = 0
-bytes_reallocated = 132311
-net_bytes = 132311
+allocations = 8
+deallocations = 4
+reallocations = 23
+bytes_allocated = 47276
+bytes_deallocated = 22352
+bytes_reallocated = 6848
+net_bytes = 24924
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_cpu_multithreaded"
-allocations = 91
-deallocations = 51
-reallocations = 59
-bytes_allocated = 135199
-bytes_deallocated = 0
-bytes_reallocated = 135199
-net_bytes = 135199
+allocations = 63
+deallocations = 25
+reallocations = 39
+bytes_allocated = 191180
+bytes_deallocated = 163008
+bytes_reallocated = 9608
+net_bytes = 28172
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_cpu_u8_neon"
-allocations = 33
-deallocations = 29
-reallocations = 41
-bytes_allocated = 132311
-bytes_deallocated = 0
-bytes_reallocated = 132311
-net_bytes = 132311
+allocations = 8
+deallocations = 4
+reallocations = 23
+bytes_allocated = 22664
+bytes_deallocated = 10064
+bytes_reallocated = 6848
+net_bytes = 12600
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_cpu_u8_scalar"
-allocations = 33
-deallocations = 29
-reallocations = 41
-bytes_allocated = 132311
-bytes_deallocated = 0
-bytes_reallocated = 132311
-net_bytes = 132311
+allocations = 8
+deallocations = 4
+reallocations = 23
+bytes_allocated = 22664
+bytes_deallocated = 10064
+bytes_reallocated = 6848
+net_bytes = 12600
 
 [[instances]]
 name = "gradient_radial_center_offset_bottom_left_hybrid"
-allocations = 212
-deallocations = 185
-reallocations = 58
-bytes_allocated = 196839
-bytes_deallocated = 0
-bytes_reallocated = 196839
-net_bytes = 196839
+allocations = 187
+deallocations = 160
+reallocations = 40
+bytes_allocated = 104068
+bytes_deallocated = 54606
+bytes_reallocated = 71376
+net_bytes = 49462

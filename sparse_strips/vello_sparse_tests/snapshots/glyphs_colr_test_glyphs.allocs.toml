@@ -3,50 +3,50 @@ units = "bytes"
 
 [[instances]]
 name = "glyphs_colr_test_glyphs_cpu_f32_neon"
-allocations = 7624
-deallocations = 7191
-reallocations = 9253
-bytes_allocated = 15526539
-bytes_deallocated = 0
-bytes_reallocated = 15526539
-net_bytes = 15526539
+allocations = 7599
+deallocations = 7166
+reallocations = 9230
+bytes_allocated = 25054958
+bytes_deallocated = 23243468
+bytes_reallocated = 14252096
+net_bytes = 1811490
 
 [[instances]]
 name = "glyphs_colr_test_glyphs_cpu_f32_scalar"
-allocations = 7624
-deallocations = 7191
-reallocations = 9253
-bytes_allocated = 15526539
-bytes_deallocated = 0
-bytes_reallocated = 15526539
-net_bytes = 15526539
+allocations = 7599
+deallocations = 7166
+reallocations = 9230
+bytes_allocated = 25054958
+bytes_deallocated = 23243468
+bytes_reallocated = 14252096
+net_bytes = 1811490
 
 [[instances]]
 name = "glyphs_colr_test_glyphs_cpu_multithreaded"
-allocations = 8161
-deallocations = 7215
-reallocations = 9377
-bytes_allocated = 15688659
-bytes_deallocated = 0
-bytes_reallocated = 15688659
-net_bytes = 15688659
+allocations = 8117
+deallocations = 7178
+reallocations = 9351
+bytes_allocated = 25427486
+bytes_deallocated = 23370948
+bytes_reallocated = 14414024
+net_bytes = 2056538
 
 [[instances]]
 name = "glyphs_colr_test_glyphs_cpu_u8_neon"
-allocations = 7624
-deallocations = 7191
-reallocations = 9253
-bytes_allocated = 6763429
-bytes_deallocated = 0
-bytes_reallocated = 6763429
-net_bytes = 6763429
+allocations = 7599
+deallocations = 7166
+reallocations = 9230
+bytes_allocated = 11213738
+bytes_deallocated = 9402248
+bytes_reallocated = 5490752
+net_bytes = 1811490
 
 [[instances]]
 name = "glyphs_colr_test_glyphs_cpu_u8_scalar"
-allocations = 7624
-deallocations = 7191
-reallocations = 9253
-bytes_allocated = 6763429
-bytes_deallocated = 0
-bytes_reallocated = 6763429
-net_bytes = 6763429
+allocations = 7599
+deallocations = 7166
+reallocations = 9230
+bytes_allocated = 11213738
+bytes_deallocated = 9402248
+bytes_reallocated = 5490752
+net_bytes = 1811490

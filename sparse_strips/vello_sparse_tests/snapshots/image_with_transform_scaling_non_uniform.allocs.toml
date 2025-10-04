@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_f32_neon"
-allocations = 45
-deallocations = 41
-reallocations = 29
-bytes_allocated = 56791
-bytes_deallocated = 0
-bytes_reallocated = 56791
-net_bytes = 56791
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_f32_scalar"
-allocations = 45
-deallocations = 41
-reallocations = 29
-bytes_allocated = 56791
-bytes_deallocated = 0
-bytes_reallocated = 56791
-net_bytes = 56791
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_multithreaded"
-allocations = 110
-deallocations = 65
-reallocations = 48
-bytes_allocated = 59743
-bytes_deallocated = 0
-bytes_reallocated = 59743
-net_bytes = 59743
+allocations = 86
+deallocations = 38
+reallocations = 33
+bytes_allocated = 231362
+bytes_deallocated = 213970
+bytes_reallocated = 6015
+net_bytes = 17392
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_u8_neon"
-allocations = 45
-deallocations = 41
-reallocations = 29
-bytes_allocated = 56791
-bytes_deallocated = 0
-bytes_reallocated = 56791
-net_bytes = 56791
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_u8_scalar"
-allocations = 45
-deallocations = 41
-reallocations = 29
-bytes_allocated = 56791
-bytes_deallocated = 0
-bytes_reallocated = 56791
-net_bytes = 56791
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_hybrid"
-allocations = 246
-deallocations = 220
-reallocations = 46
-bytes_allocated = 92206
-bytes_deallocated = 0
-bytes_reallocated = 92206
-net_bytes = 92206
+allocations = 220
+deallocations = 194
+reallocations = 31
+bytes_allocated = 172865
+bytes_deallocated = 163656
+bytes_reallocated = 38478
+net_bytes = 9209

@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "clip_with_scale_cpu_f32_neon"
-allocations = 39
-deallocations = 33
-reallocations = 61
-bytes_allocated = 82917
-bytes_deallocated = 0
-bytes_reallocated = 82917
-net_bytes = 82917
+allocations = 13
+deallocations = 7
+reallocations = 47
+bytes_allocated = 56624
+bytes_deallocated = 39856
+bytes_reallocated = 32168
+net_bytes = 16768
 
 [[instances]]
 name = "clip_with_scale_cpu_f32_scalar"
-allocations = 39
-deallocations = 33
-reallocations = 61
-bytes_allocated = 82917
-bytes_deallocated = 0
-bytes_reallocated = 82917
-net_bytes = 82917
+allocations = 13
+deallocations = 7
+reallocations = 47
+bytes_allocated = 56624
+bytes_deallocated = 39856
+bytes_reallocated = 32168
+net_bytes = 16768
 
 [[instances]]
 name = "clip_with_scale_cpu_multithreaded"
-allocations = 94
-deallocations = 47
-reallocations = 83
-bytes_allocated = 120893
-bytes_deallocated = 0
-bytes_reallocated = 120893
-net_bytes = 120893
+allocations = 75
+deallocations = 29
+reallocations = 69
+bytes_allocated = 207888
+bytes_deallocated = 180440
+bytes_reallocated = 70144
+net_bytes = 27448
 
 [[instances]]
 name = "clip_with_scale_cpu_u8_neon"
-allocations = 39
-deallocations = 33
-reallocations = 61
-bytes_allocated = 70629
-bytes_deallocated = 0
-bytes_reallocated = 70629
-net_bytes = 70629
+allocations = 13
+deallocations = 7
+reallocations = 47
+bytes_allocated = 32048
+bytes_deallocated = 15280
+bytes_reallocated = 19880
+net_bytes = 16768
 
 [[instances]]
 name = "clip_with_scale_cpu_u8_scalar"
-allocations = 39
-deallocations = 33
-reallocations = 61
-bytes_allocated = 70629
-bytes_deallocated = 0
-bytes_reallocated = 70629
-net_bytes = 70629
+allocations = 13
+deallocations = 7
+reallocations = 47
+bytes_allocated = 32048
+bytes_deallocated = 15280
+bytes_reallocated = 19880
+net_bytes = 16768
 
 [[instances]]
 name = "clip_with_scale_hybrid"
-allocations = 236
-deallocations = 209
-reallocations = 92
-bytes_allocated = 103837
-bytes_deallocated = 0
-bytes_reallocated = 103837
-net_bytes = 103837
+allocations = 210
+deallocations = 183
+reallocations = 78
+bytes_allocated = 79987
+bytes_deallocated = 59681
+bytes_reallocated = 53088
+net_bytes = 20306

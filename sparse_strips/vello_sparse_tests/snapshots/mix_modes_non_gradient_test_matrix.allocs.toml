@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_f32_neon"
-allocations = 31
-deallocations = 29
-reallocations = 227
-bytes_allocated = 371792
-bytes_deallocated = 0
-bytes_reallocated = 371792
-net_bytes = 371792
+allocations = 5
+deallocations = 3
+reallocations = 207
+bytes_allocated = 302208
+bytes_deallocated = 39744
+bytes_reallocated = 278496
+net_bytes = 262464
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_f32_scalar"
-allocations = 31
-deallocations = 29
-reallocations = 227
-bytes_allocated = 371792
-bytes_deallocated = 0
-bytes_reallocated = 371792
-net_bytes = 371792
+allocations = 5
+deallocations = 3
+reallocations = 207
+bytes_allocated = 302208
+bytes_deallocated = 39744
+bytes_reallocated = 278496
+net_bytes = 262464
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_multithreaded"
-allocations = 136
-deallocations = 44
-reallocations = 396
-bytes_allocated = 550160
-bytes_deallocated = 0
-bytes_reallocated = 550160
-net_bytes = 550160
+allocations = 112
+deallocations = 19
+reallocations = 393
+bytes_allocated = 636512
+bytes_deallocated = 200136
+bytes_reallocated = 463112
+net_bytes = 436376
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_u8_neon"
-allocations = 31
-deallocations = 29
-reallocations = 227
-bytes_allocated = 359486
-bytes_deallocated = 0
-bytes_reallocated = 359486
-net_bytes = 359486
+allocations = 5
+deallocations = 3
+reallocations = 207
+bytes_allocated = 277632
+bytes_deallocated = 15168
+bytes_reallocated = 266208
+net_bytes = 262464
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_u8_scalar"
-allocations = 31
-deallocations = 29
-reallocations = 227
-bytes_allocated = 359486
-bytes_deallocated = 0
-bytes_reallocated = 359486
-net_bytes = 359486
+allocations = 5
+deallocations = 3
+reallocations = 207
+bytes_allocated = 277632
+bytes_deallocated = 15168
+bytes_reallocated = 266208
+net_bytes = 262464
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_hybrid"
-allocations = 1634
-deallocations = 1565
-reallocations = 959
-bytes_allocated = 607608
-bytes_deallocated = 0
-bytes_reallocated = 607608
-net_bytes = 607608
+allocations = 1608
+deallocations = 1539
+reallocations = 939
+bytes_allocated = 744017
+bytes_deallocated = 457915
+bytes_reallocated = 514316
+net_bytes = 286102

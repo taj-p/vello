@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "image_with_opacity_cpu_f32_neon"
-allocations = 46
-deallocations = 41
-reallocations = 69
-bytes_allocated = 105703
-bytes_deallocated = 0
-bytes_reallocated = 105703
-net_bytes = 105703
+allocations = 20
+deallocations = 15
+reallocations = 52
+bytes_allocated = 159490
+bytes_deallocated = 142850
+bytes_reallocated = 30967
+net_bytes = 16640
 
 [[instances]]
 name = "image_with_opacity_cpu_f32_scalar"
-allocations = 46
-deallocations = 41
-reallocations = 69
-bytes_allocated = 105703
-bytes_deallocated = 0
-bytes_reallocated = 105703
-net_bytes = 105703
+allocations = 20
+deallocations = 15
+reallocations = 52
+bytes_allocated = 159490
+bytes_deallocated = 142850
+bytes_reallocated = 30967
+net_bytes = 16640
 
 [[instances]]
 name = "image_with_opacity_cpu_multithreaded"
-allocations = 110
-deallocations = 64
-reallocations = 94
-bytes_allocated = 143871
-bytes_deallocated = 0
-bytes_reallocated = 143871
-net_bytes = 143871
+allocations = 84
+deallocations = 38
+reallocations = 77
+bytes_allocated = 342466
+bytes_deallocated = 316434
+bytes_reallocated = 69135
+net_bytes = 26032
 
 [[instances]]
 name = "image_with_opacity_cpu_u8_neon"
-allocations = 46
-deallocations = 41
-reallocations = 69
-bytes_allocated = 93415
-bytes_deallocated = 0
-bytes_reallocated = 93415
-net_bytes = 93415
+allocations = 20
+deallocations = 15
+reallocations = 52
+bytes_allocated = 134914
+bytes_deallocated = 118274
+bytes_reallocated = 18679
+net_bytes = 16640
 
 [[instances]]
 name = "image_with_opacity_cpu_u8_scalar"
-allocations = 46
-deallocations = 41
-reallocations = 69
-bytes_allocated = 93415
-bytes_deallocated = 0
-bytes_reallocated = 93415
-net_bytes = 93415
+allocations = 20
+deallocations = 15
+reallocations = 52
+bytes_allocated = 134914
+bytes_deallocated = 118274
+bytes_reallocated = 18679
+net_bytes = 16640
 
 [[instances]]
 name = "image_with_opacity_hybrid"
-allocations = 292
-deallocations = 263
-reallocations = 121
-bytes_allocated = 131282
-bytes_deallocated = 0
-bytes_reallocated = 131282
-net_bytes = 131282
+allocations = 266
+deallocations = 237
+reallocations = 104
+bytes_allocated = 196915
+bytes_deallocated = 175390
+bytes_reallocated = 56546
+net_bytes = 21525

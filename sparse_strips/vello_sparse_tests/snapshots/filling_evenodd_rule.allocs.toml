@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_f32_neon"
-allocations = 30
-deallocations = 30
-reallocations = 34
-bytes_allocated = 70622
-bytes_deallocated = 0
-bytes_reallocated = 70622
-net_bytes = 70622
+allocations = 4
+deallocations = 4
+reallocations = 17
+bytes_allocated = 28296
+bytes_deallocated = 22728
+bytes_reallocated = 5792
+net_bytes = 5568
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_f32_scalar"
-allocations = 30
-deallocations = 30
-reallocations = 34
-bytes_allocated = 70622
-bytes_deallocated = 0
-bytes_reallocated = 70622
-net_bytes = 70622
+allocations = 4
+deallocations = 4
+reallocations = 17
+bytes_allocated = 28296
+bytes_deallocated = 22728
+bytes_reallocated = 5792
+net_bytes = 5568
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_multithreaded"
-allocations = 91
-deallocations = 51
-reallocations = 50
-bytes_allocated = 73438
-bytes_deallocated = 0
-bytes_reallocated = 73438
-net_bytes = 73438
+allocations = 66
+deallocations = 27
+reallocations = 33
+bytes_allocated = 144416
+bytes_deallocated = 130608
+bytes_reallocated = 8608
+net_bytes = 13808
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_u8_neon"
-allocations = 30
-deallocations = 30
-reallocations = 34
-bytes_allocated = 70626
-bytes_deallocated = 0
-bytes_reallocated = 70626
-net_bytes = 70626
+allocations = 4
+deallocations = 4
+reallocations = 17
+bytes_allocated = 16008
+bytes_deallocated = 10440
+bytes_reallocated = 5792
+net_bytes = 5568
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_u8_scalar"
-allocations = 30
-deallocations = 30
-reallocations = 34
-bytes_allocated = 70626
-bytes_deallocated = 0
-bytes_reallocated = 70626
-net_bytes = 70626
+allocations = 4
+deallocations = 4
+reallocations = 17
+bytes_allocated = 16008
+bytes_deallocated = 10440
+bytes_reallocated = 5792
+net_bytes = 5568
 
 [[instances]]
 name = "filling_evenodd_rule_hybrid"
-allocations = 205
-deallocations = 184
-reallocations = 51
-bytes_allocated = 106606
-bytes_deallocated = 0
-bytes_reallocated = 106606
-net_bytes = 106606
+allocations = 179
+deallocations = 158
+reallocations = 34
+bytes_allocated = 64248
+bytes_deallocated = 55014
+bytes_reallocated = 41776
+net_bytes = 9234

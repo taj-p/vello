@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_neon"
-allocations = 47
-deallocations = 45
-reallocations = 155
-bytes_allocated = 195480
-bytes_deallocated = 0
-bytes_reallocated = 195480
-net_bytes = 195480
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 171128
+bytes_deallocated = 46296
+bytes_reallocated = 144368
+net_bytes = 124832
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_scalar"
-allocations = 47
-deallocations = 45
-reallocations = 155
-bytes_allocated = 195480
-bytes_deallocated = 0
-bytes_reallocated = 195480
-net_bytes = 195480
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 171128
+bytes_deallocated = 46296
+bytes_reallocated = 144368
+net_bytes = 124832
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_multithreaded"
-allocations = 122
-deallocations = 77
-reallocations = 182
-bytes_allocated = 240904
-bytes_deallocated = 0
-bytes_reallocated = 240904
-net_bytes = 240904
+allocations = 92
+deallocations = 45
+reallocations = 167
+bytes_allocated = 330752
+bytes_deallocated = 179128
+bytes_reallocated = 189728
+net_bytes = 151624
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_neon"
-allocations = 47
-deallocations = 45
-reallocations = 155
-bytes_allocated = 183192
-bytes_deallocated = 0
-bytes_reallocated = 183192
-net_bytes = 183192
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 146552
+bytes_deallocated = 21720
+bytes_reallocated = 132080
+net_bytes = 124832
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_scalar"
-allocations = 47
-deallocations = 45
-reallocations = 155
-bytes_allocated = 183192
-bytes_deallocated = 0
-bytes_reallocated = 183192
-net_bytes = 183192
+allocations = 21
+deallocations = 19
+reallocations = 141
+bytes_allocated = 146552
+bytes_deallocated = 21720
+bytes_reallocated = 132080
+net_bytes = 124832
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
-allocations = 828
-deallocations = 778
-reallocations = 403
-bytes_allocated = 275700
-bytes_deallocated = 0
-bytes_reallocated = 275700
-net_bytes = 275700
+allocations = 802
+deallocations = 752
+reallocations = 389
+bytes_allocated = 316934
+bytes_deallocated = 174032
+bytes_reallocated = 224588
+net_bytes = 142902

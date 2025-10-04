@@ -3,50 +3,50 @@ units = "bytes"
 
 [[instances]]
 name = "clip_clear_cpu_f32_neon"
-allocations = 32
-deallocations = 29
-reallocations = 43
-bytes_allocated = 86280
-bytes_deallocated = 0
-bytes_reallocated = 86280
-net_bytes = 86280
+allocations = 8
+deallocations = 5
+reallocations = 30
+bytes_allocated = 47096
+bytes_deallocated = 39320
+bytes_reallocated = 23904
+net_bytes = 7776
 
 [[instances]]
 name = "clip_clear_cpu_f32_scalar"
-allocations = 32
-deallocations = 29
-reallocations = 43
-bytes_allocated = 86280
-bytes_deallocated = 0
-bytes_reallocated = 86280
-net_bytes = 86280
+allocations = 8
+deallocations = 5
+reallocations = 30
+bytes_allocated = 47096
+bytes_deallocated = 39320
+bytes_reallocated = 23904
+net_bytes = 7776
 
 [[instances]]
 name = "clip_clear_cpu_multithreaded"
-allocations = 93
-deallocations = 51
-reallocations = 62
-bytes_allocated = 122368
-bytes_deallocated = 0
-bytes_reallocated = 122368
-net_bytes = 122368
+allocations = 69
+deallocations = 27
+reallocations = 49
+bytes_allocated = 196424
+bytes_deallocated = 179904
+bytes_reallocated = 59992
+net_bytes = 16520
 
 [[instances]]
 name = "clip_clear_cpu_u8_neon"
-allocations = 32
-deallocations = 29
-reallocations = 43
-bytes_allocated = 73992
-bytes_deallocated = 0
-bytes_reallocated = 73992
-net_bytes = 73992
+allocations = 8
+deallocations = 5
+reallocations = 30
+bytes_allocated = 22520
+bytes_deallocated = 14744
+bytes_reallocated = 11616
+net_bytes = 7776
 
 [[instances]]
 name = "clip_clear_cpu_u8_scalar"
-allocations = 32
-deallocations = 29
-reallocations = 43
-bytes_allocated = 73992
-bytes_deallocated = 0
-bytes_reallocated = 73992
-net_bytes = 73992
+allocations = 8
+deallocations = 5
+reallocations = 30
+bytes_allocated = 22520
+bytes_deallocated = 14744
+bytes_reallocated = 11616
+net_bytes = 7776

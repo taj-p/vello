@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "nested_clip_path_panic_cpu_f32_neon"
-allocations = 6
-deallocations = 4
+allocations = 9
+deallocations = 7
 reallocations = 4
-bytes_allocated = 544
-bytes_deallocated = 0
+bytes_allocated = 21912
+bytes_deallocated = 21560
 bytes_reallocated = 544
-net_bytes = 544
+net_bytes = 352
 
 [[instances]]
 name = "nested_clip_path_panic_cpu_f32_scalar"
-allocations = 6
-deallocations = 4
+allocations = 9
+deallocations = 7
 reallocations = 4
-bytes_allocated = 544
-bytes_deallocated = 0
+bytes_allocated = 21912
+bytes_deallocated = 21560
 bytes_reallocated = 544
-net_bytes = 544
+net_bytes = 352
 
 [[instances]]
 name = "nested_clip_path_panic_cpu_multithreaded"
-allocations = 29
-deallocations = 12
-reallocations = 10
-bytes_allocated = 2296
-bytes_deallocated = 0
-bytes_reallocated = 2296
-net_bytes = 2296
+allocations = 40
+deallocations = 21
+reallocations = 11
+bytes_allocated = 107976
+bytes_deallocated = 95856
+bytes_reallocated = 2360
+net_bytes = 12120
 
 [[instances]]
 name = "nested_clip_path_panic_cpu_u8_neon"
-allocations = 6
-deallocations = 4
+allocations = 9
+deallocations = 7
 reallocations = 4
-bytes_allocated = 544
-bytes_deallocated = 0
+bytes_allocated = 9624
+bytes_deallocated = 9272
 bytes_reallocated = 544
-net_bytes = 544
+net_bytes = 352
 
 [[instances]]
 name = "nested_clip_path_panic_cpu_u8_scalar"
-allocations = 6
-deallocations = 4
+allocations = 9
+deallocations = 7
 reallocations = 4
-bytes_allocated = 544
-bytes_deallocated = 0
+bytes_allocated = 9624
+bytes_deallocated = 9272
 bytes_reallocated = 544
-net_bytes = 544
+net_bytes = 352
 
 [[instances]]
 name = "nested_clip_path_panic_hybrid"
-allocations = 6
-deallocations = 4
-reallocations = 4
-bytes_allocated = 544
-bytes_deallocated = 0
-bytes_reallocated = 544
-net_bytes = 544
+allocations = 115
+deallocations = 92
+reallocations = 16
+bytes_allocated = 48176
+bytes_deallocated = 44158
+bytes_reallocated = 34048
+net_bytes = 4018

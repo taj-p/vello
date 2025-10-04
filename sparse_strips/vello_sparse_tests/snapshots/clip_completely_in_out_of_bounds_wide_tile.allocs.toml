@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_cpu_f32_neon"
-allocations = 4
-deallocations = 2
+allocations = 7
+deallocations = 5
 reallocations = 1
-bytes_allocated = 224
-bytes_deallocated = 0
+bytes_allocated = 23072
+bytes_deallocated = 22816
 bytes_reallocated = 224
-net_bytes = 224
+net_bytes = 256
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_cpu_f32_scalar"
-allocations = 4
-deallocations = 2
+allocations = 7
+deallocations = 5
 reallocations = 1
-bytes_allocated = 224
-bytes_deallocated = 0
+bytes_allocated = 23072
+bytes_deallocated = 22816
 bytes_reallocated = 224
-net_bytes = 224
+net_bytes = 256
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_cpu_multithreaded"
-allocations = 54
-deallocations = 17
+allocations = 67
+deallocations = 28
 reallocations = 16
-bytes_allocated = 2472
-bytes_deallocated = 0
+bytes_allocated = 171376
+bytes_deallocated = 163544
 bytes_reallocated = 2472
-net_bytes = 2472
+net_bytes = 7832
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_cpu_u8_neon"
-allocations = 4
-deallocations = 2
+allocations = 7
+deallocations = 5
 reallocations = 1
-bytes_allocated = 224
-bytes_deallocated = 0
+bytes_allocated = 10784
+bytes_deallocated = 10528
 bytes_reallocated = 224
-net_bytes = 224
+net_bytes = 256
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_cpu_u8_scalar"
-allocations = 4
-deallocations = 2
+allocations = 7
+deallocations = 5
 reallocations = 1
-bytes_allocated = 224
-bytes_deallocated = 0
+bytes_allocated = 10784
+bytes_deallocated = 10528
 bytes_reallocated = 224
-net_bytes = 224
+net_bytes = 256
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_hybrid"
-allocations = 4
-deallocations = 2
-reallocations = 1
-bytes_allocated = 224
-bytes_deallocated = 0
-bytes_reallocated = 224
-net_bytes = 224
+allocations = 182
+deallocations = 159
+reallocations = 17
+bytes_allocated = 56624
+bytes_deallocated = 52702
+bytes_reallocated = 34928
+net_bytes = 3922

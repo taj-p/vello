@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_cpu_f32_neon"
-allocations = 45
-deallocations = 41
-reallocations = 28
-bytes_allocated = 58605
-bytes_deallocated = 0
-bytes_reallocated = 58605
-net_bytes = 58605
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_cpu_f32_scalar"
-allocations = 45
-deallocations = 41
-reallocations = 28
-bytes_allocated = 58605
-bytes_deallocated = 0
-bytes_reallocated = 58605
-net_bytes = 58605
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 131458
+bytes_deallocated = 126466
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_cpu_multithreaded"
-allocations = 109
-deallocations = 64
-reallocations = 47
-bytes_allocated = 61557
-bytes_deallocated = 0
-bytes_reallocated = 61557
-net_bytes = 61557
+allocations = 75
+deallocations = 30
+reallocations = 31
+bytes_allocated = 242674
+bytes_deallocated = 221178
+bytes_reallocated = 5887
+net_bytes = 21496
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_cpu_u8_neon"
-allocations = 45
-deallocations = 41
-reallocations = 28
-bytes_allocated = 58605
-bytes_deallocated = 0
-bytes_reallocated = 58605
-net_bytes = 58605
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_cpu_u8_scalar"
-allocations = 45
-deallocations = 41
-reallocations = 28
-bytes_allocated = 58605
-bytes_deallocated = 0
-bytes_reallocated = 58605
-net_bytes = 58605
+allocations = 19
+deallocations = 15
+reallocations = 14
+bytes_allocated = 119170
+bytes_deallocated = 114178
+bytes_reallocated = 3063
+net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_scale_and_translate_hybrid"
-allocations = 246
-deallocations = 220
-reallocations = 45
-bytes_allocated = 94020
-bytes_deallocated = 0
-bytes_reallocated = 94020
-net_bytes = 94020
+allocations = 220
+deallocations = 194
+reallocations = 31
+bytes_allocated = 172865
+bytes_deallocated = 163656
+bytes_reallocated = 38478
+net_bytes = 9209

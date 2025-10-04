@@ -3,60 +3,60 @@ units = "bytes"
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_f32_neon"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 3
-bytes_allocated = 1472
-bytes_deallocated = 0
+bytes_allocated = 24456
+bytes_deallocated = 22728
 bytes_reallocated = 1472
-net_bytes = 1472
+net_bytes = 1728
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_f32_scalar"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 3
-bytes_allocated = 1472
-bytes_deallocated = 0
+bytes_allocated = 24456
+bytes_deallocated = 22728
 bytes_reallocated = 1472
-net_bytes = 1472
+net_bytes = 1728
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_multithreaded"
-allocations = 56
-deallocations = 17
+allocations = 61
+deallocations = 18
 reallocations = 20
-bytes_allocated = 4792
-bytes_deallocated = 0
+bytes_allocated = 136920
+bytes_deallocated = 117344
 bytes_reallocated = 4792
-net_bytes = 4792
+net_bytes = 19576
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_u8_neon"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 3
-bytes_allocated = 1472
-bytes_deallocated = 0
+bytes_allocated = 12168
+bytes_deallocated = 10440
 bytes_reallocated = 1472
-net_bytes = 1472
+net_bytes = 1728
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_u8_scalar"
-allocations = 4
-deallocations = 1
+allocations = 7
+deallocations = 4
 reallocations = 3
-bytes_allocated = 1472
-bytes_deallocated = 0
+bytes_allocated = 12168
+bytes_deallocated = 10440
 bytes_reallocated = 1472
-net_bytes = 1472
+net_bytes = 1728
 
 [[instances]]
 name = "out_of_viewport_clip_hybrid"
-allocations = 4
-deallocations = 2
-reallocations = 3
-bytes_allocated = 1472
-bytes_deallocated = 0
-bytes_reallocated = 1472
-net_bytes = 1472
+allocations = 182
+deallocations = 159
+reallocations = 19
+bytes_allocated = 58008
+bytes_deallocated = 53062
+bytes_reallocated = 36176
+net_bytes = 4946
