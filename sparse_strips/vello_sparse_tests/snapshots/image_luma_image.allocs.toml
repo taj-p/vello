@@ -2,61 +2,39 @@ test = "image_luma_image"
 units = "bytes"
 
 [[instances]]
-name = "image_luma_image_cpu_f32_neon"
-allocations = 20
-deallocations = 16
-reallocations = 24
-bytes_allocated = 135099
-bytes_deallocated = 126267
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_luma_image_cpu_f32_scalar"
-allocations = 20
-deallocations = 16
-reallocations = 24
-bytes_allocated = 135099
-bytes_deallocated = 126267
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_luma_image_cpu_multithreaded"
-allocations = 76
-deallocations = 32
-reallocations = 43
-bytes_allocated = 277451
-bytes_deallocated = 253891
-bytes_reallocated = 9855
-net_bytes = 23560
-
-[[instances]]
 name = "image_luma_image_cpu_u8_neon"
+
+[instances.cold]
 allocations = 20
 deallocations = 16
 reallocations = 24
 bytes_allocated = 122811
 bytes_deallocated = 113979
 bytes_reallocated = 6903
-net_bytes = 8832
+
+[instances.warm]
+allocations = 18
+deallocations = 16
+reallocations = 1
+bytes_allocated = 114427
+bytes_deallocated = 113979
+bytes_reallocated = 55
 
 [[instances]]
 name = "image_luma_image_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 20
 deallocations = 16
 reallocations = 24
 bytes_allocated = 122811
 bytes_deallocated = 113979
 bytes_reallocated = 6903
-net_bytes = 8832
 
-[[instances]]
-name = "image_luma_image_hybrid"
-allocations = 206
-deallocations = 181
-reallocations = 40
-bytes_allocated = 175805
-bytes_deallocated = 162788
-bytes_reallocated = 42254
-net_bytes = 13017
+[instances.warm]
+allocations = 18
+deallocations = 16
+reallocations = 1
+bytes_allocated = 114427
+bytes_deallocated = 113979
+bytes_reallocated = 55

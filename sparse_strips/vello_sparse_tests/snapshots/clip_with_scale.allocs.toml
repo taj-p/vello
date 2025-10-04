@@ -2,61 +2,39 @@ test = "clip_with_scale"
 units = "bytes"
 
 [[instances]]
-name = "clip_with_scale_cpu_f32_neon"
-allocations = 13
-deallocations = 7
-reallocations = 47
-bytes_allocated = 56624
-bytes_deallocated = 39856
-bytes_reallocated = 32168
-net_bytes = 16768
-
-[[instances]]
-name = "clip_with_scale_cpu_f32_scalar"
-allocations = 13
-deallocations = 7
-reallocations = 47
-bytes_allocated = 56624
-bytes_deallocated = 39856
-bytes_reallocated = 32168
-net_bytes = 16768
-
-[[instances]]
-name = "clip_with_scale_cpu_multithreaded"
-allocations = 75
-deallocations = 29
-reallocations = 69
-bytes_allocated = 207888
-bytes_deallocated = 180440
-bytes_reallocated = 70144
-net_bytes = 27448
-
-[[instances]]
 name = "clip_with_scale_cpu_u8_neon"
+
+[instances.cold]
 allocations = 13
 deallocations = 7
 reallocations = 47
 bytes_allocated = 32048
 bytes_deallocated = 15280
 bytes_reallocated = 19880
-net_bytes = 16768
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 19
+bytes_allocated = 28976
+bytes_deallocated = 15280
+bytes_reallocated = 18240
 
 [[instances]]
 name = "clip_with_scale_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 13
 deallocations = 7
 reallocations = 47
 bytes_allocated = 32048
 bytes_deallocated = 15280
 bytes_reallocated = 19880
-net_bytes = 16768
 
-[[instances]]
-name = "clip_with_scale_hybrid"
-allocations = 196
-deallocations = 171
-reallocations = 73
-bytes_allocated = 78702
-bytes_deallocated = 58748
-bytes_reallocated = 52728
-net_bytes = 19954
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 19
+bytes_allocated = 28976
+bytes_deallocated = 15280
+bytes_reallocated = 18240

@@ -2,61 +2,39 @@ test = "recording_can_be_cleared"
 units = "bytes"
 
 [[instances]]
-name = "recording_can_be_cleared_cpu_f32_neon"
-allocations = 15
-deallocations = 14
-reallocations = 40
-bytes_allocated = 32344
-bytes_deallocated = 27976
-bytes_reallocated = 8128
-net_bytes = 4368
-
-[[instances]]
-name = "recording_can_be_cleared_cpu_f32_scalar"
-allocations = 15
-deallocations = 14
-reallocations = 40
-bytes_allocated = 32344
-bytes_deallocated = 27976
-bytes_reallocated = 8128
-net_bytes = 4368
-
-[[instances]]
-name = "recording_can_be_cleared_cpu_multithreaded"
-allocations = 83
-deallocations = 39
-reallocations = 56
-bytes_allocated = 181440
-bytes_deallocated = 169120
-bytes_reallocated = 9248
-net_bytes = 12320
-
-[[instances]]
 name = "recording_can_be_cleared_cpu_u8_neon"
-allocations = 16
-deallocations = 19
-reallocations = 40
-bytes_allocated = 22128
-bytes_deallocated = 16016
-bytes_reallocated = 8128
-net_bytes = 6112
 
-[[instances]]
-name = "recording_can_be_cleared_cpu_u8_scalar"
+[instances.cold]
 allocations = 15
 deallocations = 14
 reallocations = 40
 bytes_allocated = 20056
 bytes_deallocated = 15688
 bytes_reallocated = 8128
-net_bytes = 4368
+
+[instances.warm]
+allocations = 14
+deallocations = 14
+reallocations = 21
+bytes_allocated = 17752
+bytes_deallocated = 15688
+bytes_reallocated = 6048
 
 [[instances]]
-name = "recording_can_be_cleared_hybrid"
-allocations = 171
-deallocations = 151
-reallocations = 47
-bytes_allocated = 65723
-bytes_deallocated = 57657
-bytes_reallocated = 42960
-net_bytes = 8066
+name = "recording_can_be_cleared_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 15
+deallocations = 14
+reallocations = 40
+bytes_allocated = 20056
+bytes_deallocated = 15688
+bytes_reallocated = 8128
+
+[instances.warm]
+allocations = 14
+deallocations = 14
+reallocations = 21
+bytes_allocated = 17752
+bytes_deallocated = 15688
+bytes_reallocated = 6048

@@ -2,61 +2,39 @@ test = "recording_glyphs"
 units = "bytes"
 
 [[instances]]
-name = "recording_glyphs_cpu_f32_neon"
-allocations = 44
-deallocations = 27
-reallocations = 77
-bytes_allocated = 78708
-bytes_deallocated = 52044
-bytes_reallocated = 36992
-net_bytes = 26664
-
-[[instances]]
-name = "recording_glyphs_cpu_f32_scalar"
-allocations = 44
-deallocations = 27
-reallocations = 77
-bytes_allocated = 78708
-bytes_deallocated = 52044
-bytes_reallocated = 36992
-net_bytes = 26664
-
-[[instances]]
-name = "recording_glyphs_cpu_multithreaded"
-allocations = 127
-deallocations = 60
-reallocations = 99
-bytes_allocated = 196756
-bytes_deallocated = 161076
-bytes_reallocated = 37616
-net_bytes = 35680
-
-[[instances]]
 name = "recording_glyphs_cpu_u8_neon"
+
+[instances.cold]
 allocations = 44
 deallocations = 27
 reallocations = 77
 bytes_allocated = 66420
 bytes_deallocated = 39756
 bytes_reallocated = 36992
-net_bytes = 26664
+
+[instances.warm]
+allocations = 41
+deallocations = 26
+reallocations = 67
+bytes_allocated = 67432
+bytes_deallocated = 39976
+bytes_reallocated = 38240
 
 [[instances]]
 name = "recording_glyphs_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 44
 deallocations = 27
 reallocations = 77
 bytes_allocated = 66420
 bytes_deallocated = 39756
 bytes_reallocated = 36992
-net_bytes = 26664
 
-[[instances]]
-name = "recording_glyphs_hybrid"
-allocations = 235
-deallocations = 198
-reallocations = 88
-bytes_allocated = 118895
-bytes_deallocated = 87637
-bytes_reallocated = 74352
-net_bytes = 31258
+[instances.warm]
+allocations = 41
+deallocations = 26
+reallocations = 67
+bytes_allocated = 67432
+bytes_deallocated = 39976
+bytes_reallocated = 38240

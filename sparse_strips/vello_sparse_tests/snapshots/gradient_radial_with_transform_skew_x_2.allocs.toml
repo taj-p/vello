@@ -2,61 +2,39 @@ test = "gradient_radial_with_transform_skew_x_2"
 units = "bytes"
 
 [[instances]]
-name = "gradient_radial_with_transform_skew_x_2_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 14
-bytes_allocated = 43948
-bytes_deallocated = 22352
-bytes_reallocated = 3520
-net_bytes = 21596
-
-[[instances]]
-name = "gradient_radial_with_transform_skew_x_2_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 14
-bytes_allocated = 43948
-bytes_deallocated = 22352
-bytes_reallocated = 3520
-net_bytes = 21596
-
-[[instances]]
-name = "gradient_radial_with_transform_skew_x_2_cpu_multithreaded"
-allocations = 61
-deallocations = 19
-reallocations = 31
-bytes_allocated = 153164
-bytes_deallocated = 117064
-bytes_reallocated = 6344
-net_bytes = 36100
-
-[[instances]]
 name = "gradient_radial_with_transform_skew_x_2_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 14
 bytes_allocated = 19336
 bytes_deallocated = 10064
 bytes_reallocated = 3520
-net_bytes = 9272
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048
 
 [[instances]]
 name = "gradient_radial_with_transform_skew_x_2_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 14
 bytes_allocated = 19336
 bytes_deallocated = 10064
 bytes_reallocated = 3520
-net_bytes = 9272
 
-[[instances]]
-name = "gradient_radial_with_transform_skew_x_2_hybrid"
-allocations = 172
-deallocations = 146
-reallocations = 30
-bytes_allocated = 99271
-bytes_deallocated = 53169
-bytes_reallocated = 67984
-net_bytes = 46102
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048

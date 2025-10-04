@@ -2,61 +2,39 @@ test = "filled_unaligned_rect"
 units = "bytes"
 
 [[instances]]
-name = "filled_unaligned_rect_cpu_f32_neon"
-allocations = 4
-deallocations = 3
-reallocations = 6
-bytes_allocated = 22152
-bytes_deallocated = 20840
-bytes_reallocated = 1088
-net_bytes = 1312
-
-[[instances]]
-name = "filled_unaligned_rect_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
-reallocations = 6
-bytes_allocated = 22152
-bytes_deallocated = 20840
-bytes_reallocated = 1088
-net_bytes = 1312
-
-[[instances]]
-name = "filled_unaligned_rect_cpu_multithreaded"
-allocations = 42
-deallocations = 25
-reallocations = 16
-bytes_allocated = 131976
-bytes_deallocated = 128656
-bytes_reallocated = 1928
-net_bytes = 3320
-
-[[instances]]
 name = "filled_unaligned_rect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 6
 bytes_allocated = 9864
 bytes_deallocated = 8552
 bytes_reallocated = 1088
-net_bytes = 1312
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 6
+bytes_allocated = 10344
+bytes_deallocated = 8552
+bytes_reallocated = 1792
 
 [[instances]]
 name = "filled_unaligned_rect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 6
 bytes_allocated = 9864
 bytes_deallocated = 8552
 bytes_reallocated = 1088
-net_bytes = 1312
 
-[[instances]]
-name = "filled_unaligned_rect_hybrid"
-allocations = 104
-deallocations = 84
-reallocations = 19
-bytes_allocated = 48827
-bytes_deallocated = 44329
-bytes_reallocated = 34960
-net_bytes = 4498
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 6
+bytes_allocated = 10344
+bytes_deallocated = 8552
+bytes_reallocated = 1792

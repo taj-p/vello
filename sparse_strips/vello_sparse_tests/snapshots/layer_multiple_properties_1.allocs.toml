@@ -2,51 +2,39 @@ test = "layer_multiple_properties_1"
 units = "bytes"
 
 [[instances]]
-name = "layer_multiple_properties_1_cpu_f32_neon"
-allocations = 45
-deallocations = 41
-reallocations = 89
-bytes_allocated = 176108
-bytes_deallocated = 136044
-bytes_reallocated = 82672
-net_bytes = 40064
-
-[[instances]]
-name = "layer_multiple_properties_1_cpu_f32_scalar"
-allocations = 45
-deallocations = 41
-reallocations = 89
-bytes_allocated = 176108
-bytes_deallocated = 136044
-bytes_reallocated = 82672
-net_bytes = 40064
-
-[[instances]]
-name = "layer_multiple_properties_1_cpu_multithreaded"
-allocations = 111
-deallocations = 64
-reallocations = 117
-bytes_allocated = 394460
-bytes_deallocated = 342260
-bytes_reallocated = 187496
-net_bytes = 52200
-
-[[instances]]
 name = "layer_multiple_properties_1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 45
 deallocations = 41
 reallocations = 89
 bytes_allocated = 126956
 bytes_deallocated = 86892
 bytes_reallocated = 45808
-net_bytes = 40064
+
+[instances.warm]
+allocations = 42
+deallocations = 41
+reallocations = 44
+bytes_allocated = 128140
+bytes_deallocated = 86892
+bytes_reallocated = 47472
 
 [[instances]]
 name = "layer_multiple_properties_1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 45
 deallocations = 41
 reallocations = 89
 bytes_allocated = 126956
 bytes_deallocated = 86892
 bytes_reallocated = 45808
-net_bytes = 40064
+
+[instances.warm]
+allocations = 42
+deallocations = 41
+reallocations = 44
+bytes_allocated = 128140
+bytes_deallocated = 86892
+bytes_reallocated = 47472

@@ -2,61 +2,39 @@ test = "deep_compose"
 units = "bytes"
 
 [[instances]]
-name = "deep_compose_cpu_f32_neon"
-allocations = 54
-deallocations = 23
-reallocations = 132
-bytes_allocated = 351888
-bytes_deallocated = 273360
-bytes_reallocated = 322032
-net_bytes = 78528
-
-[[instances]]
-name = "deep_compose_cpu_f32_scalar"
-allocations = 54
-deallocations = 23
-reallocations = 132
-bytes_allocated = 351888
-bytes_deallocated = 273360
-bytes_reallocated = 322032
-net_bytes = 78528
-
-[[instances]]
-name = "deep_compose_cpu_multithreaded"
-allocations = 91
-deallocations = 44
-reallocations = 159
-bytes_allocated = 969384
-bytes_deallocated = 872720
-bytes_reallocated = 830552
-net_bytes = 96664
-
-[[instances]]
 name = "deep_compose_cpu_u8_neon"
+
+[instances.cold]
 allocations = 54
 deallocations = 23
 reallocations = 132
 bytes_allocated = 155280
 bytes_deallocated = 76752
 bytes_reallocated = 137712
-net_bytes = 78528
+
+[instances.warm]
+allocations = 23
+deallocations = 23
+reallocations = 38
+bytes_allocated = 148176
+bytes_deallocated = 76752
+bytes_reallocated = 135104
 
 [[instances]]
 name = "deep_compose_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 54
 deallocations = 23
 reallocations = 132
 bytes_allocated = 155280
 bytes_deallocated = 76752
 bytes_reallocated = 137712
-net_bytes = 78528
 
-[[instances]]
-name = "deep_compose_hybrid"
-allocations = 550
-deallocations = 485
-reallocations = 351
-bytes_allocated = 220919
-bytes_deallocated = 133521
-bytes_reallocated = 155708
-net_bytes = 87398
+[instances.warm]
+allocations = 23
+deallocations = 23
+reallocations = 38
+bytes_allocated = 148176
+bytes_deallocated = 76752
+bytes_reallocated = 135104

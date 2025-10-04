@@ -2,61 +2,39 @@ test = "image_with_opacity"
 units = "bytes"
 
 [[instances]]
-name = "image_with_opacity_cpu_f32_neon"
-allocations = 20
-deallocations = 15
-reallocations = 52
-bytes_allocated = 159490
-bytes_deallocated = 142850
-bytes_reallocated = 30967
-net_bytes = 16640
-
-[[instances]]
-name = "image_with_opacity_cpu_f32_scalar"
-allocations = 20
-deallocations = 15
-reallocations = 52
-bytes_allocated = 159490
-bytes_deallocated = 142850
-bytes_reallocated = 30967
-net_bytes = 16640
-
-[[instances]]
-name = "image_with_opacity_cpu_multithreaded"
-allocations = 84
-deallocations = 38
-reallocations = 77
-bytes_allocated = 342466
-bytes_deallocated = 316434
-bytes_reallocated = 69135
-net_bytes = 26032
-
-[[instances]]
 name = "image_with_opacity_cpu_u8_neon"
+
+[instances.cold]
 allocations = 20
 deallocations = 15
 reallocations = 52
 bytes_allocated = 134914
 bytes_deallocated = 118274
 bytes_reallocated = 18679
-net_bytes = 16640
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 26
+bytes_allocated = 136258
+bytes_deallocated = 118274
+bytes_reallocated = 21687
 
 [[instances]]
 name = "image_with_opacity_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 20
 deallocations = 15
 reallocations = 52
 bytes_allocated = 134914
 bytes_deallocated = 118274
 bytes_reallocated = 18679
-net_bytes = 16640
 
-[[instances]]
-name = "image_with_opacity_hybrid"
-allocations = 252
-deallocations = 225
-reallocations = 104
-bytes_allocated = 195974
-bytes_deallocated = 174769
-bytes_reallocated = 56530
-net_bytes = 21205
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 26
+bytes_allocated = 136258
+bytes_deallocated = 118274
+bytes_reallocated = 21687

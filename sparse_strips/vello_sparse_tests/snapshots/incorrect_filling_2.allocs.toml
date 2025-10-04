@@ -2,61 +2,39 @@ test = "incorrect_filling_2"
 units = "bytes"
 
 [[instances]]
-name = "incorrect_filling_2_cpu_f32_neon"
-allocations = 4
-deallocations = 4
-reallocations = 10
-bytes_allocated = 23872
-bytes_deallocated = 22080
-bytes_reallocated = 2016
-net_bytes = 1792
-
-[[instances]]
-name = "incorrect_filling_2_cpu_f32_scalar"
-allocations = 4
-deallocations = 4
-reallocations = 10
-bytes_allocated = 23872
-bytes_deallocated = 22080
-bytes_reallocated = 2016
-net_bytes = 1792
-
-[[instances]]
-name = "incorrect_filling_2_cpu_multithreaded"
-allocations = 56
-deallocations = 26
-reallocations = 23
-bytes_allocated = 168544
-bytes_deallocated = 162800
-bytes_reallocated = 3496
-net_bytes = 5744
-
-[[instances]]
 name = "incorrect_filling_2_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 10
 bytes_allocated = 11584
 bytes_deallocated = 9792
 bytes_reallocated = 2016
-net_bytes = 1792
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 9792
+bytes_deallocated = 9792
+bytes_reallocated = 224
 
 [[instances]]
 name = "incorrect_filling_2_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 10
 bytes_allocated = 11584
 bytes_deallocated = 9792
 bytes_reallocated = 2016
-net_bytes = 1792
 
-[[instances]]
-name = "incorrect_filling_2_hybrid"
-allocations = 137
-deallocations = 117
-reallocations = 24
-bytes_allocated = 54219
-bytes_deallocated = 48793
-bytes_reallocated = 36528
-net_bytes = 5426
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 9792
+bytes_deallocated = 9792
+bytes_reallocated = 224

@@ -2,51 +2,39 @@ test = "glyphs_bitmap_noto"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_bitmap_noto_cpu_f32_neon"
-allocations = 63
-deallocations = 53
-reallocations = 33
-bytes_allocated = 875259
-bytes_deallocated = 581595
-bytes_reallocated = 13408
-net_bytes = 293664
-
-[[instances]]
-name = "glyphs_bitmap_noto_cpu_f32_scalar"
-allocations = 63
-deallocations = 53
-reallocations = 33
-bytes_allocated = 875259
-bytes_deallocated = 581595
-bytes_reallocated = 13408
-net_bytes = 293664
-
-[[instances]]
-name = "glyphs_bitmap_noto_cpu_multithreaded"
-allocations = 124
-deallocations = 78
-reallocations = 59
-bytes_allocated = 995851
-bytes_deallocated = 689635
-bytes_reallocated = 21464
-net_bytes = 306216
-
-[[instances]]
 name = "glyphs_bitmap_noto_cpu_u8_neon"
+
+[instances.cold]
 allocations = 63
 deallocations = 53
 reallocations = 33
 bytes_allocated = 862971
 bytes_deallocated = 569307
 bytes_reallocated = 13408
-net_bytes = 293664
+
+[instances.warm]
+allocations = 61
+deallocations = 53
+reallocations = 18
+bytes_allocated = 867131
+bytes_deallocated = 569307
+bytes_reallocated = 19104
 
 [[instances]]
 name = "glyphs_bitmap_noto_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 63
 deallocations = 53
 reallocations = 33
 bytes_allocated = 862971
 bytes_deallocated = 569307
 bytes_reallocated = 13408
-net_bytes = 293664
+
+[instances.warm]
+allocations = 61
+deallocations = 53
+reallocations = 18
+bytes_allocated = 867131
+bytes_deallocated = 569307
+bytes_reallocated = 19104

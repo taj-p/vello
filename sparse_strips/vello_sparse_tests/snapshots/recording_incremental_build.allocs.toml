@@ -2,61 +2,39 @@ test = "recording_incremental_build"
 units = "bytes"
 
 [[instances]]
-name = "recording_incremental_build_cpu_f32_neon"
-allocations = 13
-deallocations = 12
-reallocations = 64
-bytes_allocated = 46328
-bytes_deallocated = 34712
-bytes_reallocated = 21904
-net_bytes = 11616
-
-[[instances]]
-name = "recording_incremental_build_cpu_f32_scalar"
-allocations = 13
-deallocations = 12
-reallocations = 64
-bytes_allocated = 46328
-bytes_deallocated = 34712
-bytes_reallocated = 21904
-net_bytes = 11616
-
-[[instances]]
-name = "recording_incremental_build_cpu_multithreaded"
-allocations = 81
-deallocations = 35
-reallocations = 84
-bytes_allocated = 160800
-bytes_deallocated = 130400
-bytes_reallocated = 24448
-net_bytes = 30400
-
-[[instances]]
 name = "recording_incremental_build_cpu_u8_neon"
+
+[instances.cold]
 allocations = 13
 deallocations = 12
 reallocations = 64
 bytes_allocated = 34040
 bytes_deallocated = 22424
 bytes_reallocated = 21904
-net_bytes = 11616
+
+[instances.warm]
+allocations = 12
+deallocations = 12
+reallocations = 44
+bytes_allocated = 37336
+bytes_deallocated = 22424
+bytes_reallocated = 25424
 
 [[instances]]
 name = "recording_incremental_build_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 13
 deallocations = 12
 reallocations = 64
 bytes_allocated = 34040
 bytes_deallocated = 22424
 bytes_reallocated = 21904
-net_bytes = 11616
 
-[[instances]]
-name = "recording_incremental_build_hybrid"
-allocations = 180
-deallocations = 160
-reallocations = 84
-bytes_allocated = 88971
-bytes_deallocated = 74169
-bytes_reallocated = 62016
-net_bytes = 14802
+[instances.warm]
+allocations = 12
+deallocations = 12
+reallocations = 44
+bytes_allocated = 37336
+bytes_deallocated = 22424
+bytes_reallocated = 25424

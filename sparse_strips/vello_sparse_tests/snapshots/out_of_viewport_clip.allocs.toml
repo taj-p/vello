@@ -2,61 +2,39 @@ test = "out_of_viewport_clip"
 units = "bytes"
 
 [[instances]]
-name = "out_of_viewport_clip_cpu_f32_neon"
-allocations = 7
-deallocations = 4
-reallocations = 3
-bytes_allocated = 24456
-bytes_deallocated = 22728
-bytes_reallocated = 1472
-net_bytes = 1728
-
-[[instances]]
-name = "out_of_viewport_clip_cpu_f32_scalar"
-allocations = 7
-deallocations = 4
-reallocations = 3
-bytes_allocated = 24456
-bytes_deallocated = 22728
-bytes_reallocated = 1472
-net_bytes = 1728
-
-[[instances]]
-name = "out_of_viewport_clip_cpu_multithreaded"
-allocations = 61
-deallocations = 18
-reallocations = 20
-bytes_allocated = 136920
-bytes_deallocated = 117344
-bytes_reallocated = 4792
-net_bytes = 19576
-
-[[instances]]
 name = "out_of_viewport_clip_cpu_u8_neon"
+
+[instances.cold]
 allocations = 7
 deallocations = 4
 reallocations = 3
 bytes_allocated = 12168
 bytes_deallocated = 10440
 bytes_reallocated = 1472
-net_bytes = 1728
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 12488
+bytes_deallocated = 10440
+bytes_reallocated = 2272
 
 [[instances]]
 name = "out_of_viewport_clip_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 7
 deallocations = 4
 reallocations = 3
 bytes_allocated = 12168
 bytes_deallocated = 10440
 bytes_reallocated = 1472
-net_bytes = 1728
 
-[[instances]]
-name = "out_of_viewport_clip_hybrid"
-allocations = 167
-deallocations = 145
-reallocations = 17
-bytes_allocated = 56795
-bytes_deallocated = 51881
-bytes_reallocated = 35984
-net_bytes = 4914
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 2
+bytes_allocated = 12488
+bytes_deallocated = 10440
+bytes_reallocated = 2272

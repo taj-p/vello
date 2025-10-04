@@ -2,61 +2,39 @@ test = "intersected_clip_bbox_with_x0_gt_x1"
 units = "bytes"
 
 [[instances]]
-name = "intersected_clip_bbox_with_x0_gt_x1_cpu_f32_neon"
-allocations = 9
-deallocations = 7
-reallocations = 3
-bytes_allocated = 22104
-bytes_deallocated = 21720
-bytes_reallocated = 576
-net_bytes = 384
-
-[[instances]]
-name = "intersected_clip_bbox_with_x0_gt_x1_cpu_f32_scalar"
-allocations = 9
-deallocations = 7
-reallocations = 3
-bytes_allocated = 22104
-bytes_deallocated = 21720
-bytes_reallocated = 576
-net_bytes = 384
-
-[[instances]]
-name = "intersected_clip_bbox_with_x0_gt_x1_cpu_multithreaded"
-allocations = 42
-deallocations = 21
-reallocations = 13
-bytes_allocated = 128920
-bytes_deallocated = 116336
-bytes_reallocated = 2520
-net_bytes = 12584
-
-[[instances]]
 name = "intersected_clip_bbox_with_x0_gt_x1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 9
 deallocations = 7
 reallocations = 3
 bytes_allocated = 9816
 bytes_deallocated = 9432
 bytes_reallocated = 576
-net_bytes = 384
+
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 3
+bytes_allocated = 9688
+bytes_deallocated = 9432
+bytes_reallocated = 704
 
 [[instances]]
 name = "intersected_clip_bbox_with_x0_gt_x1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 9
 deallocations = 7
 reallocations = 3
 bytes_allocated = 9816
 bytes_deallocated = 9432
 bytes_reallocated = 576
-net_bytes = 384
 
-[[instances]]
-name = "intersected_clip_bbox_with_x0_gt_x1_hybrid"
-allocations = 106
-deallocations = 84
-reallocations = 15
-bytes_allocated = 48003
-bytes_deallocated = 43985
-bytes_reallocated = 34128
-net_bytes = 4018
+[instances.warm]
+allocations = 7
+deallocations = 7
+reallocations = 3
+bytes_allocated = 9688
+bytes_deallocated = 9432
+bytes_reallocated = 704

@@ -2,61 +2,39 @@ test = "image_with_transform_scale"
 units = "bytes"
 
 [[instances]]
-name = "image_with_transform_scale_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_scale_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_scale_cpu_multithreaded"
-allocations = 79
-deallocations = 36
-reallocations = 33
-bytes_allocated = 245234
-bytes_deallocated = 234306
-bytes_reallocated = 6015
-net_bytes = 10928
-
-[[instances]]
 name = "image_with_transform_scale_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
 
 [[instances]]
 name = "image_with_transform_scale_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
 
-[[instances]]
-name = "image_with_transform_scale_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 30
-bytes_allocated = 171780
-bytes_deallocated = 162603
-bytes_reallocated = 38414
-net_bytes = 9177
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103

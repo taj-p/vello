@@ -2,61 +2,39 @@ test = "mix_hard_light"
 units = "bytes"
 
 [[instances]]
-name = "mix_hard_light_cpu_f32_neon"
-allocations = 25
-deallocations = 16
-reallocations = 46
-bytes_allocated = 251309
-bytes_deallocated = 193861
-bytes_reallocated = 29687
-net_bytes = 57448
-
-[[instances]]
-name = "mix_hard_light_cpu_f32_scalar"
-allocations = 25
-deallocations = 16
-reallocations = 46
-bytes_allocated = 251309
-bytes_deallocated = 193861
-bytes_reallocated = 29687
-net_bytes = 57448
-
-[[instances]]
-name = "mix_hard_light_cpu_multithreaded"
-allocations = 84
-deallocations = 37
-reallocations = 71
-bytes_allocated = 397997
-bytes_deallocated = 334469
-bytes_reallocated = 67855
-net_bytes = 63528
-
-[[instances]]
 name = "mix_hard_light_cpu_u8_neon"
+
+[instances.cold]
 allocations = 25
 deallocations = 16
 reallocations = 46
 bytes_allocated = 214409
 bytes_deallocated = 169285
 bytes_reallocated = 17399
-net_bytes = 45124
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047
 
 [[instances]]
 name = "mix_hard_light_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 25
 deallocations = 16
 reallocations = 46
 bytes_allocated = 214409
 bytes_deallocated = 169285
 bytes_reallocated = 17399
-net_bytes = 45124
 
-[[instances]]
-name = "mix_hard_light_hybrid"
-allocations = 261
-deallocations = 227
-reallocations = 98
-bytes_allocated = 308105
-bytes_deallocated = 250100
-bytes_reallocated = 83666
-net_bytes = 58005
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047

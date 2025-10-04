@@ -2,61 +2,39 @@ test = "mix_hue"
 units = "bytes"
 
 [[instances]]
-name = "mix_hue_cpu_f32_neon"
-allocations = 25
-deallocations = 16
-reallocations = 46
-bytes_allocated = 251309
-bytes_deallocated = 193861
-bytes_reallocated = 29687
-net_bytes = 57448
-
-[[instances]]
-name = "mix_hue_cpu_f32_scalar"
-allocations = 25
-deallocations = 16
-reallocations = 46
-bytes_allocated = 251309
-bytes_deallocated = 193861
-bytes_reallocated = 29687
-net_bytes = 57448
-
-[[instances]]
-name = "mix_hue_cpu_multithreaded"
-allocations = 86
-deallocations = 31
-reallocations = 71
-bytes_allocated = 399005
-bytes_deallocated = 321341
-bytes_reallocated = 67855
-net_bytes = 77664
-
-[[instances]]
 name = "mix_hue_cpu_u8_neon"
-allocations = 26
-deallocations = 22
-reallocations = 46
-bytes_allocated = 216481
-bytes_deallocated = 169669
-bytes_reallocated = 17399
-net_bytes = 46812
 
-[[instances]]
-name = "mix_hue_cpu_u8_scalar"
+[instances.cold]
 allocations = 25
 deallocations = 16
 reallocations = 46
 bytes_allocated = 214409
 bytes_deallocated = 169285
 bytes_reallocated = 17399
-net_bytes = 45124
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047
 
 [[instances]]
-name = "mix_hue_hybrid"
-allocations = 261
-deallocations = 227
-reallocations = 98
-bytes_allocated = 308105
-bytes_deallocated = 250100
-bytes_reallocated = 83666
-net_bytes = 58005
+name = "mix_hue_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 25
+deallocations = 16
+reallocations = 46
+bytes_allocated = 214409
+bytes_deallocated = 169285
+bytes_reallocated = 17399
+
+[instances.warm]
+allocations = 22
+deallocations = 17
+reallocations = 24
+bytes_allocated = 216393
+bytes_deallocated = 169405
+bytes_reallocated = 21047

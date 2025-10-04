@@ -2,61 +2,39 @@ test = "compose_dest_in"
 units = "bytes"
 
 [[instances]]
-name = "compose_dest_in_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 51
-bytes_allocated = 85800
-bytes_deallocated = 71432
-bytes_reallocated = 63168
-net_bytes = 14368
-
-[[instances]]
-name = "compose_dest_in_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 51
-bytes_allocated = 85800
-bytes_deallocated = 71432
-bytes_reallocated = 63168
-net_bytes = 14368
-
-[[instances]]
-name = "compose_dest_in_cpu_multithreaded"
-allocations = 64
-deallocations = 20
-reallocations = 74
-bytes_allocated = 330552
-bytes_deallocated = 299400
-bytes_reallocated = 165656
-net_bytes = 31152
-
-[[instances]]
 name = "compose_dest_in_cpu_u8_neon"
-allocations = 6
-deallocations = 8
-reallocations = 51
-bytes_allocated = 38720
-bytes_deallocated = 22552
-bytes_reallocated = 26304
-net_bytes = 16168
 
-[[instances]]
-name = "compose_dest_in_cpu_u8_scalar"
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 51
 bytes_allocated = 36648
 bytes_deallocated = 22280
 bytes_reallocated = 26304
-net_bytes = 14368
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 26
+bytes_allocated = 39816
+bytes_deallocated = 22280
+bytes_reallocated = 29824
 
 [[instances]]
-name = "compose_dest_in_hybrid"
-allocations = 252
-deallocations = 228
-reallocations = 120
-bytes_allocated = 89035
-bytes_deallocated = 70445
-bytes_reallocated = 58596
-net_bytes = 18590
+name = "compose_dest_in_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 5
+deallocations = 3
+reallocations = 51
+bytes_allocated = 36648
+bytes_deallocated = 22280
+bytes_reallocated = 26304
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 26
+bytes_allocated = 39816
+bytes_deallocated = 22280
+bytes_reallocated = 29824

@@ -2,61 +2,39 @@ test = "round_stroked_rect"
 units = "bytes"
 
 [[instances]]
-name = "round_stroked_rect_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 16
-bytes_allocated = 27568
-bytes_deallocated = 21104
-bytes_reallocated = 5288
-net_bytes = 6464
-
-[[instances]]
-name = "round_stroked_rect_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 16
-bytes_allocated = 27568
-bytes_deallocated = 21104
-bytes_reallocated = 5288
-net_bytes = 6464
-
-[[instances]]
-name = "round_stroked_rect_cpu_multithreaded"
-allocations = 49
-deallocations = 25
-reallocations = 28
-bytes_allocated = 170528
-bytes_deallocated = 161760
-bytes_reallocated = 6512
-net_bytes = 8768
-
-[[instances]]
 name = "round_stroked_rect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 16
 bytes_allocated = 15280
 bytes_deallocated = 8816
 bytes_reallocated = 5288
-net_bytes = 6464
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 5
+bytes_allocated = 10480
+bytes_deallocated = 8816
+bytes_reallocated = 1664
 
 [[instances]]
 name = "round_stroked_rect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 16
 bytes_allocated = 15280
 bytes_deallocated = 8816
 bytes_reallocated = 5288
-net_bytes = 6464
 
-[[instances]]
-name = "round_stroked_rect_hybrid"
-allocations = 117
-deallocations = 94
-reallocations = 29
-bytes_allocated = 55035
-bytes_deallocated = 45385
-bytes_reallocated = 39160
-net_bytes = 9650
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 5
+bytes_allocated = 10480
+bytes_deallocated = 8816
+bytes_reallocated = 1664

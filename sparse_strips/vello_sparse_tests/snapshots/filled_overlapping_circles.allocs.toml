@@ -2,61 +2,39 @@ test = "filled_overlapping_circles"
 units = "bytes"
 
 [[instances]]
-name = "filled_overlapping_circles_cpu_f32_neon"
-allocations = 9
-deallocations = 9
-reallocations = 38
-bytes_allocated = 33840
-bytes_deallocated = 23888
-bytes_reallocated = 10624
-net_bytes = 9952
-
-[[instances]]
-name = "filled_overlapping_circles_cpu_f32_scalar"
-allocations = 9
-deallocations = 9
-reallocations = 38
-bytes_allocated = 33840
-bytes_deallocated = 23888
-bytes_reallocated = 10624
-net_bytes = 9952
-
-[[instances]]
-name = "filled_overlapping_circles_cpu_multithreaded"
-allocations = 63
-deallocations = 23
-reallocations = 57
-bytes_allocated = 147760
-bytes_deallocated = 118504
-bytes_reallocated = 16312
-net_bytes = 29256
-
-[[instances]]
 name = "filled_overlapping_circles_cpu_u8_neon"
+
+[instances.cold]
 allocations = 9
 deallocations = 9
 reallocations = 38
 bytes_allocated = 21552
 bytes_deallocated = 11600
 bytes_reallocated = 10624
-net_bytes = 9952
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 19
+bytes_allocated = 22576
+bytes_deallocated = 11600
+bytes_reallocated = 11648
 
 [[instances]]
 name = "filled_overlapping_circles_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 9
 deallocations = 9
 reallocations = 38
 bytes_allocated = 21552
 bytes_deallocated = 11600
 bytes_reallocated = 10624
-net_bytes = 9952
 
-[[instances]]
-name = "filled_overlapping_circles_hybrid"
-allocations = 169
-deallocations = 149
-reallocations = 54
-bytes_allocated = 72131
-bytes_deallocated = 58545
-bytes_reallocated = 48976
-net_bytes = 13586
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 19
+bytes_allocated = 22576
+bytes_deallocated = 11600
+bytes_reallocated = 11648

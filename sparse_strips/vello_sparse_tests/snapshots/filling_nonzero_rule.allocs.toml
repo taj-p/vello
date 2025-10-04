@@ -2,61 +2,39 @@ test = "filling_nonzero_rule"
 units = "bytes"
 
 [[instances]]
-name = "filling_nonzero_rule_cpu_f32_neon"
-allocations = 4
-deallocations = 4
-reallocations = 24
-bytes_allocated = 30056
-bytes_deallocated = 22728
-bytes_reallocated = 7552
-net_bytes = 7328
-
-[[instances]]
-name = "filling_nonzero_rule_cpu_f32_scalar"
-allocations = 4
-deallocations = 4
-reallocations = 24
-bytes_allocated = 30056
-bytes_deallocated = 22728
-bytes_reallocated = 7552
-net_bytes = 7328
-
-[[instances]]
-name = "filling_nonzero_rule_cpu_multithreaded"
-allocations = 55
-deallocations = 18
-reallocations = 40
-bytes_allocated = 139120
-bytes_deallocated = 117344
-bytes_reallocated = 10368
-net_bytes = 21776
-
-[[instances]]
 name = "filling_nonzero_rule_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 24
 bytes_allocated = 17768
 bytes_deallocated = 10440
 bytes_reallocated = 7552
-net_bytes = 7328
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 7
+bytes_allocated = 11880
+bytes_deallocated = 10440
+bytes_reallocated = 1664
 
 [[instances]]
 name = "filling_nonzero_rule_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 24
 bytes_allocated = 17768
 bytes_deallocated = 10440
 bytes_reallocated = 7552
-net_bytes = 7328
 
-[[instances]]
-name = "filling_nonzero_rule_hybrid"
-allocations = 164
-deallocations = 144
-reallocations = 39
-bytes_allocated = 64907
-bytes_deallocated = 53945
-bytes_reallocated = 43344
-net_bytes = 10962
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 7
+bytes_allocated = 11880
+bytes_deallocated = 10440
+bytes_reallocated = 1664

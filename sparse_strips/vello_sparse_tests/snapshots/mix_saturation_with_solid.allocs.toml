@@ -2,61 +2,39 @@ test = "mix_saturation_with_solid"
 units = "bytes"
 
 [[instances]]
-name = "mix_saturation_with_solid_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 45
-bytes_allocated = 52264
-bytes_deallocated = 38664
-bytes_reallocated = 29632
-net_bytes = 13600
-
-[[instances]]
-name = "mix_saturation_with_solid_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 45
-bytes_allocated = 52264
-bytes_deallocated = 38664
-bytes_reallocated = 29632
-net_bytes = 13600
-
-[[instances]]
-name = "mix_saturation_with_solid_cpu_multithreaded"
-allocations = 61
-deallocations = 21
-reallocations = 69
-bytes_allocated = 197256
-bytes_deallocated = 176896
-bytes_reallocated = 67736
-net_bytes = 20360
-
-[[instances]]
 name = "mix_saturation_with_solid_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 45
 bytes_allocated = 27688
 bytes_deallocated = 14088
 bytes_reallocated = 17344
-net_bytes = 13600
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 30984
+bytes_deallocated = 14088
+bytes_reallocated = 20992
 
 [[instances]]
 name = "mix_saturation_with_solid_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 45
 bytes_allocated = 27688
 bytes_deallocated = 14088
 bytes_reallocated = 17344
-net_bytes = 13600
 
-[[instances]]
-name = "mix_saturation_with_solid_hybrid"
-allocations = 211
-deallocations = 189
-reallocations = 95
-bytes_allocated = 81613
-bytes_deallocated = 64447
-bytes_reallocated = 55092
-net_bytes = 17166
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 23
+bytes_allocated = 30984
+bytes_deallocated = 14088
+bytes_reallocated = 20992

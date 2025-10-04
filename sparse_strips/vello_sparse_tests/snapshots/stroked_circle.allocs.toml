@@ -2,61 +2,39 @@ test = "stroked_circle"
 units = "bytes"
 
 [[instances]]
-name = "stroked_circle_cpu_f32_neon"
-allocations = 9
-deallocations = 5
-reallocations = 13
-bytes_allocated = 30632
-bytes_deallocated = 22824
-bytes_reallocated = 7080
-net_bytes = 7808
-
-[[instances]]
-name = "stroked_circle_cpu_f32_scalar"
-allocations = 9
-deallocations = 5
-reallocations = 13
-bytes_allocated = 30632
-bytes_deallocated = 22824
-bytes_reallocated = 7080
-net_bytes = 7808
-
-[[instances]]
-name = "stroked_circle_cpu_multithreaded"
-allocations = 65
-deallocations = 22
-reallocations = 31
-bytes_allocated = 140112
-bytes_deallocated = 122144
-bytes_reallocated = 10024
-net_bytes = 17968
-
-[[instances]]
 name = "stroked_circle_cpu_u8_neon"
+
+[instances.cold]
 allocations = 9
 deallocations = 5
 reallocations = 13
 bytes_allocated = 18344
 bytes_deallocated = 10536
 bytes_reallocated = 7080
-net_bytes = 7808
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 23
+bytes_allocated = 17992
+bytes_deallocated = 10536
+bytes_reallocated = 7680
 
 [[instances]]
 name = "stroked_circle_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 9
 deallocations = 5
 reallocations = 13
 bytes_allocated = 18344
 bytes_deallocated = 10536
 bytes_reallocated = 7080
-net_bytes = 7808
 
-[[instances]]
-name = "stroked_circle_hybrid"
-allocations = 169
-deallocations = 145
-reallocations = 28
-bytes_allocated = 64987
-bytes_deallocated = 53545
-bytes_reallocated = 42872
-net_bytes = 11442
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 23
+bytes_allocated = 17992
+bytes_deallocated = 10536
+bytes_reallocated = 7680

@@ -2,61 +2,39 @@ test = "image_complex_shape"
 units = "bytes"
 
 [[instances]]
-name = "image_complex_shape_cpu_f32_neon"
-allocations = 19
-deallocations = 16
-reallocations = 25
-bytes_allocated = 136002
-bytes_deallocated = 126914
-bytes_reallocated = 7607
-net_bytes = 9088
-
-[[instances]]
-name = "image_complex_shape_cpu_f32_scalar"
-allocations = 19
-deallocations = 16
-reallocations = 25
-bytes_allocated = 136002
-bytes_deallocated = 126914
-bytes_reallocated = 7607
-net_bytes = 9088
-
-[[instances]]
-name = "image_complex_shape_cpu_multithreaded"
-allocations = 83
-deallocations = 39
-reallocations = 44
-bytes_allocated = 251546
-bytes_deallocated = 234826
-bytes_reallocated = 10615
-net_bytes = 16720
-
-[[instances]]
 name = "image_complex_shape_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 16
 reallocations = 25
 bytes_allocated = 123714
 bytes_deallocated = 114626
 bytes_reallocated = 7607
-net_bytes = 9088
+
+[instances.warm]
+allocations = 18
+deallocations = 16
+reallocations = 8
+bytes_allocated = 116514
+bytes_deallocated = 114626
+bytes_reallocated = 1719
 
 [[instances]]
 name = "image_complex_shape_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 16
 reallocations = 25
 bytes_allocated = 123714
 bytes_deallocated = 114626
 bytes_reallocated = 7607
-net_bytes = 9088
 
-[[instances]]
-name = "image_complex_shape_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 41
-bytes_allocated = 176996
-bytes_deallocated = 163275
-bytes_reallocated = 42958
-net_bytes = 13721
+[instances.warm]
+allocations = 18
+deallocations = 16
+reallocations = 8
+bytes_allocated = 116514
+bytes_deallocated = 114626
+bytes_reallocated = 1719

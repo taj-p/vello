@@ -2,61 +2,39 @@ test = "glyphs_filled"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_filled_cpu_f32_neon"
-allocations = 25
-deallocations = 8
-reallocations = 54
-bytes_allocated = 54276
-bytes_deallocated = 26172
-bytes_reallocated = 24176
-net_bytes = 28104
-
-[[instances]]
-name = "glyphs_filled_cpu_f32_scalar"
-allocations = 25
-deallocations = 8
-reallocations = 54
-bytes_allocated = 54276
-bytes_deallocated = 26172
-bytes_reallocated = 24176
-net_bytes = 28104
-
-[[instances]]
-name = "glyphs_filled_cpu_multithreaded"
-allocations = 94
-deallocations = 19
-reallocations = 94
-bytes_allocated = 179068
-bytes_deallocated = 120740
-bytes_reallocated = 42520
-net_bytes = 58328
-
-[[instances]]
 name = "glyphs_filled_cpu_u8_neon"
+
+[instances.cold]
 allocations = 25
 deallocations = 8
 reallocations = 54
 bytes_allocated = 41988
 bytes_deallocated = 13884
 bytes_reallocated = 24176
-net_bytes = 28104
+
+[instances.warm]
+allocations = 22
+deallocations = 7
+reallocations = 39
+bytes_allocated = 42040
+bytes_deallocated = 14104
+bytes_reallocated = 24464
 
 [[instances]]
 name = "glyphs_filled_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 25
 deallocations = 8
 reallocations = 54
 bytes_allocated = 41988
 bytes_deallocated = 13884
 bytes_reallocated = 24176
-net_bytes = 28104
 
-[[instances]]
-name = "glyphs_filled_hybrid"
-allocations = 218
-deallocations = 181
-reallocations = 70
-bytes_allocated = 95551
-bytes_deallocated = 63813
-bytes_reallocated = 62528
-net_bytes = 31738
+[instances.warm]
+allocations = 22
+deallocations = 7
+reallocations = 39
+bytes_allocated = 42040
+bytes_deallocated = 14104
+bytes_reallocated = 24464

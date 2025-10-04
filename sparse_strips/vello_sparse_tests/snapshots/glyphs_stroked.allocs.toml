@@ -2,61 +2,39 @@ test = "glyphs_stroked"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_stroked_cpu_f32_neon"
-allocations = 36
-deallocations = 15
-reallocations = 64
-bytes_allocated = 70796
-bytes_deallocated = 26724
-bytes_reallocated = 38296
-net_bytes = 44072
-
-[[instances]]
-name = "glyphs_stroked_cpu_f32_scalar"
-allocations = 36
-deallocations = 15
-reallocations = 64
-bytes_allocated = 70796
-bytes_deallocated = 26724
-bytes_reallocated = 38296
-net_bytes = 44072
-
-[[instances]]
-name = "glyphs_stroked_cpu_multithreaded"
-allocations = 119
-deallocations = 31
-reallocations = 126
-bytes_allocated = 244124
-bytes_deallocated = 154348
-bytes_reallocated = 66536
-net_bytes = 89776
-
-[[instances]]
 name = "glyphs_stroked_cpu_u8_neon"
+
+[instances.cold]
 allocations = 36
 deallocations = 15
 reallocations = 64
 bytes_allocated = 58508
 bytes_deallocated = 14436
 bytes_reallocated = 38296
-net_bytes = 44072
+
+[instances.warm]
+allocations = 29
+deallocations = 14
+reallocations = 47
+bytes_allocated = 33600
+bytes_deallocated = 14656
+bytes_reallocated = 15696
 
 [[instances]]
 name = "glyphs_stroked_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 36
 deallocations = 15
 reallocations = 64
 bytes_allocated = 58508
 bytes_deallocated = 14436
 bytes_reallocated = 38296
-net_bytes = 44072
 
-[[instances]]
-name = "glyphs_stroked_hybrid"
-allocations = 229
-deallocations = 188
-reallocations = 80
-bytes_allocated = 111879
-bytes_deallocated = 64173
-bytes_reallocated = 76648
-net_bytes = 47706
+[instances.warm]
+allocations = 29
+deallocations = 14
+reallocations = 47
+bytes_allocated = 33600
+bytes_deallocated = 14656
+bytes_reallocated = 15696

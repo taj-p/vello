@@ -2,61 +2,39 @@ test = "tile_clamped_off_by_one"
 units = "bytes"
 
 [[instances]]
-name = "tile_clamped_off_by_one_cpu_f32_neon"
-allocations = 8
-deallocations = 6
-reallocations = 9
-bytes_allocated = 39320
-bytes_deallocated = 38232
-bytes_reallocated = 17664
-net_bytes = 1088
-
-[[instances]]
-name = "tile_clamped_off_by_one_cpu_f32_scalar"
-allocations = 8
-deallocations = 6
-reallocations = 9
-bytes_allocated = 39320
-bytes_deallocated = 38232
-bytes_reallocated = 17664
-net_bytes = 1088
-
-[[instances]]
-name = "tile_clamped_off_by_one_cpu_multithreaded"
-allocations = 53
-deallocations = 30
-reallocations = 17
-bytes_allocated = 186952
-bytes_deallocated = 178888
-bytes_reallocated = 51416
-net_bytes = 8064
-
-[[instances]]
 name = "tile_clamped_off_by_one_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 6
 reallocations = 9
 bytes_allocated = 14744
 bytes_deallocated = 13656
 bytes_reallocated = 5376
-net_bytes = 1088
+
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 8
+bytes_allocated = 15192
+bytes_deallocated = 13656
+bytes_reallocated = 6080
 
 [[instances]]
 name = "tile_clamped_off_by_one_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 6
 reallocations = 9
 bytes_allocated = 14744
 bytes_deallocated = 13656
 bytes_reallocated = 5376
-net_bytes = 1088
 
-[[instances]]
-name = "tile_clamped_off_by_one_hybrid"
-allocations = 134
-deallocations = 112
-reallocations = 27
-bytes_allocated = 51998
-bytes_deallocated = 47276
-bytes_reallocated = 35680
-net_bytes = 4722
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 8
+bytes_allocated = 15192
+bytes_deallocated = 13656
+bytes_reallocated = 6080

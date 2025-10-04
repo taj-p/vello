@@ -2,61 +2,39 @@ test = "image_bicubic_2x_scale"
 units = "bytes"
 
 [[instances]]
-name = "image_bicubic_2x_scale_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 134320
-bytes_deallocated = 125872
-bytes_reallocated = 6903
-net_bytes = 8448
-
-[[instances]]
-name = "image_bicubic_2x_scale_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 134320
-bytes_deallocated = 125872
-bytes_reallocated = 6903
-net_bytes = 8448
-
-[[instances]]
-name = "image_bicubic_2x_scale_cpu_multithreaded"
-allocations = 85
-deallocations = 38
-reallocations = 43
-bytes_allocated = 253056
-bytes_deallocated = 233784
-bytes_reallocated = 9855
-net_bytes = 19272
-
-[[instances]]
 name = "image_bicubic_2x_scale_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 122032
 bytes_deallocated = 113584
 bytes_reallocated = 6903
-net_bytes = 8448
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 113648
+bytes_deallocated = 113584
+bytes_reallocated = 55
 
 [[instances]]
 name = "image_bicubic_2x_scale_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 122032
 bytes_deallocated = 113584
 bytes_reallocated = 6903
-net_bytes = 8448
 
-[[instances]]
-name = "image_bicubic_2x_scale_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 40
-bytes_allocated = 175026
-bytes_deallocated = 162009
-bytes_reallocated = 42254
-net_bytes = 13017
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 113648
+bytes_deallocated = 113584
+bytes_reallocated = 55

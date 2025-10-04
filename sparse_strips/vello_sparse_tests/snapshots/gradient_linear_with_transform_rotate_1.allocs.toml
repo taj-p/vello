@@ -2,61 +2,39 @@ test = "gradient_linear_with_transform_rotate_1"
 units = "bytes"
 
 [[instances]]
-name = "gradient_linear_with_transform_rotate_1_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 18
-bytes_allocated = 44588
-bytes_deallocated = 22352
-bytes_reallocated = 4160
-net_bytes = 22236
-
-[[instances]]
-name = "gradient_linear_with_transform_rotate_1_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 18
-bytes_allocated = 44588
-bytes_deallocated = 22352
-bytes_reallocated = 4160
-net_bytes = 22236
-
-[[instances]]
-name = "gradient_linear_with_transform_rotate_1_cpu_multithreaded"
-allocations = 63
-deallocations = 18
-reallocations = 34
-bytes_allocated = 155628
-bytes_deallocated = 116968
-bytes_reallocated = 6920
-net_bytes = 38660
-
-[[instances]]
 name = "gradient_linear_with_transform_rotate_1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 18
 bytes_allocated = 19976
 bytes_deallocated = 10064
 bytes_reallocated = 4160
-net_bytes = 9912
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048
 
 [[instances]]
 name = "gradient_linear_with_transform_rotate_1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 18
 bytes_allocated = 19976
 bytes_deallocated = 10064
 bytes_reallocated = 4160
-net_bytes = 9912
 
-[[instances]]
-name = "gradient_linear_with_transform_rotate_1_hybrid"
-allocations = 172
-deallocations = 146
-reallocations = 34
-bytes_allocated = 100135
-bytes_deallocated = 53393
-bytes_reallocated = 68624
-net_bytes = 46742
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 1
+bytes_allocated = 16328
+bytes_deallocated = 10064
+bytes_reallocated = 2048

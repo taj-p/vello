@@ -2,61 +2,39 @@ test = "shape_at_wide_tile_boundary"
 units = "bytes"
 
 [[instances]]
-name = "shape_at_wide_tile_boundary_cpu_f32_neon"
-allocations = 4
-deallocations = 4
-reallocations = 3
-bytes_allocated = 21096
-bytes_deallocated = 21000
-bytes_reallocated = 320
-net_bytes = 96
-
-[[instances]]
-name = "shape_at_wide_tile_boundary_cpu_f32_scalar"
-allocations = 4
-deallocations = 4
-reallocations = 3
-bytes_allocated = 21096
-bytes_deallocated = 21000
-bytes_reallocated = 320
-net_bytes = 96
-
-[[instances]]
-name = "shape_at_wide_tile_boundary_cpu_multithreaded"
-allocations = 32
-deallocations = 21
-reallocations = 8
-bytes_allocated = 50440
-bytes_deallocated = 55032
-bytes_reallocated = 776
-net_bytes = 0
-
-[[instances]]
 name = "shape_at_wide_tile_boundary_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 3
 bytes_allocated = 8808
 bytes_deallocated = 8712
 bytes_reallocated = 320
-net_bytes = 96
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 8712
+bytes_deallocated = 8712
+bytes_reallocated = 224
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 3
 bytes_allocated = 8808
 bytes_deallocated = 8712
 bytes_reallocated = 320
-net_bytes = 96
 
-[[instances]]
-name = "shape_at_wide_tile_boundary_hybrid"
-allocations = 92
-deallocations = 72
-reallocations = 13
-bytes_allocated = 45915
-bytes_deallocated = 42185
-bytes_reallocated = 33632
-net_bytes = 3730
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 8712
+bytes_deallocated = 8712
+bytes_reallocated = 224

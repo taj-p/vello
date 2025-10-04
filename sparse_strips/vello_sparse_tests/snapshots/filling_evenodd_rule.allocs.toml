@@ -2,61 +2,39 @@ test = "filling_evenodd_rule"
 units = "bytes"
 
 [[instances]]
-name = "filling_evenodd_rule_cpu_f32_neon"
-allocations = 4
-deallocations = 4
-reallocations = 17
-bytes_allocated = 28296
-bytes_deallocated = 22728
-bytes_reallocated = 5792
-net_bytes = 5568
-
-[[instances]]
-name = "filling_evenodd_rule_cpu_f32_scalar"
-allocations = 4
-deallocations = 4
-reallocations = 17
-bytes_allocated = 28296
-bytes_deallocated = 22728
-bytes_reallocated = 5792
-net_bytes = 5568
-
-[[instances]]
-name = "filling_evenodd_rule_cpu_multithreaded"
-allocations = 66
-deallocations = 27
-reallocations = 33
-bytes_allocated = 144416
-bytes_deallocated = 130608
-bytes_reallocated = 8608
-net_bytes = 13808
-
-[[instances]]
 name = "filling_evenodd_rule_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 17
 bytes_allocated = 16008
 bytes_deallocated = 10440
 bytes_reallocated = 5792
-net_bytes = 5568
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 14
+bytes_allocated = 13640
+bytes_deallocated = 10440
+bytes_reallocated = 3424
 
 [[instances]]
 name = "filling_evenodd_rule_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 17
 bytes_allocated = 16008
 bytes_deallocated = 10440
 bytes_reallocated = 5792
-net_bytes = 5568
 
-[[instances]]
-name = "filling_evenodd_rule_hybrid"
-allocations = 164
-deallocations = 144
-reallocations = 32
-bytes_allocated = 63035
-bytes_deallocated = 53833
-bytes_reallocated = 41584
-net_bytes = 9202
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 14
+bytes_allocated = 13640
+bytes_deallocated = 10440
+bytes_reallocated = 3424

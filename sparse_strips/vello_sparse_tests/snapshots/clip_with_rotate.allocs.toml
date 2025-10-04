@@ -2,61 +2,39 @@ test = "clip_with_rotate"
 units = "bytes"
 
 [[instances]]
-name = "clip_with_rotate_cpu_f32_neon"
-allocations = 12
-deallocations = 6
-reallocations = 59
-bytes_allocated = 63072
-bytes_deallocated = 39904
-bytes_reallocated = 38568
-net_bytes = 23168
-
-[[instances]]
-name = "clip_with_rotate_cpu_f32_scalar"
-allocations = 12
-deallocations = 6
-reallocations = 59
-bytes_allocated = 63072
-bytes_deallocated = 39904
-bytes_reallocated = 38568
-net_bytes = 23168
-
-[[instances]]
-name = "clip_with_rotate_cpu_multithreaded"
-allocations = 68
-deallocations = 22
-reallocations = 81
-bytes_allocated = 242240
-bytes_deallocated = 202272
-bytes_reallocated = 76544
-net_bytes = 39968
-
-[[instances]]
 name = "clip_with_rotate_cpu_u8_neon"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 59
 bytes_allocated = 38496
 bytes_deallocated = 15328
 bytes_reallocated = 26280
-net_bytes = 23168
+
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 27
+bytes_allocated = 36960
+bytes_deallocated = 15328
+bytes_reallocated = 26176
 
 [[instances]]
 name = "clip_with_rotate_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 59
 bytes_allocated = 38496
 bytes_deallocated = 15328
 bytes_reallocated = 26280
-net_bytes = 23168
 
-[[instances]]
-name = "clip_with_rotate_hybrid"
-allocations = 195
-deallocations = 170
-reallocations = 89
-bytes_allocated = 89742
-bytes_deallocated = 63388
-bytes_reallocated = 62520
-net_bytes = 26354
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 27
+bytes_allocated = 36960
+bytes_deallocated = 15328
+bytes_reallocated = 26176

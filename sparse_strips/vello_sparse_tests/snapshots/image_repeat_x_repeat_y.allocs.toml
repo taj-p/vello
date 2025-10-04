@@ -2,61 +2,39 @@ test = "image_repeat_x_repeat_y"
 units = "bytes"
 
 [[instances]]
-name = "image_repeat_x_repeat_y_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 135298
-bytes_deallocated = 126466
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_repeat_x_repeat_y_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 135298
-bytes_deallocated = 126466
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_repeat_x_repeat_y_cpu_multithreaded"
-allocations = 79
-deallocations = 35
-reallocations = 40
-bytes_allocated = 197850
-bytes_deallocated = 177002
-bytes_reallocated = 9663
-net_bytes = 20848
-
-[[instances]]
 name = "image_repeat_x_repeat_y_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 123010
 bytes_deallocated = 114178
 bytes_reallocated = 6903
-net_bytes = 8832
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114626
+bytes_deallocated = 114178
+bytes_reallocated = 55
 
 [[instances]]
 name = "image_repeat_x_repeat_y_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 123010
 bytes_deallocated = 114178
 bytes_reallocated = 6903
-net_bytes = 8832
 
-[[instances]]
-name = "image_repeat_x_repeat_y_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 40
-bytes_allocated = 176004
-bytes_deallocated = 162987
-bytes_reallocated = 42254
-net_bytes = 13017
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114626
+bytes_deallocated = 114178
+bytes_reallocated = 55

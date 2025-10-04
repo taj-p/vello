@@ -2,61 +2,39 @@ test = "clip_exceeding_viewport"
 units = "bytes"
 
 [[instances]]
-name = "clip_exceeding_viewport_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 11
-bytes_allocated = 44384
-bytes_deallocated = 39168
-bytes_reallocated = 21344
-net_bytes = 5216
-
-[[instances]]
-name = "clip_exceeding_viewport_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 11
-bytes_allocated = 44384
-bytes_deallocated = 39168
-bytes_reallocated = 21344
-net_bytes = 5216
-
-[[instances]]
-name = "clip_exceeding_viewport_cpu_multithreaded"
-allocations = 62
-deallocations = 22
-reallocations = 28
-bytes_allocated = 102520
-bytes_deallocated = 89568
-bytes_reallocated = 24664
-net_bytes = 12952
-
-[[instances]]
 name = "clip_exceeding_viewport_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 11
 bytes_allocated = 19808
 bytes_deallocated = 14592
 bytes_reallocated = 9056
-net_bytes = 5216
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 2
+bytes_allocated = 14592
+bytes_deallocated = 14592
+bytes_reallocated = 4320
 
 [[instances]]
 name = "clip_exceeding_viewport_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 11
 bytes_allocated = 19808
 bytes_deallocated = 14592
 bytes_reallocated = 9056
-net_bytes = 5216
 
-[[instances]]
-name = "clip_exceeding_viewport_hybrid"
-allocations = 191
-deallocations = 169
-reallocations = 30
-bytes_allocated = 62734
-bytes_deallocated = 54332
-bytes_reallocated = 40000
-net_bytes = 8402
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 2
+bytes_allocated = 14592
+bytes_deallocated = 14592
+bytes_reallocated = 4320

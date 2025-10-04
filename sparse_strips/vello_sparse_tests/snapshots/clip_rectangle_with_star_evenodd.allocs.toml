@@ -2,61 +2,39 @@ test = "clip_rectangle_with_star_evenodd"
 units = "bytes"
 
 [[instances]]
-name = "clip_rectangle_with_star_evenodd_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 40
-bytes_allocated = 51080
-bytes_deallocated = 39528
-bytes_reallocated = 27680
-net_bytes = 11552
-
-[[instances]]
-name = "clip_rectangle_with_star_evenodd_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 40
-bytes_allocated = 51080
-bytes_deallocated = 39528
-bytes_reallocated = 27680
-net_bytes = 11552
-
-[[instances]]
-name = "clip_rectangle_with_star_evenodd_cpu_multithreaded"
-allocations = 60
-deallocations = 21
-reallocations = 59
-bytes_allocated = 159672
-bytes_deallocated = 139032
-bytes_reallocated = 48520
-net_bytes = 20640
-
-[[instances]]
 name = "clip_rectangle_with_star_evenodd_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 40
 bytes_allocated = 26504
 bytes_deallocated = 14952
 bytes_reallocated = 15392
-net_bytes = 11552
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 26408
+bytes_deallocated = 14952
+bytes_reallocated = 15776
 
 [[instances]]
 name = "clip_rectangle_with_star_evenodd_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 40
 bytes_allocated = 26504
 bytes_deallocated = 14952
 bytes_reallocated = 15392
-net_bytes = 11552
 
-[[instances]]
-name = "clip_rectangle_with_star_evenodd_hybrid"
-allocations = 191
-deallocations = 169
-reallocations = 69
-bytes_allocated = 74294
-bytes_deallocated = 59556
-bytes_reallocated = 49072
-net_bytes = 14738
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 19
+bytes_allocated = 26408
+bytes_deallocated = 14952
+bytes_reallocated = 15776

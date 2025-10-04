@@ -2,61 +2,39 @@ test = "tricky_strokes"
 units = "bytes"
 
 [[instances]]
-name = "tricky_strokes_cpu_f32_neon"
-allocations = 283
-deallocations = 46
-reallocations = 364
-bytes_allocated = 262768
-bytes_deallocated = 100912
-bytes_reallocated = 128928
-net_bytes = 161856
-
-[[instances]]
-name = "tricky_strokes_cpu_f32_scalar"
-allocations = 283
-deallocations = 46
-reallocations = 364
-bytes_allocated = 262768
-bytes_deallocated = 100912
-bytes_reallocated = 128928
-net_bytes = 161856
-
-[[instances]]
-name = "tricky_strokes_cpu_multithreaded"
-allocations = 785
-deallocations = 57
-reallocations = 402
-bytes_allocated = 493600
-bytes_deallocated = 195480
-bytes_reallocated = 184536
-net_bytes = 298120
-
-[[instances]]
 name = "tricky_strokes_cpu_u8_neon"
+
+[instances.cold]
 allocations = 283
 deallocations = 46
 reallocations = 364
 bytes_allocated = 250480
 bytes_deallocated = 88624
 bytes_reallocated = 128928
-net_bytes = 161856
+
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 266000
+bytes_deallocated = 88624
+bytes_reallocated = 182736
 
 [[instances]]
 name = "tricky_strokes_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 283
 deallocations = 46
 reallocations = 364
 bytes_allocated = 250480
 bytes_deallocated = 88624
 bytes_reallocated = 128928
-net_bytes = 161856
 
-[[instances]]
-name = "tricky_strokes_hybrid"
-allocations = 2991
-deallocations = 2967
-reallocations = 423
-bytes_allocated = 617035
-bytes_deallocated = 479065
-bytes_reallocated = 253840
-net_bytes = 137970
+[instances.warm]
+allocations = 46
+deallocations = 46
+reallocations = 408
+bytes_allocated = 266000
+bytes_deallocated = 88624
+bytes_reallocated = 182736

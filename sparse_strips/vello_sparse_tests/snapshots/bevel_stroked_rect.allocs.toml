@@ -2,61 +2,39 @@ test = "bevel_stroked_rect"
 units = "bytes"
 
 [[instances]]
-name = "bevel_stroked_rect_cpu_f32_neon"
-allocations = 7
-deallocations = 3
-reallocations = 14
-bytes_allocated = 26752
-bytes_deallocated = 21056
-bytes_reallocated = 4520
-net_bytes = 5696
-
-[[instances]]
-name = "bevel_stroked_rect_cpu_f32_scalar"
-allocations = 7
-deallocations = 3
-reallocations = 14
-bytes_allocated = 26752
-bytes_deallocated = 21056
-bytes_reallocated = 4520
-net_bytes = 5696
-
-[[instances]]
-name = "bevel_stroked_rect_cpu_multithreaded"
-allocations = 53
-deallocations = 20
-reallocations = 26
-bytes_allocated = 140448
-bytes_deallocated = 117632
-bytes_reallocated = 5744
-net_bytes = 22816
-
-[[instances]]
 name = "bevel_stroked_rect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 14
 bytes_allocated = 14464
 bytes_deallocated = 8768
 bytes_reallocated = 4520
-net_bytes = 5696
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 5
+bytes_allocated = 10432
+bytes_deallocated = 8768
+bytes_reallocated = 1664
 
 [[instances]]
 name = "bevel_stroked_rect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 14
 bytes_allocated = 14464
 bytes_deallocated = 8768
 bytes_reallocated = 4520
-net_bytes = 5696
 
-[[instances]]
-name = "bevel_stroked_rect_hybrid"
-allocations = 117
-deallocations = 93
-reallocations = 27
-bytes_allocated = 54283
-bytes_deallocated = 45337
-bytes_reallocated = 38392
-net_bytes = 8946
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 5
+bytes_allocated = 10432
+bytes_deallocated = 8768
+bytes_reallocated = 1664

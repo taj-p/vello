@@ -2,61 +2,39 @@ test = "glyphs_scaled_unhinted"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_scaled_unhinted_cpu_f32_neon"
-allocations = 17
-deallocations = 7
-reallocations = 65
-bytes_allocated = 50516
-bytes_deallocated = 23708
-bytes_reallocated = 24016
-net_bytes = 26808
-
-[[instances]]
-name = "glyphs_scaled_unhinted_cpu_f32_scalar"
-allocations = 17
-deallocations = 7
-reallocations = 65
-bytes_allocated = 50516
-bytes_deallocated = 23708
-bytes_reallocated = 24016
-net_bytes = 26808
-
-[[instances]]
-name = "glyphs_scaled_unhinted_cpu_multithreaded"
-allocations = 96
-deallocations = 28
-reallocations = 107
-bytes_allocated = 184508
-bytes_deallocated = 131548
-bytes_reallocated = 42680
-net_bytes = 52960
-
-[[instances]]
 name = "glyphs_scaled_unhinted_cpu_u8_neon"
+
+[instances.cold]
 allocations = 17
 deallocations = 7
 reallocations = 65
 bytes_allocated = 38228
 bytes_deallocated = 11420
 bytes_reallocated = 24016
-net_bytes = 26808
+
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 42
+bytes_allocated = 40968
+bytes_deallocated = 11640
+bytes_reallocated = 26544
 
 [[instances]]
 name = "glyphs_scaled_unhinted_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 17
 deallocations = 7
 reallocations = 65
 bytes_allocated = 38228
 bytes_deallocated = 11420
 bytes_reallocated = 24016
-net_bytes = 26808
 
-[[instances]]
-name = "glyphs_scaled_unhinted_hybrid"
-allocations = 198
-deallocations = 168
-reallocations = 81
-bytes_allocated = 91263
-bytes_deallocated = 60821
-bytes_reallocated = 62368
-net_bytes = 30442
+[instances.warm]
+allocations = 15
+deallocations = 6
+reallocations = 42
+bytes_allocated = 40968
+bytes_deallocated = 11640
+bytes_reallocated = 26544

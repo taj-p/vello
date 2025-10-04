@@ -2,61 +2,39 @@ test = "basic_alpha_compositing"
 units = "bytes"
 
 [[instances]]
-name = "basic_alpha_compositing_cpu_f32_neon"
-allocations = 4
-deallocations = 3
-reallocations = 22
-bytes_allocated = 28840
-bytes_deallocated = 22280
-bytes_reallocated = 6336
-net_bytes = 6560
-
-[[instances]]
-name = "basic_alpha_compositing_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
-reallocations = 22
-bytes_allocated = 28840
-bytes_deallocated = 22280
-bytes_reallocated = 6336
-net_bytes = 6560
-
-[[instances]]
-name = "basic_alpha_compositing_cpu_multithreaded"
-allocations = 58
-deallocations = 17
-reallocations = 39
-bytes_allocated = 140392
-bytes_deallocated = 116896
-bytes_reallocated = 9656
-net_bytes = 23496
-
-[[instances]]
 name = "basic_alpha_compositing_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 22
 bytes_allocated = 16552
 bytes_deallocated = 9992
 bytes_reallocated = 6336
-net_bytes = 6560
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 12
+bytes_allocated = 17608
+bytes_deallocated = 9992
+bytes_reallocated = 7616
 
 [[instances]]
 name = "basic_alpha_compositing_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 22
 bytes_allocated = 16552
 bytes_deallocated = 9992
 bytes_reallocated = 6336
-net_bytes = 6560
 
-[[instances]]
-name = "basic_alpha_compositing_hybrid"
-allocations = 165
-deallocations = 145
-reallocations = 39
-bytes_allocated = 66875
-bytes_deallocated = 57129
-bytes_reallocated = 44912
-net_bytes = 9746
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 12
+bytes_allocated = 17608
+bytes_deallocated = 9992
+bytes_reallocated = 7616

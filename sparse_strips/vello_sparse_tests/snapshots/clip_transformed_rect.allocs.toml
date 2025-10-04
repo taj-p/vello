@@ -2,61 +2,39 @@ test = "clip_transformed_rect"
 units = "bytes"
 
 [[instances]]
-name = "clip_transformed_rect_cpu_f32_neon"
-allocations = 12
-deallocations = 6
-reallocations = 47
-bytes_allocated = 60416
-bytes_deallocated = 39808
-bytes_reallocated = 36008
-net_bytes = 20608
-
-[[instances]]
-name = "clip_transformed_rect_cpu_f32_scalar"
-allocations = 12
-deallocations = 6
-reallocations = 47
-bytes_allocated = 60416
-bytes_deallocated = 39808
-bytes_reallocated = 36008
-net_bytes = 20608
-
-[[instances]]
-name = "clip_transformed_rect_cpu_multithreaded"
-allocations = 72
-deallocations = 26
-reallocations = 69
-bytes_allocated = 210096
-bytes_deallocated = 180320
-bytes_reallocated = 73984
-net_bytes = 29776
-
-[[instances]]
 name = "clip_transformed_rect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 47
 bytes_allocated = 35840
 bytes_deallocated = 15232
 bytes_reallocated = 23720
-net_bytes = 20608
+
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 31
+bytes_allocated = 35680
+bytes_deallocated = 15328
+bytes_reallocated = 24896
 
 [[instances]]
 name = "clip_transformed_rect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 47
 bytes_allocated = 35840
 bytes_deallocated = 15232
 bytes_reallocated = 23720
-net_bytes = 20608
 
-[[instances]]
-name = "clip_transformed_rect_hybrid"
-allocations = 195
-deallocations = 170
-reallocations = 74
-bytes_allocated = 83374
-bytes_deallocated = 59580
-bytes_reallocated = 57208
-net_bytes = 23794
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 31
+bytes_allocated = 35680
+bytes_deallocated = 15328
+bytes_reallocated = 24896

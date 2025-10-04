@@ -2,61 +2,39 @@ test = "stroked_transformed_rect_1"
 units = "bytes"
 
 [[instances]]
-name = "stroked_transformed_rect_1_cpu_f32_neon"
-allocations = 7
-deallocations = 3
-reallocations = 13
-bytes_allocated = 27584
-bytes_deallocated = 21056
-bytes_reallocated = 5128
-net_bytes = 6528
-
-[[instances]]
-name = "stroked_transformed_rect_1_cpu_f32_scalar"
-allocations = 7
-deallocations = 3
-reallocations = 13
-bytes_allocated = 27584
-bytes_deallocated = 21056
-bytes_reallocated = 5128
-net_bytes = 6528
-
-[[instances]]
-name = "stroked_transformed_rect_1_cpu_multithreaded"
-allocations = 47
-deallocations = 18
-reallocations = 25
-bytes_allocated = 135392
-bytes_deallocated = 115736
-bytes_reallocated = 6352
-net_bytes = 19656
-
-[[instances]]
 name = "stroked_transformed_rect_1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 13
 bytes_allocated = 15296
 bytes_deallocated = 8768
 bytes_reallocated = 5128
-net_bytes = 6528
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9248
+bytes_deallocated = 8768
+bytes_reallocated = 480
 
 [[instances]]
 name = "stroked_transformed_rect_1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 13
 bytes_allocated = 15296
 bytes_deallocated = 8768
 bytes_reallocated = 5128
-net_bytes = 6528
 
-[[instances]]
-name = "stroked_transformed_rect_1_hybrid"
-allocations = 116
-deallocations = 93
-reallocations = 26
-bytes_allocated = 54971
-bytes_deallocated = 45257
-bytes_reallocated = 39000
-net_bytes = 9714
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9248
+bytes_deallocated = 8768
+bytes_reallocated = 480

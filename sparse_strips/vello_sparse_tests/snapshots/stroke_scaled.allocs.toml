@@ -2,61 +2,39 @@ test = "stroke_scaled"
 units = "bytes"
 
 [[instances]]
-name = "stroke_scaled_cpu_f32_neon"
-allocations = 12
-deallocations = 8
-reallocations = 47
-bytes_allocated = 42472
-bytes_deallocated = 23336
-bytes_reallocated = 18544
-net_bytes = 19136
-
-[[instances]]
-name = "stroke_scaled_cpu_f32_scalar"
-allocations = 12
-deallocations = 8
-reallocations = 47
-bytes_allocated = 42472
-bytes_deallocated = 23336
-bytes_reallocated = 18544
-net_bytes = 19136
-
-[[instances]]
-name = "stroke_scaled_cpu_multithreaded"
-allocations = 69
-deallocations = 23
-reallocations = 64
-bytes_allocated = 154232
-bytes_deallocated = 118048
-bytes_reallocated = 21880
-net_bytes = 36184
-
-[[instances]]
 name = "stroke_scaled_cpu_u8_neon"
+
+[instances.cold]
 allocations = 12
 deallocations = 8
 reallocations = 47
 bytes_allocated = 30184
 bytes_deallocated = 11048
 bytes_reallocated = 18544
-net_bytes = 19136
+
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 30280
+bytes_deallocated = 11048
+bytes_reallocated = 19536
 
 [[instances]]
 name = "stroke_scaled_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 12
 deallocations = 8
 reallocations = 47
 bytes_allocated = 30184
 bytes_deallocated = 11048
 bytes_reallocated = 18544
-net_bytes = 19136
 
-[[instances]]
-name = "stroke_scaled_hybrid"
-allocations = 172
-deallocations = 148
-reallocations = 63
-bytes_allocated = 81915
-bytes_deallocated = 59145
-bytes_reallocated = 56896
-net_bytes = 22770
+[instances.warm]
+allocations = 8
+deallocations = 8
+reallocations = 23
+bytes_allocated = 30280
+bytes_deallocated = 11048
+bytes_reallocated = 19536

@@ -2,61 +2,39 @@ test = "rectangle_left_of_viewport"
 units = "bytes"
 
 [[instances]]
-name = "rectangle_left_of_viewport_cpu_f32_neon"
-allocations = 4
-deallocations = 3
-reallocations = 2
-bytes_allocated = 21272
-bytes_deallocated = 20696
-bytes_reallocated = 352
-net_bytes = 576
-
-[[instances]]
-name = "rectangle_left_of_viewport_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
-reallocations = 2
-bytes_allocated = 21272
-bytes_deallocated = 20696
-bytes_reallocated = 352
-net_bytes = 576
-
-[[instances]]
-name = "rectangle_left_of_viewport_cpu_multithreaded"
-allocations = 36
-deallocations = 18
-reallocations = 11
-bytes_allocated = 126680
-bytes_deallocated = 115408
-bytes_reallocated = 1000
-net_bytes = 11272
-
-[[instances]]
 name = "rectangle_left_of_viewport_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 2
 bytes_allocated = 8984
 bytes_deallocated = 8408
 bytes_reallocated = 352
-net_bytes = 576
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 2
+bytes_allocated = 8728
+bytes_deallocated = 8408
+bytes_reallocated = 320
 
 [[instances]]
 name = "rectangle_left_of_viewport_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 2
 bytes_allocated = 8984
 bytes_deallocated = 8408
 bytes_reallocated = 352
-net_bytes = 576
 
-[[instances]]
-name = "rectangle_left_of_viewport_hybrid"
-allocations = 98
-deallocations = 78
-reallocations = 14
-bytes_allocated = 46891
-bytes_deallocated = 43129
-bytes_reallocated = 33904
-net_bytes = 3762
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 2
+bytes_allocated = 8728
+bytes_deallocated = 8408
+bytes_reallocated = 320

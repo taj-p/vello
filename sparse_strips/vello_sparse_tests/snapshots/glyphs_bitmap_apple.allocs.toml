@@ -2,51 +2,39 @@ test = "glyphs_bitmap_apple"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_bitmap_apple_cpu_f32_neon"
-allocations = 59
-deallocations = 44
-reallocations = 36
-bytes_allocated = 189178958
-bytes_deallocated = 189112332
-bytes_reallocated = 12624
-net_bytes = 66626
-
-[[instances]]
-name = "glyphs_bitmap_apple_cpu_f32_scalar"
-allocations = 59
-deallocations = 44
-reallocations = 36
-bytes_allocated = 189178958
-bytes_deallocated = 189112332
-bytes_reallocated = 12624
-net_bytes = 66626
-
-[[instances]]
-name = "glyphs_bitmap_apple_cpu_multithreaded"
-allocations = 117
-deallocations = 67
-reallocations = 62
-bytes_allocated = 189299374
-bytes_deallocated = 189220244
-bytes_reallocated = 20680
-net_bytes = 79130
-
-[[instances]]
 name = "glyphs_bitmap_apple_cpu_u8_neon"
+
+[instances.cold]
 allocations = 59
 deallocations = 44
 reallocations = 36
 bytes_allocated = 189166670
 bytes_deallocated = 189100044
 bytes_reallocated = 12624
-net_bytes = 66626
+
+[instances.warm]
+allocations = 56
+deallocations = 44
+reallocations = 22
+bytes_allocated = 189161870
+bytes_deallocated = 189100044
+bytes_reallocated = 9808
 
 [[instances]]
 name = "glyphs_bitmap_apple_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 59
 deallocations = 44
 reallocations = 36
 bytes_allocated = 189166670
 bytes_deallocated = 189100044
 bytes_reallocated = 12624
-net_bytes = 66626
+
+[instances.warm]
+allocations = 56
+deallocations = 44
+reallocations = 22
+bytes_allocated = 189161870
+bytes_deallocated = 189100044
+bytes_reallocated = 9808

@@ -2,61 +2,39 @@ test = "gradient_linear_with_y_reflect"
 units = "bytes"
 
 [[instances]]
-name = "gradient_linear_with_y_reflect_cpu_f32_neon"
-allocations = 9
-deallocations = 5
-reallocations = 23
-bytes_allocated = 96860
-bytes_deallocated = 22640
-bytes_reallocated = 6848
-net_bytes = 74220
-
-[[instances]]
-name = "gradient_linear_with_y_reflect_cpu_f32_scalar"
-allocations = 9
-deallocations = 5
-reallocations = 23
-bytes_allocated = 96860
-bytes_deallocated = 22640
-bytes_reallocated = 6848
-net_bytes = 74220
-
-[[instances]]
-name = "gradient_linear_with_y_reflect_cpu_multithreaded"
-allocations = 67
-deallocations = 21
-reallocations = 39
-bytes_allocated = 241836
-bytes_deallocated = 150232
-bytes_reallocated = 9608
-net_bytes = 91604
-
-[[instances]]
 name = "gradient_linear_with_y_reflect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 9
 deallocations = 5
 reallocations = 23
 bytes_allocated = 35384
 bytes_deallocated = 10352
 bytes_reallocated = 6848
-net_bytes = 25032
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 27000
+bytes_deallocated = 10352
+bytes_reallocated = 0
 
 [[instances]]
 name = "gradient_linear_with_y_reflect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 9
 deallocations = 5
 reallocations = 23
 bytes_allocated = 35384
 bytes_deallocated = 10352
 bytes_reallocated = 6848
-net_bytes = 25032
 
-[[instances]]
-name = "gradient_linear_with_y_reflect_hybrid"
-allocations = 173
-deallocations = 147
-reallocations = 39
-bytes_allocated = 115703
-bytes_deallocated = 53841
-bytes_reallocated = 59024
-net_bytes = 61862
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 0
+bytes_allocated = 27000
+bytes_deallocated = 10352
+bytes_reallocated = 0

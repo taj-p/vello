@@ -2,61 +2,39 @@ test = "stroked_triangle"
 units = "bytes"
 
 [[instances]]
-name = "stroked_triangle_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 10
-bytes_allocated = 29808
-bytes_deallocated = 22544
-bytes_reallocated = 6256
-net_bytes = 7264
-
-[[instances]]
-name = "stroked_triangle_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 10
-bytes_allocated = 29808
-bytes_deallocated = 22544
-bytes_reallocated = 6256
-net_bytes = 7264
-
-[[instances]]
-name = "stroked_triangle_cpu_multithreaded"
-allocations = 65
-deallocations = 25
-reallocations = 26
-bytes_allocated = 144112
-bytes_deallocated = 130288
-bytes_reallocated = 9016
-net_bytes = 13824
-
-[[instances]]
 name = "stroked_triangle_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 10
 bytes_allocated = 17520
 bytes_deallocated = 10256
 bytes_reallocated = 6256
-net_bytes = 7264
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 20
+bytes_allocated = 17392
+bytes_deallocated = 10256
+bytes_reallocated = 7136
 
 [[instances]]
 name = "stroked_triangle_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 10
 bytes_allocated = 17520
 bytes_deallocated = 10256
 bytes_reallocated = 6256
-net_bytes = 7264
 
-[[instances]]
-name = "stroked_triangle_hybrid"
-allocations = 168
-deallocations = 145
-reallocations = 25
-bytes_allocated = 64131
-bytes_deallocated = 53233
-bytes_reallocated = 42048
-net_bytes = 10898
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 20
+bytes_allocated = 17392
+bytes_deallocated = 10256
+bytes_reallocated = 7136

@@ -2,61 +2,39 @@ test = "clip_with_translation"
 units = "bytes"
 
 [[instances]]
-name = "clip_with_translation_cpu_f32_neon"
-allocations = 12
-deallocations = 6
-reallocations = 35
-bytes_allocated = 52656
-bytes_deallocated = 39728
-bytes_reallocated = 28328
-net_bytes = 12928
-
-[[instances]]
-name = "clip_with_translation_cpu_f32_scalar"
-allocations = 12
-deallocations = 6
-reallocations = 35
-bytes_allocated = 52656
-bytes_deallocated = 39728
-bytes_reallocated = 28328
-net_bytes = 12928
-
-[[instances]]
-name = "clip_with_translation_cpu_multithreaded"
-allocations = 68
-deallocations = 22
-reallocations = 58
-bytes_allocated = 230096
-bytes_deallocated = 200120
-bytes_reallocated = 66368
-net_bytes = 29976
-
-[[instances]]
 name = "clip_with_translation_cpu_u8_neon"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 35
 bytes_allocated = 28080
 bytes_deallocated = 15152
 bytes_reallocated = 16040
-net_bytes = 12928
+
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 15
+bytes_allocated = 25648
+bytes_deallocated = 15152
+bytes_reallocated = 15040
 
 [[instances]]
 name = "clip_with_translation_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 12
 deallocations = 6
 reallocations = 35
 bytes_allocated = 28080
 bytes_deallocated = 15152
 bytes_reallocated = 16040
-net_bytes = 12928
 
-[[instances]]
-name = "clip_with_translation_hybrid"
-allocations = 195
-deallocations = 170
-reallocations = 61
-bytes_allocated = 74046
-bytes_deallocated = 57932
-bytes_reallocated = 48888
-net_bytes = 16114
+[instances.warm]
+allocations = 6
+deallocations = 6
+reallocations = 15
+bytes_allocated = 25648
+bytes_deallocated = 15152
+bytes_reallocated = 15040

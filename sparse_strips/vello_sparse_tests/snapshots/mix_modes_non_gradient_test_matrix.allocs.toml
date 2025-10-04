@@ -2,61 +2,39 @@ test = "mix_modes_non_gradient_test_matrix"
 units = "bytes"
 
 [[instances]]
-name = "mix_modes_non_gradient_test_matrix_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 207
-bytes_allocated = 302208
-bytes_deallocated = 39744
-bytes_reallocated = 278496
-net_bytes = 262464
-
-[[instances]]
-name = "mix_modes_non_gradient_test_matrix_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 207
-bytes_allocated = 302208
-bytes_deallocated = 39744
-bytes_reallocated = 278496
-net_bytes = 262464
-
-[[instances]]
-name = "mix_modes_non_gradient_test_matrix_cpu_multithreaded"
-allocations = 112
-deallocations = 19
-reallocations = 393
-bytes_allocated = 636512
-bytes_deallocated = 200136
-bytes_reallocated = 463112
-net_bytes = 436376
-
-[[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 207
 bytes_allocated = 277632
 bytes_deallocated = 15168
 bytes_reallocated = 266208
-net_bytes = 262464
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 42
+bytes_allocated = 285504
+bytes_deallocated = 15168
+bytes_reallocated = 274432
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 207
 bytes_allocated = 277632
 bytes_deallocated = 15168
 bytes_reallocated = 266208
-net_bytes = 262464
 
-[[instances]]
-name = "mix_modes_non_gradient_test_matrix_hybrid"
-allocations = 1595
-deallocations = 1528
-reallocations = 939
-bytes_allocated = 743204
-bytes_deallocated = 457422
-bytes_reallocated = 514300
-net_bytes = 285782
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 42
+bytes_allocated = 285504
+bytes_deallocated = 15168
+bytes_reallocated = 274432

@@ -2,61 +2,39 @@ test = "gradient_radial_focal_on_circle"
 units = "bytes"
 
 [[instances]]
-name = "gradient_radial_focal_on_circle_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 23
-bytes_allocated = 47276
-bytes_deallocated = 22352
-bytes_reallocated = 6848
-net_bytes = 24924
-
-[[instances]]
-name = "gradient_radial_focal_on_circle_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 23
-bytes_allocated = 47276
-bytes_deallocated = 22352
-bytes_reallocated = 6848
-net_bytes = 24924
-
-[[instances]]
-name = "gradient_radial_focal_on_circle_cpu_multithreaded"
-allocations = 62
-deallocations = 18
-reallocations = 42
-bytes_allocated = 155196
-bytes_deallocated = 117056
-bytes_reallocated = 9800
-net_bytes = 38140
-
-[[instances]]
 name = "gradient_radial_focal_on_circle_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 23
 bytes_allocated = 34988
 bytes_deallocated = 10064
 bytes_reallocated = 6848
-net_bytes = 24924
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 0
+bytes_allocated = 26604
+bytes_deallocated = 10064
+bytes_reallocated = 0
 
 [[instances]]
 name = "gradient_radial_focal_on_circle_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 23
 bytes_allocated = 34988
 bytes_deallocated = 10064
 bytes_reallocated = 6848
-net_bytes = 24924
 
-[[instances]]
-name = "gradient_radial_focal_on_circle_hybrid"
-allocations = 172
-deallocations = 146
-reallocations = 39
-bytes_allocated = 102983
-bytes_deallocated = 53553
-bytes_reallocated = 71312
-net_bytes = 49430
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 0
+bytes_allocated = 26604
+bytes_deallocated = 10064
+bytes_reallocated = 0

@@ -2,51 +2,39 @@ test = "clip_clear"
 units = "bytes"
 
 [[instances]]
-name = "clip_clear_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 30
-bytes_allocated = 47096
-bytes_deallocated = 39320
-bytes_reallocated = 23904
-net_bytes = 7776
-
-[[instances]]
-name = "clip_clear_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 30
-bytes_allocated = 47096
-bytes_deallocated = 39320
-bytes_reallocated = 23904
-net_bytes = 7776
-
-[[instances]]
-name = "clip_clear_cpu_multithreaded"
-allocations = 69
-deallocations = 27
-reallocations = 49
-bytes_allocated = 196424
-bytes_deallocated = 179904
-bytes_reallocated = 59992
-net_bytes = 16520
-
-[[instances]]
 name = "clip_clear_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 30
 bytes_allocated = 22520
 bytes_deallocated = 14744
 bytes_reallocated = 11616
-net_bytes = 7776
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 27
+bytes_allocated = 22744
+bytes_deallocated = 14744
+bytes_reallocated = 12320
 
 [[instances]]
 name = "clip_clear_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 30
 bytes_allocated = 22520
 bytes_deallocated = 14744
 bytes_reallocated = 11616
-net_bytes = 7776
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 27
+bytes_allocated = 22744
+bytes_deallocated = 14744
+bytes_reallocated = 12320

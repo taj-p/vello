@@ -2,61 +2,39 @@ test = "recording_can_be_repeatedly_executed_in_layers"
 units = "bytes"
 
 [[instances]]
-name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_neon"
-allocations = 21
-deallocations = 19
-reallocations = 141
-bytes_allocated = 171128
-bytes_deallocated = 46296
-bytes_reallocated = 144368
-net_bytes = 124832
-
-[[instances]]
-name = "recording_can_be_repeatedly_executed_in_layers_cpu_f32_scalar"
-allocations = 21
-deallocations = 19
-reallocations = 141
-bytes_allocated = 171128
-bytes_deallocated = 46296
-bytes_reallocated = 144368
-net_bytes = 124832
-
-[[instances]]
-name = "recording_can_be_repeatedly_executed_in_layers_cpu_multithreaded"
-allocations = 92
-deallocations = 45
-reallocations = 167
-bytes_allocated = 330752
-bytes_deallocated = 179128
-bytes_reallocated = 189728
-net_bytes = 151624
-
-[[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_neon"
+
+[instances.cold]
 allocations = 21
 deallocations = 19
 reallocations = 141
 bytes_allocated = 146552
 bytes_deallocated = 21720
 bytes_reallocated = 132080
-net_bytes = 124832
+
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 151000
+bytes_deallocated = 21720
+bytes_reallocated = 136880
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 21
 deallocations = 19
 reallocations = 141
 bytes_allocated = 146552
 bytes_deallocated = 21720
 bytes_reallocated = 132080
-net_bytes = 124832
 
-[[instances]]
-name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
-allocations = 789
-deallocations = 741
-reallocations = 389
-bytes_allocated = 316121
-bytes_deallocated = 173539
-bytes_reallocated = 224572
-net_bytes = 142582
+[instances.warm]
+allocations = 19
+deallocations = 19
+reallocations = 43
+bytes_allocated = 151000
+bytes_deallocated = 21720
+bytes_reallocated = 136880

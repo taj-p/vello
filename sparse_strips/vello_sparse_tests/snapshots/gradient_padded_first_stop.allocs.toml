@@ -2,61 +2,39 @@ test = "gradient_padded_first_stop"
 units = "bytes"
 
 [[instances]]
-name = "gradient_padded_first_stop_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 23
-bytes_allocated = 39024
-bytes_deallocated = 22328
-bytes_reallocated = 6848
-net_bytes = 16696
-
-[[instances]]
-name = "gradient_padded_first_stop_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 23
-bytes_allocated = 39024
-bytes_deallocated = 22328
-bytes_reallocated = 6848
-net_bytes = 16696
-
-[[instances]]
-name = "gradient_padded_first_stop_cpu_multithreaded"
-allocations = 64
-deallocations = 24
-reallocations = 39
-bytes_allocated = 153280
-bytes_deallocated = 130072
-bytes_reallocated = 9608
-net_bytes = 23208
-
-[[instances]]
 name = "gradient_padded_first_stop_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 23
 bytes_allocated = 20556
 bytes_deallocated = 10040
 bytes_reallocated = 6848
-net_bytes = 10516
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 0
+bytes_allocated = 12172
+bytes_deallocated = 10040
+bytes_reallocated = 0
 
 [[instances]]
 name = "gradient_padded_first_stop_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 23
 bytes_allocated = 20556
 bytes_deallocated = 10040
 bytes_reallocated = 6848
-net_bytes = 10516
 
-[[instances]]
-name = "gradient_padded_first_stop_hybrid"
-allocations = 172
-deallocations = 146
-reallocations = 39
-bytes_allocated = 100875
-bytes_deallocated = 53529
-bytes_reallocated = 73360
-net_bytes = 47346
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 0
+bytes_allocated = 12172
+bytes_deallocated = 10040
+bytes_reallocated = 0

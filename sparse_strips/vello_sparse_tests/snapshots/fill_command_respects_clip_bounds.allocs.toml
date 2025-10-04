@@ -2,61 +2,39 @@ test = "fill_command_respects_clip_bounds"
 units = "bytes"
 
 [[instances]]
-name = "fill_command_respects_clip_bounds_cpu_f32_neon"
-allocations = 37
-deallocations = 5
-reallocations = 51
-bytes_allocated = 95272
-bytes_deallocated = 70120
-bytes_reallocated = 37136
-net_bytes = 25152
-
-[[instances]]
-name = "fill_command_respects_clip_bounds_cpu_f32_scalar"
-allocations = 37
-deallocations = 5
-reallocations = 51
-bytes_allocated = 95272
-bytes_deallocated = 70120
-bytes_reallocated = 37136
-net_bytes = 25152
-
-[[instances]]
-name = "fill_command_respects_clip_bounds_cpu_multithreaded"
-allocations = 65
-deallocations = 21
-reallocations = 55
-bytes_allocated = 264480
-bytes_deallocated = 230512
-bytes_reallocated = 70248
-net_bytes = 33968
-
-[[instances]]
 name = "fill_command_respects_clip_bounds_cpu_u8_neon"
+
+[instances.cold]
 allocations = 37
 deallocations = 5
 reallocations = 51
 bytes_allocated = 70696
 bytes_deallocated = 45544
 bytes_reallocated = 24848
-net_bytes = 25152
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 28
+bytes_allocated = 61736
+bytes_deallocated = 45544
+bytes_reallocated = 20512
 
 [[instances]]
 name = "fill_command_respects_clip_bounds_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 37
 deallocations = 5
 reallocations = 51
 bytes_allocated = 70696
 bytes_deallocated = 45544
 bytes_reallocated = 24848
-net_bytes = 25152
 
-[[instances]]
-name = "fill_command_respects_clip_bounds_hybrid"
-allocations = 1495
-deallocations = 1444
-reallocations = 79
-bytes_allocated = 215582
-bytes_deallocated = 187244
-bytes_reallocated = 57888
-net_bytes = 28338
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 28
+bytes_allocated = 61736
+bytes_deallocated = 45544
+bytes_reallocated = 20512

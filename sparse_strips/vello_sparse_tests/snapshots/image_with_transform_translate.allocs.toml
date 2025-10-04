@@ -2,61 +2,39 @@ test = "image_with_transform_translate"
 units = "bytes"
 
 [[instances]]
-name = "image_with_transform_translate_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_translate_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_translate_cpu_multithreaded"
-allocations = 78
-deallocations = 34
-reallocations = 33
-bytes_allocated = 275794
-bytes_deallocated = 260306
-bytes_reallocated = 6015
-net_bytes = 15488
-
-[[instances]]
 name = "image_with_transform_translate_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
 
 [[instances]]
 name = "image_with_transform_translate_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
 
-[[instances]]
-name = "image_with_transform_translate_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 30
-bytes_allocated = 171780
-bytes_deallocated = 162603
-bytes_reallocated = 38414
-net_bytes = 9177
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103

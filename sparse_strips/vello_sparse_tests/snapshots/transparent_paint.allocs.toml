@@ -2,61 +2,39 @@ test = "transparent_paint"
 units = "bytes"
 
 [[instances]]
-name = "transparent_paint_cpu_f32_neon"
-allocations = 34
-deallocations = 4
-reallocations = 43
-bytes_allocated = 38600
-bytes_deallocated = 22504
-bytes_reallocated = 11432
-net_bytes = 16096
-
-[[instances]]
-name = "transparent_paint_cpu_f32_scalar"
-allocations = 34
-deallocations = 4
-reallocations = 43
-bytes_allocated = 38600
-bytes_deallocated = 22504
-bytes_reallocated = 11432
-net_bytes = 16096
-
-[[instances]]
-name = "transparent_paint_cpu_multithreaded"
-allocations = 61
-deallocations = 24
-reallocations = 45
-bytes_allocated = 145232
-bytes_deallocated = 130248
-bytes_reallocated = 12168
-net_bytes = 14984
-
-[[instances]]
 name = "transparent_paint_cpu_u8_neon"
+
+[instances.cold]
 allocations = 34
 deallocations = 4
 reallocations = 43
 bytes_allocated = 26312
 bytes_deallocated = 10216
 bytes_reallocated = 11432
-net_bytes = 16096
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 20
+bytes_allocated = 20392
+bytes_deallocated = 10216
+bytes_reallocated = 10176
 
 [[instances]]
 name = "transparent_paint_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 34
 deallocations = 4
 reallocations = 43
 bytes_allocated = 26312
 bytes_deallocated = 10216
 bytes_reallocated = 11432
-net_bytes = 16096
 
-[[instances]]
-name = "transparent_paint_hybrid"
-allocations = 108
-deallocations = 104
-reallocations = 1
-bytes_allocated = 14966
-bytes_deallocated = 13906
-bytes_reallocated = 544
-net_bytes = 1060
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 20
+bytes_allocated = 20392
+bytes_deallocated = 10216
+bytes_reallocated = 10176

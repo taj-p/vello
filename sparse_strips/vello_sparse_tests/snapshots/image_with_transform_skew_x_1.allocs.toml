@@ -2,61 +2,39 @@ test = "image_with_transform_skew_x_1"
 units = "bytes"
 
 [[instances]]
-name = "image_with_transform_skew_x_1_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 15
-bytes_allocated = 131970
-bytes_deallocated = 126466
-bytes_reallocated = 3575
-net_bytes = 5504
-
-[[instances]]
-name = "image_with_transform_skew_x_1_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 15
-bytes_allocated = 131970
-bytes_deallocated = 126466
-bytes_reallocated = 3575
-net_bytes = 5504
-
-[[instances]]
-name = "image_with_transform_skew_x_1_cpu_multithreaded"
-allocations = 90
-deallocations = 41
-reallocations = 34
-bytes_allocated = 254290
-bytes_deallocated = 236338
-bytes_reallocated = 6527
-net_bytes = 17952
-
-[[instances]]
 name = "image_with_transform_skew_x_1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 15
 bytes_allocated = 119682
 bytes_deallocated = 114178
 bytes_reallocated = 3575
-net_bytes = 5504
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
 
 [[instances]]
 name = "image_with_transform_skew_x_1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 15
 bytes_allocated = 119682
 bytes_deallocated = 114178
 bytes_reallocated = 3575
-net_bytes = 5504
 
-[[instances]]
-name = "image_with_transform_skew_x_1_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 31
-bytes_allocated = 172292
-bytes_deallocated = 162603
-bytes_reallocated = 38926
-net_bytes = 9689
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103

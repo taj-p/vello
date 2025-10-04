@@ -2,61 +2,39 @@ test = "composed_layers_nesting"
 units = "bytes"
 
 [[instances]]
-name = "composed_layers_nesting_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 6
-bytes_allocated = 70896
-bytes_deallocated = 69776
-bytes_reallocated = 49920
-net_bytes = 1120
-
-[[instances]]
-name = "composed_layers_nesting_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 6
-bytes_allocated = 70896
-bytes_deallocated = 69776
-bytes_reallocated = 49920
-net_bytes = 1120
-
-[[instances]]
-name = "composed_layers_nesting_cpu_multithreaded"
-allocations = 40
-deallocations = 23
-reallocations = 16
-bytes_allocated = 162608
-bytes_deallocated = 157112
-bytes_reallocated = 53496
-net_bytes = 5496
-
-[[instances]]
 name = "composed_layers_nesting_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 6
 bytes_allocated = 21744
 bytes_deallocated = 20624
 bytes_reallocated = 13056
-net_bytes = 1120
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 21392
+bytes_deallocated = 20624
+bytes_reallocated = 13056
 
 [[instances]]
 name = "composed_layers_nesting_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 6
 bytes_allocated = 21744
 bytes_deallocated = 20624
 bytes_reallocated = 13056
-net_bytes = 1120
 
-[[instances]]
-name = "composed_layers_nesting_hybrid"
-allocations = 286
-deallocations = 258
-reallocations = 55
-bytes_allocated = 66308
-bytes_deallocated = 59614
-bytes_reallocated = 40508
-net_bytes = 6694
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 4
+bytes_allocated = 21392
+bytes_deallocated = 20624
+bytes_reallocated = 13056

@@ -2,61 +2,39 @@ test = "clip_single_wide_tile"
 units = "bytes"
 
 [[instances]]
-name = "clip_single_wide_tile_cpu_f32_neon"
-allocations = 12
-deallocations = 9
-reallocations = 11
-bytes_allocated = 73208
-bytes_deallocated = 71192
-bytes_reallocated = 51360
-net_bytes = 2016
-
-[[instances]]
-name = "clip_single_wide_tile_cpu_f32_scalar"
-allocations = 12
-deallocations = 9
-reallocations = 11
-bytes_allocated = 73208
-bytes_deallocated = 71192
-bytes_reallocated = 51360
-net_bytes = 2016
-
-[[instances]]
-name = "clip_single_wide_tile_cpu_multithreaded"
-allocations = 42
-deallocations = 22
-reallocations = 25
-bytes_allocated = 160488
-bytes_deallocated = 145424
-bytes_reallocated = 56312
-net_bytes = 15064
-
-[[instances]]
 name = "clip_single_wide_tile_cpu_u8_neon"
+
+[instances.cold]
 allocations = 12
 deallocations = 9
 reallocations = 11
 bytes_allocated = 24056
 bytes_deallocated = 22040
 bytes_reallocated = 14496
-net_bytes = 2016
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 23576
+bytes_deallocated = 22040
+bytes_reallocated = 14496
 
 [[instances]]
 name = "clip_single_wide_tile_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 12
 deallocations = 9
 reallocations = 11
 bytes_allocated = 24056
 bytes_deallocated = 22040
 bytes_reallocated = 14496
-net_bytes = 2016
 
-[[instances]]
-name = "clip_single_wide_tile_hybrid"
-allocations = 211
-deallocations = 185
-reallocations = 47
-bytes_allocated = 61254
-bytes_deallocated = 54712
-bytes_reallocated = 39652
-net_bytes = 6542
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 7
+bytes_allocated = 23576
+bytes_deallocated = 22040
+bytes_reallocated = 14496

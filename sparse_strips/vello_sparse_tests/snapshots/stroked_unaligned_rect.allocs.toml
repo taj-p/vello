@@ -2,61 +2,39 @@ test = "stroked_unaligned_rect"
 units = "bytes"
 
 [[instances]]
-name = "stroked_unaligned_rect_cpu_f32_neon"
-allocations = 7
-deallocations = 3
-reallocations = 16
-bytes_allocated = 28064
-bytes_deallocated = 21056
-bytes_reallocated = 5608
-net_bytes = 7008
-
-[[instances]]
-name = "stroked_unaligned_rect_cpu_f32_scalar"
-allocations = 7
-deallocations = 3
-reallocations = 16
-bytes_allocated = 28064
-bytes_deallocated = 21056
-bytes_reallocated = 5608
-net_bytes = 7008
-
-[[instances]]
-name = "stroked_unaligned_rect_cpu_multithreaded"
-allocations = 51
-deallocations = 25
-reallocations = 28
-bytes_allocated = 139808
-bytes_deallocated = 128872
-bytes_reallocated = 6832
-net_bytes = 10936
-
-[[instances]]
 name = "stroked_unaligned_rect_cpu_u8_neon"
-allocations = 7
-deallocations = 5
-reallocations = 16
-bytes_allocated = 15776
-bytes_deallocated = 8968
-bytes_reallocated = 5608
-net_bytes = 6808
 
-[[instances]]
-name = "stroked_unaligned_rect_cpu_u8_scalar"
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 16
 bytes_allocated = 15776
 bytes_deallocated = 8768
 bytes_reallocated = 5608
-net_bytes = 7008
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 2
+bytes_allocated = 9088
+bytes_deallocated = 8768
+bytes_reallocated = 320
 
 [[instances]]
-name = "stroked_unaligned_rect_hybrid"
-allocations = 116
-deallocations = 93
-reallocations = 29
-bytes_allocated = 55531
-bytes_deallocated = 45337
-bytes_reallocated = 39480
-net_bytes = 10194
+name = "stroked_unaligned_rect_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 7
+deallocations = 3
+reallocations = 16
+bytes_allocated = 15776
+bytes_deallocated = 8768
+bytes_reallocated = 5608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 2
+bytes_allocated = 9088
+bytes_deallocated = 8768
+bytes_reallocated = 320

@@ -2,61 +2,39 @@ test = "gradient_color_alpha"
 units = "bytes"
 
 [[instances]]
-name = "gradient_color_alpha_cpu_f32_neon"
-allocations = 8
-deallocations = 4
-reallocations = 2
-bytes_allocated = 28404
-bytes_deallocated = 21440
-bytes_reallocated = 1248
-net_bytes = 6964
-
-[[instances]]
-name = "gradient_color_alpha_cpu_f32_scalar"
-allocations = 8
-deallocations = 4
-reallocations = 2
-bytes_allocated = 28404
-bytes_deallocated = 21440
-bytes_reallocated = 1248
-net_bytes = 6964
-
-[[instances]]
-name = "gradient_color_alpha_cpu_multithreaded"
-allocations = 50
-deallocations = 19
-reallocations = 17
-bytes_allocated = 167988
-bytes_deallocated = 148968
-bytes_reallocated = 3496
-net_bytes = 19020
-
-[[instances]]
 name = "gradient_color_alpha_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 2
 bytes_allocated = 13008
 bytes_deallocated = 9152
 bytes_reallocated = 1248
-net_bytes = 3856
+
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 14192
+bytes_deallocated = 9152
+bytes_reallocated = 3968
 
 [[instances]]
 name = "gradient_color_alpha_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 4
 reallocations = 2
 bytes_allocated = 13008
 bytes_deallocated = 9152
 bytes_reallocated = 1248
-net_bytes = 3856
 
-[[instances]]
-name = "gradient_color_alpha_hybrid"
-allocations = 136
-deallocations = 110
-reallocations = 17
-bytes_allocated = 88319
-bytes_deallocated = 47633
-bytes_reallocated = 67504
-net_bytes = 40686
+[instances.warm]
+allocations = 6
+deallocations = 4
+reallocations = 13
+bytes_allocated = 14192
+bytes_deallocated = 9152
+bytes_reallocated = 3968

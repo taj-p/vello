@@ -2,61 +2,39 @@ test = "filling_unclosed_path_1"
 units = "bytes"
 
 [[instances]]
-name = "filling_unclosed_path_1_cpu_f32_neon"
-allocations = 4
-deallocations = 4
-reallocations = 11
-bytes_allocated = 25128
-bytes_deallocated = 22504
-bytes_reallocated = 2624
-net_bytes = 2624
-
-[[instances]]
-name = "filling_unclosed_path_1_cpu_f32_scalar"
-allocations = 4
-deallocations = 4
-reallocations = 11
-bytes_allocated = 25128
-bytes_deallocated = 22504
-bytes_reallocated = 2624
-net_bytes = 2624
-
-[[instances]]
-name = "filling_unclosed_path_1_cpu_multithreaded"
-allocations = 57
-deallocations = 18
-reallocations = 27
-bytes_allocated = 134232
-bytes_deallocated = 117120
-bytes_reallocated = 5384
-net_bytes = 17112
-
-[[instances]]
 name = "filling_unclosed_path_1_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 11
 bytes_allocated = 12840
 bytes_deallocated = 10216
 bytes_reallocated = 2624
-net_bytes = 2624
+
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 12264
+bytes_deallocated = 10216
+bytes_reallocated = 2048
 
 [[instances]]
 name = "filling_unclosed_path_1_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 4
 reallocations = 11
 bytes_allocated = 12840
 bytes_deallocated = 10216
 bytes_reallocated = 2624
-net_bytes = 2624
 
-[[instances]]
-name = "filling_unclosed_path_1_hybrid"
-allocations = 164
-deallocations = 144
-reallocations = 26
-bytes_allocated = 59275
-bytes_deallocated = 53017
-bytes_reallocated = 38416
-net_bytes = 6258
+[instances.warm]
+allocations = 4
+deallocations = 4
+reallocations = 1
+bytes_allocated = 12264
+bytes_deallocated = 10216
+bytes_reallocated = 2048

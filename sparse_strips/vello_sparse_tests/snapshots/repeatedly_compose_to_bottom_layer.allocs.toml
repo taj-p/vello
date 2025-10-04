@@ -2,61 +2,39 @@ test = "repeatedly_compose_to_bottom_layer"
 units = "bytes"
 
 [[instances]]
-name = "repeatedly_compose_to_bottom_layer_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 5
-bytes_allocated = 38128
-bytes_deallocated = 37008
-bytes_reallocated = 17152
-net_bytes = 1120
-
-[[instances]]
-name = "repeatedly_compose_to_bottom_layer_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 5
-bytes_allocated = 38128
-bytes_deallocated = 37008
-bytes_reallocated = 17152
-net_bytes = 1120
-
-[[instances]]
-name = "repeatedly_compose_to_bottom_layer_cpu_multithreaded"
-allocations = 35
-deallocations = 21
-reallocations = 13
-bytes_allocated = 125008
-bytes_deallocated = 124272
-bytes_reallocated = 19000
-net_bytes = 736
-
-[[instances]]
 name = "repeatedly_compose_to_bottom_layer_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 5
 bytes_allocated = 13552
 bytes_deallocated = 12432
 bytes_reallocated = 4864
-net_bytes = 1120
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 13200
+bytes_deallocated = 12432
+bytes_reallocated = 4864
 
 [[instances]]
 name = "repeatedly_compose_to_bottom_layer_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 5
 bytes_allocated = 13552
 bytes_deallocated = 12432
 bytes_reallocated = 4864
-net_bytes = 1120
 
-[[instances]]
-name = "repeatedly_compose_to_bottom_layer_hybrid"
-allocations = 224
-deallocations = 199
-reallocations = 43
-bytes_allocated = 59916
-bytes_deallocated = 54206
-bytes_reallocated = 38164
-net_bytes = 5710
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 13200
+bytes_deallocated = 12432
+bytes_reallocated = 4864

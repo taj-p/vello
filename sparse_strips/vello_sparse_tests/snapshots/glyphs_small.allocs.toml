@@ -2,61 +2,39 @@ test = "glyphs_small"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_small_cpu_f32_neon"
-allocations = 25
-deallocations = 8
-reallocations = 35
-bytes_allocated = 38812
-bytes_deallocated = 23796
-bytes_reallocated = 11088
-net_bytes = 15016
-
-[[instances]]
-name = "glyphs_small_cpu_f32_scalar"
-allocations = 25
-deallocations = 8
-reallocations = 35
-bytes_allocated = 38812
-bytes_deallocated = 23796
-bytes_reallocated = 11088
-net_bytes = 15016
-
-[[instances]]
-name = "glyphs_small_cpu_multithreaded"
-allocations = 69
-deallocations = 24
-reallocations = 60
-bytes_allocated = 190372
-bytes_deallocated = 151420
-bytes_reallocated = 24408
-net_bytes = 38952
-
-[[instances]]
 name = "glyphs_small_cpu_u8_neon"
-allocations = 26
-deallocations = 13
-reallocations = 35
-bytes_allocated = 28596
-bytes_deallocated = 11860
-bytes_reallocated = 11088
-net_bytes = 16736
 
-[[instances]]
-name = "glyphs_small_cpu_u8_scalar"
+[instances.cold]
 allocations = 25
 deallocations = 8
 reallocations = 35
 bytes_allocated = 26524
 bytes_deallocated = 11508
 bytes_reallocated = 11088
-net_bytes = 15016
+
+[instances.warm]
+allocations = 22
+deallocations = 7
+reallocations = 26
+bytes_allocated = 26256
+bytes_deallocated = 11728
+bytes_reallocated = 11056
 
 [[instances]]
-name = "glyphs_small_hybrid"
-allocations = 119
-deallocations = 82
-reallocations = 49
-bytes_allocated = 65807
-bytes_deallocated = 47157
-bytes_reallocated = 45600
-net_bytes = 18650
+name = "glyphs_small_cpu_u8_scalar"
+
+[instances.cold]
+allocations = 25
+deallocations = 8
+reallocations = 35
+bytes_allocated = 26524
+bytes_deallocated = 11508
+bytes_reallocated = 11088
+
+[instances.warm]
+allocations = 22
+deallocations = 7
+reallocations = 26
+bytes_allocated = 26256
+bytes_deallocated = 11728
+bytes_reallocated = 11056

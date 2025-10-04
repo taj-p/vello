@@ -2,61 +2,39 @@ test = "do_not_panic_on_multiple_flushes"
 units = "bytes"
 
 [[instances]]
-name = "do_not_panic_on_multiple_flushes_cpu_f32_neon"
-allocations = 4
-deallocations = 3
-reallocations = 2
-bytes_allocated = 22888
-bytes_deallocated = 22280
-bytes_reallocated = 384
-net_bytes = 608
-
-[[instances]]
-name = "do_not_panic_on_multiple_flushes_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
-reallocations = 2
-bytes_allocated = 22888
-bytes_deallocated = 22280
-bytes_reallocated = 384
-net_bytes = 608
-
-[[instances]]
-name = "do_not_panic_on_multiple_flushes_cpu_multithreaded"
-allocations = 84
-deallocations = 32
-reallocations = 19
-bytes_allocated = 152016
-bytes_deallocated = 133712
-bytes_reallocated = 2664
-net_bytes = 18304
-
-[[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 2
 bytes_allocated = 10600
 bytes_deallocated = 9992
 bytes_reallocated = 384
-net_bytes = 608
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 0
+bytes_allocated = 9992
+bytes_deallocated = 9992
+bytes_reallocated = 0
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 2
 bytes_allocated = 10600
 bytes_deallocated = 9992
 bytes_reallocated = 384
-net_bytes = 608
 
-[[instances]]
-name = "do_not_panic_on_multiple_flushes_hybrid"
-allocations = 166
-deallocations = 146
-reallocations = 18
-bytes_allocated = 56171
-bytes_deallocated = 52377
-bytes_reallocated = 35344
-net_bytes = 3794
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 0
+bytes_allocated = 9992
+bytes_deallocated = 9992
+bytes_reallocated = 0

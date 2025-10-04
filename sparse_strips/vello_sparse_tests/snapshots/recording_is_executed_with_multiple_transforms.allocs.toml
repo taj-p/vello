@@ -2,61 +2,39 @@ test = "recording_is_executed_with_multiple_transforms"
 units = "bytes"
 
 [[instances]]
-name = "recording_is_executed_with_multiple_transforms_cpu_f32_neon"
-allocations = 24
-deallocations = 14
-reallocations = 22
-bytes_allocated = 31924
-bytes_deallocated = 28248
-bytes_reallocated = 4752
-net_bytes = 3676
-
-[[instances]]
-name = "recording_is_executed_with_multiple_transforms_cpu_f32_scalar"
-allocations = 24
-deallocations = 14
-reallocations = 22
-bytes_allocated = 31924
-bytes_deallocated = 28248
-bytes_reallocated = 4752
-net_bytes = 3676
-
-[[instances]]
-name = "recording_is_executed_with_multiple_transforms_cpu_multithreaded"
-allocations = 83
-deallocations = 42
-reallocations = 43
-bytes_allocated = 147788
-bytes_deallocated = 136328
-bytes_reallocated = 8616
-net_bytes = 11460
-
-[[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_u8_neon"
+
+[instances.cold]
 allocations = 24
 deallocations = 14
 reallocations = 22
 bytes_allocated = 19636
 bytes_deallocated = 15960
 bytes_reallocated = 4752
-net_bytes = 3676
+
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 19528
+bytes_deallocated = 15960
+bytes_reallocated = 5552
 
 [[instances]]
 name = "recording_is_executed_with_multiple_transforms_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 24
 deallocations = 14
 reallocations = 22
 bytes_allocated = 19636
 bytes_deallocated = 15960
 bytes_reallocated = 4752
-net_bytes = 3676
 
-[[instances]]
-name = "recording_is_executed_with_multiple_transforms_hybrid"
-allocations = 150
-deallocations = 121
-reallocations = 38
-bytes_allocated = 63127
-bytes_deallocated = 56073
-bytes_reallocated = 40064
-net_bytes = 7054
+[instances.warm]
+allocations = 21
+deallocations = 14
+reallocations = 20
+bytes_allocated = 19528
+bytes_deallocated = 15960
+bytes_reallocated = 5552

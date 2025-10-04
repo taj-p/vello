@@ -2,61 +2,39 @@ test = "image_bilinear_10x_scale_2"
 units = "bytes"
 
 [[instances]]
-name = "image_bilinear_10x_scale_2_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 134342
-bytes_deallocated = 125886
-bytes_reallocated = 6903
-net_bytes = 8456
-
-[[instances]]
-name = "image_bilinear_10x_scale_2_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 134342
-bytes_deallocated = 125886
-bytes_reallocated = 6903
-net_bytes = 8456
-
-[[instances]]
-name = "image_bilinear_10x_scale_2_cpu_multithreaded"
-allocations = 77
-deallocations = 30
-reallocations = 43
-bytes_allocated = 243926
-bytes_deallocated = 220598
-bytes_reallocated = 9855
-net_bytes = 23328
-
-[[instances]]
 name = "image_bilinear_10x_scale_2_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 122054
 bytes_deallocated = 113598
 bytes_reallocated = 6903
-net_bytes = 8456
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 113670
+bytes_deallocated = 113598
+bytes_reallocated = 55
 
 [[instances]]
 name = "image_bilinear_10x_scale_2_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 122054
 bytes_deallocated = 113598
 bytes_reallocated = 6903
-net_bytes = 8456
 
-[[instances]]
-name = "image_bilinear_10x_scale_2_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 41
-bytes_allocated = 175176
-bytes_deallocated = 162031
-bytes_reallocated = 42382
-net_bytes = 13145
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 113670
+bytes_deallocated = 113598
+bytes_reallocated = 55

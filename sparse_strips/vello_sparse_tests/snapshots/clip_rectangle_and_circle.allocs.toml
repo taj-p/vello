@@ -2,61 +2,39 @@ test = "clip_rectangle_and_circle"
 units = "bytes"
 
 [[instances]]
-name = "clip_rectangle_and_circle_cpu_f32_neon"
-allocations = 16
-deallocations = 9
-reallocations = 51
-bytes_allocated = 98344
-bytes_deallocated = 72904
-bytes_reallocated = 73384
-net_bytes = 25440
-
-[[instances]]
-name = "clip_rectangle_and_circle_cpu_f32_scalar"
-allocations = 16
-deallocations = 9
-reallocations = 51
-bytes_allocated = 98344
-bytes_deallocated = 72904
-bytes_reallocated = 73384
-net_bytes = 25440
-
-[[instances]]
-name = "clip_rectangle_and_circle_cpu_multithreaded"
-allocations = 75
-deallocations = 30
-reallocations = 78
-bytes_allocated = 311640
-bytes_deallocated = 279048
-bytes_reallocated = 178144
-net_bytes = 32592
-
-[[instances]]
 name = "clip_rectangle_and_circle_cpu_u8_neon"
+
+[instances.cold]
 allocations = 16
 deallocations = 9
 reallocations = 51
 bytes_allocated = 49192
 bytes_deallocated = 23752
 bytes_reallocated = 36520
-net_bytes = 25440
+
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 45064
+bytes_deallocated = 23752
+bytes_reallocated = 34048
 
 [[instances]]
 name = "clip_rectangle_and_circle_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 16
 deallocations = 9
 reallocations = 51
 bytes_allocated = 49192
 bytes_deallocated = 23752
 bytes_reallocated = 36520
-net_bytes = 25440
 
-[[instances]]
-name = "clip_rectangle_and_circle_hybrid"
-allocations = 222
-deallocations = 195
-reallocations = 95
-bytes_allocated = 94749
-bytes_deallocated = 65743
-bytes_reallocated = 65948
-net_bytes = 29006
+[instances.warm]
+allocations = 9
+deallocations = 9
+reallocations = 18
+bytes_allocated = 45064
+bytes_deallocated = 23752
+bytes_reallocated = 34048

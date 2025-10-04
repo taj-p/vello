@@ -2,61 +2,39 @@ test = "oversized_star"
 units = "bytes"
 
 [[instances]]
-name = "oversized_star_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 70
-bytes_allocated = 67640
-bytes_deallocated = 24120
-bytes_reallocated = 41784
-net_bytes = 43520
-
-[[instances]]
-name = "oversized_star_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 70
-bytes_allocated = 67640
-bytes_deallocated = 24120
-bytes_reallocated = 41784
-net_bytes = 43520
-
-[[instances]]
-name = "oversized_star_cpu_multithreaded"
-allocations = 67
-deallocations = 26
-reallocations = 88
-bytes_allocated = 184104
-bytes_deallocated = 131960
-bytes_reallocated = 47472
-net_bytes = 52144
-
-[[instances]]
 name = "oversized_star_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 70
 bytes_allocated = 55352
 bytes_deallocated = 11832
 bytes_reallocated = 41784
-net_bytes = 43520
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 25
+bytes_allocated = 30584
+bytes_deallocated = 11832
+bytes_reallocated = 20320
 
 [[instances]]
 name = "oversized_star_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 70
 bytes_allocated = 55352
 bytes_deallocated = 11832
 bytes_reallocated = 41784
-net_bytes = 43520
 
-[[instances]]
-name = "oversized_star_hybrid"
-allocations = 168
-deallocations = 145
-reallocations = 87
-bytes_allocated = 112859
-bytes_deallocated = 65705
-bytes_reallocated = 85256
-net_bytes = 47154
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 25
+bytes_allocated = 30584
+bytes_deallocated = 11832
+bytes_reallocated = 20320

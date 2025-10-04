@@ -2,61 +2,39 @@ test = "clip_wrong_command"
 units = "bytes"
 
 [[instances]]
-name = "clip_wrong_command_cpu_f32_neon"
-allocations = 17
-deallocations = 10
-reallocations = 19
-bytes_allocated = 80968
-bytes_deallocated = 72712
-bytes_reallocated = 57120
-net_bytes = 8256
-
-[[instances]]
-name = "clip_wrong_command_cpu_f32_scalar"
-allocations = 17
-deallocations = 10
-reallocations = 19
-bytes_allocated = 80968
-bytes_deallocated = 72712
-bytes_reallocated = 57120
-net_bytes = 8256
-
-[[instances]]
-name = "clip_wrong_command_cpu_multithreaded"
-allocations = 63
-deallocations = 32
-reallocations = 35
-bytes_allocated = 227096
-bytes_deallocated = 213296
-bytes_reallocated = 92408
-net_bytes = 13800
-
-[[instances]]
 name = "clip_wrong_command_cpu_u8_neon"
+
+[instances.cold]
 allocations = 17
 deallocations = 10
 reallocations = 19
 bytes_allocated = 31816
 bytes_deallocated = 23560
 bytes_reallocated = 20256
-net_bytes = 8256
+
+[instances.warm]
+allocations = 10
+deallocations = 10
+reallocations = 12
+bytes_allocated = 29096
+bytes_deallocated = 23560
+bytes_reallocated = 18592
 
 [[instances]]
 name = "clip_wrong_command_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 17
 deallocations = 10
 reallocations = 19
 bytes_allocated = 31816
 bytes_deallocated = 23560
 bytes_reallocated = 20256
-net_bytes = 8256
 
-[[instances]]
-name = "clip_wrong_command_hybrid"
-allocations = 187
-deallocations = 164
-reallocations = 52
-bytes_allocated = 65421
-bytes_deallocated = 53151
-bytes_reallocated = 43860
-net_bytes = 12270
+[instances.warm]
+allocations = 10
+deallocations = 10
+reallocations = 12
+bytes_allocated = 29096
+bytes_deallocated = 23560
+bytes_reallocated = 18592

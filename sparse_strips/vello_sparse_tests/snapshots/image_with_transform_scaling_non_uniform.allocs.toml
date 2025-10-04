@@ -2,61 +2,39 @@ test = "image_with_transform_scaling_non_uniform"
 units = "bytes"
 
 [[instances]]
-name = "image_with_transform_scaling_non_uniform_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_scaling_non_uniform_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 14
-bytes_allocated = 131458
-bytes_deallocated = 126466
-bytes_reallocated = 3063
-net_bytes = 4992
-
-[[instances]]
-name = "image_with_transform_scaling_non_uniform_cpu_multithreaded"
-allocations = 86
-deallocations = 38
-reallocations = 33
-bytes_allocated = 231362
-bytes_deallocated = 213970
-bytes_reallocated = 6015
-net_bytes = 17392
-
-[[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103
 
 [[instances]]
 name = "image_with_transform_scaling_non_uniform_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 14
 bytes_allocated = 119170
 bytes_deallocated = 114178
 bytes_reallocated = 3063
-net_bytes = 4992
 
-[[instances]]
-name = "image_with_transform_scaling_non_uniform_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 30
-bytes_allocated = 171780
-bytes_deallocated = 162603
-bytes_reallocated = 38414
-net_bytes = 9177
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 2
+bytes_allocated = 116674
+bytes_deallocated = 114178
+bytes_reallocated = 2103

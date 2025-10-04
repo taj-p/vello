@@ -2,61 +2,39 @@ test = "filled_transformed_rect_4"
 units = "bytes"
 
 [[instances]]
-name = "filled_transformed_rect_4_cpu_f32_neon"
-allocations = 4
-deallocations = 3
-reallocations = 3
-bytes_allocated = 22176
-bytes_deallocated = 21056
-bytes_reallocated = 896
-net_bytes = 1120
-
-[[instances]]
-name = "filled_transformed_rect_4_cpu_f32_scalar"
-allocations = 4
-deallocations = 3
-reallocations = 3
-bytes_allocated = 22176
-bytes_deallocated = 21056
-bytes_reallocated = 896
-net_bytes = 1120
-
-[[instances]]
-name = "filled_transformed_rect_4_cpu_multithreaded"
-allocations = 40
-deallocations = 17
-reallocations = 15
-bytes_allocated = 127024
-bytes_deallocated = 115672
-bytes_reallocated = 2120
-net_bytes = 11352
-
-[[instances]]
 name = "filled_transformed_rect_4_cpu_u8_neon"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 3
 bytes_allocated = 9888
 bytes_deallocated = 8768
 bytes_reallocated = 896
-net_bytes = 1120
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 5
+bytes_allocated = 9728
+bytes_deallocated = 8768
+bytes_reallocated = 960
 
 [[instances]]
 name = "filled_transformed_rect_4_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 4
 deallocations = 3
 reallocations = 3
 bytes_allocated = 9888
 bytes_deallocated = 8768
 bytes_reallocated = 896
-net_bytes = 1120
 
-[[instances]]
-name = "filled_transformed_rect_4_hybrid"
-allocations = 113
-deallocations = 93
-reallocations = 16
-bytes_allocated = 49595
-bytes_deallocated = 45289
-bytes_reallocated = 34768
-net_bytes = 4306
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 5
+bytes_allocated = 9728
+bytes_deallocated = 8768
+bytes_reallocated = 960

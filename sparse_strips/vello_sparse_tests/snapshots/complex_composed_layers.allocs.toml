@@ -2,61 +2,39 @@ test = "complex_composed_layers"
 units = "bytes"
 
 [[instances]]
-name = "complex_composed_layers_cpu_f32_neon"
-allocations = 54
-deallocations = 23
-reallocations = 144
-bytes_allocated = 371816
-bytes_deallocated = 273320
-bytes_reallocated = 342000
-net_bytes = 98496
-
-[[instances]]
-name = "complex_composed_layers_cpu_f32_scalar"
-allocations = 54
-deallocations = 23
-reallocations = 144
-bytes_allocated = 371816
-bytes_deallocated = 273320
-bytes_reallocated = 342000
-net_bytes = 98496
-
-[[instances]]
-name = "complex_composed_layers_cpu_multithreaded"
-allocations = 100
-deallocations = 46
-reallocations = 192
-bytes_allocated = 997344
-bytes_deallocated = 872752
-bytes_reallocated = 855480
-net_bytes = 124592
-
-[[instances]]
 name = "complex_composed_layers_cpu_u8_neon"
+
+[instances.cold]
 allocations = 54
 deallocations = 23
 reallocations = 144
 bytes_allocated = 175208
 bytes_deallocated = 76712
 bytes_reallocated = 157680
-net_bytes = 98496
+
+[instances.warm]
+allocations = 23
+deallocations = 23
+reallocations = 40
+bytes_allocated = 172456
+bytes_deallocated = 76712
+bytes_reallocated = 159424
 
 [[instances]]
 name = "complex_composed_layers_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 54
 deallocations = 23
 reallocations = 144
 bytes_allocated = 175208
 bytes_deallocated = 76712
 bytes_reallocated = 157680
-net_bytes = 98496
 
-[[instances]]
-name = "complex_composed_layers_hybrid"
-allocations = 616
-deallocations = 549
-reallocations = 426
-bytes_allocated = 270726
-bytes_deallocated = 162720
-bytes_reallocated = 194204
-net_bytes = 108006
+[instances.warm]
+allocations = 23
+deallocations = 23
+reallocations = 40
+bytes_allocated = 172456
+bytes_deallocated = 76712
+bytes_reallocated = 159424

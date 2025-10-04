@@ -2,51 +2,39 @@ test = "glyphs_colr_noto"
 units = "bytes"
 
 [[instances]]
-name = "glyphs_colr_noto_cpu_f32_neon"
-allocations = 297
-deallocations = 282
-reallocations = 437
-bytes_allocated = 705988
-bytes_deallocated = 640092
-bytes_reallocated = 440352
-net_bytes = 65896
-
-[[instances]]
-name = "glyphs_colr_noto_cpu_f32_scalar"
-allocations = 297
-deallocations = 282
-reallocations = 437
-bytes_allocated = 705988
-bytes_deallocated = 640092
-bytes_reallocated = 440352
-net_bytes = 65896
-
-[[instances]]
-name = "glyphs_colr_noto_cpu_multithreaded"
-allocations = 351
-deallocations = 305
-reallocations = 463
-bytes_allocated = 825300
-bytes_deallocated = 748004
-bytes_reallocated = 448408
-net_bytes = 77296
-
-[[instances]]
 name = "glyphs_colr_noto_cpu_u8_neon"
+
+[instances.cold]
 allocations = 297
 deallocations = 282
 reallocations = 437
 bytes_allocated = 481588
 bytes_deallocated = 415692
 bytes_reallocated = 292896
-net_bytes = 65896
+
+[instances.warm]
+allocations = 294
+deallocations = 282
+reallocations = 424
+bytes_allocated = 485300
+bytes_deallocated = 415692
+bytes_reallocated = 298592
 
 [[instances]]
 name = "glyphs_colr_noto_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 297
 deallocations = 282
 reallocations = 437
 bytes_allocated = 481588
 bytes_deallocated = 415692
 bytes_reallocated = 292896
-net_bytes = 65896
+
+[instances.warm]
+allocations = 294
+deallocations = 282
+reallocations = 424
+bytes_allocated = 485300
+bytes_deallocated = 415692
+bytes_reallocated = 298592

@@ -2,51 +2,39 @@ test = "blurred_rounded_rect_with_large_radius"
 units = "bytes"
 
 [[instances]]
-name = "blurred_rounded_rect_with_large_radius_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 2
-bytes_allocated = 25064
-bytes_deallocated = 22280
-bytes_reallocated = 1248
-net_bytes = 2784
-
-[[instances]]
-name = "blurred_rounded_rect_with_large_radius_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 2
-bytes_allocated = 25064
-bytes_deallocated = 22280
-bytes_reallocated = 1248
-net_bytes = 2784
-
-[[instances]]
-name = "blurred_rounded_rect_with_large_radius_cpu_multithreaded"
-allocations = 63
-deallocations = 25
-reallocations = 18
-bytes_allocated = 140024
-bytes_deallocated = 130096
-bytes_reallocated = 4008
-net_bytes = 9928
-
-[[instances]]
 name = "blurred_rounded_rect_with_large_radius_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 2
 bytes_allocated = 12776
 bytes_deallocated = 9992
 bytes_reallocated = 1248
-net_bytes = 2784
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 26
+bytes_allocated = 16040
+bytes_deallocated = 9992
+bytes_reallocated = 6048
 
 [[instances]]
 name = "blurred_rounded_rect_with_large_radius_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 2
 bytes_allocated = 12776
 bytes_deallocated = 9992
 bytes_reallocated = 1248
-net_bytes = 2784
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 26
+bytes_allocated = 16040
+bytes_deallocated = 9992
+bytes_reallocated = 6048

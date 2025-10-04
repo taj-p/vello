@@ -2,61 +2,39 @@ test = "gradient_with_color_spaces_3"
 units = "bytes"
 
 [[instances]]
-name = "gradient_with_color_spaces_3_cpu_f32_neon"
-allocations = 16
-deallocations = 8
-reallocations = 30
-bytes_allocated = 185820
-bytes_deallocated = 25264
-bytes_reallocated = 10848
-net_bytes = 160556
-
-[[instances]]
-name = "gradient_with_color_spaces_3_cpu_f32_scalar"
-allocations = 16
-deallocations = 8
-reallocations = 30
-bytes_allocated = 185820
-bytes_deallocated = 25264
-bytes_reallocated = 10848
-net_bytes = 160556
-
-[[instances]]
-name = "gradient_with_color_spaces_3_cpu_multithreaded"
-allocations = 70
-deallocations = 19
-reallocations = 49
-bytes_allocated = 294188
-bytes_deallocated = 119832
-bytes_reallocated = 15704
-net_bytes = 174356
-
-[[instances]]
 name = "gradient_with_color_spaces_3_cpu_u8_neon"
+
+[instances.cold]
 allocations = 16
 deallocations = 8
 reallocations = 30
 bytes_allocated = 62832
 bytes_deallocated = 12976
 bytes_reallocated = 10848
-net_bytes = 49856
+
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 52880
+bytes_deallocated = 12976
+bytes_reallocated = 2432
 
 [[instances]]
 name = "gradient_with_color_spaces_3_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 16
 deallocations = 8
 reallocations = 30
 bytes_allocated = 62832
 bytes_deallocated = 12976
 bytes_reallocated = 10848
-net_bytes = 49856
 
-[[instances]]
-name = "gradient_with_color_spaces_3_hybrid"
-allocations = 232
-deallocations = 196
-reallocations = 51
-bytes_allocated = 200270
-bytes_deallocated = 63614
-bytes_reallocated = 127472
-net_bytes = 136656
+[instances.warm]
+allocations = 14
+deallocations = 8
+reallocations = 7
+bytes_allocated = 52880
+bytes_deallocated = 12976
+bytes_reallocated = 2432

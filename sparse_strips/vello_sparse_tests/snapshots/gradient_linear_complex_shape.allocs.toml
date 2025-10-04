@@ -2,61 +2,39 @@ test = "gradient_linear_complex_shape"
 units = "bytes"
 
 [[instances]]
-name = "gradient_linear_complex_shape_cpu_f32_neon"
-allocations = 8
-deallocations = 5
-reallocations = 24
-bytes_allocated = 47980
-bytes_deallocated = 22800
-bytes_reallocated = 7552
-net_bytes = 25180
-
-[[instances]]
-name = "gradient_linear_complex_shape_cpu_f32_scalar"
-allocations = 8
-deallocations = 5
-reallocations = 24
-bytes_allocated = 47980
-bytes_deallocated = 22800
-bytes_reallocated = 7552
-net_bytes = 25180
-
-[[instances]]
-name = "gradient_linear_complex_shape_cpu_multithreaded"
-allocations = 67
-deallocations = 25
-reallocations = 40
-bytes_allocated = 162452
-bytes_deallocated = 130544
-bytes_reallocated = 10368
-net_bytes = 31908
-
-[[instances]]
 name = "gradient_linear_complex_shape_cpu_u8_neon"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 24
 bytes_allocated = 23368
 bytes_deallocated = 10512
 bytes_reallocated = 7552
-net_bytes = 12856
+
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 7
+bytes_allocated = 16168
+bytes_deallocated = 10512
+bytes_reallocated = 1664
 
 [[instances]]
 name = "gradient_linear_complex_shape_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 8
 deallocations = 5
 reallocations = 24
 bytes_allocated = 23368
 bytes_deallocated = 10512
 bytes_reallocated = 7552
-net_bytes = 12856
 
-[[instances]]
-name = "gradient_linear_complex_shape_hybrid"
-allocations = 172
-deallocations = 146
-reallocations = 40
-bytes_allocated = 103975
-bytes_deallocated = 53841
-bytes_reallocated = 72016
-net_bytes = 50134
+[instances.warm]
+allocations = 7
+deallocations = 5
+reallocations = 7
+bytes_allocated = 16168
+bytes_deallocated = 10512
+bytes_reallocated = 1664

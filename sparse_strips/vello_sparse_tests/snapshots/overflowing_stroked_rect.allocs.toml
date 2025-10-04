@@ -2,61 +2,39 @@ test = "overflowing_stroked_rect"
 units = "bytes"
 
 [[instances]]
-name = "overflowing_stroked_rect_cpu_f32_neon"
-allocations = 7
-deallocations = 3
-reallocations = 12
-bytes_allocated = 27424
-bytes_deallocated = 21056
-bytes_reallocated = 4968
-net_bytes = 6368
-
-[[instances]]
-name = "overflowing_stroked_rect_cpu_f32_scalar"
-allocations = 7
-deallocations = 3
-reallocations = 12
-bytes_allocated = 27424
-bytes_deallocated = 21056
-bytes_reallocated = 4968
-net_bytes = 6368
-
-[[instances]]
-name = "overflowing_stroked_rect_cpu_multithreaded"
-allocations = 43
-deallocations = 17
-reallocations = 24
-bytes_allocated = 132272
-bytes_deallocated = 115672
-bytes_reallocated = 6192
-net_bytes = 16600
-
-[[instances]]
 name = "overflowing_stroked_rect_cpu_u8_neon"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 12
 bytes_allocated = 15136
 bytes_deallocated = 8768
 bytes_reallocated = 4968
-net_bytes = 6368
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9248
+bytes_deallocated = 8768
+bytes_reallocated = 480
 
 [[instances]]
 name = "overflowing_stroked_rect_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 7
 deallocations = 3
 reallocations = 12
 bytes_allocated = 15136
 bytes_deallocated = 8768
 bytes_reallocated = 4968
-net_bytes = 6368
 
-[[instances]]
-name = "overflowing_stroked_rect_hybrid"
-allocations = 116
-deallocations = 93
-reallocations = 25
-bytes_allocated = 54779
-bytes_deallocated = 45225
-bytes_reallocated = 38840
-net_bytes = 9554
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 3
+bytes_allocated = 9248
+bytes_deallocated = 8768
+bytes_reallocated = 480

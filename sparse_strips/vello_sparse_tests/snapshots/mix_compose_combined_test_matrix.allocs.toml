@@ -2,61 +2,39 @@ test = "mix_compose_combined_test_matrix"
 units = "bytes"
 
 [[instances]]
-name = "mix_compose_combined_test_matrix_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 328
-bytes_allocated = 1768576
-bytes_deallocated = 72512
-bytes_reallocated = 1744864
-net_bytes = 1696064
-
-[[instances]]
-name = "mix_compose_combined_test_matrix_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 328
-bytes_allocated = 1768576
-bytes_deallocated = 72512
-bytes_reallocated = 1744864
-net_bytes = 1696064
-
-[[instances]]
-name = "mix_compose_combined_test_matrix_cpu_multithreaded"
-allocations = 129
-deallocations = 20
-reallocations = 547
-bytes_allocated = 2121248
-bytes_deallocated = 272488
-bytes_reallocated = 1969096
-net_bytes = 1848760
-
-[[instances]]
 name = "mix_compose_combined_test_matrix_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 328
 bytes_allocated = 1719424
 bytes_deallocated = 23360
 bytes_reallocated = 1708000
-net_bytes = 1696064
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1727296
+bytes_deallocated = 23360
+bytes_reallocated = 1716224
 
 [[instances]]
 name = "mix_compose_combined_test_matrix_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 328
 bytes_allocated = 1719424
 bytes_deallocated = 23360
 bytes_reallocated = 1708000
-net_bytes = 1696064
 
-[[instances]]
-name = "mix_compose_combined_test_matrix_hybrid"
-allocations = 19947
-deallocations = 18979
-reallocations = 5384
-bytes_allocated = 4920586
-bytes_deallocated = 2868372
-bytes_reallocated = 3039820
-net_bytes = 2052214
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 43
+bytes_allocated = 1727296
+bytes_deallocated = 23360
+bytes_reallocated = 1716224

@@ -2,61 +2,39 @@ test = "image_rgba_image"
 units = "bytes"
 
 [[instances]]
-name = "image_rgba_image_cpu_f32_neon"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 135497
-bytes_deallocated = 126665
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_rgba_image_cpu_f32_scalar"
-allocations = 19
-deallocations = 15
-reallocations = 24
-bytes_allocated = 135497
-bytes_deallocated = 126665
-bytes_reallocated = 6903
-net_bytes = 8832
-
-[[instances]]
-name = "image_rgba_image_cpu_multithreaded"
-allocations = 77
-deallocations = 30
-reallocations = 43
-bytes_allocated = 246921
-bytes_deallocated = 221377
-bytes_reallocated = 9855
-net_bytes = 25544
-
-[[instances]]
 name = "image_rgba_image_cpu_u8_neon"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 123209
 bytes_deallocated = 114377
 bytes_reallocated = 6903
-net_bytes = 8832
+
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114825
+bytes_deallocated = 114377
+bytes_reallocated = 55
 
 [[instances]]
 name = "image_rgba_image_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 19
 deallocations = 15
 reallocations = 24
 bytes_allocated = 123209
 bytes_deallocated = 114377
 bytes_reallocated = 6903
-net_bytes = 8832
 
-[[instances]]
-name = "image_rgba_image_hybrid"
-allocations = 205
-deallocations = 180
-reallocations = 40
-bytes_allocated = 176203
-bytes_deallocated = 163186
-bytes_reallocated = 42254
-net_bytes = 13017
+[instances.warm]
+allocations = 17
+deallocations = 15
+reallocations = 1
+bytes_allocated = 114825
+bytes_deallocated = 114377
+bytes_reallocated = 55

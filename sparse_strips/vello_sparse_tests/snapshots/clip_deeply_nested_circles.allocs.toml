@@ -2,61 +2,39 @@ test = "clip_deeply_nested_circles"
 units = "bytes"
 
 [[instances]]
-name = "clip_deeply_nested_circles_cpu_f32_neon"
-allocations = 89
-deallocations = 82
-reallocations = 172
-bytes_allocated = 758352
-bytes_deallocated = 546288
-bytes_reallocated = 723016
-net_bytes = 212064
-
-[[instances]]
-name = "clip_deeply_nested_circles_cpu_f32_scalar"
-allocations = 89
-deallocations = 82
-reallocations = 172
-bytes_allocated = 758352
-bytes_deallocated = 546288
-bytes_reallocated = 723016
-net_bytes = 212064
-
-[[instances]]
-name = "clip_deeply_nested_circles_cpu_multithreaded"
-allocations = 180
-deallocations = 104
-reallocations = 312
-bytes_allocated = 1745488
-bytes_deallocated = 1440672
-bytes_reallocated = 1558368
-net_bytes = 304816
-
-[[instances]]
 name = "clip_deeply_nested_circles_cpu_u8_neon"
+
+[instances.cold]
 allocations = 89
 deallocations = 82
 reallocations = 172
 bytes_allocated = 365136
 bytes_deallocated = 153072
 bytes_reallocated = 342088
-net_bytes = 212064
+
+[instances.warm]
+allocations = 82
+deallocations = 82
+reallocations = 51
+bytes_allocated = 354928
+bytes_deallocated = 153072
+bytes_reallocated = 333312
 
 [[instances]]
 name = "clip_deeply_nested_circles_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 89
 deallocations = 82
 reallocations = 172
 bytes_allocated = 365136
 bytes_deallocated = 153072
 bytes_reallocated = 342088
-net_bytes = 212064
 
-[[instances]]
-name = "clip_deeply_nested_circles_hybrid"
-allocations = 874
-deallocations = 820
-reallocations = 510
-bytes_allocated = 454870
-bytes_deallocated = 228224
-bytes_reallocated = 340516
-net_bytes = 226646
+[instances.warm]
+allocations = 82
+deallocations = 82
+reallocations = 51
+bytes_allocated = 354928
+bytes_deallocated = 153072
+bytes_reallocated = 333312

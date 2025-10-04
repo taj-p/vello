@@ -2,61 +2,39 @@ test = "filled_circle_with_opacity"
 units = "bytes"
 
 [[instances]]
-name = "filled_circle_with_opacity_cpu_f32_neon"
-allocations = 5
-deallocations = 5
-reallocations = 28
-bytes_allocated = 30216
-bytes_deallocated = 22824
-bytes_reallocated = 7616
-net_bytes = 7392
-
-[[instances]]
-name = "filled_circle_with_opacity_cpu_f32_scalar"
-allocations = 5
-deallocations = 5
-reallocations = 28
-bytes_allocated = 30216
-bytes_deallocated = 22824
-bytes_reallocated = 7616
-net_bytes = 7392
-
-[[instances]]
-name = "filled_circle_with_opacity_cpu_multithreaded"
-allocations = 62
-deallocations = 23
-reallocations = 44
-bytes_allocated = 175184
-bytes_deallocated = 156568
-bytes_reallocated = 10432
-net_bytes = 18616
-
-[[instances]]
 name = "filled_circle_with_opacity_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 5
 reallocations = 28
 bytes_allocated = 17928
 bytes_deallocated = 10536
 bytes_reallocated = 7616
-net_bytes = 7392
+
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 1
+bytes_allocated = 10536
+bytes_deallocated = 10536
+bytes_reallocated = 224
 
 [[instances]]
 name = "filled_circle_with_opacity_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 5
 reallocations = 28
 bytes_allocated = 17928
 bytes_deallocated = 10536
 bytes_reallocated = 7616
-net_bytes = 7392
 
-[[instances]]
-name = "filled_circle_with_opacity_hybrid"
-allocations = 165
-deallocations = 145
-reallocations = 43
-bytes_allocated = 64875
-bytes_deallocated = 53849
-bytes_reallocated = 43408
-net_bytes = 11026
+[instances.warm]
+allocations = 5
+deallocations = 5
+reallocations = 1
+bytes_allocated = 10536
+bytes_deallocated = 10536
+bytes_reallocated = 224

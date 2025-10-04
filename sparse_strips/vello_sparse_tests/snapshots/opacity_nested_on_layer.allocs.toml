@@ -2,61 +2,39 @@ test = "opacity_nested_on_layer"
 units = "bytes"
 
 [[instances]]
-name = "opacity_nested_on_layer_cpu_f32_neon"
-allocations = 5
-deallocations = 3
-reallocations = 61
-bytes_allocated = 90792
-bytes_deallocated = 71432
-bytes_reallocated = 68160
-net_bytes = 19360
-
-[[instances]]
-name = "opacity_nested_on_layer_cpu_f32_scalar"
-allocations = 5
-deallocations = 3
-reallocations = 61
-bytes_allocated = 90792
-bytes_deallocated = 71432
-bytes_reallocated = 68160
-net_bytes = 19360
-
-[[instances]]
-name = "opacity_nested_on_layer_cpu_multithreaded"
-allocations = 65
-deallocations = 24
-reallocations = 84
-bytes_allocated = 304984
-bytes_deallocated = 277544
-bytes_reallocated = 170648
-net_bytes = 27440
-
-[[instances]]
 name = "opacity_nested_on_layer_cpu_u8_neon"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 61
 bytes_allocated = 41640
 bytes_deallocated = 22280
 bytes_reallocated = 31296
-net_bytes = 19360
+
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 28
+bytes_allocated = 45576
+bytes_deallocated = 22280
+bytes_reallocated = 35584
 
 [[instances]]
 name = "opacity_nested_on_layer_cpu_u8_scalar"
+
+[instances.cold]
 allocations = 5
 deallocations = 3
 reallocations = 61
 bytes_allocated = 41640
 bytes_deallocated = 22280
 bytes_reallocated = 31296
-net_bytes = 19360
 
-[[instances]]
-name = "opacity_nested_on_layer_hybrid"
-allocations = 253
-deallocations = 229
-reallocations = 131
-bytes_allocated = 95611
-bytes_deallocated = 72029
-bytes_reallocated = 63812
-net_bytes = 23582
+[instances.warm]
+allocations = 3
+deallocations = 3
+reallocations = 28
+bytes_allocated = 45576
+bytes_deallocated = 22280
+bytes_reallocated = 35584
