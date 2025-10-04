@@ -82,16 +82,16 @@ name = "rectangle_above_viewport_hybrid"
 
 [instances.cold]
 allocations = 98
-deallocations = 78
+deallocations = 77
 reallocations = 16
 bytes_allocated = 47275
-bytes_deallocated = 43193
+bytes_deallocated = 43161
 bytes_reallocated = 34224
 
 [instances.warm]
 allocations = 65
-deallocations = 64
+deallocations = 63
 reallocations = 3
 bytes_allocated = 8785
-bytes_deallocated = 8725
+bytes_deallocated = 8693
 bytes_reallocated = 464

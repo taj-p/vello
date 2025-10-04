@@ -82,16 +82,16 @@ name = "stroked_circle_hybrid"
 
 [instances.cold]
 allocations = 169
-deallocations = 145
+deallocations = 144
 reallocations = 28
 bytes_allocated = 64987
-bytes_deallocated = 53545
+bytes_deallocated = 53513
 bytes_reallocated = 42872
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 6
 bytes_allocated = 17329
-bytes_deallocated = 17269
+bytes_deallocated = 17237
 bytes_reallocated = 1584

@@ -82,16 +82,16 @@ name = "recording_basic_hybrid"
 
 [instances.cold]
 allocations = 181
-deallocations = 161
+deallocations = 160
 reallocations = 87
 bytes_allocated = 83979
-bytes_deallocated = 68313
+bytes_deallocated = 68281
 bytes_reallocated = 57520
 
 [instances.warm]
 allocations = 148
-deallocations = 147
+deallocations = 146
 reallocations = 38
 bytes_allocated = 33377
-bytes_deallocated = 33317
+bytes_deallocated = 33285
 bytes_reallocated = 12336

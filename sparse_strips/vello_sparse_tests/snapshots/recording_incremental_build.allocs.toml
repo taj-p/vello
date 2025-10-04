@@ -82,16 +82,16 @@ name = "recording_incremental_build_hybrid"
 
 [instances.cold]
 allocations = 180
-deallocations = 160
+deallocations = 159
 reallocations = 84
 bytes_allocated = 88971
-bytes_deallocated = 74169
+bytes_deallocated = 74137
 bytes_reallocated = 62016
 
 [instances.warm]
 allocations = 147
-deallocations = 146
+deallocations = 145
 reallocations = 36
 bytes_allocated = 39233
-bytes_deallocated = 39173
+bytes_deallocated = 39141
 bytes_reallocated = 17696

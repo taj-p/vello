@@ -82,16 +82,16 @@ name = "image_rgba_image_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 40
 bytes_allocated = 176203
-bytes_deallocated = 163186
+bytes_deallocated = 163122
 bytes_reallocated = 42254
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 8
 bytes_allocated = 127978
-bytes_deallocated = 127538
+bytes_deallocated = 127474
 bytes_reallocated = 1767

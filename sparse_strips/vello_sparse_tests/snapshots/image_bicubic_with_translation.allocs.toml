@@ -82,16 +82,16 @@ name = "image_bicubic_with_translation_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 40
 bytes_allocated = 175026
-bytes_deallocated = 162009
+bytes_deallocated = 161945
 bytes_reallocated = 42254
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 8
 bytes_allocated = 126801
-bytes_deallocated = 126361
+bytes_deallocated = 126297
 bytes_reallocated = 1767

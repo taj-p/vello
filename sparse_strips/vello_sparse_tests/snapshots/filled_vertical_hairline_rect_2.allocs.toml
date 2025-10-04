@@ -82,16 +82,16 @@ name = "filled_vertical_hairline_rect_2_hybrid"
 
 [instances.cold]
 allocations = 98
-deallocations = 78
+deallocations = 77
 reallocations = 14
 bytes_allocated = 46907
-bytes_deallocated = 43145
+bytes_deallocated = 43113
 bytes_reallocated = 33904
 
 [instances.warm]
 allocations = 65
-deallocations = 64
+deallocations = 63
 reallocations = 2
 bytes_allocated = 8657
-bytes_deallocated = 8597
+bytes_deallocated = 8565
 bytes_reallocated = 384

@@ -82,16 +82,16 @@ name = "clip_rectangle_and_circle_hybrid"
 
 [instances.cold]
 allocations = 222
-deallocations = 195
+deallocations = 194
 reallocations = 95
 bytes_allocated = 94749
-bytes_deallocated = 65743
+bytes_deallocated = 65711
 bytes_reallocated = 65948
 
 [instances.warm]
 allocations = 183
-deallocations = 182
+deallocations = 181
 reallocations = 32
 bytes_allocated = 28611
-bytes_deallocated = 28551
+bytes_deallocated = 28519
 bytes_reallocated = 6672

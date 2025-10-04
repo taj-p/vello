@@ -82,16 +82,16 @@ name = "recording_handles_completely_offscreen_content_hybrid"
 
 [instances.cold]
 allocations = 107
-deallocations = 87
+deallocations = 86
 reallocations = 15
 bytes_allocated = 49211
-bytes_deallocated = 45577
+bytes_deallocated = 45545
 bytes_reallocated = 34672
 
 [instances.warm]
 allocations = 43
-deallocations = 43
+deallocations = 42
 reallocations = 3
 bytes_allocated = 9206
-bytes_deallocated = 9206
+bytes_deallocated = 9174
 bytes_reallocated = 1120

@@ -82,16 +82,16 @@ name = "glyphs_skewed_unhinted_hybrid"
 
 [instances.cold]
 allocations = 210
-deallocations = 180
+deallocations = 179
 reallocations = 65
 bytes_allocated = 96959
-bytes_deallocated = 61365
+bytes_deallocated = 61333
 bytes_reallocated = 67520
 
 [instances.warm]
 allocations = 175
-deallocations = 165
+deallocations = 164
 reallocations = 29
 bytes_allocated = 37817
-bytes_deallocated = 26541
+bytes_deallocated = 26509
 bytes_reallocated = 13632

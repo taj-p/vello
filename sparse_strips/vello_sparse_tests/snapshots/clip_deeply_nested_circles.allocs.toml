@@ -82,16 +82,16 @@ name = "clip_deeply_nested_circles_hybrid"
 
 [instances.cold]
 allocations = 874
-deallocations = 820
+deallocations = 819
 reallocations = 510
 bytes_allocated = 454870
-bytes_deallocated = 228224
+bytes_deallocated = 228192
 bytes_reallocated = 340516
 
 [instances.warm]
 allocations = 836
-deallocations = 835
+deallocations = 834
 reallocations = 320
 bytes_allocated = 192248
-bytes_deallocated = 192188
+bytes_deallocated = 192156
 bytes_reallocated = 84064

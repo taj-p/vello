@@ -82,16 +82,16 @@ name = "nested_clip_path_panic_2_hybrid"
 
 [instances.cold]
 allocations = 146
-deallocations = 123
+deallocations = 122
 reallocations = 34
 bytes_allocated = 52293
-bytes_deallocated = 47223
+bytes_deallocated = 47191
 bytes_reallocated = 35876
 
 [instances.warm]
 allocations = 111
-deallocations = 110
+deallocations = 109
 reallocations = 11
 bytes_allocated = 13403
-bytes_deallocated = 13343
+bytes_deallocated = 13311
 bytes_reallocated = 1920

@@ -82,16 +82,16 @@ name = "gradient_sweep_with_transform_translate_hybrid"
 
 [instances.cold]
 allocations = 172
-deallocations = 146
+deallocations = 145
 reallocations = 29
 bytes_allocated = 98759
-bytes_deallocated = 53169
+bytes_deallocated = 53137
 bytes_reallocated = 67472
 
 [instances.warm]
 allocations = 132
-deallocations = 130
+deallocations = 129
 reallocations = 6
 bytes_allocated = 17165
-bytes_deallocated = 16997
+bytes_deallocated = 16965
 bytes_reallocated = 1584

@@ -82,16 +82,16 @@ name = "filled_unaligned_rect_hybrid"
 
 [instances.cold]
 allocations = 104
-deallocations = 84
+deallocations = 83
 reallocations = 19
 bytes_allocated = 48827
-bytes_deallocated = 44329
+bytes_deallocated = 44297
 bytes_reallocated = 34960
 
 [instances.warm]
 allocations = 71
-deallocations = 70
+deallocations = 69
 reallocations = 4
 bytes_allocated = 9633
-bytes_deallocated = 9573
+bytes_deallocated = 9541
 bytes_reallocated = 624

@@ -82,16 +82,16 @@ name = "image_with_opacity_hybrid"
 
 [instances.cold]
 allocations = 252
-deallocations = 225
+deallocations = 223
 reallocations = 104
 bytes_allocated = 195974
-bytes_deallocated = 174769
+bytes_deallocated = 174705
 bytes_reallocated = 56530
 
 [instances.warm]
 allocations = 215
-deallocations = 211
+deallocations = 209
 reallocations = 37
 bytes_allocated = 138101
-bytes_deallocated = 137661
+bytes_deallocated = 137597
 bytes_reallocated = 6535

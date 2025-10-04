@@ -82,16 +82,16 @@ name = "filled_fully_overflowing_circle_hybrid"
 
 [instances.cold]
 allocations = 165
-deallocations = 145
+deallocations = 144
 reallocations = 21
 bytes_allocated = 59251
-bytes_deallocated = 53633
+bytes_deallocated = 53601
 bytes_reallocated = 38000
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 6
 bytes_allocated = 17417
-bytes_deallocated = 17357
+bytes_deallocated = 17325
 bytes_reallocated = 1584

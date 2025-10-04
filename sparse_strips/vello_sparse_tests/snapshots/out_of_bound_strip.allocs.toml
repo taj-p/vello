@@ -82,16 +82,16 @@ name = "out_of_bound_strip_hybrid"
 
 [instances.cold]
 allocations = 284
-deallocations = 261
+deallocations = 260
 reallocations = 17
 bytes_allocated = 70187
-bytes_deallocated = 65593
+bytes_deallocated = 65561
 bytes_reallocated = 36080
 
 [instances.warm]
 allocations = 217
-deallocations = 217
+deallocations = 216
 reallocations = 0
 bytes_allocated = 25094
-bytes_deallocated = 25094
+bytes_deallocated = 25062
 bytes_reallocated = 0

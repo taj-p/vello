@@ -82,16 +82,16 @@ name = "mix_compose_combined_test_matrix_hybrid"
 
 [instances.cold]
 allocations = 19947
-deallocations = 18979
+deallocations = 18978
 reallocations = 5384
 bytes_allocated = 4920586
-bytes_deallocated = 2868372
+bytes_deallocated = 2868340
 bytes_reallocated = 3039820
 
 [instances.warm]
 allocations = 19914
-deallocations = 19913
+deallocations = 19912
 reallocations = 4956
 bytes_allocated = 2966464
-bytes_deallocated = 2966404
+bytes_deallocated = 2966372
 bytes_reallocated = 1080176

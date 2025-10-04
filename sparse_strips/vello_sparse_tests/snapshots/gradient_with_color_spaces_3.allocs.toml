@@ -82,16 +82,16 @@ name = "gradient_with_color_spaces_3_hybrid"
 
 [instances.cold]
 allocations = 232
-deallocations = 196
+deallocations = 195
 reallocations = 51
 bytes_allocated = 200270
-bytes_deallocated = 63614
+bytes_deallocated = 63582
 bytes_reallocated = 127472
 
 [instances.warm]
 allocations = 162
-deallocations = 158
+deallocations = 157
 reallocations = 15
 bytes_allocated = 25155
-bytes_deallocated = 23403
+bytes_deallocated = 23371
 bytes_reallocated = 4432

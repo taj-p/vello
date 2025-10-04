@@ -82,16 +82,16 @@ name = "out_of_viewport_clip_hybrid"
 
 [instances.cold]
 allocations = 167
-deallocations = 145
+deallocations = 144
 reallocations = 17
 bytes_allocated = 56795
-bytes_deallocated = 51881
+bytes_deallocated = 51849
 bytes_reallocated = 35984
 
 [instances.warm]
 allocations = 101
-deallocations = 101
+deallocations = 100
 reallocations = 2
 bytes_allocated = 13910
-bytes_deallocated = 13910
+bytes_deallocated = 13878
 bytes_reallocated = 448

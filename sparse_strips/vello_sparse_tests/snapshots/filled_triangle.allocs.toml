@@ -82,16 +82,16 @@ name = "filled_triangle_hybrid"
 
 [instances.cold]
 allocations = 164
-deallocations = 144
+deallocations = 143
 reallocations = 37
 bytes_allocated = 63723
-bytes_deallocated = 53465
+bytes_deallocated = 53433
 bytes_reallocated = 42416
 
 [instances.warm]
 allocations = 131
-deallocations = 130
+deallocations = 129
 reallocations = 5
 bytes_allocated = 17249
-bytes_deallocated = 17189
+bytes_deallocated = 17157
 bytes_reallocated = 1360

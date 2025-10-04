@@ -82,16 +82,16 @@ name = "triangle_exceeding_viewport_2_hybrid"
 
 [instances.cold]
 allocations = 95
-deallocations = 75
+deallocations = 74
 reallocations = 15
 bytes_allocated = 46347
-bytes_deallocated = 42425
+bytes_deallocated = 42393
 bytes_reallocated = 33680
 
 [instances.warm]
 allocations = 62
-deallocations = 61
+deallocations = 60
 reallocations = 1
 bytes_allocated = 8113
-bytes_deallocated = 8053
+bytes_deallocated = 8021
 bytes_reallocated = 160

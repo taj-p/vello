@@ -82,16 +82,16 @@ name = "gradient_on_3_wide_tiles_hybrid"
 
 [instances.cold]
 allocations = 169
-deallocations = 143
+deallocations = 142
 reallocations = 17
 bytes_allocated = 91087
-bytes_deallocated = 51169
+bytes_deallocated = 51137
 bytes_reallocated = 66736
 
 [instances.warm]
 allocations = 129
-deallocations = 127
+deallocations = 126
 reallocations = 5
 bytes_allocated = 16069
-bytes_deallocated = 15973
+bytes_deallocated = 15941
 bytes_reallocated = 944

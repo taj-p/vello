@@ -82,16 +82,16 @@ name = "repeatedly_compose_to_bottom_layer_hybrid"
 
 [instances.cold]
 allocations = 224
-deallocations = 199
+deallocations = 198
 reallocations = 43
 bytes_allocated = 59916
-bytes_deallocated = 54206
+bytes_deallocated = 54174
 bytes_reallocated = 38164
 
 [instances.warm]
 allocations = 173
-deallocations = 172
+deallocations = 171
 reallocations = 17
 bytes_allocated = 18179
-bytes_deallocated = 18119
+bytes_deallocated = 18087
 bytes_reallocated = 2512

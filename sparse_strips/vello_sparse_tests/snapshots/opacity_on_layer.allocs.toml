@@ -82,16 +82,16 @@ name = "opacity_on_layer_hybrid"
 
 [instances.cold]
 allocations = 215
-deallocations = 193
+deallocations = 192
 reallocations = 105
 bytes_allocated = 84869
-bytes_deallocated = 65975
+bytes_deallocated = 65943
 bytes_reallocated = 57044
 
 [instances.warm]
 allocations = 181
-deallocations = 180
+deallocations = 179
 reallocations = 37
 bytes_allocated = 31403
-bytes_deallocated = 31343
+bytes_deallocated = 31311
 bytes_reallocated = 9136

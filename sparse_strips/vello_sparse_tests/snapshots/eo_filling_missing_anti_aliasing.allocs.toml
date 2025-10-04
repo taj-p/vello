@@ -82,16 +82,16 @@ name = "eo_filling_missing_anti_aliasing_hybrid"
 
 [instances.cold]
 allocations = 128
-deallocations = 108
+deallocations = 107
 reallocations = 27
 bytes_allocated = 55643
-bytes_deallocated = 49385
+bytes_deallocated = 49353
 bytes_reallocated = 38640
 
 [instances.warm]
 allocations = 95
-deallocations = 94
+deallocations = 93
 reallocations = 6
 bytes_allocated = 13377
-bytes_deallocated = 13317
+bytes_deallocated = 13285
 bytes_reallocated = 1584

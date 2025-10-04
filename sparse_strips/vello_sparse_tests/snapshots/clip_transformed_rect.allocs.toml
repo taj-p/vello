@@ -82,16 +82,16 @@ name = "clip_transformed_rect_hybrid"
 
 [instances.cold]
 allocations = 195
-deallocations = 170
+deallocations = 169
 reallocations = 74
 bytes_allocated = 83374
-bytes_deallocated = 59580
+bytes_deallocated = 59548
 bytes_reallocated = 57208
 
 [instances.warm]
 allocations = 157
-deallocations = 156
+deallocations = 155
 reallocations = 21
 bytes_allocated = 24492
-bytes_deallocated = 24432
+bytes_deallocated = 24400
 bytes_reallocated = 4976

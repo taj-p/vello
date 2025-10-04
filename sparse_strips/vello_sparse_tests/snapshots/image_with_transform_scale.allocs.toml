@@ -82,16 +82,16 @@ name = "image_with_transform_scale_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 30
 bytes_allocated = 171780
-bytes_deallocated = 162603
+bytes_deallocated = 162539
 bytes_reallocated = 38414
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 8
 bytes_allocated = 127395
-bytes_deallocated = 126955
+bytes_deallocated = 126891
 bytes_reallocated = 1767

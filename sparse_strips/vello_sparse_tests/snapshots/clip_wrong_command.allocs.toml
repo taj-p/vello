@@ -82,16 +82,16 @@ name = "clip_wrong_command_hybrid"
 
 [instances.cold]
 allocations = 187
-deallocations = 164
+deallocations = 163
 reallocations = 52
 bytes_allocated = 65421
-bytes_deallocated = 53151
+bytes_deallocated = 53119
 bytes_reallocated = 43860
 
 [instances.warm]
 allocations = 152
-deallocations = 151
+deallocations = 150
 reallocations = 15
 bytes_allocated = 18499
-bytes_deallocated = 18439
+bytes_deallocated = 18407
 bytes_reallocated = 2224

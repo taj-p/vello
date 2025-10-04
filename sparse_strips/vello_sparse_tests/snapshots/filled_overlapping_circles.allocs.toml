@@ -82,16 +82,16 @@ name = "filled_overlapping_circles_hybrid"
 
 [instances.cold]
 allocations = 169
-deallocations = 149
+deallocations = 148
 reallocations = 54
 bytes_allocated = 72131
-bytes_deallocated = 58545
+bytes_deallocated = 58513
 bytes_reallocated = 48976
 
 [instances.warm]
 allocations = 136
-deallocations = 135
+deallocations = 134
 reallocations = 10
 bytes_allocated = 23609
-bytes_deallocated = 23549
+bytes_deallocated = 23517
 bytes_reallocated = 5872

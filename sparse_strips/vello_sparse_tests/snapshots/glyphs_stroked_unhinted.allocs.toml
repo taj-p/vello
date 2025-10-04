@@ -82,16 +82,16 @@ name = "glyphs_stroked_unhinted_hybrid"
 
 [instances.cold]
 allocations = 221
-deallocations = 187
+deallocations = 186
 reallocations = 79
 bytes_allocated = 108343
-bytes_deallocated = 61933
+bytes_deallocated = 61901
 bytes_reallocated = 76488
 
 [instances.warm]
 allocations = 182
-deallocations = 172
+deallocations = 171
 reallocations = 34
 bytes_allocated = 38385
-bytes_deallocated = 27109
+bytes_deallocated = 27077
 bytes_reallocated = 13856

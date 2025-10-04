@@ -82,16 +82,16 @@ name = "filling_nonzero_rule_hybrid"
 
 [instances.cold]
 allocations = 164
-deallocations = 144
+deallocations = 143
 reallocations = 39
 bytes_allocated = 64907
-bytes_deallocated = 53945
+bytes_deallocated = 53913
 bytes_reallocated = 43344
 
 [instances.warm]
 allocations = 131
-deallocations = 130
+deallocations = 129
 reallocations = 7
 bytes_allocated = 19009
-bytes_deallocated = 18949
+bytes_deallocated = 18917
 bytes_reallocated = 2864

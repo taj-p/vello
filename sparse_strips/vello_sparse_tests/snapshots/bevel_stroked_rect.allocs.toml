@@ -82,16 +82,16 @@ name = "bevel_stroked_rect_hybrid"
 
 [instances.cold]
 allocations = 117
-deallocations = 93
+deallocations = 92
 reallocations = 27
 bytes_allocated = 54283
-bytes_deallocated = 45337
+bytes_deallocated = 45305
 bytes_reallocated = 38392
 
 [instances.warm]
 allocations = 80
-deallocations = 79
+deallocations = 78
 reallocations = 4
 bytes_allocated = 10529
-bytes_deallocated = 10469
+bytes_deallocated = 10437
 bytes_reallocated = 624

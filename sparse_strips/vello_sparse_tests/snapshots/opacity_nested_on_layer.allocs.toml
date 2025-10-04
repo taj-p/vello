@@ -82,16 +82,16 @@ name = "opacity_nested_on_layer_hybrid"
 
 [instances.cold]
 allocations = 253
-deallocations = 229
+deallocations = 228
 reallocations = 131
 bytes_allocated = 95611
-bytes_deallocated = 72029
+bytes_deallocated = 71997
 bytes_reallocated = 63812
 
 [instances.warm]
 allocations = 219
-deallocations = 218
+deallocations = 217
 reallocations = 52
 bytes_allocated = 35041
-bytes_deallocated = 34981
+bytes_deallocated = 34949
 bytes_reallocated = 8912

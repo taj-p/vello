@@ -82,16 +82,16 @@ name = "gradient_sweep_complex_shape_hybrid"
 
 [instances.cold]
 allocations = 172
-deallocations = 146
+deallocations = 145
 reallocations = 40
 bytes_allocated = 103975
-bytes_deallocated = 53841
+bytes_deallocated = 53809
 bytes_reallocated = 72016
 
 [instances.warm]
 allocations = 132
-deallocations = 130
+deallocations = 129
 reallocations = 7
 bytes_allocated = 19117
-bytes_deallocated = 18949
+bytes_deallocated = 18917
 bytes_reallocated = 2864

@@ -82,16 +82,16 @@ name = "recording_can_be_cleared_hybrid"
 
 [instances.cold]
 allocations = 171
-deallocations = 151
+deallocations = 150
 reallocations = 47
 bytes_allocated = 65723
-bytes_deallocated = 57657
+bytes_deallocated = 57625
 bytes_reallocated = 42960
 
 [instances.warm]
 allocations = 138
-deallocations = 137
+deallocations = 136
 reallocations = 17
 bytes_allocated = 21441
-bytes_deallocated = 21381
+bytes_deallocated = 21349
 bytes_reallocated = 4096

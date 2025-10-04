@@ -82,16 +82,16 @@ name = "mix_darken_hybrid"
 
 [instances.cold]
 allocations = 261
-deallocations = 227
+deallocations = 225
 reallocations = 98
 bytes_allocated = 308105
-bytes_deallocated = 250100
+bytes_deallocated = 250036
 bytes_reallocated = 83666
 
 [instances.warm]
 allocations = 218
-deallocations = 211
+deallocations = 209
 reallocations = 37
 bytes_allocated = 214224
-bytes_deallocated = 213328
+bytes_deallocated = 213264
 bytes_reallocated = 6535

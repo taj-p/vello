@@ -82,16 +82,16 @@ name = "recording_mixed_with_direct_drawing_hybrid"
 
 [instances.cold]
 allocations = 259
-deallocations = 230
+deallocations = 229
 reallocations = 71
 bytes_allocated = 89703
-bytes_deallocated = 73657
+bytes_deallocated = 73625
 bytes_reallocated = 53024
 
 [instances.warm]
 allocations = 224
-deallocations = 216
+deallocations = 215
 reallocations = 24
 bytes_allocated = 39905
-bytes_deallocated = 38261
+bytes_deallocated = 38229
 bytes_reallocated = 9728

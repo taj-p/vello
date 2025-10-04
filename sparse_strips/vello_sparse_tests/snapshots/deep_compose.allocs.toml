@@ -82,16 +82,16 @@ name = "deep_compose_hybrid"
 
 [instances.cold]
 allocations = 550
-deallocations = 485
+deallocations = 484
 reallocations = 351
 bytes_allocated = 220919
-bytes_deallocated = 133521
+bytes_deallocated = 133489
 bytes_reallocated = 155708
 
 [instances.warm]
 allocations = 488
-deallocations = 487
+deallocations = 486
 reallocations = 201
 bytes_allocated = 100365
-bytes_deallocated = 100305
+bytes_deallocated = 100273
 bytes_reallocated = 43744

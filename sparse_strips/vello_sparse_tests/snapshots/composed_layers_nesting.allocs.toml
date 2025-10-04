@@ -82,16 +82,16 @@ name = "composed_layers_nesting_hybrid"
 
 [instances.cold]
 allocations = 286
-deallocations = 258
+deallocations = 257
 reallocations = 55
 bytes_allocated = 66308
-bytes_deallocated = 59614
+bytes_deallocated = 59582
 bytes_reallocated = 40508
 
 [instances.warm]
 allocations = 232
-deallocations = 231
+deallocations = 230
 reallocations = 22
 bytes_allocated = 24022
-bytes_deallocated = 23962
+bytes_deallocated = 23930
 bytes_reallocated = 4240

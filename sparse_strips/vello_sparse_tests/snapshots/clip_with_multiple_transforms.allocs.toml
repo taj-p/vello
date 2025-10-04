@@ -82,16 +82,16 @@ name = "clip_with_multiple_transforms_hybrid"
 
 [instances.cold]
 allocations = 221
-deallocations = 195
+deallocations = 194
 reallocations = 106
 bytes_allocated = 95013
-bytes_deallocated = 64119
+bytes_deallocated = 64087
 bytes_reallocated = 65724
 
 [instances.warm]
 allocations = 183
-deallocations = 182
+deallocations = 181
 reallocations = 33
 bytes_allocated = 29547
-bytes_deallocated = 29487
+bytes_deallocated = 29455
 bytes_reallocated = 6896

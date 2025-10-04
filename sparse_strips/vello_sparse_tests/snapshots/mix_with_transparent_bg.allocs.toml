@@ -82,16 +82,16 @@ name = "mix_with_transparent_bg_hybrid"
 
 [instances.cold]
 allocations = 240
-deallocations = 189
+deallocations = 188
 reallocations = 108
 bytes_allocated = 84365
-bytes_deallocated = 61087
+bytes_deallocated = 61055
 bytes_reallocated = 54500
 
 [instances.warm]
 allocations = 177
-deallocations = 176
+deallocations = 175
 reallocations = 35
 bytes_allocated = 27315
-bytes_deallocated = 27255
+bytes_deallocated = 27223
 bytes_reallocated = 6352

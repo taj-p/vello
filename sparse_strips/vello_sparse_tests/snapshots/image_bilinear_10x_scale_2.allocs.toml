@@ -82,16 +82,16 @@ name = "image_bilinear_10x_scale_2_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 41
 bytes_allocated = 175176
-bytes_deallocated = 162031
+bytes_deallocated = 161967
 bytes_reallocated = 42382
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 7
 bytes_allocated = 126695
-bytes_deallocated = 126383
+bytes_deallocated = 126319
 bytes_reallocated = 1639

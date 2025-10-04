@@ -82,16 +82,16 @@ name = "image_complex_shape_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 41
 bytes_allocated = 176996
-bytes_deallocated = 163275
+bytes_deallocated = 163211
 bytes_reallocated = 42958
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 9
 bytes_allocated = 129347
-bytes_deallocated = 128907
+bytes_deallocated = 128843
 bytes_reallocated = 3047

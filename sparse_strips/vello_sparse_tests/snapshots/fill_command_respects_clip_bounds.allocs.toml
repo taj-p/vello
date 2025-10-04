@@ -82,16 +82,16 @@ name = "fill_command_respects_clip_bounds_hybrid"
 
 [instances.cold]
 allocations = 1495
-deallocations = 1444
+deallocations = 1443
 reallocations = 79
 bytes_allocated = 215582
-bytes_deallocated = 187244
+bytes_deallocated = 187212
 bytes_reallocated = 57888
 
 [instances.warm]
 allocations = 1431
-deallocations = 1430
+deallocations = 1429
 reallocations = 21
 bytes_allocated = 152956
-bytes_deallocated = 152896
+bytes_deallocated = 152864
 bytes_reallocated = 4304

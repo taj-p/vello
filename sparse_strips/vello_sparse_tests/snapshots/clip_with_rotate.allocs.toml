@@ -82,16 +82,16 @@ name = "clip_with_rotate_hybrid"
 
 [instances.cold]
 allocations = 195
-deallocations = 170
+deallocations = 169
 reallocations = 89
 bytes_allocated = 89742
-bytes_deallocated = 63388
+bytes_deallocated = 63356
 bytes_reallocated = 62520
 
 [instances.warm]
 allocations = 157
-deallocations = 156
+deallocations = 155
 reallocations = 23
 bytes_allocated = 25740
-bytes_deallocated = 25680
+bytes_deallocated = 25648
 bytes_reallocated = 5168

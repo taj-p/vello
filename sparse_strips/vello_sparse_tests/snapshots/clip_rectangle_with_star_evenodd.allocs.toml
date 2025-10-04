@@ -82,16 +82,16 @@ name = "clip_rectangle_with_star_evenodd_hybrid"
 
 [instances.cold]
 allocations = 191
-deallocations = 169
+deallocations = 168
 reallocations = 69
 bytes_allocated = 74294
-bytes_deallocated = 59556
+bytes_deallocated = 59524
 bytes_reallocated = 49072
 
 [instances.warm]
 allocations = 156
-deallocations = 155
+deallocations = 154
 reallocations = 22
 bytes_allocated = 24468
-bytes_deallocated = 24408
+bytes_deallocated = 24376
 bytes_reallocated = 4944

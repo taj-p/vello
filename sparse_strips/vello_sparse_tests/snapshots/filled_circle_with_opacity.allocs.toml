@@ -82,16 +82,16 @@ name = "filled_circle_with_opacity_hybrid"
 
 [instances.cold]
 allocations = 165
-deallocations = 145
+deallocations = 144
 reallocations = 43
 bytes_allocated = 64875
-bytes_deallocated = 53849
+bytes_deallocated = 53817
 bytes_reallocated = 43408
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 7
 bytes_allocated = 18913
-bytes_deallocated = 18853
+bytes_deallocated = 18821
 bytes_reallocated = 2864

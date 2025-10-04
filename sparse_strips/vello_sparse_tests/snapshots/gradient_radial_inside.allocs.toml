@@ -82,16 +82,16 @@ name = "gradient_radial_inside_hybrid"
 
 [instances.cold]
 allocations = 136
-deallocations = 110
+deallocations = 109
 reallocations = 17
 bytes_allocated = 89403
-bytes_deallocated = 47657
+bytes_deallocated = 47625
 bytes_reallocated = 66480
 
 [instances.warm]
 allocations = 96
-deallocations = 94
+deallocations = 93
 reallocations = 5
 bytes_allocated = 12681
-bytes_deallocated = 12549
+bytes_deallocated = 12517
 bytes_reallocated = 944

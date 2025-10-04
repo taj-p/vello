@@ -82,16 +82,16 @@ name = "clip_with_translation_hybrid"
 
 [instances.cold]
 allocations = 195
-deallocations = 170
+deallocations = 169
 reallocations = 61
 bytes_allocated = 74046
-bytes_deallocated = 57932
+bytes_deallocated = 57900
 bytes_reallocated = 48888
 
 [instances.warm]
 allocations = 157
-deallocations = 156
+deallocations = 155
 reallocations = 19
 bytes_allocated = 21564
-bytes_deallocated = 21504
+bytes_deallocated = 21472
 bytes_reallocated = 3056

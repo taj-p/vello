@@ -82,16 +82,16 @@ name = "do_not_panic_on_multiple_flushes_hybrid"
 
 [instances.cold]
 allocations = 166
-deallocations = 146
+deallocations = 145
 reallocations = 18
 bytes_allocated = 56171
-bytes_deallocated = 52377
+bytes_deallocated = 52345
 bytes_reallocated = 35344
 
 [instances.warm]
 allocations = 133
-deallocations = 132
+deallocations = 131
 reallocations = 4
 bytes_allocated = 16241
-bytes_deallocated = 16181
+bytes_deallocated = 16149
 bytes_reallocated = 832

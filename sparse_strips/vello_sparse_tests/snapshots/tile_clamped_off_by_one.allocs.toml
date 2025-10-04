@@ -82,16 +82,16 @@ name = "tile_clamped_off_by_one_hybrid"
 
 [instances.cold]
 allocations = 134
-deallocations = 112
+deallocations = 111
 reallocations = 27
 bytes_allocated = 51998
-bytes_deallocated = 47276
+bytes_deallocated = 47244
 bytes_reallocated = 35680
 
 [instances.warm]
 allocations = 99
-deallocations = 98
+deallocations = 97
 reallocations = 10
 bytes_allocated = 12540
-bytes_deallocated = 12480
+bytes_deallocated = 12448
 bytes_reallocated = 1248

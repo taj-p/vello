@@ -82,16 +82,16 @@ name = "strip_inscribed_rect_hybrid"
 
 [instances.cold]
 allocations = 104
-deallocations = 84
+deallocations = 83
 reallocations = 15
 bytes_allocated = 47867
-bytes_deallocated = 43849
+bytes_deallocated = 43817
 bytes_reallocated = 34160
 
 [instances.warm]
 allocations = 71
-deallocations = 70
+deallocations = 69
 reallocations = 2
 bytes_allocated = 9233
-bytes_deallocated = 9173
+bytes_deallocated = 9141
 bytes_reallocated = 384

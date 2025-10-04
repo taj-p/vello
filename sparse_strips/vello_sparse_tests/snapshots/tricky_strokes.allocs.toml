@@ -82,16 +82,16 @@ name = "tricky_strokes_hybrid"
 
 [instances.cold]
 allocations = 2991
-deallocations = 2967
+deallocations = 2966
 reallocations = 423
 bytes_allocated = 617035
-bytes_deallocated = 479065
+bytes_deallocated = 479033
 bytes_reallocated = 253840
 
 [instances.warm]
 allocations = 2954
-deallocations = 2953
+deallocations = 2952
 reallocations = 25
 bytes_allocated = 425905
-bytes_deallocated = 425845
+bytes_deallocated = 425813
 bytes_reallocated = 87360

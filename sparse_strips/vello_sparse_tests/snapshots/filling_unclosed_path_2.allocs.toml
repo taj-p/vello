@@ -82,16 +82,16 @@ name = "filling_unclosed_path_2_hybrid"
 
 [instances.cold]
 allocations = 164
-deallocations = 144
+deallocations = 143
 reallocations = 29
 bytes_allocated = 60475
-bytes_deallocated = 53641
+bytes_deallocated = 53609
 bytes_reallocated = 39216
 
 [instances.warm]
 allocations = 131
-deallocations = 130
+deallocations = 129
 reallocations = 6
 bytes_allocated = 17425
-bytes_deallocated = 17365
+bytes_deallocated = 17333
 bytes_reallocated = 1584

@@ -82,16 +82,16 @@ name = "stroke_scaled_hybrid"
 
 [instances.cold]
 allocations = 172
-deallocations = 148
+deallocations = 147
 reallocations = 63
 bytes_allocated = 81915
-bytes_deallocated = 59145
+bytes_deallocated = 59113
 bytes_reallocated = 56896
 
 [instances.warm]
 allocations = 135
-deallocations = 134
+deallocations = 133
 reallocations = 9
 bytes_allocated = 24209
-bytes_deallocated = 24149
+bytes_deallocated = 24117
 bytes_reallocated = 5504

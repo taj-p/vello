@@ -82,16 +82,16 @@ name = "complex_composed_layers_hybrid"
 
 [instances.cold]
 allocations = 616
-deallocations = 549
+deallocations = 548
 reallocations = 426
 bytes_allocated = 270726
-bytes_deallocated = 162720
+bytes_deallocated = 162688
 bytes_reallocated = 194204
 
 [instances.warm]
 allocations = 554
-deallocations = 553
+deallocations = 552
 reallocations = 264
 bytes_allocated = 132188
-bytes_deallocated = 132128
+bytes_deallocated = 132096
 bytes_reallocated = 64256

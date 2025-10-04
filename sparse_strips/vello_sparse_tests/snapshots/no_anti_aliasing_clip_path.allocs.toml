@@ -82,16 +82,16 @@ name = "no_anti_aliasing_clip_path_hybrid"
 
 [instances.cold]
 allocations = 191
-deallocations = 169
+deallocations = 168
 reallocations = 72
 bytes_allocated = 75366
-bytes_deallocated = 59668
+bytes_deallocated = 59636
 bytes_reallocated = 50032
 
 [instances.warm]
 allocations = 156
-deallocations = 155
+deallocations = 154
 reallocations = 22
 bytes_allocated = 24580
-bytes_deallocated = 24520
+bytes_deallocated = 24488
 bytes_reallocated = 4944

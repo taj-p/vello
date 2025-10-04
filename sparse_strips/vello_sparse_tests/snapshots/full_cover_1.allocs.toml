@@ -82,16 +82,16 @@ name = "full_cover_1_hybrid"
 
 [instances.cold]
 allocations = 95
-deallocations = 75
+deallocations = 74
 reallocations = 13
 bytes_allocated = 46347
-bytes_deallocated = 42649
+bytes_deallocated = 42617
 bytes_reallocated = 33680
 
 [instances.warm]
 allocations = 62
-deallocations = 61
+deallocations = 60
 reallocations = 2
 bytes_allocated = 8369
-bytes_deallocated = 8309
+bytes_deallocated = 8277
 bytes_reallocated = 384

@@ -82,16 +82,16 @@ name = "basic_alpha_compositing_hybrid"
 
 [instances.cold]
 allocations = 165
-deallocations = 145
+deallocations = 144
 reallocations = 39
 bytes_allocated = 66875
-bytes_deallocated = 57129
+bytes_deallocated = 57097
 bytes_reallocated = 44912
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 8
 bytes_allocated = 19633
-bytes_deallocated = 19573
+bytes_deallocated = 19541
 bytes_reallocated = 3088

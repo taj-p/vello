@@ -82,16 +82,16 @@ name = "round_stroked_rect_hybrid"
 
 [instances.cold]
 allocations = 117
-deallocations = 94
+deallocations = 93
 reallocations = 29
 bytes_allocated = 55035
-bytes_deallocated = 45385
+bytes_deallocated = 45353
 bytes_reallocated = 39160
 
 [instances.warm]
 allocations = 81
-deallocations = 80
+deallocations = 79
 reallocations = 4
 bytes_allocated = 10577
-bytes_deallocated = 10517
+bytes_deallocated = 10485
 bytes_reallocated = 624

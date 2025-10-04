@@ -82,16 +82,16 @@ name = "gradient_linear_with_y_reflect_hybrid"
 
 [instances.cold]
 allocations = 173
-deallocations = 147
+deallocations = 146
 reallocations = 39
 bytes_allocated = 115703
-bytes_deallocated = 53841
+bytes_deallocated = 53809
 bytes_reallocated = 59024
 
 [instances.warm]
 allocations = 133
-deallocations = 131
+deallocations = 130
 reallocations = 6
 bytes_allocated = 17885
-bytes_deallocated = 17573
+bytes_deallocated = 17541
 bytes_reallocated = 1584

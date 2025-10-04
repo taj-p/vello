@@ -82,16 +82,16 @@ name = "image_with_transform_skew_y_2_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 41
 bytes_allocated = 174404
-bytes_deallocated = 163115
+bytes_deallocated = 163051
 bytes_reallocated = 40526
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 9
 bytes_allocated = 129187
-bytes_deallocated = 128747
+bytes_deallocated = 128683
 bytes_reallocated = 3047

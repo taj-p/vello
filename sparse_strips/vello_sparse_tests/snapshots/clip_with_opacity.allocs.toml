@@ -82,16 +82,16 @@ name = "clip_with_opacity_hybrid"
 
 [instances.cold]
 allocations = 191
-deallocations = 169
+deallocations = 168
 reallocations = 75
 bytes_allocated = 76206
-bytes_deallocated = 59292
+bytes_deallocated = 59260
 bytes_reallocated = 51248
 
 [instances.warm]
 allocations = 156
-deallocations = 155
+deallocations = 154
 reallocations = 21
 bytes_allocated = 22924
-bytes_deallocated = 22864
+bytes_deallocated = 22832
 bytes_reallocated = 3664

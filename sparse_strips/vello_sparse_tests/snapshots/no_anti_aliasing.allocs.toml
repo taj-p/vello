@@ -82,16 +82,16 @@ name = "no_anti_aliasing_hybrid"
 
 [instances.cold]
 allocations = 164
-deallocations = 144
+deallocations = 143
 reallocations = 30
 bytes_allocated = 60107
-bytes_deallocated = 53369
+bytes_deallocated = 53337
 bytes_reallocated = 39120
 
 [instances.warm]
 allocations = 131
-deallocations = 130
+deallocations = 129
 reallocations = 6
 bytes_allocated = 17153
-bytes_deallocated = 17093
+bytes_deallocated = 17061
 bytes_reallocated = 1584

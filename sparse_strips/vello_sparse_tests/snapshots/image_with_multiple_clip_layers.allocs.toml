@@ -82,16 +82,16 @@ name = "image_with_multiple_clip_layers_hybrid"
 
 [instances.cold]
 allocations = 256
-deallocations = 228
+deallocations = 226
 reallocations = 77
 bytes_allocated = 187924
-bytes_deallocated = 171551
+bytes_deallocated = 171487
 bytes_reallocated = 49522
 
 [instances.warm]
 allocations = 218
-deallocations = 214
+deallocations = 212
 reallocations = 32
 bytes_allocated = 136163
-bytes_deallocated = 135723
+bytes_deallocated = 135659
 bytes_reallocated = 5767

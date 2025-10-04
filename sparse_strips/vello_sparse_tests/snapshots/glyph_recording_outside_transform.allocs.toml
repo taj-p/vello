@@ -82,16 +82,16 @@ name = "glyph_recording_outside_transform_hybrid"
 
 [instances.cold]
 allocations = 235
-deallocations = 198
+deallocations = 197
 reallocations = 88
 bytes_allocated = 118895
-bytes_deallocated = 87637
+bytes_deallocated = 87605
 bytes_reallocated = 74352
 
 [instances.warm]
 allocations = 199
-deallocations = 183
+deallocations = 182
 reallocations = 48
 bytes_allocated = 64777
-bytes_deallocated = 52813
+bytes_deallocated = 52781
 bytes_reallocated = 25936

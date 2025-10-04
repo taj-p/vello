@@ -82,16 +82,16 @@ name = "image_pad_x_pad_y_hybrid"
 
 [instances.cold]
 allocations = 205
-deallocations = 180
+deallocations = 178
 reallocations = 40
 bytes_allocated = 176004
-bytes_deallocated = 162987
+bytes_deallocated = 162923
 bytes_reallocated = 42254
 
 [instances.warm]
 allocations = 169
-deallocations = 165
+deallocations = 163
 reallocations = 8
 bytes_allocated = 127779
-bytes_deallocated = 127339
+bytes_deallocated = 127275
 bytes_reallocated = 1767

@@ -82,16 +82,16 @@ name = "recording_is_executed_at_recorded_transform_hybrid"
 
 [instances.cold]
 allocations = 133
-deallocations = 113
+deallocations = 112
 reallocations = 29
 bytes_allocated = 54155
-bytes_deallocated = 49401
+bytes_deallocated = 49369
 bytes_reallocated = 36448
 
 [instances.warm]
 allocations = 100
-deallocations = 99
+deallocations = 98
 reallocations = 12
 bytes_allocated = 14033
-bytes_deallocated = 13973
+bytes_deallocated = 13941
 bytes_reallocated = 1536

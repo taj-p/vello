@@ -82,16 +82,16 @@ name = "shape_at_wide_tile_boundary_hybrid"
 
 [instances.cold]
 allocations = 92
-deallocations = 72
+deallocations = 71
 reallocations = 13
 bytes_allocated = 45915
-bytes_deallocated = 42185
+bytes_deallocated = 42153
 bytes_reallocated = 33632
 
 [instances.warm]
 allocations = 59
-deallocations = 58
+deallocations = 57
 reallocations = 2
 bytes_allocated = 8017
-bytes_deallocated = 7957
+bytes_deallocated = 7925
 bytes_reallocated = 384

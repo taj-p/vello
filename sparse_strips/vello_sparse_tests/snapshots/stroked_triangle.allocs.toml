@@ -82,16 +82,16 @@ name = "stroked_triangle_hybrid"
 
 [instances.cold]
 allocations = 168
-deallocations = 145
+deallocations = 144
 reallocations = 25
 bytes_allocated = 64131
-bytes_deallocated = 53233
+bytes_deallocated = 53201
 bytes_reallocated = 42048
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 5
 bytes_allocated = 17017
-bytes_deallocated = 16957
+bytes_deallocated = 16925
 bytes_reallocated = 1360

@@ -82,16 +82,16 @@ name = "overflowing_stroked_rect_hybrid"
 
 [instances.cold]
 allocations = 116
-deallocations = 93
+deallocations = 92
 reallocations = 25
 bytes_allocated = 54779
-bytes_deallocated = 45225
+bytes_deallocated = 45193
 bytes_reallocated = 38840
 
 [instances.warm]
 allocations = 80
-deallocations = 79
+deallocations = 78
 reallocations = 2
 bytes_allocated = 10177
-bytes_deallocated = 10117
+bytes_deallocated = 10085
 bytes_reallocated = 384

@@ -82,16 +82,16 @@ name = "oversized_star_hybrid"
 
 [instances.cold]
 allocations = 168
-deallocations = 145
+deallocations = 144
 reallocations = 87
 bytes_allocated = 112859
-bytes_deallocated = 65705
+bytes_deallocated = 65673
 bytes_reallocated = 85256
 
 [instances.warm]
 allocations = 132
-deallocations = 131
+deallocations = 130
 reallocations = 10
 bytes_allocated = 25649
-bytes_deallocated = 25589
+bytes_deallocated = 25557
 bytes_reallocated = 6768

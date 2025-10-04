@@ -82,16 +82,16 @@ name = "filling_evenodd_rule_hybrid"
 
 [instances.cold]
 allocations = 164
-deallocations = 144
+deallocations = 143
 reallocations = 32
 bytes_allocated = 63035
-bytes_deallocated = 53833
+bytes_deallocated = 53801
 bytes_reallocated = 41584
 
 [instances.warm]
 allocations = 131
-deallocations = 130
+deallocations = 129
 reallocations = 7
 bytes_allocated = 18897
-bytes_deallocated = 18837
+bytes_deallocated = 18805
 bytes_reallocated = 2864

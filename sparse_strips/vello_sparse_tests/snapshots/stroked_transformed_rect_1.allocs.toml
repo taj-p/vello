@@ -82,16 +82,16 @@ name = "stroked_transformed_rect_1_hybrid"
 
 [instances.cold]
 allocations = 116
-deallocations = 93
+deallocations = 92
 reallocations = 26
 bytes_allocated = 54971
-bytes_deallocated = 45257
+bytes_deallocated = 45225
 bytes_reallocated = 39000
 
 [instances.warm]
 allocations = 80
-deallocations = 79
+deallocations = 78
 reallocations = 3
 bytes_allocated = 10289
-bytes_deallocated = 10229
+bytes_deallocated = 10197
 bytes_reallocated = 464

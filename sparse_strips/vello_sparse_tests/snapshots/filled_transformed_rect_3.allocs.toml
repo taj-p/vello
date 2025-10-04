@@ -82,16 +82,16 @@ name = "filled_transformed_rect_3_hybrid"
 
 [instances.cold]
 allocations = 113
-deallocations = 93
+deallocations = 92
 reallocations = 20
 bytes_allocated = 50827
-bytes_deallocated = 46041
+bytes_deallocated = 46009
 bytes_reallocated = 35888
 
 [instances.warm]
 allocations = 80
-deallocations = 79
+deallocations = 78
 reallocations = 4
 bytes_allocated = 10593
-bytes_deallocated = 10533
+bytes_deallocated = 10501
 bytes_reallocated = 624

@@ -82,16 +82,16 @@ name = "compose_src_in_hybrid"
 
 [instances.cold]
 allocations = 252
-deallocations = 228
+deallocations = 227
 reallocations = 120
 bytes_allocated = 89035
-bytes_deallocated = 70445
+bytes_deallocated = 70413
 bytes_reallocated = 58596
 
 [instances.warm]
 allocations = 219
-deallocations = 218
+deallocations = 217
 reallocations = 47
 bytes_allocated = 33580
-bytes_deallocated = 33520
+bytes_deallocated = 33488
 bytes_reallocated = 8608

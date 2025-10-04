@@ -82,16 +82,16 @@ name = "intersected_clip_bbox_with_x0_gt_x1_hybrid"
 
 [instances.cold]
 allocations = 106
-deallocations = 84
+deallocations = 83
 reallocations = 15
 bytes_allocated = 48003
-bytes_deallocated = 43985
+bytes_deallocated = 43953
 bytes_reallocated = 34128
 
 [instances.warm]
 allocations = 40
-deallocations = 40
+deallocations = 39
 reallocations = 2
 bytes_allocated = 7582
-bytes_deallocated = 7582
+bytes_deallocated = 7550
 bytes_reallocated = 448

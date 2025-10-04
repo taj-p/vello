@@ -82,16 +82,16 @@ name = "image_luma_image_hybrid"
 
 [instances.cold]
 allocations = 206
-deallocations = 181
+deallocations = 179
 reallocations = 40
 bytes_allocated = 175805
-bytes_deallocated = 162788
+bytes_deallocated = 162724
 bytes_reallocated = 42254
 
 [instances.warm]
 allocations = 170
-deallocations = 166
+deallocations = 164
 reallocations = 8
 bytes_allocated = 127580
-bytes_deallocated = 127140
+bytes_deallocated = 127076
 bytes_reallocated = 1767

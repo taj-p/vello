@@ -82,16 +82,16 @@ name = "compose_dest_over_hybrid"
 
 [instances.cold]
 allocations = 274
-deallocations = 249
+deallocations = 248
 reallocations = 112
 bytes_allocated = 86094
-bytes_deallocated = 69440
+bytes_deallocated = 69408
 bytes_reallocated = 54948
 
 [instances.warm]
 allocations = 240
-deallocations = 239
+deallocations = 238
 reallocations = 49
 bytes_allocated = 32912
-bytes_deallocated = 32852
+bytes_deallocated = 32820
 bytes_reallocated = 7424

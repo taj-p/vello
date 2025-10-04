@@ -82,16 +82,16 @@ name = "transparent_paint_hybrid"
 
 [instances.cold]
 allocations = 108
-deallocations = 104
+deallocations = 103
 reallocations = 1
 bytes_allocated = 14966
-bytes_deallocated = 13906
+bytes_deallocated = 13874
 bytes_reallocated = 544
 
 [instances.warm]
 allocations = 100
-deallocations = 100
+deallocations = 99
 reallocations = 0
 bytes_allocated = 13238
-bytes_deallocated = 13238
+bytes_deallocated = 13206
 bytes_reallocated = 0

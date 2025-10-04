@@ -82,16 +82,16 @@ name = "mix_modes_non_gradient_test_matrix_hybrid"
 
 [instances.cold]
 allocations = 1595
-deallocations = 1528
+deallocations = 1527
 reallocations = 939
 bytes_allocated = 743204
-bytes_deallocated = 457422
+bytes_deallocated = 457390
 bytes_reallocated = 514300
 
 [instances.warm]
 allocations = 1562
-deallocations = 1561
+deallocations = 1560
 reallocations = 683
 bytes_allocated = 427302
-bytes_deallocated = 427242
+bytes_deallocated = 427210
 bytes_reallocated = 203776

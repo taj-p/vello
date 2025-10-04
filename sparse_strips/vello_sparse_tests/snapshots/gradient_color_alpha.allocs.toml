@@ -82,16 +82,16 @@ name = "gradient_color_alpha_hybrid"
 
 [instances.cold]
 allocations = 136
-deallocations = 110
+deallocations = 109
 reallocations = 17
 bytes_allocated = 88319
-bytes_deallocated = 47633
+bytes_deallocated = 47601
 bytes_reallocated = 67504
 
 [instances.warm]
 allocations = 96
-deallocations = 94
+deallocations = 93
 reallocations = 5
 bytes_allocated = 12645
-bytes_deallocated = 12549
+bytes_deallocated = 12517
 bytes_reallocated = 944

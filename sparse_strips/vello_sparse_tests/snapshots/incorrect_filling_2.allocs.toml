@@ -82,16 +82,16 @@ name = "incorrect_filling_2_hybrid"
 
 [instances.cold]
 allocations = 137
-deallocations = 117
+deallocations = 116
 reallocations = 24
 bytes_allocated = 54219
-bytes_deallocated = 48793
+bytes_deallocated = 48761
 bytes_reallocated = 36528
 
 [instances.warm]
 allocations = 104
-deallocations = 103
+deallocations = 102
 reallocations = 5
 bytes_allocated = 13505
-bytes_deallocated = 13445
+bytes_deallocated = 13413
 bytes_reallocated = 944

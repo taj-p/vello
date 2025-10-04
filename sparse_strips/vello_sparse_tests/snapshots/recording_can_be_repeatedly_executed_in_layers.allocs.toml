@@ -82,16 +82,16 @@ name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
 
 [instances.cold]
 allocations = 789
-deallocations = 741
+deallocations = 740
 reallocations = 389
 bytes_allocated = 316121
-bytes_deallocated = 173539
+bytes_deallocated = 173507
 bytes_reallocated = 224572
 
 [instances.warm]
 allocations = 756
-deallocations = 755
+deallocations = 754
 reallocations = 220
 bytes_allocated = 138519
-bytes_deallocated = 138459
+bytes_deallocated = 138427
 bytes_reallocated = 52096
