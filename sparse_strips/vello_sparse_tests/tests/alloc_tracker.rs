@@ -3,6 +3,7 @@
 
 //! Tracks allocations and deallocations.
 
+use core::cell::Cell;
 use core::sync::atomic::{AtomicUsize, Ordering};
 use std::alloc::{GlobalAlloc, Layout, System};
 
@@ -30,40 +31,51 @@ pub(crate) struct AllocationTracker {
     bytes_reallocated: AtomicUsize,
 }
 
+thread_local! {
+    static TRACKING_ENABLED: Cell<bool> = Cell::new(false);
+}
+
 unsafe impl GlobalAlloc for &AllocationTracker {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        self.allocations.fetch_add(1, Ordering::Relaxed);
-        self.bytes_allocated
-            .fetch_add(layout.size(), Ordering::Relaxed);
+        if TRACKING_ENABLED.get() {
+            self.allocations.fetch_add(1, Ordering::Relaxed);
+            self.bytes_allocated
+                .fetch_add(layout.size(), Ordering::Relaxed);
+        }
         unsafe { System.alloc(layout) }
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
-        self.deallocations.fetch_add(1, Ordering::Relaxed);
-        self.bytes_deallocated
-            .fetch_add(layout.size(), Ordering::Relaxed);
+        if TRACKING_ENABLED.get() {
+            self.deallocations.fetch_add(1, Ordering::Relaxed);
+            self.bytes_deallocated
+                .fetch_add(layout.size(), Ordering::Relaxed);
+        }
         unsafe { System.dealloc(ptr, layout) }
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        self.allocations.fetch_add(1, Ordering::Relaxed);
-        self.bytes_allocated
-            .fetch_add(layout.size(), Ordering::Relaxed);
+        if TRACKING_ENABLED.get() {
+            self.allocations.fetch_add(1, Ordering::Relaxed);
+            self.bytes_allocated
+                .fetch_add(layout.size(), Ordering::Relaxed);
+        }
         unsafe { System.alloc_zeroed(layout) }
     }
 
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
-        self.reallocations.fetch_add(1, Ordering::Relaxed);
-
-        if new_size > layout.size() {
-            self.bytes_allocated
+        if TRACKING_ENABLED.get() {
+            self.reallocations.fetch_add(1, Ordering::Relaxed);
+            if new_size > layout.size() {
+                self.bytes_allocated
+                    .fetch_add(new_size - layout.size(), Ordering::Relaxed);
+            } else {
+                self.bytes_deallocated
+                    .fetch_add(layout.size() - new_size, Ordering::Relaxed);
+            }
+            self.bytes_reallocated
                 .fetch_add(new_size - layout.size(), Ordering::Relaxed);
-        } else {
-            self.bytes_deallocated
-                .fetch_add(layout.size() - new_size, Ordering::Relaxed);
         }
-        self.bytes_reallocated
-            .fetch_add(new_size - layout.size(), Ordering::Relaxed);
 
         unsafe { System.realloc(ptr, layout, new_size) }
     }
@@ -112,6 +124,7 @@ pub(crate) struct AllocationSpan<'a> {
 
 impl<'a> AllocationSpan<'a> {
     pub(crate) fn new(allocator: &'a AllocationTracker) -> Self {
+        TRACKING_ENABLED.set(true);
         Self {
             allocator,
             initial_stats: allocator.into(),
@@ -119,6 +132,7 @@ impl<'a> AllocationSpan<'a> {
     }
 
     pub(crate) fn end(self) -> AllocationStats {
+        TRACKING_ENABLED.set(false);
         let stats: AllocationStats = self.allocator.into();
         stats.sub(&self.initial_stats)
     }
