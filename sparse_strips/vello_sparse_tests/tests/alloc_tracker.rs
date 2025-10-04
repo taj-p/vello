@@ -69,7 +69,7 @@ unsafe impl GlobalAlloc for &AllocationTracker {
     }
 }
 
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy, Serialize, Deserialize)]
 pub(crate) struct AllocationStats {
     pub allocations: usize,
     pub deallocations: usize,
@@ -134,13 +134,8 @@ pub(crate) struct AllocFile {
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub(crate) struct AllocInstance {
     pub name: String,
-    pub allocations: usize,
-    pub deallocations: usize,
-    pub reallocations: usize,
-    pub bytes_allocated: usize,
-    pub bytes_deallocated: usize,
-    pub bytes_reallocated: usize,
-    pub net_bytes: usize,
+    pub cold: AllocationStats,
+    pub warm: AllocationStats,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -148,8 +143,18 @@ pub(crate) fn save_alloc_stats(alloc_stats: AllocationStats, file_path: &str, in
     // Do nothing on wasm32.
 }
 
+pub(crate) enum RunType {
+    Cold,
+    Warm,
+}
+
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn save_alloc_stats(alloc_stats: AllocationStats, file_path: &str, instance_name: &str) {
+pub(crate) fn save_alloc_stats(
+    run_type: RunType,
+    alloc_stats: AllocationStats,
+    file_path: &str,
+    instance_name: &str,
+) {
     use std::io::Write;
     use std::thread;
     use std::time::Duration;
@@ -188,31 +193,32 @@ pub(crate) fn save_alloc_stats(alloc_stats: AllocationStats, file_path: &str, in
     file_data.test = test_name.to_string();
     file_data.units = "bytes".to_string();
 
-    let net_bytes = alloc_stats
-        .bytes_allocated
-        .saturating_sub(alloc_stats.bytes_deallocated);
     if let Some(inst) = file_data
         .instances
         .iter_mut()
         .find(|i| i.name == instance_name)
     {
-        inst.allocations = alloc_stats.allocations;
-        inst.deallocations = alloc_stats.deallocations;
-        inst.reallocations = alloc_stats.reallocations;
-        inst.bytes_allocated = alloc_stats.bytes_allocated;
-        inst.bytes_deallocated = alloc_stats.bytes_deallocated;
-        inst.bytes_reallocated = alloc_stats.bytes_reallocated;
-        inst.net_bytes = net_bytes;
+        let stats = match run_type {
+            RunType::Cold => &mut inst.cold,
+            RunType::Warm => &mut inst.warm,
+        };
+
+        stats.allocations = alloc_stats.allocations;
+        stats.deallocations = alloc_stats.deallocations;
+        stats.reallocations = alloc_stats.reallocations;
+        stats.bytes_allocated = alloc_stats.bytes_allocated;
+        stats.bytes_deallocated = alloc_stats.bytes_deallocated;
+        stats.bytes_reallocated = alloc_stats.bytes_reallocated;
     } else {
+        let (cold_stats, warm_stats) = match run_type {
+            RunType::Cold => (alloc_stats, AllocationStats::default()),
+            RunType::Warm => (AllocationStats::default(), alloc_stats),
+        };
+
         file_data.instances.push(AllocInstance {
             name: instance_name.to_string(),
-            allocations: alloc_stats.allocations,
-            deallocations: alloc_stats.deallocations,
-            reallocations: alloc_stats.reallocations,
-            bytes_allocated: alloc_stats.bytes_allocated,
-            bytes_deallocated: alloc_stats.bytes_deallocated,
-            bytes_reallocated: alloc_stats.bytes_reallocated,
-            net_bytes,
+            cold: cold_stats,
+            warm: warm_stats,
         });
     }
     file_data.instances.sort_by(|a, b| a.name.cmp(&b.name));

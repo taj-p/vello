@@ -40,6 +40,7 @@ pub(crate) trait Renderer: Sized {
         mask: Option<Mask>,
     );
     fn flush(&mut self);
+    fn reset(&mut self);
     fn push_clip_layer(&mut self, path: &BezPath);
     fn push_blend_layer(&mut self, blend_mode: BlendMode);
     fn push_opacity_layer(&mut self, opacity: f32);
@@ -114,6 +115,10 @@ impl Renderer for RenderContext {
 
     fn flush(&mut self) {
         Self::flush(self);
+    }
+
+    fn reset(&mut self) {
+        Self::reset(self);
     }
 
     fn push_clip_layer(&mut self, path: &BezPath) {
@@ -422,6 +427,10 @@ impl Renderer for HybridRenderer {
     }
 
     fn flush(&mut self) {}
+
+    fn reset(&mut self) {
+        self.scene.reset();
+    }
 
     fn push_clip_layer(&mut self, path: &BezPath) {
         self.scene.push_clip_layer(path);
