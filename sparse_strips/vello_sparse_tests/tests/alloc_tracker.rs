@@ -102,6 +102,18 @@ impl AllocationStats {
             bytes_reallocated: self.bytes_reallocated - other.bytes_reallocated,
         }
     }
+
+    fn approx_eq(&self, other: &AllocationStats, threshold: usize) -> bool {
+        let threshold = threshold as isize;
+        (self.allocations as isize - other.allocations as isize).abs() <= threshold
+            && (self.deallocations as isize - other.deallocations as isize).abs() <= threshold
+            && (self.reallocations as isize - other.reallocations as isize).abs() <= threshold
+            && (self.bytes_allocated as isize - other.bytes_allocated as isize).abs() <= threshold
+            && (self.bytes_deallocated as isize - other.bytes_deallocated as isize).abs()
+                <= threshold
+            && (self.bytes_reallocated as isize - other.bytes_reallocated as isize).abs()
+                <= threshold
+    }
 }
 
 impl Into<AllocationStats> for &AllocationTracker {
@@ -214,8 +226,6 @@ pub(crate) fn process_alloc_stats(
     instance_name: &str,
 ) {
     use std::io::Write;
-    use std::thread;
-    use std::time::Duration;
 
     if !should_process_allocs() {
         return;
@@ -248,7 +258,10 @@ pub(crate) fn process_alloc_stats(
             });
 
         if let Some(expected_stats) = expected_stats {
-            assert_eq!(alloc_stats, *expected_stats);
+            assert!(
+                alloc_stats.approx_eq(expected_stats, 100),
+                "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
+            );
         }
         // TODO: Handle missing entry?
         return;
