@@ -53,10 +53,10 @@ net_bytes = 16768
 
 [[instances]]
 name = "clip_with_scale_hybrid"
-allocations = 210
-deallocations = 183
-reallocations = 78
-bytes_allocated = 79987
-bytes_deallocated = 59681
-bytes_reallocated = 53088
-net_bytes = 20306
+allocations = 196
+deallocations = 171
+reallocations = 73
+bytes_allocated = 78702
+bytes_deallocated = 58748
+bytes_reallocated = 52728
+net_bytes = 19954

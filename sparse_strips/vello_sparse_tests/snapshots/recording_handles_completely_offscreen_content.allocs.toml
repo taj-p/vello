@@ -53,10 +53,10 @@ net_bytes = 448
 
 [[instances]]
 name = "recording_handles_completely_offscreen_content_hybrid"
-allocations = 122
-deallocations = 101
-reallocations = 17
-bytes_allocated = 50424
-bytes_deallocated = 46758
-bytes_reallocated = 34864
-net_bytes = 3666
+allocations = 107
+deallocations = 87
+reallocations = 15
+bytes_allocated = 49211
+bytes_deallocated = 45577
+bytes_reallocated = 34672
+net_bytes = 3634

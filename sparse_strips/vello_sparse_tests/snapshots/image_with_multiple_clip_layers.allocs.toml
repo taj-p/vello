@@ -53,10 +53,10 @@ net_bytes = 11424
 
 [[instances]]
 name = "image_with_multiple_clip_layers_hybrid"
-allocations = 270
-deallocations = 240
+allocations = 256
+deallocations = 228
 reallocations = 77
-bytes_allocated = 188865
-bytes_deallocated = 172172
-bytes_reallocated = 49538
-net_bytes = 16693
+bytes_allocated = 187924
+bytes_deallocated = 171551
+bytes_reallocated = 49522
+net_bytes = 16373

@@ -53,10 +53,10 @@ net_bytes = 1088
 
 [[instances]]
 name = "tile_clamped_off_by_one_hybrid"
-allocations = 148
-deallocations = 124
-reallocations = 32
-bytes_allocated = 53283
-bytes_deallocated = 48209
-bytes_reallocated = 36040
-net_bytes = 5074
+allocations = 134
+deallocations = 112
+reallocations = 27
+bytes_allocated = 51998
+bytes_deallocated = 47276
+bytes_reallocated = 35680
+net_bytes = 4722

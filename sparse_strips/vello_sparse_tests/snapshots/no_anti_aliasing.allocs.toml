@@ -53,10 +53,10 @@ net_bytes = 3552
 
 [[instances]]
 name = "no_anti_aliasing_hybrid"
-allocations = 179
-deallocations = 158
-reallocations = 32
-bytes_allocated = 61320
-bytes_deallocated = 54550
-bytes_reallocated = 39312
-net_bytes = 6770
+allocations = 164
+deallocations = 144
+reallocations = 30
+bytes_allocated = 60107
+bytes_deallocated = 53369
+bytes_reallocated = 39120
+net_bytes = 6738

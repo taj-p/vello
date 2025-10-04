@@ -53,10 +53,10 @@ net_bytes = 1728
 
 [[instances]]
 name = "out_of_viewport_clip_hybrid"
-allocations = 182
-deallocations = 159
-reallocations = 19
-bytes_allocated = 58008
-bytes_deallocated = 53062
-bytes_reallocated = 36176
-net_bytes = 4946
+allocations = 167
+deallocations = 145
+reallocations = 17
+bytes_allocated = 56795
+bytes_deallocated = 51881
+bytes_reallocated = 35984
+net_bytes = 4914

@@ -53,10 +53,10 @@ net_bytes = 55768
 
 [[instances]]
 name = "glyphs_skewed_long_hybrid"
-allocations = 193
-deallocations = 145
-reallocations = 112
-bytes_allocated = 127780
-bytes_deallocated = 68346
-bytes_reallocated = 93696
-net_bytes = 59434
+allocations = 178
+deallocations = 131
+reallocations = 110
+bytes_allocated = 126567
+bytes_deallocated = 67165
+bytes_reallocated = 93504
+net_bytes = 59402

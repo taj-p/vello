@@ -53,10 +53,10 @@ net_bytes = 25032
 
 [[instances]]
 name = "gradient_radial_spread_method_reflect_hybrid"
-allocations = 188
-deallocations = 161
-reallocations = 40
-bytes_allocated = 116788
-bytes_deallocated = 54894
-bytes_reallocated = 59088
-net_bytes = 61894
+allocations = 173
+deallocations = 147
+reallocations = 39
+bytes_allocated = 115703
+bytes_deallocated = 53841
+bytes_reallocated = 59024
+net_bytes = 61862

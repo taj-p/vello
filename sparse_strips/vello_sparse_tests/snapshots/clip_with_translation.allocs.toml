@@ -53,10 +53,10 @@ net_bytes = 12928
 
 [[instances]]
 name = "clip_with_translation_hybrid"
-allocations = 209
-deallocations = 182
-reallocations = 66
-bytes_allocated = 75331
-bytes_deallocated = 58865
-bytes_reallocated = 49248
-net_bytes = 16466
+allocations = 195
+deallocations = 170
+reallocations = 61
+bytes_allocated = 74046
+bytes_deallocated = 57932
+bytes_reallocated = 48888
+net_bytes = 16114

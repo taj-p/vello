@@ -53,10 +53,10 @@ net_bytes = 12668
 
 [[instances]]
 name = "recording_mixed_with_direct_drawing_hybrid"
-allocations = 274
-deallocations = 244
-reallocations = 73
-bytes_allocated = 90916
-bytes_deallocated = 74838
-bytes_reallocated = 53216
-net_bytes = 16078
+allocations = 259
+deallocations = 230
+reallocations = 71
+bytes_allocated = 89703
+bytes_deallocated = 73657
+bytes_reallocated = 53024
+net_bytes = 16046

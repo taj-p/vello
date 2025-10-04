@@ -53,10 +53,10 @@ net_bytes = 44072
 
 [[instances]]
 name = "glyphs_stroked_hybrid"
-allocations = 244
-deallocations = 202
-reallocations = 82
-bytes_allocated = 113092
-bytes_deallocated = 65354
-bytes_reallocated = 76840
-net_bytes = 47738
+allocations = 229
+deallocations = 188
+reallocations = 80
+bytes_allocated = 111879
+bytes_deallocated = 64173
+bytes_reallocated = 76648
+net_bytes = 47706

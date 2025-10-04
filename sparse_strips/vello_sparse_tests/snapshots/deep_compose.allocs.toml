@@ -53,10 +53,10 @@ net_bytes = 78528
 
 [[instances]]
 name = "deep_compose_hybrid"
-allocations = 564
-deallocations = 497
-reallocations = 352
-bytes_allocated = 221924
-bytes_deallocated = 134142
-bytes_reallocated = 155788
-net_bytes = 87782
+allocations = 550
+deallocations = 485
+reallocations = 351
+bytes_allocated = 220919
+bytes_deallocated = 133521
+bytes_reallocated = 155708
+net_bytes = 87398

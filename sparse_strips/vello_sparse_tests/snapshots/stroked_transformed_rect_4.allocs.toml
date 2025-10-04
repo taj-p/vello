@@ -53,10 +53,10 @@ net_bytes = 6368
 
 [[instances]]
 name = "stroked_transformed_rect_4_hybrid"
-allocations = 131
-deallocations = 107
-reallocations = 27
-bytes_allocated = 56024
-bytes_deallocated = 46438
-bytes_reallocated = 39032
-net_bytes = 9586
+allocations = 116
+deallocations = 93
+reallocations = 25
+bytes_allocated = 54811
+bytes_deallocated = 45257
+bytes_reallocated = 38840
+net_bytes = 9554

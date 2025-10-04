@@ -53,10 +53,10 @@ net_bytes = 896
 
 [[instances]]
 name = "rectangle_above_viewport_hybrid"
-allocations = 113
-deallocations = 92
-reallocations = 18
-bytes_allocated = 48488
-bytes_deallocated = 44374
-bytes_reallocated = 34416
-net_bytes = 4114
+allocations = 98
+deallocations = 78
+reallocations = 16
+bytes_allocated = 47275
+bytes_deallocated = 43193
+bytes_reallocated = 34224
+net_bytes = 4082

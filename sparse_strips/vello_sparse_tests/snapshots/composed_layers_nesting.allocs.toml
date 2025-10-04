@@ -53,10 +53,10 @@ net_bytes = 1120
 
 [[instances]]
 name = "composed_layers_nesting_hybrid"
-allocations = 299
-deallocations = 269
-reallocations = 56
-bytes_allocated = 67153
-bytes_deallocated = 60107
-bytes_reallocated = 40556
-net_bytes = 7046
+allocations = 286
+deallocations = 258
+reallocations = 55
+bytes_allocated = 66308
+bytes_deallocated = 59614
+bytes_reallocated = 40508
+net_bytes = 6694

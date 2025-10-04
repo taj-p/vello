@@ -53,10 +53,10 @@ net_bytes = 11552
 
 [[instances]]
 name = "clip_rectangle_with_star_evenodd_hybrid"
-allocations = 205
-deallocations = 181
-reallocations = 74
-bytes_allocated = 75579
-bytes_deallocated = 60489
-bytes_reallocated = 49432
-net_bytes = 15090
+allocations = 191
+deallocations = 169
+reallocations = 69
+bytes_allocated = 74294
+bytes_deallocated = 59556
+bytes_reallocated = 49072
+net_bytes = 14738

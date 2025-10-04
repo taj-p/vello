@@ -53,10 +53,10 @@ net_bytes = 1696064
 
 [[instances]]
 name = "mix_compose_combined_test_matrix_hybrid"
-allocations = 19960
-deallocations = 18990
+allocations = 19947
+deallocations = 18979
 reallocations = 5384
-bytes_allocated = 4921399
-bytes_deallocated = 2868865
-bytes_reallocated = 3039836
-net_bytes = 2052534
+bytes_allocated = 4920586
+bytes_deallocated = 2868372
+bytes_reallocated = 3039820
+net_bytes = 2052214

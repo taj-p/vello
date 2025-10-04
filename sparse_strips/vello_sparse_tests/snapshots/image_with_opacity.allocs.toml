@@ -53,10 +53,10 @@ net_bytes = 16640
 
 [[instances]]
 name = "image_with_opacity_hybrid"
-allocations = 266
-deallocations = 237
+allocations = 252
+deallocations = 225
 reallocations = 104
-bytes_allocated = 196915
-bytes_deallocated = 175390
-bytes_reallocated = 56546
-net_bytes = 21525
+bytes_allocated = 195974
+bytes_deallocated = 174769
+bytes_reallocated = 56530
+net_bytes = 21205

@@ -53,10 +53,10 @@ net_bytes = 4048
 
 [[instances]]
 name = "gradient_on_3_wide_tiles_hybrid"
-allocations = 184
-deallocations = 157
-reallocations = 18
-bytes_allocated = 92172
-bytes_deallocated = 52222
-bytes_reallocated = 66800
-net_bytes = 39950
+allocations = 169
+deallocations = 143
+reallocations = 17
+bytes_allocated = 91087
+bytes_deallocated = 51169
+bytes_reallocated = 66736
+net_bytes = 39918

@@ -53,10 +53,10 @@ net_bytes = 49856
 
 [[instances]]
 name = "gradient_with_color_spaces_3_hybrid"
-allocations = 247
-deallocations = 210
-reallocations = 52
-bytes_allocated = 201355
-bytes_deallocated = 64667
-bytes_reallocated = 127536
-net_bytes = 136688
+allocations = 232
+deallocations = 196
+reallocations = 51
+bytes_allocated = 200270
+bytes_deallocated = 63614
+bytes_reallocated = 127472
+net_bytes = 136656

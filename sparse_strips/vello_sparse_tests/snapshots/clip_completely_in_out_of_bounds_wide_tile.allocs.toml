@@ -53,10 +53,10 @@ net_bytes = 256
 
 [[instances]]
 name = "clip_completely_in_out_of_bounds_wide_tile_hybrid"
-allocations = 182
-deallocations = 159
-reallocations = 17
-bytes_allocated = 56624
-bytes_deallocated = 52702
-bytes_reallocated = 34928
-net_bytes = 3922
+allocations = 167
+deallocations = 145
+reallocations = 15
+bytes_allocated = 55411
+bytes_deallocated = 51521
+bytes_reallocated = 34736
+net_bytes = 3890

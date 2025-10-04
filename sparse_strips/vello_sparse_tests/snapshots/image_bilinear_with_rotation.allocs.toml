@@ -53,10 +53,10 @@ net_bytes = 8448
 
 [[instances]]
 name = "image_bilinear_with_rotation_hybrid"
-allocations = 220
-deallocations = 194
-reallocations = 41
-bytes_allocated = 176111
-bytes_deallocated = 163062
-bytes_reallocated = 42318
-net_bytes = 13049
+allocations = 205
+deallocations = 180
+reallocations = 40
+bytes_allocated = 175026
+bytes_deallocated = 162009
+bytes_reallocated = 42254
+net_bytes = 13017

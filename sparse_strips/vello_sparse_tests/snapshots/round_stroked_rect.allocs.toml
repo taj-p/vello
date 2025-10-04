@@ -53,10 +53,10 @@ net_bytes = 6464
 
 [[instances]]
 name = "round_stroked_rect_hybrid"
-allocations = 132
-deallocations = 108
-reallocations = 31
-bytes_allocated = 56248
-bytes_deallocated = 46566
-bytes_reallocated = 39352
-net_bytes = 9682
+allocations = 117
+deallocations = 94
+reallocations = 29
+bytes_allocated = 55035
+bytes_deallocated = 45385
+bytes_reallocated = 39160
+net_bytes = 9650

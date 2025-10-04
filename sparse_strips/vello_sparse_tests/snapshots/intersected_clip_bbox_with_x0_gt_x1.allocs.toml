@@ -53,10 +53,10 @@ net_bytes = 384
 
 [[instances]]
 name = "intersected_clip_bbox_with_x0_gt_x1_hybrid"
-allocations = 121
-deallocations = 98
-reallocations = 17
-bytes_allocated = 49216
-bytes_deallocated = 45166
-bytes_reallocated = 34320
-net_bytes = 4050
+allocations = 106
+deallocations = 84
+reallocations = 15
+bytes_allocated = 48003
+bytes_deallocated = 43985
+bytes_reallocated = 34128
+net_bytes = 4018

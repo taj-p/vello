@@ -53,10 +53,10 @@ net_bytes = 12480
 
 [[instances]]
 name = "recording_basic_hybrid"
-allocations = 196
-deallocations = 175
-reallocations = 89
-bytes_allocated = 85192
-bytes_deallocated = 69494
-bytes_reallocated = 57712
-net_bytes = 15698
+allocations = 181
+deallocations = 161
+reallocations = 87
+bytes_allocated = 83979
+bytes_deallocated = 68313
+bytes_reallocated = 57520
+net_bytes = 15666

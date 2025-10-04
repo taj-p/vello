@@ -53,10 +53,10 @@ net_bytes = 13600
 
 [[instances]]
 name = "mix_saturation_with_solid_hybrid"
-allocations = 225
-deallocations = 201
+allocations = 211
+deallocations = 189
 reallocations = 95
-bytes_allocated = 82554
-bytes_deallocated = 65068
-bytes_reallocated = 55108
-net_bytes = 17486
+bytes_allocated = 81613
+bytes_deallocated = 64447
+bytes_reallocated = 55092
+net_bytes = 17166

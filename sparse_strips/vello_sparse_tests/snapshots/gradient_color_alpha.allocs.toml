@@ -53,10 +53,10 @@ net_bytes = 3856
 
 [[instances]]
 name = "gradient_color_alpha_hybrid"
-allocations = 151
-deallocations = 124
-reallocations = 18
-bytes_allocated = 89404
-bytes_deallocated = 48686
-bytes_reallocated = 67568
-net_bytes = 40718
+allocations = 136
+deallocations = 110
+reallocations = 17
+bytes_allocated = 88319
+bytes_deallocated = 47633
+bytes_reallocated = 67504
+net_bytes = 40686

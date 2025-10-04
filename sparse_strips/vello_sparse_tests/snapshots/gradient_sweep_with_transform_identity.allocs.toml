@@ -53,10 +53,10 @@ net_bytes = 8760
 
 [[instances]]
 name = "gradient_sweep_with_transform_identity_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 30
-bytes_allocated = 99844
-bytes_deallocated = 54222
-bytes_reallocated = 67536
-net_bytes = 45622
+allocations = 172
+deallocations = 146
+reallocations = 29
+bytes_allocated = 98759
+bytes_deallocated = 53169
+bytes_reallocated = 67472
+net_bytes = 45590

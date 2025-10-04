@@ -53,10 +53,10 @@ net_bytes = 512
 
 [[instances]]
 name = "filled_vertical_hairline_rect_hybrid"
-allocations = 110
-deallocations = 89
-reallocations = 14
-bytes_allocated = 47416
-bytes_deallocated = 43686
-bytes_reallocated = 33792
-net_bytes = 3730
+allocations = 95
+deallocations = 75
+reallocations = 12
+bytes_allocated = 46203
+bytes_deallocated = 42505
+bytes_reallocated = 33600
+net_bytes = 3698

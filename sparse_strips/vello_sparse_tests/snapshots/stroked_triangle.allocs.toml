@@ -53,10 +53,10 @@ net_bytes = 7264
 
 [[instances]]
 name = "stroked_triangle_hybrid"
-allocations = 183
-deallocations = 159
-reallocations = 27
-bytes_allocated = 65344
-bytes_deallocated = 54414
-bytes_reallocated = 42240
-net_bytes = 10930
+allocations = 168
+deallocations = 145
+reallocations = 25
+bytes_allocated = 64131
+bytes_deallocated = 53233
+bytes_reallocated = 42048
+net_bytes = 10898

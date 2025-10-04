@@ -53,10 +53,10 @@ net_bytes = 19136
 
 [[instances]]
 name = "stroke_scaled_hybrid"
-allocations = 187
-deallocations = 162
-reallocations = 65
-bytes_allocated = 83128
-bytes_deallocated = 60326
-bytes_reallocated = 57088
-net_bytes = 22802
+allocations = 172
+deallocations = 148
+reallocations = 63
+bytes_allocated = 81915
+bytes_deallocated = 59145
+bytes_reallocated = 56896
+net_bytes = 22770

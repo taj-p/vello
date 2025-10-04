@@ -53,10 +53,10 @@ net_bytes = 43520
 
 [[instances]]
 name = "oversized_star_hybrid"
-allocations = 183
-deallocations = 159
-reallocations = 89
-bytes_allocated = 114072
-bytes_deallocated = 66886
-bytes_reallocated = 85448
-net_bytes = 47186
+allocations = 168
+deallocations = 145
+reallocations = 87
+bytes_allocated = 112859
+bytes_deallocated = 65705
+bytes_reallocated = 85256
+net_bytes = 47154

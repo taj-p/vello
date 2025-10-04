@@ -53,10 +53,10 @@ net_bytes = 2624
 
 [[instances]]
 name = "eo_filling_missing_anti_aliasing_hybrid"
-allocations = 143
-deallocations = 122
-reallocations = 29
-bytes_allocated = 56856
-bytes_deallocated = 50566
-bytes_reallocated = 38832
-net_bytes = 6290
+allocations = 128
+deallocations = 108
+reallocations = 27
+bytes_allocated = 55643
+bytes_deallocated = 49385
+bytes_reallocated = 38640
+net_bytes = 6258

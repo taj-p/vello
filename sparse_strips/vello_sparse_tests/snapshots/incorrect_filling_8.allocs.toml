@@ -53,10 +53,10 @@ net_bytes = 448
 
 [[instances]]
 name = "incorrect_filling_8_hybrid"
-allocations = 128
-deallocations = 107
-reallocations = 20
-bytes_allocated = 50840
-bytes_deallocated = 46726
-bytes_reallocated = 35184
-net_bytes = 4114
+allocations = 113
+deallocations = 93
+reallocations = 18
+bytes_allocated = 49627
+bytes_deallocated = 45545
+bytes_reallocated = 34992
+net_bytes = 4082

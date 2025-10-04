@@ -53,10 +53,10 @@ net_bytes = 5696
 
 [[instances]]
 name = "bevel_stroked_rect_hybrid"
-allocations = 132
-deallocations = 107
-reallocations = 29
-bytes_allocated = 55496
-bytes_deallocated = 46518
-bytes_reallocated = 38584
-net_bytes = 8978
+allocations = 117
+deallocations = 93
+reallocations = 27
+bytes_allocated = 54283
+bytes_deallocated = 45337
+bytes_reallocated = 38392
+net_bytes = 8946

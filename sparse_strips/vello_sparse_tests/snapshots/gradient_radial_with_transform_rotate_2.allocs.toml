@@ -53,10 +53,10 @@ net_bytes = 9912
 
 [[instances]]
 name = "gradient_radial_with_transform_rotate_2_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 35
-bytes_allocated = 101220
-bytes_deallocated = 54446
-bytes_reallocated = 68688
-net_bytes = 46774
+allocations = 172
+deallocations = 146
+reallocations = 34
+bytes_allocated = 100135
+bytes_deallocated = 53393
+bytes_reallocated = 68624
+net_bytes = 46742

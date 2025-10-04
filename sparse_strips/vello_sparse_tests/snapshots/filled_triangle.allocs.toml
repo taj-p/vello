@@ -53,10 +53,10 @@ net_bytes = 6624
 
 [[instances]]
 name = "filled_triangle_hybrid"
-allocations = 179
-deallocations = 158
-reallocations = 39
-bytes_allocated = 64936
-bytes_deallocated = 54646
-bytes_reallocated = 42608
-net_bytes = 10290
+allocations = 164
+deallocations = 144
+reallocations = 37
+bytes_allocated = 63723
+bytes_deallocated = 53465
+bytes_reallocated = 42416
+net_bytes = 10258

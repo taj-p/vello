@@ -53,10 +53,10 @@ net_bytes = 124832
 
 [[instances]]
 name = "recording_can_be_repeatedly_executed_in_layers_hybrid"
-allocations = 802
-deallocations = 752
+allocations = 789
+deallocations = 741
 reallocations = 389
-bytes_allocated = 316934
-bytes_deallocated = 174032
-bytes_reallocated = 224588
-net_bytes = 142902
+bytes_allocated = 316121
+bytes_deallocated = 173539
+bytes_reallocated = 224572
+net_bytes = 142582

@@ -53,10 +53,10 @@ net_bytes = 1120
 
 [[instances]]
 name = "repeatedly_compose_to_bottom_layer_hybrid"
-allocations = 237
-deallocations = 210
+allocations = 224
+deallocations = 199
 reallocations = 43
-bytes_allocated = 60729
-bytes_deallocated = 54699
-bytes_reallocated = 38180
-net_bytes = 6030
+bytes_allocated = 59916
+bytes_deallocated = 54206
+bytes_reallocated = 38164
+net_bytes = 5710

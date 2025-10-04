@@ -53,10 +53,10 @@ net_bytes = 25440
 
 [[instances]]
 name = "clip_rectangle_and_circle_hybrid"
-allocations = 236
-deallocations = 207
+allocations = 222
+deallocations = 195
 reallocations = 95
-bytes_allocated = 95690
-bytes_deallocated = 66364
-bytes_reallocated = 65964
-net_bytes = 29326
+bytes_allocated = 94749
+bytes_deallocated = 65743
+bytes_reallocated = 65948
+net_bytes = 29006

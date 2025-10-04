@@ -53,10 +53,10 @@ net_bytes = 11616
 
 [[instances]]
 name = "recording_incremental_build_hybrid"
-allocations = 195
-deallocations = 174
-reallocations = 86
-bytes_allocated = 90184
-bytes_deallocated = 75350
-bytes_reallocated = 62208
-net_bytes = 14834
+allocations = 180
+deallocations = 160
+reallocations = 84
+bytes_allocated = 88971
+bytes_deallocated = 74169
+bytes_reallocated = 62016
+net_bytes = 14802

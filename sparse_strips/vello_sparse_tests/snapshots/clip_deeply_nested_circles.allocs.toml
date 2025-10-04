@@ -53,10 +53,10 @@ net_bytes = 212064
 
 [[instances]]
 name = "clip_deeply_nested_circles_hybrid"
-allocations = 888
-deallocations = 832
-reallocations = 511
-bytes_allocated = 456067
-bytes_deallocated = 228845
-bytes_reallocated = 340788
-net_bytes = 227222
+allocations = 874
+deallocations = 820
+reallocations = 510
+bytes_allocated = 454870
+bytes_deallocated = 228224
+bytes_reallocated = 340516
+net_bytes = 226646

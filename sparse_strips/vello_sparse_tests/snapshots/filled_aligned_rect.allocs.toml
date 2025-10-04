@@ -53,10 +53,10 @@ net_bytes = 1312
 
 [[instances]]
 name = "filled_aligned_rect_hybrid"
-allocations = 119
-deallocations = 98
-reallocations = 21
-bytes_allocated = 50040
-bytes_deallocated = 45510
-bytes_reallocated = 35152
-net_bytes = 4530
+allocations = 104
+deallocations = 84
+reallocations = 19
+bytes_allocated = 48827
+bytes_deallocated = 44329
+bytes_reallocated = 34960
+net_bytes = 4498

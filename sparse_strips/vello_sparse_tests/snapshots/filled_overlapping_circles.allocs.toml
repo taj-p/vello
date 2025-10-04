@@ -53,10 +53,10 @@ net_bytes = 9952
 
 [[instances]]
 name = "filled_overlapping_circles_hybrid"
-allocations = 184
-deallocations = 163
-reallocations = 56
-bytes_allocated = 73344
-bytes_deallocated = 59726
-bytes_reallocated = 49168
-net_bytes = 13618
+allocations = 169
+deallocations = 149
+reallocations = 54
+bytes_allocated = 72131
+bytes_deallocated = 58545
+bytes_reallocated = 48976
+net_bytes = 13586

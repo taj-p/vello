@@ -53,10 +53,10 @@ net_bytes = 8456
 
 [[instances]]
 name = "image_bicubic_10x_scale_2_hybrid"
-allocations = 220
-deallocations = 194
-reallocations = 42
-bytes_allocated = 176261
-bytes_deallocated = 163084
-bytes_reallocated = 42446
-net_bytes = 13177
+allocations = 205
+deallocations = 180
+reallocations = 41
+bytes_allocated = 175176
+bytes_deallocated = 162031
+bytes_reallocated = 42382
+net_bytes = 13145

@@ -53,10 +53,10 @@ net_bytes = 25152
 
 [[instances]]
 name = "fill_command_respects_clip_bounds_hybrid"
-allocations = 1509
-deallocations = 1456
-reallocations = 84
-bytes_allocated = 216867
-bytes_deallocated = 188177
-bytes_reallocated = 58248
-net_bytes = 28690
+allocations = 1495
+deallocations = 1444
+reallocations = 79
+bytes_allocated = 215582
+bytes_deallocated = 187244
+bytes_reallocated = 57888
+net_bytes = 28338

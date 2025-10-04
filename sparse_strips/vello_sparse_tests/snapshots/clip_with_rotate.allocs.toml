@@ -53,10 +53,10 @@ net_bytes = 23168
 
 [[instances]]
 name = "clip_with_rotate_hybrid"
-allocations = 209
-deallocations = 182
-reallocations = 94
-bytes_allocated = 91027
-bytes_deallocated = 64321
-bytes_reallocated = 62880
-net_bytes = 26706
+allocations = 195
+deallocations = 170
+reallocations = 89
+bytes_allocated = 89742
+bytes_deallocated = 63388
+bytes_reallocated = 62520
+net_bytes = 26354

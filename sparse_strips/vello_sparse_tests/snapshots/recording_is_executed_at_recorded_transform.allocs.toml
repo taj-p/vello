@@ -53,10 +53,10 @@ net_bytes = 1568
 
 [[instances]]
 name = "recording_is_executed_at_recorded_transform_hybrid"
-allocations = 148
-deallocations = 127
-reallocations = 31
-bytes_allocated = 55368
-bytes_deallocated = 50582
-bytes_reallocated = 36640
-net_bytes = 4786
+allocations = 133
+deallocations = 113
+reallocations = 29
+bytes_allocated = 54155
+bytes_deallocated = 49401
+bytes_reallocated = 36448
+net_bytes = 4754

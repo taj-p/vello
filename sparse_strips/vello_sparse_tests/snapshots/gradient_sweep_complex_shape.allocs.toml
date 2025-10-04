@@ -53,10 +53,10 @@ net_bytes = 12856
 
 [[instances]]
 name = "gradient_sweep_complex_shape_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 41
-bytes_allocated = 105060
-bytes_deallocated = 54894
-bytes_reallocated = 72080
-net_bytes = 50166
+allocations = 172
+deallocations = 146
+reallocations = 40
+bytes_allocated = 103975
+bytes_deallocated = 53841
+bytes_reallocated = 72016
+net_bytes = 50134

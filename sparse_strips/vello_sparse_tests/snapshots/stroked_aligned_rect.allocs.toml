@@ -53,10 +53,10 @@ net_bytes = 7008
 
 [[instances]]
 name = "stroked_aligned_rect_hybrid"
-allocations = 131
-deallocations = 107
-reallocations = 31
-bytes_allocated = 56744
-bytes_deallocated = 46518
-bytes_reallocated = 39672
-net_bytes = 10226
+allocations = 116
+deallocations = 93
+reallocations = 29
+bytes_allocated = 55531
+bytes_deallocated = 45337
+bytes_reallocated = 39480
+net_bytes = 10194

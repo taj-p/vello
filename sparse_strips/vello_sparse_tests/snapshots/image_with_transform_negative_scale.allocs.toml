@@ -53,10 +53,10 @@ net_bytes = 4992
 
 [[instances]]
 name = "image_with_transform_negative_scale_hybrid"
-allocations = 220
-deallocations = 194
-reallocations = 31
-bytes_allocated = 172865
-bytes_deallocated = 163656
-bytes_reallocated = 38478
-net_bytes = 9209
+allocations = 205
+deallocations = 180
+reallocations = 30
+bytes_allocated = 171780
+bytes_deallocated = 162603
+bytes_reallocated = 38414
+net_bytes = 9177

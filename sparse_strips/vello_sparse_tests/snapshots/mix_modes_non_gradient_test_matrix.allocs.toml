@@ -53,10 +53,10 @@ net_bytes = 262464
 
 [[instances]]
 name = "mix_modes_non_gradient_test_matrix_hybrid"
-allocations = 1608
-deallocations = 1539
+allocations = 1595
+deallocations = 1528
 reallocations = 939
-bytes_allocated = 744017
-bytes_deallocated = 457915
-bytes_reallocated = 514316
-net_bytes = 286102
+bytes_allocated = 743204
+bytes_deallocated = 457422
+bytes_reallocated = 514300
+net_bytes = 285782

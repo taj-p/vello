@@ -53,10 +53,10 @@ net_bytes = 4916
 
 [[instances]]
 name = "gradient_radial_inside_hybrid"
-allocations = 151
-deallocations = 124
-reallocations = 18
-bytes_allocated = 90488
-bytes_deallocated = 48710
-bytes_reallocated = 66544
-net_bytes = 41778
+allocations = 136
+deallocations = 110
+reallocations = 17
+bytes_allocated = 89403
+bytes_deallocated = 47657
+bytes_reallocated = 66480
+net_bytes = 41746

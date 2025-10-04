@@ -53,10 +53,10 @@ net_bytes = 1216
 
 [[instances]]
 name = "nested_clip_path_panic_2_hybrid"
-allocations = 160
-deallocations = 135
+allocations = 146
+deallocations = 123
 reallocations = 34
-bytes_allocated = 53234
-bytes_deallocated = 47844
-bytes_reallocated = 35892
-net_bytes = 5390
+bytes_allocated = 52293
+bytes_deallocated = 47223
+bytes_reallocated = 35876
+net_bytes = 5070

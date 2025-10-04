@@ -53,10 +53,10 @@ net_bytes = 10516
 
 [[instances]]
 name = "gradient_padded_first_stop_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 40
-bytes_allocated = 101960
-bytes_deallocated = 54582
-bytes_reallocated = 73424
-net_bytes = 47378
+allocations = 172
+deallocations = 146
+reallocations = 39
+bytes_allocated = 100875
+bytes_deallocated = 53529
+bytes_reallocated = 73360
+net_bytes = 47346

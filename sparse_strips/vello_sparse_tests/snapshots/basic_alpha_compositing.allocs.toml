@@ -53,10 +53,10 @@ net_bytes = 6560
 
 [[instances]]
 name = "basic_alpha_compositing_hybrid"
-allocations = 180
-deallocations = 159
-reallocations = 41
-bytes_allocated = 68088
-bytes_deallocated = 58310
-bytes_reallocated = 45104
-net_bytes = 9778
+allocations = 165
+deallocations = 145
+reallocations = 39
+bytes_allocated = 66875
+bytes_deallocated = 57129
+bytes_reallocated = 44912
+net_bytes = 9746

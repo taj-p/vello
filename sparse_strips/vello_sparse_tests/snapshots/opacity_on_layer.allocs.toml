@@ -53,10 +53,10 @@ net_bytes = 14880
 
 [[instances]]
 name = "opacity_on_layer_hybrid"
-allocations = 229
-deallocations = 205
+allocations = 215
+deallocations = 193
 reallocations = 105
-bytes_allocated = 85810
-bytes_deallocated = 66596
-bytes_reallocated = 57060
-net_bytes = 19214
+bytes_allocated = 84869
+bytes_deallocated = 65975
+bytes_reallocated = 57044
+net_bytes = 18894

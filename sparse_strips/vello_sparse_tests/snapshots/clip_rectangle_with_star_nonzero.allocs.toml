@@ -53,10 +53,10 @@ net_bytes = 12512
 
 [[instances]]
 name = "clip_rectangle_with_star_nonzero_hybrid"
-allocations = 205
-deallocations = 181
-reallocations = 77
-bytes_allocated = 76651
-bytes_deallocated = 60601
-bytes_reallocated = 50392
-net_bytes = 16050
+allocations = 191
+deallocations = 169
+reallocations = 72
+bytes_allocated = 75366
+bytes_deallocated = 59668
+bytes_reallocated = 50032
+net_bytes = 15698

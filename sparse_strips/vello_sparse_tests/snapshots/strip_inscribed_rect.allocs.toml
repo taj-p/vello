@@ -53,10 +53,10 @@ net_bytes = 832
 
 [[instances]]
 name = "strip_inscribed_rect_hybrid"
-allocations = 119
-deallocations = 98
-reallocations = 17
-bytes_allocated = 49080
-bytes_deallocated = 45030
-bytes_reallocated = 34352
-net_bytes = 4050
+allocations = 104
+deallocations = 84
+reallocations = 15
+bytes_allocated = 47867
+bytes_deallocated = 43849
+bytes_reallocated = 34160
+net_bytes = 4018

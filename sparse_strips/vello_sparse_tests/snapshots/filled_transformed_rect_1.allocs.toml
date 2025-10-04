@@ -53,10 +53,10 @@ net_bytes = 768
 
 [[instances]]
 name = "filled_transformed_rect_1_hybrid"
-allocations = 128
-deallocations = 107
-reallocations = 18
-bytes_allocated = 50456
-bytes_deallocated = 46470
-bytes_reallocated = 34608
-net_bytes = 3986
+allocations = 113
+deallocations = 93
+reallocations = 16
+bytes_allocated = 49243
+bytes_deallocated = 45289
+bytes_reallocated = 34416
+net_bytes = 3954

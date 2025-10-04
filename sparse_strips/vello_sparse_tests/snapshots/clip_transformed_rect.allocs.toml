@@ -53,10 +53,10 @@ net_bytes = 20608
 
 [[instances]]
 name = "clip_transformed_rect_hybrid"
-allocations = 209
-deallocations = 182
-reallocations = 79
-bytes_allocated = 84659
-bytes_deallocated = 60513
-bytes_reallocated = 57568
-net_bytes = 24146
+allocations = 195
+deallocations = 170
+reallocations = 74
+bytes_allocated = 83374
+bytes_deallocated = 59580
+bytes_reallocated = 57208
+net_bytes = 23794

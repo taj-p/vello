@@ -53,10 +53,10 @@ net_bytes = 19712
 
 [[instances]]
 name = "mix_with_transparent_bg_hybrid"
-allocations = 254
-deallocations = 201
+allocations = 240
+deallocations = 189
 reallocations = 108
-bytes_allocated = 85306
-bytes_deallocated = 61708
-bytes_reallocated = 54516
-net_bytes = 23598
+bytes_allocated = 84365
+bytes_deallocated = 61087
+bytes_reallocated = 54500
+net_bytes = 23278

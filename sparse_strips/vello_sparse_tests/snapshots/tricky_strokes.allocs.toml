@@ -53,10 +53,10 @@ net_bytes = 161856
 
 [[instances]]
 name = "tricky_strokes_hybrid"
-allocations = 3006
-deallocations = 2981
-reallocations = 425
-bytes_allocated = 618248
-bytes_deallocated = 480246
-bytes_reallocated = 254032
-net_bytes = 138002
+allocations = 2991
+deallocations = 2967
+reallocations = 423
+bytes_allocated = 617035
+bytes_deallocated = 479065
+bytes_reallocated = 253840
+net_bytes = 137970

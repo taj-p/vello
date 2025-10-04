@@ -53,10 +53,10 @@ net_bytes = 9088
 
 [[instances]]
 name = "image_complex_shape_hybrid"
-allocations = 220
-deallocations = 194
-reallocations = 42
-bytes_allocated = 178081
-bytes_deallocated = 164328
-bytes_reallocated = 43022
-net_bytes = 13753
+allocations = 205
+deallocations = 180
+reallocations = 41
+bytes_allocated = 176996
+bytes_deallocated = 163275
+bytes_reallocated = 42958
+net_bytes = 13721

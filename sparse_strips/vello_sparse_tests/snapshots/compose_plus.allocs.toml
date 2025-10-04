@@ -53,10 +53,10 @@ net_bytes = 12128
 
 [[instances]]
 name = "compose_plus_hybrid"
-allocations = 288
-deallocations = 261
-reallocations = 113
-bytes_allocated = 87099
-bytes_deallocated = 70061
-bytes_reallocated = 55028
-net_bytes = 17038
+allocations = 274
+deallocations = 249
+reallocations = 112
+bytes_allocated = 86094
+bytes_deallocated = 69440
+bytes_reallocated = 54948
+net_bytes = 16654

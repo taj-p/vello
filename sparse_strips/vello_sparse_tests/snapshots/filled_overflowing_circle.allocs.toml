@@ -53,10 +53,10 @@ net_bytes = 8064
 
 [[instances]]
 name = "filled_overflowing_circle_hybrid"
-allocations = 180
-deallocations = 159
-reallocations = 47
-bytes_allocated = 66896
-bytes_deallocated = 55166
-bytes_reallocated = 44272
-net_bytes = 11730
+allocations = 165
+deallocations = 145
+reallocations = 45
+bytes_allocated = 65683
+bytes_deallocated = 53985
+bytes_reallocated = 44080
+net_bytes = 11698

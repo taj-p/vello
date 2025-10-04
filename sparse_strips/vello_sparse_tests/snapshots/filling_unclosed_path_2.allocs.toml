@@ -53,10 +53,10 @@ net_bytes = 3200
 
 [[instances]]
 name = "filling_unclosed_path_2_hybrid"
-allocations = 179
-deallocations = 158
-reallocations = 31
-bytes_allocated = 61688
-bytes_deallocated = 54822
-bytes_reallocated = 39408
-net_bytes = 6866
+allocations = 164
+deallocations = 144
+reallocations = 29
+bytes_allocated = 60475
+bytes_deallocated = 53641
+bytes_reallocated = 39216
+net_bytes = 6834

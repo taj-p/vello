@@ -53,10 +53,10 @@ net_bytes = 960
 
 [[instances]]
 name = "out_of_bound_strip_hybrid"
-allocations = 299
-deallocations = 275
-reallocations = 19
-bytes_allocated = 71400
-bytes_deallocated = 66774
-bytes_reallocated = 36272
-net_bytes = 4626
+allocations = 284
+deallocations = 261
+reallocations = 17
+bytes_allocated = 70187
+bytes_deallocated = 65593
+bytes_reallocated = 36080
+net_bytes = 4594

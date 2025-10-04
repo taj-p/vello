@@ -53,10 +53,10 @@ net_bytes = 8256
 
 [[instances]]
 name = "clip_wrong_command_hybrid"
-allocations = 201
-deallocations = 176
+allocations = 187
+deallocations = 164
 reallocations = 52
-bytes_allocated = 66362
-bytes_deallocated = 53772
-bytes_reallocated = 43876
-net_bytes = 12590
+bytes_allocated = 65421
+bytes_deallocated = 53151
+bytes_reallocated = 43860
+net_bytes = 12270

@@ -53,10 +53,10 @@ net_bytes = 8832
 
 [[instances]]
 name = "image_luma_image_hybrid"
-allocations = 221
-deallocations = 195
-reallocations = 41
-bytes_allocated = 176890
-bytes_deallocated = 163841
-bytes_reallocated = 42318
-net_bytes = 13049
+allocations = 206
+deallocations = 181
+reallocations = 40
+bytes_allocated = 175805
+bytes_deallocated = 162788
+bytes_reallocated = 42254
+net_bytes = 13017

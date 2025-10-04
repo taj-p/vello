@@ -53,10 +53,10 @@ net_bytes = 608
 
 [[instances]]
 name = "do_not_panic_on_multiple_flushes_hybrid"
-allocations = 181
-deallocations = 160
-reallocations = 20
-bytes_allocated = 57384
-bytes_deallocated = 53558
-bytes_reallocated = 35536
-net_bytes = 3826
+allocations = 166
+deallocations = 146
+reallocations = 18
+bytes_allocated = 56171
+bytes_deallocated = 52377
+bytes_reallocated = 35344
+net_bytes = 3794

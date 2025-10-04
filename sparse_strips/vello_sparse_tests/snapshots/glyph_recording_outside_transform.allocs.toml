@@ -53,10 +53,10 @@ net_bytes = 26664
 
 [[instances]]
 name = "glyph_recording_outside_transform_hybrid"
-allocations = 250
-deallocations = 212
-reallocations = 90
-bytes_allocated = 120108
-bytes_deallocated = 88818
-bytes_reallocated = 74544
-net_bytes = 31290
+allocations = 235
+deallocations = 198
+reallocations = 88
+bytes_allocated = 118895
+bytes_deallocated = 87637
+bytes_reallocated = 74352
+net_bytes = 31258

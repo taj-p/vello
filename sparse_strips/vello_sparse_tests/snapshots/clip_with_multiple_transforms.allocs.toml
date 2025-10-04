@@ -53,10 +53,10 @@ net_bytes = 27328
 
 [[instances]]
 name = "clip_with_multiple_transforms_hybrid"
-allocations = 235
-deallocations = 207
+allocations = 221
+deallocations = 195
 reallocations = 106
-bytes_allocated = 95954
-bytes_deallocated = 64740
-bytes_reallocated = 65740
-net_bytes = 31214
+bytes_allocated = 95013
+bytes_deallocated = 64119
+bytes_reallocated = 65724
+net_bytes = 30894

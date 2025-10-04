@@ -53,10 +53,10 @@ net_bytes = 10872
 
 [[instances]]
 name = "gradient_linear_with_transform_skew_y_1_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 41
-bytes_allocated = 102468
-bytes_deallocated = 54734
-bytes_reallocated = 69648
-net_bytes = 47734
+allocations = 172
+deallocations = 146
+reallocations = 40
+bytes_allocated = 101383
+bytes_deallocated = 53681
+bytes_reallocated = 69584
+net_bytes = 47702

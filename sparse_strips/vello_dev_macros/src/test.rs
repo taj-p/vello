@@ -451,9 +451,10 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             {
                 #input_fn_name(&mut ctx);
                 ctx.flush();
-                ctx.render_to_pixmap(&mut pixmap);
+                ctx.render();
             }
             save_alloc_stats(alloc_span.end(), #input_fn_name_str, #hybrid_fn_name_str);
+            ctx.copy_to_pixmap(&mut pixmap);
             if !#no_ref {
                 check_ref(pixmap, #input_fn_name_str, #hybrid_fn_name_str, #hybrid_tolerance, #diff_pixels, false, #reference_image_name);
             }

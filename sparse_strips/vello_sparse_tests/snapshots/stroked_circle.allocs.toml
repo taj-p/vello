@@ -53,10 +53,10 @@ net_bytes = 7808
 
 [[instances]]
 name = "stroked_circle_hybrid"
-allocations = 184
-deallocations = 159
-reallocations = 30
-bytes_allocated = 66200
-bytes_deallocated = 54726
-bytes_reallocated = 43064
-net_bytes = 11474
+allocations = 169
+deallocations = 145
+reallocations = 28
+bytes_allocated = 64987
+bytes_deallocated = 53545
+bytes_reallocated = 42872
+net_bytes = 11442

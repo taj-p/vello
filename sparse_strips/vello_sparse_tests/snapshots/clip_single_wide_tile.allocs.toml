@@ -53,10 +53,10 @@ net_bytes = 2016
 
 [[instances]]
 name = "clip_single_wide_tile_hybrid"
-allocations = 225
-deallocations = 197
-reallocations = 48
-bytes_allocated = 62259
-bytes_deallocated = 55333
-bytes_reallocated = 39732
-net_bytes = 6926
+allocations = 211
+deallocations = 185
+reallocations = 47
+bytes_allocated = 61254
+bytes_deallocated = 54712
+bytes_reallocated = 39652
+net_bytes = 6542

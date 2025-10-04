@@ -53,10 +53,10 @@ net_bytes = 5504
 
 [[instances]]
 name = "image_with_transform_skew_x_2_hybrid"
-allocations = 220
-deallocations = 194
-reallocations = 32
-bytes_allocated = 173377
-bytes_deallocated = 163656
-bytes_reallocated = 38990
-net_bytes = 9721
+allocations = 205
+deallocations = 180
+reallocations = 31
+bytes_allocated = 172292
+bytes_deallocated = 162603
+bytes_reallocated = 38926
+net_bytes = 9689

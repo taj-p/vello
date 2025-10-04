@@ -53,10 +53,10 @@ net_bytes = 5568
 
 [[instances]]
 name = "filling_evenodd_rule_hybrid"
-allocations = 179
-deallocations = 158
-reallocations = 34
-bytes_allocated = 64248
-bytes_deallocated = 55014
-bytes_reallocated = 41776
-net_bytes = 9234
+allocations = 164
+deallocations = 144
+reallocations = 32
+bytes_allocated = 63035
+bytes_deallocated = 53833
+bytes_reallocated = 41584
+net_bytes = 9202

@@ -53,10 +53,10 @@ net_bytes = 26720
 
 [[instances]]
 name = "clip_with_save_restore_hybrid"
-allocations = 237
-deallocations = 208
+allocations = 223
+deallocations = 196
 reallocations = 98
-bytes_allocated = 96362
-bytes_deallocated = 65756
-bytes_reallocated = 66188
-net_bytes = 30606
+bytes_allocated = 95421
+bytes_deallocated = 65135
+bytes_reallocated = 66172
+net_bytes = 30286

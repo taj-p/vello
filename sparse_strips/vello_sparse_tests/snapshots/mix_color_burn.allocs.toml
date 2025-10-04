@@ -53,10 +53,10 @@ net_bytes = 45124
 
 [[instances]]
 name = "mix_color_burn_hybrid"
-allocations = 275
-deallocations = 239
+allocations = 261
+deallocations = 227
 reallocations = 98
-bytes_allocated = 309046
-bytes_deallocated = 250721
-bytes_reallocated = 83682
-net_bytes = 58325
+bytes_allocated = 308105
+bytes_deallocated = 250100
+bytes_reallocated = 83666
+net_bytes = 58005

@@ -53,10 +53,10 @@ net_bytes = 23744
 
 [[instances]]
 name = "clip_triangle_with_star_hybrid"
-allocations = 208
-deallocations = 181
-reallocations = 95
-bytes_allocated = 93155
-bytes_deallocated = 65425
-bytes_reallocated = 64744
-net_bytes = 27730
+allocations = 194
+deallocations = 169
+reallocations = 90
+bytes_allocated = 91870
+bytes_deallocated = 64492
+bytes_reallocated = 64384
+net_bytes = 27378

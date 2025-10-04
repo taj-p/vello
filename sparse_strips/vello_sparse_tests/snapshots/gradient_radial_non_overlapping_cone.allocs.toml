@@ -53,10 +53,10 @@ net_bytes = 24924
 
 [[instances]]
 name = "gradient_radial_non_overlapping_cone_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 40
-bytes_allocated = 104068
-bytes_deallocated = 54606
-bytes_reallocated = 71376
-net_bytes = 49462
+allocations = 172
+deallocations = 146
+reallocations = 39
+bytes_allocated = 102983
+bytes_deallocated = 53553
+bytes_reallocated = 71312
+net_bytes = 49430

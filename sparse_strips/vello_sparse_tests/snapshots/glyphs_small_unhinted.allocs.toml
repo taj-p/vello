@@ -53,10 +53,10 @@ net_bytes = 13880
 
 [[instances]]
 name = "glyphs_small_unhinted_hybrid"
-allocations = 126
-deallocations = 95
-reallocations = 51
-bytes_allocated = 63708
-bytes_deallocated = 46162
-bytes_reallocated = 45792
-net_bytes = 17546
+allocations = 111
+deallocations = 81
+reallocations = 49
+bytes_allocated = 62495
+bytes_deallocated = 44981
+bytes_reallocated = 45600
+net_bytes = 17514

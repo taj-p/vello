@@ -53,10 +53,10 @@ net_bytes = 5216
 
 [[instances]]
 name = "clip_exceeding_viewport_hybrid"
-allocations = 205
-deallocations = 181
-reallocations = 35
-bytes_allocated = 64019
-bytes_deallocated = 55265
-bytes_reallocated = 40360
-net_bytes = 8754
+allocations = 191
+deallocations = 169
+reallocations = 30
+bytes_allocated = 62734
+bytes_deallocated = 54332
+bytes_reallocated = 40000
+net_bytes = 8402

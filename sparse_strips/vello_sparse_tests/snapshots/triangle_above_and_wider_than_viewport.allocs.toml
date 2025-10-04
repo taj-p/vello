@@ -53,10 +53,10 @@ net_bytes = 448
 
 [[instances]]
 name = "triangle_above_and_wider_than_viewport_hybrid"
-allocations = 113
-deallocations = 92
-reallocations = 17
-bytes_allocated = 48248
-bytes_deallocated = 44134
-bytes_reallocated = 34192
-net_bytes = 4114
+allocations = 98
+deallocations = 78
+reallocations = 15
+bytes_allocated = 47035
+bytes_deallocated = 42953
+bytes_reallocated = 34000
+net_bytes = 4082

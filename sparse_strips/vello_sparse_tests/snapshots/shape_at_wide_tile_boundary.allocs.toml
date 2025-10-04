@@ -53,10 +53,10 @@ net_bytes = 96
 
 [[instances]]
 name = "shape_at_wide_tile_boundary_hybrid"
-allocations = 107
-deallocations = 86
-reallocations = 15
-bytes_allocated = 47128
-bytes_deallocated = 43366
-bytes_reallocated = 33824
-net_bytes = 3762
+allocations = 92
+deallocations = 72
+reallocations = 13
+bytes_allocated = 45915
+bytes_deallocated = 42185
+bytes_reallocated = 33632
+net_bytes = 3730

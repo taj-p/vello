@@ -53,10 +53,10 @@ net_bytes = 9456
 
 [[instances]]
 name = "gradient_linear_2_stops_with_alpha_hybrid"
-allocations = 187
-deallocations = 160
-reallocations = 40
-bytes_allocated = 100876
-bytes_deallocated = 54558
-bytes_reallocated = 74448
-net_bytes = 46318
+allocations = 172
+deallocations = 146
+reallocations = 39
+bytes_allocated = 99791
+bytes_deallocated = 53505
+bytes_reallocated = 74384
+net_bytes = 46286
