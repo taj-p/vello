@@ -165,6 +165,12 @@ pub(crate) struct AllocFile {
 }
 
 #[derive(Serialize, Deserialize, Default, Clone)]
+pub(crate) struct AllocsSummary {
+    pub units: String,
+    pub tests: Vec<AllocFile>,
+}
+
+#[derive(Serialize, Deserialize, Default, Clone)]
 pub(crate) struct AllocInstance {
     pub name: String,
     pub cold: AllocationStats,
@@ -249,22 +255,43 @@ pub(crate) fn process_alloc_stats(
     if !dir.exists() {
         let _ = std::fs::create_dir_all(&dir);
     }
+    let summary_path = dir.join("allocs.toml");
     let test_name = file_path;
-    let file_path = dir.join(format!("{}.allocs.toml", file_path));
 
-    let mut file_data: AllocFile = match std::fs::read_to_string(&file_path) {
+    let mut summary: AllocsSummary = match std::fs::read_to_string(&summary_path) {
         Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
-        _ => AllocFile::default(),
+        _ => AllocsSummary::default(),
     };
-    file_data.test = test_name.to_string();
-    file_data.units = "bytes".to_string();
+    if summary.units.is_empty() {
+        summary.units = "bytes".to_string();
+    }
+    // Find or create the test entry
+    let test_entry: &mut AllocFile =
+        if let Some(entry) = summary.tests.iter_mut().find(|t| t.test == test_name) {
+            entry
+        } else {
+            summary.tests.push(AllocFile {
+                test: test_name.to_string(),
+                units: summary.units.clone(),
+                instances: Vec::new(),
+            });
+            summary.tests.last_mut().unwrap()
+        };
 
     let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
     if is_test_mode {
-        let expected_stats = file_data
-            .instances
+        // Load consolidated summary and look up expected stats for this test/instance
+        let summary_path = dir.join("allocs.toml");
+        let summary: AllocsSummary = match std::fs::read_to_string(&summary_path) {
+            Ok(s) if !s.is_empty() => toml::from_str(&s).unwrap_or_default(),
+            _ => AllocsSummary::default(),
+        };
+
+        let expected_stats = summary
+            .tests
             .iter()
-            .find(|i| i.name == instance_name)
+            .find(|t| t.test == test_name)
+            .and_then(|t| t.instances.iter().find(|i| i.name == instance_name))
             .map(|i| match run_type {
                 RunType::Cold => &i.cold,
                 RunType::Warm => &i.warm,
@@ -276,11 +303,10 @@ pub(crate) fn process_alloc_stats(
                 "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
             );
         }
-        // TODO: Handle missing entry?
         return;
     }
 
-    if let Some(inst) = file_data
+    if let Some(inst) = test_entry
         .instances
         .iter_mut()
         .find(|i| i.name == instance_name)
@@ -302,17 +328,18 @@ pub(crate) fn process_alloc_stats(
             RunType::Warm => (AllocationStats::default(), alloc_stats),
         };
 
-        file_data.instances.push(AllocInstance {
+        test_entry.instances.push(AllocInstance {
             name: instance_name.to_string(),
             cold: cold_stats,
             warm: warm_stats,
         });
     }
-    file_data.instances.sort_by(|a, b| a.name.cmp(&b.name));
+    test_entry.instances.sort_by(|a, b| a.name.cmp(&b.name));
+    summary.tests.sort_by(|a, b| a.test.cmp(&b.test));
 
-    let out = toml::to_string_pretty(&file_data).unwrap();
+    let out = toml::to_string_pretty(&summary).unwrap();
 
-    let tmp_path = file_path.with_extension("allocs.toml.tmp");
+    let tmp_path = summary_path.with_extension("allocs.toml.tmp");
     let mut tmp = std::fs::OpenOptions::new()
         .create(true)
         .write(true)
@@ -320,5 +347,5 @@ pub(crate) fn process_alloc_stats(
         .open(&tmp_path)
         .unwrap();
     let _ = tmp.write_all(out.as_bytes());
-    let _ = std::fs::rename(&tmp_path, &file_path);
+    let _ = std::fs::rename(&tmp_path, &summary_path);
 }
