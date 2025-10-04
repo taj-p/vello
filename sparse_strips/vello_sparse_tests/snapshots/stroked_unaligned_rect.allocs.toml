@@ -43,11 +43,11 @@ bytes_reallocated = 320
 name = "stroked_unaligned_rect_cpu_u8_neon"
 
 [instances.cold]
-allocations = 10
-deallocations = 9
+allocations = 7
+deallocations = 3
 reallocations = 16
-bytes_allocated = 17960
-bytes_deallocated = 10640
+bytes_allocated = 15776
+bytes_deallocated = 8768
 bytes_reallocated = 5608
 
 [instances.warm]

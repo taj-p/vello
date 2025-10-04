@@ -43,19 +43,19 @@ bytes_reallocated = 33975
 name = "image_with_opacity_cpu_u8_neon"
 
 [instances.cold]
-allocations = 29
-deallocations = 74
+allocations = 20
+deallocations = 15
 reallocations = 52
-bytes_allocated = 141466
-bytes_deallocated = 136418
+bytes_allocated = 134914
+bytes_deallocated = 118274
 bytes_reallocated = 18679
 
 [instances.warm]
-allocations = 17
-deallocations = 15
+allocations = 22
+deallocations = 71
 reallocations = 26
-bytes_allocated = 136258
-bytes_deallocated = 118274
+bytes_allocated = 142586
+bytes_deallocated = 133314
 bytes_reallocated = 21687
 
 [[instances]]

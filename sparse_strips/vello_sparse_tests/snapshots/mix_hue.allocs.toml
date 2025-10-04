@@ -43,11 +43,11 @@ bytes_reallocated = 33335
 name = "mix_hue_cpu_u8_neon"
 
 [instances.cold]
-allocations = 27
-deallocations = 67
+allocations = 25
+deallocations = 16
 reallocations = 46
-bytes_allocated = 216529
-bytes_deallocated = 183941
+bytes_allocated = 214409
+bytes_deallocated = 169285
 bytes_reallocated = 17399
 
 [instances.warm]

@@ -51,11 +51,11 @@ bytes_deallocated = 14088
 bytes_reallocated = 19312
 
 [instances.warm]
-allocations = 4
-deallocations = 8
+allocations = 3
+deallocations = 3
 reallocations = 23
-bytes_allocated = 33056
-bytes_deallocated = 14360
+bytes_allocated = 30984
+bytes_deallocated = 14088
 bytes_reallocated = 20992
 
 [[instances]]

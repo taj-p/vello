@@ -43,10 +43,10 @@ bytes_reallocated = 3968
 name = "gradient_color_alpha_cpu_u8_neon"
 
 [instances.cold]
-allocations = 11
+allocations = 8
 deallocations = 4
 reallocations = 2
-bytes_allocated = 13184
+bytes_allocated = 13008
 bytes_deallocated = 9152
 bytes_reallocated = 1248
 

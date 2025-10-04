@@ -43,11 +43,11 @@ bytes_reallocated = 0
 name = "out_of_bound_strip_cpu_u8_neon"
 
 [instances.cold]
-allocations = 9
-deallocations = 9
+allocations = 7
+deallocations = 4
 reallocations = 2
-bytes_allocated = 14096
-bytes_deallocated = 14864
+bytes_allocated = 13984
+bytes_deallocated = 13024
 bytes_reallocated = 288
 
 [instances.warm]
