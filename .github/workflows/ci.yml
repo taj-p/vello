@@ -226,12 +226,15 @@ jobs:
         include:
           - os: ubuntu-latest
             gpu: 'yes'
+            allocs_filename: 'allocs.linux.yml'
           - os: macos-latest
             gpu: 'yes'
+            allocs_filename: 'allocs.macos.yml'
           - os: windows-latest
             # TODO: The windows runners theoretically have CPU fallback for GPUs, but
             # this failed in initial testing
             gpu: 'no'
+            allocs_filename: 'allocs.windows.yml'
     steps:
       - uses: actions/checkout@v4
         # We intentionally do not use lfs: true here, instead using the caching method to save LFS bandwidth.
@@ -296,6 +299,7 @@ jobs:
         env:
           VELLO_CI_GPU_SUPPORT: ${{ matrix.gpu }}
           TEST_ALLOCS: 1
+          ALLOCS_FILENAME: ${{ matrix.allocs_filename }}
       
       - name: Upload test results due to failure
         uses: actions/upload-artifact@v4
