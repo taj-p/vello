@@ -108,12 +108,6 @@ pub(crate) fn get_ctx<T: Renderer>(
     ctx
 }
 
-pub(crate) fn render_pixmap(ctx: &impl Renderer) -> Pixmap {
-    let mut pixmap = Pixmap::new(ctx.width(), ctx.height());
-    ctx.render_to_pixmap(&mut pixmap);
-    pixmap
-}
-
 pub(crate) fn miter_stroke_2() -> Stroke {
     Stroke {
         width: 2.0,
@@ -281,7 +275,7 @@ pub(crate) fn stops_blue_green_red_yellow() -> ColorStops {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn check_ref(
-    ctx: &impl Renderer,
+    pixmap: Pixmap,
     // The name of the test.
     test_name: &str,
     // The name of the specific instance of the test that is being run
@@ -295,8 +289,6 @@ pub(crate) fn check_ref(
     is_reference: bool,
     _: &[u8],
 ) {
-    let pixmap = render_pixmap(ctx);
-
     let encoded_image = pixmap.into_png().unwrap();
     let ref_path = REFS_PATH.join(format!("{test_name}.png"));
 
@@ -344,7 +336,7 @@ pub(crate) fn check_ref(
 
 #[cfg(target_arch = "wasm32")]
 pub(crate) fn check_ref(
-    ctx: &impl Renderer,
+    pixmap: Pixmap,
     _test_name: &str,
     // The name of the specific instance of the test that is being run
     // (e.g. test_gpu, test_cpu_u8, etc.)
@@ -358,7 +350,6 @@ pub(crate) fn check_ref(
 ) {
     assert!(!is_reference, "WASM cannot create new reference images");
 
-    let pixmap = render_pixmap(ctx);
     let encoded_image = pixmap.into_png().unwrap();
     let actual = load_from_memory(&encoded_image).unwrap().into_rgba8();
 

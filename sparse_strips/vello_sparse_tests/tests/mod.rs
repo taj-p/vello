@@ -47,5 +47,8 @@ mod renderer;
 mod scenes;
 #[macro_use]
 mod util;
+
+mod alloc_tracker;
+
 #[cfg(target_arch = "wasm32")]
 mod wasm_binary_invariants;

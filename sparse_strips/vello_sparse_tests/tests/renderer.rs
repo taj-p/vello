@@ -40,6 +40,7 @@ pub(crate) trait Renderer: Sized {
         mask: Option<Mask>,
     );
     fn flush(&mut self);
+    fn reset(&mut self);
     fn push_clip_layer(&mut self, path: &BezPath);
     fn push_blend_layer(&mut self, blend_mode: BlendMode);
     fn push_opacity_layer(&mut self, opacity: f32);
@@ -51,7 +52,6 @@ pub(crate) trait Renderer: Sized {
     fn set_fill_rule(&mut self, fill_rule: Fill);
     fn set_transform(&mut self, transform: Affine);
     fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>);
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap);
     fn width(&self) -> u16;
     fn height(&self) -> u16;
     fn get_image_source(&mut self, pixmap: Arc<Pixmap>) -> ImageSource;
@@ -117,6 +117,10 @@ impl Renderer for RenderContext {
         Self::flush(self);
     }
 
+    fn reset(&mut self) {
+        Self::reset(self);
+    }
+
     fn push_clip_layer(&mut self, path: &BezPath) {
         Self::push_clip_layer(self, path);
     }
@@ -161,10 +165,6 @@ impl Renderer for RenderContext {
         Self::set_aliasing_threshold(self, aliasing_threshold);
     }
 
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
-        Self::render_to_pixmap(self, pixmap);
-    }
-
     fn width(&self) -> u16 {
         Self::width(self)
     }
@@ -198,6 +198,131 @@ pub(crate) struct HybridRenderer {
     texture: wgpu::Texture,
     texture_view: wgpu::TextureView,
     renderer: RefCell<vello_hybrid::Renderer>,
+}
+
+impl HybridRenderer {
+    fn guard<'a>() -> std::sync::MutexGuard<'a, ()> {
+        // On some platforms using `cargo test` triggers segmentation faults in wgpu when the GPU
+        // tests are run in parallel (likely related to the number of device resources being
+        // requested simultaneously). This is "fixed" by putting a mutex around this method,
+        // ensuring only one set of device resources is alive at the same time. This slows down
+        // testing when `cargo test` is used.
+        //
+        // Testing with `cargo nextest` (as on CI) is not meaningfully slowed down. `nextest` runs
+        // each test in its own process (<https://nexte.st/docs/design/why-process-per-test/>),
+        // meaning there is no contention on this mutex.
+        let guard = {
+            use std::sync::Mutex;
+            static M: Mutex<()> = Mutex::new(());
+            M.lock().unwrap()
+        };
+
+        guard
+    }
+
+    pub(crate) fn render(&self) {
+        let _guard = Self::guard();
+
+        let width = self.scene.width();
+        let height = self.scene.height();
+
+        let render_size = vello_hybrid::RenderSize {
+            width: width.into(),
+            height: height.into(),
+        };
+        // Copy texture to buffer
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Vello Render To Buffer"),
+            });
+        self.renderer
+            .borrow_mut()
+            .render(
+                &self.scene,
+                &self.device,
+                &self.queue,
+                &mut encoder,
+                &render_size,
+                &self.texture_view,
+            )
+            .unwrap();
+        self.queue.submit([encoder.finish()]);
+        self.device.poll(wgpu::PollType::Wait).unwrap();
+    }
+
+    // This method creates device resources every time it is called. This does not matter much for
+    // testing, but should not be used as a basis for implementing something real. This would be a
+    // very bad example for that.
+    pub(crate) fn copy_to_pixmap(&self, pixmap: &mut Pixmap) {
+        let _guard = Self::guard();
+
+        let width = self.scene.width();
+        let height = self.scene.height();
+
+        // Create a buffer to copy the texture data
+        let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
+        let texture_copy_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("Output Buffer"),
+            size: u64::from(bytes_per_row) * u64::from(height),
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Vello Render To Buffer"),
+            });
+
+        encoder.copy_texture_to_buffer(
+            wgpu::TexelCopyTextureInfo {
+                texture: &self.texture,
+                mip_level: 0,
+                origin: wgpu::Origin3d::ZERO,
+                aspect: wgpu::TextureAspect::All,
+            },
+            wgpu::TexelCopyBufferInfo {
+                buffer: &texture_copy_buffer,
+                layout: wgpu::TexelCopyBufferLayout {
+                    offset: 0,
+                    bytes_per_row: Some(bytes_per_row),
+                    rows_per_image: None,
+                },
+            },
+            wgpu::Extent3d {
+                width: width.into(),
+                height: height.into(),
+                depth_or_array_layers: 1,
+            },
+        );
+        self.queue.submit([encoder.finish()]);
+
+        // Map the buffer for reading
+        texture_copy_buffer
+            .slice(..)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                if result.is_err() {
+                    panic!("Failed to map texture for reading");
+                }
+            });
+        self.device.poll(wgpu::PollType::Wait).unwrap();
+
+        // Read back the pixel data
+        for (row, buf) in texture_copy_buffer
+            .slice(..)
+            .get_mapped_range()
+            .chunks_exact(bytes_per_row as usize)
+            .zip(
+                pixmap
+                    .data_as_u8_slice_mut()
+                    .chunks_exact_mut(width as usize * 4),
+            )
+        {
+            buf.copy_from_slice(&row[0..width as usize * 4]);
+        }
+        texture_copy_buffer.unmap();
+    }
 }
 
 #[cfg(not(all(target_arch = "wasm32", feature = "webgl")))]
@@ -303,6 +428,10 @@ impl Renderer for HybridRenderer {
 
     fn flush(&mut self) {}
 
+    fn reset(&mut self) {
+        self.scene.reset();
+    }
+
     fn push_clip_layer(&mut self, path: &BezPath) {
         self.scene.push_clip_layer(path);
     }
@@ -352,110 +481,6 @@ impl Renderer for HybridRenderer {
         self.scene.set_aliasing_threshold(aliasing_threshold);
     }
 
-    // This method creates device resources every time it is called. This does not matter much for
-    // testing, but should not be used as a basis for implementing something real. This would be a
-    // very bad example for that.
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
-        // On some platforms using `cargo test` triggers segmentation faults in wgpu when the GPU
-        // tests are run in parallel (likely related to the number of device resources being
-        // requested simultaneously). This is "fixed" by putting a mutex around this method,
-        // ensuring only one set of device resources is alive at the same time. This slows down
-        // testing when `cargo test` is used.
-        //
-        // Testing with `cargo nextest` (as on CI) is not meaningfully slowed down. `nextest` runs
-        // each test in its own process (<https://nexte.st/docs/design/why-process-per-test/>),
-        // meaning there is no contention on this mutex.
-        let _guard = {
-            use std::sync::Mutex;
-            static M: Mutex<()> = Mutex::new(());
-            M.lock().unwrap()
-        };
-
-        let width = self.scene.width();
-        let height = self.scene.height();
-
-        // for image in image_cache.images {}
-
-        let render_size = vello_hybrid::RenderSize {
-            width: width.into(),
-            height: height.into(),
-        };
-        // Copy texture to buffer
-        let mut encoder = self
-            .device
-            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                label: Some("Vello Render To Buffer"),
-            });
-        self.renderer
-            .borrow_mut()
-            .render(
-                &self.scene,
-                &self.device,
-                &self.queue,
-                &mut encoder,
-                &render_size,
-                &self.texture_view,
-            )
-            .unwrap();
-
-        // Create a buffer to copy the texture data
-        let bytes_per_row = (u32::from(width) * 4).next_multiple_of(256);
-        let texture_copy_buffer = self.device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("Output Buffer"),
-            size: u64::from(bytes_per_row) * u64::from(height),
-            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-            mapped_at_creation: false,
-        });
-
-        encoder.copy_texture_to_buffer(
-            wgpu::TexelCopyTextureInfo {
-                texture: &self.texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d::ZERO,
-                aspect: wgpu::TextureAspect::All,
-            },
-            wgpu::TexelCopyBufferInfo {
-                buffer: &texture_copy_buffer,
-                layout: wgpu::TexelCopyBufferLayout {
-                    offset: 0,
-                    bytes_per_row: Some(bytes_per_row),
-                    rows_per_image: None,
-                },
-            },
-            wgpu::Extent3d {
-                width: width.into(),
-                height: height.into(),
-                depth_or_array_layers: 1,
-            },
-        );
-        self.queue.submit([encoder.finish()]);
-
-        // Map the buffer for reading
-        texture_copy_buffer
-            .slice(..)
-            .map_async(wgpu::MapMode::Read, move |result| {
-                if result.is_err() {
-                    panic!("Failed to map texture for reading");
-                }
-            });
-        self.device.poll(wgpu::PollType::Wait).unwrap();
-
-        // Read back the pixel data
-        for (row, buf) in texture_copy_buffer
-            .slice(..)
-            .get_mapped_range()
-            .chunks_exact(bytes_per_row as usize)
-            .zip(
-                pixmap
-                    .data_as_u8_slice_mut()
-                    .chunks_exact_mut(width as usize * 4),
-            )
-        {
-            buf.copy_from_slice(&row[0..width as usize * 4]);
-        }
-        texture_copy_buffer.unmap();
-    }
-
     fn width(&self) -> u16 {
         self.scene.width()
     }
@@ -502,6 +527,41 @@ pub(crate) struct HybridRenderer {
     scene: Scene,
     renderer: RefCell<vello_hybrid::WebGlRenderer>,
     gl: WebGl2RenderingContext,
+}
+
+#[cfg(all(target_arch = "wasm32", feature = "webgl"))]
+impl HybridRenderer {
+    // vello_hybrid WebGL renderer backend.
+    pub(crate) fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
+        use web_sys::WebGl2RenderingContext;
+
+        let width = self.scene.width();
+        let height = self.scene.height();
+
+        let render_size = vello_hybrid::RenderSize {
+            width: width.into(),
+            height: height.into(),
+        };
+        self.renderer
+            .borrow_mut()
+            .render(&self.scene, &render_size)
+            .unwrap();
+
+        let mut pixels = vec![0_u8; (width as usize) * (height as usize) * 4];
+        self.gl
+            .read_pixels_with_opt_u8_array(
+                0,
+                0,
+                width.into(),
+                height.into(),
+                WebGl2RenderingContext::RGBA,
+                WebGl2RenderingContext::UNSIGNED_BYTE,
+                Some(&mut pixels),
+            )
+            .unwrap();
+        let pixmap_data = pixmap.data_as_u8_slice_mut();
+        pixmap_data.copy_from_slice(&pixels);
+    }
 }
 
 #[cfg(all(target_arch = "wasm32", feature = "webgl"))]
@@ -634,38 +694,6 @@ impl Renderer for HybridRenderer {
 
     fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>) {
         self.scene.set_aliasing_threshold(aliasing_threshold);
-    }
-
-    // vello_hybrid WebGL renderer backend.
-    fn render_to_pixmap(&self, pixmap: &mut Pixmap) {
-        use web_sys::WebGl2RenderingContext;
-
-        let width = self.scene.width();
-        let height = self.scene.height();
-
-        let render_size = vello_hybrid::RenderSize {
-            width: width.into(),
-            height: height.into(),
-        };
-        self.renderer
-            .borrow_mut()
-            .render(&self.scene, &render_size)
-            .unwrap();
-
-        let mut pixels = vec![0_u8; (width as usize) * (height as usize) * 4];
-        self.gl
-            .read_pixels_with_opt_u8_array(
-                0,
-                0,
-                width.into(),
-                height.into(),
-                WebGl2RenderingContext::RGBA,
-                WebGl2RenderingContext::UNSIGNED_BYTE,
-                Some(&mut pixels),
-            )
-            .unwrap();
-        let pixmap_data = pixmap.data_as_u8_slice_mut();
-        pixmap_data.copy_from_slice(&pixels);
     }
 
     fn width(&self) -> u16 {

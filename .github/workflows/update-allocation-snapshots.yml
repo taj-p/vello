@@ -1,0 +1,251 @@
+name: Update Allocation Snapshots
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-alloc-snapshots-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  update:
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Extract PR metadata
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number,
+            });
+            core.setOutput('number', pr.data.number.toString());
+            core.setOutput('headRef', pr.data.head.ref);
+            core.setOutput('headSha', pr.data.head.sha);
+            core.setOutput('headRepo', pr.data.head.repo.full_name);
+            core.setOutput('baseRef', pr.data.base.ref);
+            const isFork = pr.data.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`;
+            core.setOutput('isFork', isFork ? 'true' : 'false');
+
+      - name: Install Rust (stable)
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: Install native dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends -y libasound2-dev libudev-dev
+
+      - name: Install llvmpipe / lavapipe (GPU fallback)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -y -qq
+          sudo add-apt-repository ppa:kisak/turtle -y
+          sudo apt-get update
+          sudo apt install -y xvfb libegl-mesa0 libgl1-mesa-dri libxcb-xfixes0-dev mesa-vulkan-drivers
+
+      - name: Fetch PR head and create working branch
+        id: prep
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin --prune
+          if [ "${{ steps.pr.outputs.isFork }}" = "true" ]; then
+            BRANCH="alloc-update/pr-${{ steps.pr.outputs.number }}"
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+              git checkout -B "$BRANCH" "origin/$BRANCH"
+            else
+              git fetch origin pull/${{ steps.pr.outputs.number }}/head:pr-head
+              git checkout -B "$BRANCH" pr-head
+            fi
+          else
+            BRANCH="${{ steps.pr.outputs.headRef }}"
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+              git checkout -B "$BRANCH" "origin/$BRANCH"
+            else
+              git fetch origin pull/${{ steps.pr.outputs.number }}/head:pr-head
+              git checkout -B "$BRANCH" pr-head
+            fi
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Set OS name
+        shell: bash
+        run: |
+          case "${{ runner.os }}" in
+            Linux) echo "OS_NAME=linux" >> "$GITHUB_ENV" ;;
+            macOS) echo "OS_NAME=macos" >> "$GITHUB_ENV" ;;
+            Windows) echo "OS_NAME=windows" >> "$GITHUB_ENV" ;;
+          esac
+
+      - name: Run allocation snapshot update
+        working-directory: sparse_strips/vello_sparse_tests
+        env:
+          SAVE_ALLOCS: "1"
+          ALLOCS_FILENAME: "allocs.${{ env.OS_NAME }}.yml"
+        run: cargo test --release -- --test-threads=1
+      - name: Upload allocation snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: allocs-${{ env.OS_NAME }}
+          path: sparse_strips/vello_sparse_tests/snapshots/allocs.${{ env.OS_NAME }}.yml
+          if-no-files-found: error
+  aggregate:
+    needs: update
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Extract PR metadata
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number,
+            });
+            core.setOutput('number', pr.data.number.toString());
+            core.setOutput('headRef', pr.data.head.ref);
+            core.setOutput('headSha', pr.data.head.sha);
+            core.setOutput('headRepo', pr.data.head.repo.full_name);
+            core.setOutput('baseRef', pr.data.base.ref);
+            const isFork = pr.data.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`;
+            core.setOutput('isFork', isFork ? 'true' : 'false');
+
+      - name: Fetch PR head and create working branch
+        id: prep
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin --prune
+          if [ "${{ steps.pr.outputs.isFork }}" = "true" ]; then
+            BRANCH="alloc-update/pr-${{ steps.pr.outputs.number }}"
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+              git checkout -B "$BRANCH" "origin/$BRANCH"
+            else
+              git fetch origin pull/${{ steps.pr.outputs.number }}/head:pr-head
+              git checkout -B "$BRANCH" pr-head
+            fi
+          else
+            BRANCH="${{ steps.pr.outputs.headRef }}"
+            if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
+              git checkout -B "$BRANCH" "origin/$BRANCH"
+            else
+              git fetch origin pull/${{ steps.pr.outputs.number }}/head:pr-head
+              git checkout -B "$BRANCH" pr-head
+            fi
+          fi
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Configure Git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Download OS allocation snapshots
+        uses: actions/download-artifact@v4
+        with:
+          pattern: allocs-*
+          merge-multiple: true
+          path: sparse_strips/vello_sparse_tests/snapshots
+
+      - name: Commit changes (if any)
+        id: commit
+        shell: bash
+        run: |
+          git add -A sparse_strips/vello_sparse_tests/snapshots
+          if git diff --staged --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to commit"
+          else
+            git commit -m "Update allocation snapshots (PR #${{ steps.pr.outputs.number }})"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push changes
+        if: steps.commit.outputs.changed == 'true'
+        run: git push --set-upstream origin "${{ steps.prep.outputs.branch }}"
+  notify:
+    needs: aggregate
+    runs-on: ubuntu-latest
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
+    steps:
+      - name: Extract PR metadata
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.issue.number,
+            });
+            core.setOutput('number', pr.data.number.toString());
+            core.setOutput('headRef', pr.data.head.ref);
+            core.setOutput('headRepo', pr.data.head.repo.full_name);
+            core.setOutput('baseRef', pr.data.base.ref);
+            const isFork = pr.data.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`;
+            core.setOutput('isFork', isFork ? 'true' : 'false');
+
+      - name: Try to open PR in fork (if fork)
+        if: steps.pr.outputs.isFork == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const [forkOwner, forkRepo] = `${{ steps.pr.outputs.headRepo }}`.split('/');
+              await github.rest.pulls.create({
+                owner: forkOwner,
+                repo: forkRepo,
+                title: `Update allocation snapshots for upstream PR #${{ steps.pr.outputs.number }}`,
+                head: `${context.repo.owner}:alloc-update/pr-${{ steps.pr.outputs.number }}`,
+                base: `${{ steps.pr.outputs.headRef }}`,
+                body: 'Automated allocation snapshot updates from upstream.',
+              });
+            } catch (e) {
+              // ignore if not permitted or already open
+            }
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number('${{ steps.pr.outputs.number }}'),
+              body: 'Allocation snapshots update workflow completed across all platforms.',
+            });
+
+
