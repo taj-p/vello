@@ -202,7 +202,8 @@ pub(crate) fn process_alloc_stats(
     if !dir.exists() {
         let _ = std::fs::create_dir_all(&dir);
     }
-    let summary_path = dir.join("allocs.toml");
+    let summary_path =
+        dir.join(std::env::var("ALLOCS_FILENAME").unwrap_or("allocs.toml".to_string()));
     let test_name = file_path;
 
     let mut summary: AllocsFile = match std::fs::read_to_string(&summary_path) {
