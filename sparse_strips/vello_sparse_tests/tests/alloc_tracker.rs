@@ -253,27 +253,6 @@ pub(crate) fn process_alloc_stats(
             summary.tests.last_mut().unwrap()
         };
 
-    let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
-    if is_test_mode {
-        let backend_stats = match backend {
-            Backend::Cpu => &test_entry.cpu,
-            Backend::Vulkan => &test_entry.vulkan,
-            Backend::Metal => &test_entry.metal,
-            Backend::Dx12 => &test_entry.dx12,
-        };
-
-        let expected_stats = match run_type {
-            RunType::Cold => &backend_stats.cold,
-            RunType::Warm => &backend_stats.warm,
-        };
-
-        assert!(
-            alloc_stats.approx_eq(expected_stats, 0, 100),
-            "{alloc_stats:?}\n should be approximately equal to\n{expected_stats:?}\nRunType: {run_type:?}"
-        );
-        return;
-    }
-
     let backend_stats = match backend {
         Backend::Cpu => &mut test_entry.cpu,
         Backend::Vulkan => &mut test_entry.vulkan,
@@ -285,6 +264,15 @@ pub(crate) fn process_alloc_stats(
         RunType::Cold => &mut backend_stats.cold,
         RunType::Warm => &mut backend_stats.warm,
     };
+
+    let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
+    if is_test_mode {
+        assert!(
+            alloc_stats.approx_eq(stats, 0, 100),
+            "{alloc_stats:?}\n should be approximately equal to\n{stats:?}\nRunType: {run_type:?}"
+        );
+        return;
+    }
 
     stats.allocations = alloc_stats.allocations;
     stats.deallocations = alloc_stats.deallocations;
