@@ -195,7 +195,6 @@ pub(crate) struct HybridRenderer {
     scene: Scene,
     device: wgpu::Device,
     queue: wgpu::Queue,
-    backend: wgpu::Backend,
     texture: wgpu::Texture,
     texture_view: wgpu::TextureView,
     renderer: RefCell<vello_hybrid::Renderer>,
@@ -324,10 +323,6 @@ impl HybridRenderer {
         }
         texture_copy_buffer.unmap();
     }
-
-    pub(crate) fn backend(&self) -> wgpu::Backend {
-        self.backend
-    }
 }
 
 #[cfg(not(all(target_arch = "wasm32", feature = "webgl")))]
@@ -352,7 +347,6 @@ impl Renderer for HybridRenderer {
             compatible_surface: None,
         }))
         .expect("Failed to find an appropriate adapter");
-        let backend = adapter.get_info().backend;
         let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
             label: Some("Device"),
             required_features: wgpu::Features::empty(),
@@ -392,7 +386,6 @@ impl Renderer for HybridRenderer {
             scene,
             device,
             queue,
-            backend,
             texture,
             texture_view,
             renderer: RefCell::new(renderer),

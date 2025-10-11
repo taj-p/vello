@@ -4,7 +4,6 @@
 //! Tracks allocations and deallocations.
 
 use core::cell::Cell;
-use core::sync::atomic::{AtomicUsize, Ordering};
 use std::alloc::{GlobalAlloc, Layout, System};
 
 use serde::{Deserialize, Serialize};
@@ -126,14 +125,6 @@ pub(crate) struct AllocsFile {
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub(crate) struct AllocsTest {
     pub test: String,
-    pub cpu: AllocInstance,
-    pub metal: AllocInstance,
-    pub dx12: AllocInstance,
-    pub vulkan: AllocInstance,
-}
-
-#[derive(Serialize, Deserialize, Default, Clone)]
-pub(crate) struct AllocInstance {
     pub cold: AllocationStats,
     pub warm: AllocationStats,
 }
@@ -198,31 +189,11 @@ pub(crate) fn should_process_allocs(num_threads: u16) -> bool {
     return true;
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) enum Backend {
-    Cpu,
-    Vulkan,
-    Metal,
-    Dx12,
-}
-
-impl Into<Backend> for wgpu::Backend {
-    fn into(self) -> Backend {
-        match self {
-            wgpu::Backend::Vulkan => Backend::Vulkan,
-            wgpu::Backend::Metal => Backend::Metal,
-            wgpu::Backend::Dx12 => Backend::Dx12,
-            _ => unimplemented!("Backend {:?} not supported", self),
-        }
-    }
-}
-
 #[cfg(not(target_arch = "wasm32"))]
 pub(crate) fn process_alloc_stats(
     run_type: RunType,
     alloc_stats: AllocationStats,
     file_path: &str,
-    backend: Backend,
 ) {
     use std::io::Write;
 
@@ -253,16 +224,9 @@ pub(crate) fn process_alloc_stats(
             summary.tests.last_mut().unwrap()
         };
 
-    let backend_stats = match backend {
-        Backend::Cpu => &mut test_entry.cpu,
-        Backend::Vulkan => &mut test_entry.vulkan,
-        Backend::Metal => &mut test_entry.metal,
-        Backend::Dx12 => &mut test_entry.dx12,
-    };
-
     let stats = match run_type {
-        RunType::Cold => &mut backend_stats.cold,
-        RunType::Warm => &mut backend_stats.warm,
+        RunType::Cold => &mut test_entry.cold,
+        RunType::Warm => &mut test_entry.warm,
     };
 
     let is_test_mode = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
