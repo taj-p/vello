@@ -38,7 +38,7 @@ impl<'a, S: Simd> PlainNNImagePainter<'a, S> {
                 data.x_advances.1,
                 data.y_advances.1,
             ),
-            image.extends.1,
+            image.sampler.y_extend,
             data.height,
             data.height_inv,
         );
@@ -68,14 +68,14 @@ impl<S: Simd> Iterator for PlainNNImagePainter<'_, S> {
         let x_pos = extend(
             self.simd,
             self.cur_x_pos,
-            self.data.image.extends.0,
+            self.data.image.sampler.x_extend,
             self.data.width,
             self.data.width_inv,
         );
 
         let samples = sample(self.simd, &self.data, x_pos, self.y_positions);
 
-        self.cur_x_pos = self.cur_x_pos + self.advance;
+        self.cur_x_pos += self.advance;
 
         Some(samples)
     }
@@ -116,7 +116,7 @@ impl<S: Simd> Iterator for NNImagePainter<'_, S> {
                 self.data.x_advances.0,
                 self.data.y_advances.0,
             ),
-            self.data.image.extends.0,
+            self.data.image.sampler.x_extend,
             self.data.width,
             self.data.width_inv,
         );
@@ -129,7 +129,7 @@ impl<S: Simd> Iterator for NNImagePainter<'_, S> {
                 self.data.x_advances.1,
                 self.data.y_advances.1,
             ),
-            self.data.image.extends.1,
+            self.data.image.sampler.y_extend,
             self.data.height,
             self.data.height_inv,
         );
@@ -214,7 +214,7 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
                 extend(
                     self.simd,
                     x_positions + $offsets[$idx],
-                    self.data.image.extends.0,
+                    self.data.image.sampler.y_extend,
                     self.data.width,
                     self.data.width_inv,
                 )
@@ -226,14 +226,14 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
                 extend(
                     self.simd,
                     y_positions + $offsets[$idx],
-                    self.data.image.extends.1,
+                    self.data.image.sampler.y_extend,
                     self.data.height,
                     self.data.height_inv,
                 )
             };
         }
 
-        match self.data.image.quality {
+        match self.data.image.sampler.quality {
             ImageQuality::Low => unreachable!(),
             ImageQuality::Medium => {
                 // <https://github.com/google/skia/blob/220738774f7a0ce4a6c7bd17519a336e5e5dea5b/src/opts/SkRasterPipeline_opts.h#L5039-L5078>
@@ -259,11 +259,11 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
                         let color_sample = sample(x_positions, y_positions);
                         let w = element_wise_splat(self.simd, cx[x_idx] * cy[y_idx]);
 
-                        interpolated_color = interpolated_color.madd(w, color_sample);
+                        interpolated_color = w.madd(color_sample, interpolated_color);
                     }
                 }
 
-                interpolated_color = interpolated_color * f32x16::splat(self.simd, 1.0 / 255.0);
+                interpolated_color *= f32x16::splat(self.simd, 1.0 / 255.0);
             }
             ImageQuality::High => {
                 // Compare to <https://github.com/google/skia/blob/84ff153b0093fc83f6c77cd10b025c06a12c5604/src/opts/SkRasterPipeline_opts.h#L5030-L5075>.
@@ -298,11 +298,11 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
                         let color_sample = sample(x_positions, y_positions);
                         let w = element_wise_splat(self.simd, cx[x_idx] * cy[y_idx]);
 
-                        interpolated_color = interpolated_color.madd(w, color_sample);
+                        interpolated_color = w.madd(color_sample, interpolated_color);
                     }
                 }
 
-                interpolated_color = interpolated_color * f32x16::splat(self.simd, 1.0 / 255.0);
+                interpolated_color *= f32x16::splat(self.simd, 1.0 / 255.0);
 
                 let alphas = interpolated_color.splat_4th();
 
@@ -415,10 +415,12 @@ pub(crate) fn extend<S: Simd>(
         // Note that max should be exclusive, so subtract a small bias to enforce that.
         // Otherwise, we might sample out-of-bounds pixels.
         crate::peniko::Extend::Pad => val.min(max - bias).max(f32x4::splat(simd, 0.0)),
-        crate::peniko::Extend::Repeat => val
-            .msub((val * inv_max).floor(), max)
-            // In certain edge cases, we might still end up with a higher number.
-            .min(max - 1.0),
+        crate::peniko::Extend::Repeat => {
+            // floor := (val * inv_max).floor() * max is the nearest multiple of `max` below val.
+            max.madd(-(val * inv_max).floor(), val)
+                // In certain edge cases, we might still end up with a higher number.
+                .min(max - 1.0)
+        }
         // <https://github.com/google/skia/blob/220738774f7a0ce4a6c7bd17519a336e5e5dea5b/src/opts/SkRasterPipeline_opts.h#L3274-L3290>
         crate::peniko::Extend::Reflect => {
             let u = val
@@ -492,7 +494,7 @@ fn single_weight<S: Simd>(
     c: f32x4<S>,
     d: f32x4<S>,
 ) -> f32x4<S> {
-    a.madd(b.madd(c.madd(t, d), t), t)
+    t.madd(d, c).madd(t, b).madd(t, a)
 }
 
 /// Mitchell filter with the variables B = 1/3 and C = 1/3.

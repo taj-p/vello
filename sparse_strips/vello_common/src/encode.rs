@@ -17,10 +17,14 @@ use alloc::vec::Vec;
 #[cfg(not(feature = "multithreading"))]
 use core::cell::OnceCell;
 use core::hash::{Hash, Hasher};
-use fearless_simd::{Simd, SimdBase, SimdFloat, f32x4, f32x16};
+use fearless_simd::{Simd, SimdBase, SimdFloat, f32x4, f32x16, mask32x4, mask32x16};
 use peniko::color::cache_key::{BitEq, BitHash, CacheKey};
-use peniko::{LinearGradientPosition, RadialGradientPosition, SweepGradientPosition};
-use smallvec::{SmallVec, ToSmallVec};
+use peniko::color::gradient_unpremultiplied;
+use peniko::{
+    ImageSampler, InterpolationAlphaSpace, LinearGradientPosition, RadialGradientPosition,
+    SweepGradientPosition,
+};
+use smallvec::ToSmallVec;
 // So we can just use `OnceCell` regardless of which feature is activated.
 #[cfg(feature = "multithreading")]
 use std::sync::OnceLock as OnceCell;
@@ -62,7 +66,6 @@ impl EncodeExt for Gradient {
         }
 
         let mut has_opacities = self.stops.iter().any(|s| s.color.components[3] != 1.0);
-        let pad = self.extend == Extend::Pad;
 
         let mut base_transform;
 
@@ -90,19 +93,7 @@ impl EncodeExt for Gradient {
         }
 
         let kind = match self.kind {
-            GradientKind::Linear(LinearGradientPosition {
-                start: p0,
-                end: mut p1,
-            }) => {
-                // Double the length of the iterator, and append stops in reverse order in case
-                // we have the extend `Reflect`.
-                // Then we can treat it the same as a repeated gradient.
-                if self.extend == Extend::Reflect {
-                    p1.x += p1.x - p0.x;
-                    p1.y += p1.y - p0.y;
-                    stops = Cow::Owned(apply_reflect(&stops));
-                }
-
+            GradientKind::Linear(LinearGradientPosition { start: p0, end: p1 }) => {
                 // We update the transform currently in-place, such that the gradient line always
                 // starts at the point (0, 0) and ends at the point (1, 0). This simplifies the
                 // calculation for the current position along the gradient line a lot.
@@ -113,23 +104,14 @@ impl EncodeExt for Gradient {
             GradientKind::Radial(RadialGradientPosition {
                 start_center: c0,
                 start_radius: r0,
-                end_center: mut c1,
-                end_radius: mut r1,
+                end_center: c1,
+                end_radius: r1,
             }) => {
                 // The implementation of radial gradients is translated from Skia.
                 // See:
                 // - <https://skia.org/docs/dev/design/conical/>
                 // - <https://github.com/google/skia/blob/main/src/shaders/gradients/SkConicalGradient.h>
                 // - <https://github.com/google/skia/blob/main/src/shaders/gradients/SkConicalGradient.cpp>
-
-                // Same story as for linear gradients, mutate stops so that reflect and repeat
-                // can be treated the same.
-                if self.extend == Extend::Reflect {
-                    c1 += c1 - c0;
-                    r1 += r1 - r0;
-                    stops = Cow::Owned(apply_reflect(&stops));
-                }
-
                 let d_radius = r1 - r0;
 
                 // <https://github.com/google/skia/blob/1e07a4b16973cf716cb40b72dd969e961f4dd950/src/shaders/gradients/SkConicalGradient.cpp#L83-L112>
@@ -178,14 +160,8 @@ impl EncodeExt for Gradient {
             GradientKind::Sweep(SweepGradientPosition {
                 center,
                 start_angle,
-                mut end_angle,
+                end_angle,
             }) => {
-                // Same as before, reduce `Reflect` to `Repeat`.
-                if self.extend == Extend::Reflect {
-                    end_angle += end_angle - start_angle;
-                    stops = Cow::Owned(apply_reflect(&stops));
-                }
-
                 // Make sure the center of the gradient falls on the origin (0, 0), to make
                 // angle calculation easier.
                 let x_offset = -center.x as f32;
@@ -200,7 +176,12 @@ impl EncodeExt for Gradient {
             }
         };
 
-        let ranges = encode_stops(&stops, self.interpolation_cs, self.hue_direction);
+        let ranges = encode_stops(
+            &stops,
+            self.interpolation_cs,
+            self.hue_direction,
+            self.interpolation_alpha_space,
+        );
 
         // This represents the transform that needs to be applied to the starting point of a
         // command before starting with the rendering.
@@ -240,7 +221,7 @@ impl EncodeExt for Gradient {
             x_advance,
             y_advance,
             ranges,
-            pad,
+            extend: self.extend,
             has_opacities,
             u8_lut: OnceCell::new(),
             f32_lut: OnceCell::new(),
@@ -336,31 +317,17 @@ fn validate(gradient: &Gradient) -> Result<(), Paint> {
     Ok(())
 }
 
-/// Extend the stops so that we can treat a repeated gradient like a reflected gradient.
-fn apply_reflect(stops: &[ColorStop]) -> SmallVec<[ColorStop; 4]> {
-    let first_half = stops.iter().map(|s| ColorStop {
-        offset: s.offset / 2.0,
-        color: s.color,
-    });
-
-    let second_half = stops.iter().rev().map(|s| ColorStop {
-        offset: 0.5 + (1.0 - s.offset) / 2.0,
-        color: s.color,
-    });
-
-    first_half.chain(second_half).collect::<SmallVec<_>>()
-}
-
 /// Encode all stops into a sequence of ranges.
 fn encode_stops(
     stops: &[ColorStop],
     cs: ColorSpaceTag,
     hue_dir: HueDirection,
+    interpolation_alpha_space: InterpolationAlphaSpace,
 ) -> Vec<GradientRange> {
     #[derive(Debug)]
     struct EncodedColorStop {
         offset: f32,
-        color: crate::color::PremulColor<Srgb>,
+        color: crate::color::AlphaColor<Srgb>,
     }
 
     let create_range = |left_stop: &EncodedColorStop, right_stop: &EncodedColorStop| {
@@ -376,8 +343,16 @@ fn encode_stops(
 
         let x0 = left_stop.offset;
         let x1 = right_stop.offset;
-        let c0 = clamp(left_stop.color.components);
-        let c1 = clamp(right_stop.color.components);
+        let c0 = if interpolation_alpha_space == InterpolationAlphaSpace::Unpremultiplied {
+            clamp(left_stop.color.components)
+        } else {
+            clamp(left_stop.color.premultiply().components)
+        };
+        let c1 = if interpolation_alpha_space == InterpolationAlphaSpace::Unpremultiplied {
+            clamp(right_stop.color.components)
+        } else {
+            clamp(right_stop.color.premultiply().components)
+        };
 
         // We calculate a bias and scale factor, such that we can simply calculate
         // bias + x * scale to get the interpolated color, where x is between x0 and x1,
@@ -393,27 +368,57 @@ fn encode_stops(
             bias[i] = c0[i] - x0 * scale[i];
         }
 
-        GradientRange { x1, bias, scale }
+        GradientRange {
+            x1,
+            bias,
+            scale,
+            interpolation_alpha_space,
+        }
     };
 
     // Create additional (SRGB-encoded) stops in-between to approximate the color space we want to
     // interpolate in.
     if cs != ColorSpaceTag::Srgb {
-        let interpolated_stops = stops
-            .windows(2)
-            .flat_map(|s| {
-                let left_stop = &s[0];
-                let right_stop = &s[1];
+        let interpolated_stops = if interpolation_alpha_space
+            == InterpolationAlphaSpace::Premultiplied
+        {
+            stops
+                .windows(2)
+                .flat_map(|s| {
+                    let left_stop = &s[0];
+                    let right_stop = &s[1];
 
-                let interpolated =
-                    gradient::<Srgb>(left_stop.color, right_stop.color, cs, hue_dir, 0.01);
+                    let interpolated =
+                        gradient::<Srgb>(left_stop.color, right_stop.color, cs, hue_dir, 0.01);
 
-                interpolated.map(|st| EncodedColorStop {
-                    offset: left_stop.offset + (right_stop.offset - left_stop.offset) * st.0,
-                    color: st.1,
+                    interpolated.map(|st| EncodedColorStop {
+                        offset: left_stop.offset + (right_stop.offset - left_stop.offset) * st.0,
+                        color: st.1.un_premultiply(),
+                    })
                 })
-            })
-            .collect::<Vec<_>>();
+                .collect::<Vec<_>>()
+        } else {
+            stops
+                .windows(2)
+                .flat_map(|s| {
+                    let left_stop = &s[0];
+                    let right_stop = &s[1];
+
+                    let interpolated = gradient_unpremultiplied::<Srgb>(
+                        left_stop.color,
+                        right_stop.color,
+                        cs,
+                        hue_dir,
+                        0.01,
+                    );
+
+                    interpolated.map(|st| EncodedColorStop {
+                        offset: left_stop.offset + (right_stop.offset - left_stop.offset) * st.0,
+                        color: st.1,
+                    })
+                })
+                .collect::<Vec<_>>()
+        };
 
         interpolated_stops
             .windows(2)
@@ -430,12 +435,12 @@ fn encode_stops(
             .map(|c| {
                 let c0 = EncodedColorStop {
                     offset: c[0].offset,
-                    color: c[0].color.to_alpha_color::<Srgb>().premultiply(),
+                    color: c[0].color.to_alpha_color::<Srgb>(),
                 };
 
                 let c1 = EncodedColorStop {
                     offset: c[1].offset,
-                    color: c[1].color.to_alpha_color::<Srgb>().premultiply(),
+                    color: c[1].color.to_alpha_color::<Srgb>(),
                 };
 
                 create_range(&c0, &c1)
@@ -465,7 +470,12 @@ impl EncodeExt for Image {
     fn encode_into(&self, paints: &mut Vec<EncodedPaint>, transform: Affine) -> Paint {
         let idx = paints.len();
 
-        let mut quality = self.quality;
+        let mut sampler = self.sampler;
+
+        if sampler.alpha != 1.0 {
+            // If the sampler alpha is not 1.0, we need to force alpha compositing.
+            unimplemented!("Applying opacity to image commands");
+        }
 
         let c = transform.as_coeffs();
 
@@ -476,9 +486,9 @@ impl EncodeExt for Image {
             && (c[3] as f32 - 1.0).is_nearly_zero()
             && ((c[4] - c[4].floor()) as f32).is_nearly_zero()
             && ((c[5] - c[5].floor()) as f32).is_nearly_zero()
-            && quality == ImageQuality::Medium
+            && sampler.quality == ImageQuality::Medium
         {
-            quality = ImageQuality::Low;
+            sampler.quality = ImageQuality::Low;
         }
 
         // Similarly to gradients, apply a 0.5 offset so we sample at the center of
@@ -487,12 +497,11 @@ impl EncodeExt for Image {
 
         let (x_advance, y_advance) = x_y_advances(&transform);
 
-        let encoded = match &self.source {
+        let encoded = match &self.image {
             ImageSource::Pixmap(pixmap) => {
                 EncodedImage {
                     source: ImageSource::Pixmap(pixmap.clone()),
-                    extends: (self.x_extend, self.y_extend),
-                    quality,
+                    sampler,
                     // While we could optimize RGB8 images, it's probably not worth the trouble.
                     has_opacities: true,
                     transform,
@@ -502,8 +511,7 @@ impl EncodeExt for Image {
             }
             ImageSource::OpaqueId(image) => EncodedImage {
                 source: ImageSource::OpaqueId(*image),
-                extends: (self.x_extend, self.y_extend),
-                quality: self.quality,
+                sampler,
                 has_opacities: true,
                 transform,
                 x_advance,
@@ -545,10 +553,8 @@ impl From<EncodedBlurredRoundedRectangle> for EncodedPaint {
 pub struct EncodedImage {
     /// The underlying pixmap of the image.
     pub source: ImageSource,
-    /// The extends in the horizontal and vertical direction.
-    pub extends: (Extend, Extend),
-    /// The rendering quality of the image.
-    pub quality: ImageQuality,
+    /// Sampler
+    pub sampler: ImageSampler,
     /// Whether the image has opacities.
     pub has_opacities: bool,
     /// A transform to apply to the image.
@@ -716,8 +722,8 @@ pub struct EncodedGradient {
     pub y_advance: Vec2,
     /// The color ranges of the gradient.
     pub ranges: Vec<GradientRange>,
-    /// Whether the gradient should be padded.
-    pub pad: bool,
+    /// The extend of the gradient.
+    pub extend: Extend,
     /// Whether the gradient requires `source_over` compositing.
     pub has_opacities: bool,
     u8_lut: OnceCell<GradientLut<u8>>,
@@ -765,7 +771,7 @@ impl BitEq for GradientCacheKey {
     }
 }
 
-/// An encoded ange between two color stops.
+/// An encoded range between two color stops.
 #[derive(Debug, Clone)]
 pub struct GradientRange {
     /// The end value of the range.
@@ -776,6 +782,8 @@ pub struct GradientRange {
     /// The scale factors of the range. By calculating bias + x * factors (where x is
     /// between 0.0 and 1.0), we can interpolate between start and end color of the gradient range.
     pub scale: [f32; 4],
+    /// The alpha space in which the interpolation was performed.
+    pub interpolation_alpha_space: InterpolationAlphaSpace,
 }
 
 /// An encoded blurred, rounded rectangle.
@@ -936,7 +944,7 @@ impl FromF32Color for u8 {
 
     fn from_f32<S: Simd>(mut color: f32x4<S>) -> [Self; 4] {
         let simd = color.simd;
-        color = f32x4::splat(simd, 0.5).madd(color, f32x4::splat(simd, 255.0));
+        color = color.madd(f32x4::splat(simd, 255.0), f32x4::splat(simd, 0.5));
 
         [
             color[0] as Self,
@@ -988,12 +996,21 @@ impl<T: FromF32Color> GradientLut<T> {
             let scales = f32x16::block_splat(f32x4::from_slice(simd, &range.scale));
 
             ramp_range.step_by(4).for_each(|idx| {
-                let t_vals = add_factor.madd(f32x4::splat(simd, idx as f32), inv_lut_scale);
+                let t_vals = f32x4::splat(simd, idx as f32).madd(inv_lut_scale, add_factor);
 
                 let t_vals = element_wise_splat(simd, t_vals);
 
-                let mut result = biases.madd(scales, t_vals);
+                let mut result = scales.madd(t_vals, biases);
                 let alphas = result.splat_4th();
+                // Premultiply colors, since we did interpolation in unpremultiplied space.
+                if range.interpolation_alpha_space == InterpolationAlphaSpace::Unpremultiplied {
+                    result = {
+                        let mask =
+                            mask32x16::block_splat(mask32x4::from_slice(simd, &[-1, -1, -1, 0]));
+                        simd.select_f32x16(mask, result * alphas, alphas)
+                    };
+                }
+
                 // Due to floating-point impreciseness, it can happen that
                 // values either become greater than 1 or the RGB channels
                 // become greater than the alpha channel. To prevent overflows

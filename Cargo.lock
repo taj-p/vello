@@ -935,8 +935,7 @@ dependencies = [
 [[package]]
 name = "fearless_simd"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eb8f822f06d1b452a9207f11ce3292f7ee6c23d5d2e7ddfd07990a9107804850"
+source = "git+https://github.com/linebender/fearless_simd?rev=a6723a80adeba198ab8b1323caff3ca75a080e48#a6723a80adeba198ab8b1323caff3ca75a080e48"
 dependencies = [
  "bytemuck",
  "libm",
@@ -1002,6 +1001,15 @@ name = "font-types"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02a596f5713680923a2080d86de50fe472fb290693cf0f701187a1c8b36996b7"
+dependencies = [
+ "bytemuck",
+]
+
+[[package]]
+name = "font-types"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "511e2c18a516c666d27867d2f9821f76e7d591f762e9fc41dd6cc5c90fe54b0b"
 dependencies = [
  "bytemuck",
 ]
@@ -2041,7 +2049,7 @@ dependencies = [
 
 [[package]]
 name = "native_webgl"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
@@ -2554,24 +2562,25 @@ checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "peniko"
-version = "0.4.0"
-source = "git+https://github.com/linebender/peniko?rev=dde968cf406be54d3211fe422bdd066f891ab632#dde968cf406be54d3211fe422bdd066f891ab632"
-dependencies = [
- "bytemuck",
- "color",
- "kurbo 0.12.0",
- "linebender_resource_handle",
- "smallvec",
-]
-
-[[package]]
-name = "peniko"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b44f9ddd2f480176b34278eb653ec1c8062f3b143a4e16eeff5ffac3334e288"
 dependencies = [
  "color",
  "kurbo 0.11.3",
+ "linebender_resource_handle",
+ "smallvec",
+]
+
+[[package]]
+name = "peniko"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b3c76095c9a636173600478e0373218c7b955335048c2bcd12dc6a79657649d8"
+dependencies = [
+ "bytemuck",
+ "color",
+ "kurbo 0.12.0",
  "linebender_resource_handle",
  "smallvec",
 ]
@@ -2859,18 +2868,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04ca636dac446b5664bd16c069c00a9621806895b8bb02c2dc68542b23b8f25d"
 dependencies = [
  "bytemuck",
- "font-types",
+ "font-types 0.9.0",
 ]
 
 [[package]]
 name = "read-fonts"
-version = "0.34.0"
+version = "0.35.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8941f8e9d5f8ad3aebea330d01ac68c0167600eb31a86ecd86e97be4d13b51f5"
+checksum = "6717cf23b488adf64b9d711329542ba34de147df262370221940dfabc2c91358"
 dependencies = [
  "bytemuck",
  "core_maths",
- "font-types",
+ "font-types 0.10.0",
 ]
 
 [[package]]
@@ -3042,7 +3051,7 @@ dependencies = [
  "image",
  "rand",
  "roxmltree",
- "skrifa 0.36.0",
+ "skrifa 0.37.0",
  "vello",
  "web-time",
 ]
@@ -3247,13 +3256,13 @@ dependencies = [
 
 [[package]]
 name = "skrifa"
-version = "0.36.0"
+version = "0.37.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37004372610e83ee2a4c69c7d896b41f33da6a3dc1a4fe07dd9b2629a549b1dc"
+checksum = "8c31071dedf532758ecf3fed987cdb4bd9509f900e026ab684b4ecb81ea49841"
 dependencies = [
  "bytemuck",
  "core_maths",
- "read-fonts 0.34.0",
+ "read-fonts 0.35.0",
 ]
 
 [[package]]
@@ -3813,14 +3822,14 @@ checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
 
 [[package]]
 name = "vello"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
  "futures-intrusive",
  "log",
- "peniko 0.4.0",
+ "peniko 0.5.0",
  "png 0.17.16",
- "skrifa 0.36.0",
+ "skrifa 0.37.0",
  "static_assertions",
  "thiserror 2.0.16",
  "vello_encoding",
@@ -3831,10 +3840,10 @@ dependencies = [
 
 [[package]]
 name = "vello_api"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
- "peniko 0.4.0",
+ "peniko 0.5.0",
  "png 0.17.16",
 ]
 
@@ -3861,10 +3870,10 @@ dependencies = [
  "hashbrown 0.15.5",
  "libm",
  "log",
- "peniko 0.4.0",
+ "peniko 0.5.0",
  "png 0.17.16",
  "roxmltree",
- "skrifa 0.36.0",
+ "skrifa 0.37.0",
  "smallvec",
 ]
 
@@ -3891,12 +3900,12 @@ dependencies = [
 
 [[package]]
 name = "vello_encoding"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
  "guillotiere",
- "peniko 0.4.0",
- "skrifa 0.36.0",
+ "peniko 0.5.0",
+ "skrifa 0.37.0",
  "smallvec",
 ]
 
@@ -3918,11 +3927,11 @@ dependencies = [
 
 [[package]]
 name = "vello_filters_cpu"
-version = "0.5.0"
+version = "0.6.0"
 
 [[package]]
 name = "vello_hybrid"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
  "guillotiere",
@@ -3953,7 +3962,7 @@ dependencies = [
 
 [[package]]
 name = "vello_shaders"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
  "log",
@@ -3978,7 +3987,7 @@ dependencies = [
  "oxipng",
  "pollster",
  "serde",
- "skrifa 0.36.0",
+ "skrifa 0.37.0",
  "smallvec",
  "toml",
  "vello_api",
@@ -4277,7 +4286,7 @@ dependencies = [
 
 [[package]]
 name = "wasm_cpu"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "bytemuck",
  "console_error_panic_hook",
@@ -4623,7 +4632,7 @@ dependencies = [
 
 [[package]]
 name = "wgpu_webgl"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "console_error_panic_hook",
  "console_log",
