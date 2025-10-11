@@ -9,72 +9,61 @@ use std::alloc::{GlobalAlloc, Layout, System};
 
 use serde::{Deserialize, Serialize};
 
-pub(crate) static ALLOCATION_TRACKER: AllocationTracker = AllocationTracker {
-    allocations: AtomicUsize::new(0),
-    deallocations: AtomicUsize::new(0),
-    reallocations: AtomicUsize::new(0),
-    bytes_allocated: AtomicUsize::new(0),
-    bytes_deallocated: AtomicUsize::new(0),
-    bytes_reallocated: AtomicUsize::new(0),
-};
+pub(crate) static ALLOCATION_TRACKER: AllocationTracker = AllocationTracker {};
 
 #[global_allocator]
 static GLOBAL: &AllocationTracker = &ALLOCATION_TRACKER;
 
 #[derive(Default)]
-pub(crate) struct AllocationTracker {
-    allocations: AtomicUsize,
-    deallocations: AtomicUsize,
-    reallocations: AtomicUsize,
-    bytes_allocated: AtomicUsize,
-    bytes_deallocated: AtomicUsize,
-    bytes_reallocated: AtomicUsize,
-}
+pub(crate) struct AllocationTracker {}
 
 thread_local! {
     static TRACKING_ENABLED: Cell<bool> = Cell::new(false);
+    static ALLOCATION_STATS: Cell<AllocationStats> = Cell::new(AllocationStats::default());
 }
 
 unsafe impl GlobalAlloc for &AllocationTracker {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         if TRACKING_ENABLED.get() {
-            self.allocations.fetch_add(1, Ordering::Relaxed);
-            self.bytes_allocated
-                .fetch_add(layout.size(), Ordering::Relaxed);
+            let mut stats = ALLOCATION_STATS.get();
+            stats.allocations += 1;
+            stats.bytes_allocated += layout.size();
+            ALLOCATION_STATS.set(stats);
         }
         unsafe { System.alloc(layout) }
     }
 
     unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
         if TRACKING_ENABLED.get() {
-            self.deallocations.fetch_add(1, Ordering::Relaxed);
-            self.bytes_deallocated
-                .fetch_add(layout.size(), Ordering::Relaxed);
+            let mut stats = ALLOCATION_STATS.get();
+            stats.deallocations += 1;
+            stats.bytes_deallocated += layout.size();
+            ALLOCATION_STATS.set(stats);
         }
         unsafe { System.dealloc(ptr, layout) }
     }
 
     unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
         if TRACKING_ENABLED.get() {
-            self.allocations.fetch_add(1, Ordering::Relaxed);
-            self.bytes_allocated
-                .fetch_add(layout.size(), Ordering::Relaxed);
+            let mut stats = ALLOCATION_STATS.get();
+            stats.allocations += 1;
+            stats.bytes_allocated += layout.size();
+            ALLOCATION_STATS.set(stats);
         }
         unsafe { System.alloc_zeroed(layout) }
     }
 
     unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
         if TRACKING_ENABLED.get() {
-            self.reallocations.fetch_add(1, Ordering::Relaxed);
+            let mut stats = ALLOCATION_STATS.get();
+            stats.reallocations += 1;
             if new_size > layout.size() {
-                self.bytes_allocated
-                    .fetch_add(new_size - layout.size(), Ordering::Relaxed);
+                stats.bytes_allocated += new_size - layout.size();
             } else {
-                self.bytes_deallocated
-                    .fetch_add(layout.size() - new_size, Ordering::Relaxed);
+                stats.bytes_deallocated += layout.size() - new_size;
             }
-            self.bytes_reallocated
-                .fetch_add(new_size - layout.size(), Ordering::Relaxed);
+            stats.bytes_reallocated += new_size - layout.size();
+            ALLOCATION_STATS.set(stats);
         }
 
         unsafe { System.realloc(ptr, layout, new_size) }
@@ -92,17 +81,6 @@ pub(crate) struct AllocationStats {
 }
 
 impl AllocationStats {
-    fn sub(&self, other: &AllocationStats) -> AllocationStats {
-        AllocationStats {
-            allocations: self.allocations - other.allocations,
-            deallocations: self.deallocations - other.deallocations,
-            reallocations: self.reallocations - other.reallocations,
-            bytes_allocated: self.bytes_allocated - other.bytes_allocated,
-            bytes_deallocated: self.bytes_deallocated - other.bytes_deallocated,
-            bytes_reallocated: self.bytes_reallocated - other.bytes_reallocated,
-        }
-    }
-
     fn approx_eq(
         &self,
         other: &AllocationStats,
@@ -123,37 +101,19 @@ impl AllocationStats {
     }
 }
 
-impl Into<AllocationStats> for &AllocationTracker {
-    fn into(self) -> AllocationStats {
-        AllocationStats {
-            allocations: self.allocations.load(Ordering::Relaxed),
-            deallocations: self.deallocations.load(Ordering::Relaxed),
-            reallocations: self.reallocations.load(Ordering::Relaxed),
-            bytes_allocated: self.bytes_allocated.load(Ordering::Relaxed),
-            bytes_deallocated: self.bytes_deallocated.load(Ordering::Relaxed),
-            bytes_reallocated: self.bytes_reallocated.load(Ordering::Relaxed),
-        }
-    }
-}
+pub(crate) struct AllocationSpan {}
 
-pub(crate) struct AllocationSpan<'a> {
-    allocator: &'a AllocationTracker,
-    initial_stats: AllocationStats,
-}
-
-impl<'a> AllocationSpan<'a> {
-    pub(crate) fn new(allocator: &'a AllocationTracker) -> Self {
+impl AllocationSpan {
+    pub(crate) fn new() -> Self {
+        assert!(!TRACKING_ENABLED.get(), "Cannot nest allocation spans");
         TRACKING_ENABLED.set(true);
-        Self {
-            allocator,
-            initial_stats: allocator.into(),
-        }
+        ALLOCATION_STATS.set(AllocationStats::default());
+        Self {}
     }
 
     pub(crate) fn end(self) -> AllocationStats {
         TRACKING_ENABLED.set(false);
-        let stats: AllocationStats = self.allocator.into();
-        stats.sub(&self.initial_stats)
+        ALLOCATION_STATS.get()
     }
 }
 
@@ -307,7 +267,7 @@ pub(crate) fn process_alloc_stats(
 
         assert!(
             alloc_stats.approx_eq(expected_stats, 0, 100),
-            "{alloc_stats:?} should be approximately equal to {expected_stats:?}"
+            "{alloc_stats:?}\n should be approximately equal to\n{expected_stats:?}"
         );
         return;
     }

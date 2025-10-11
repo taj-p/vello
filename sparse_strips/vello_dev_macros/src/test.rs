@@ -249,13 +249,13 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 };
                 use vello_cpu::{RenderContext, RenderMode};
                 use vello_common::pixmap::Pixmap;
-                use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, AllocationStats, process_alloc_stats, RunType, should_process_allocs, Backend};
+                use crate::alloc_tracker::{AllocationSpan, AllocationStats, process_alloc_stats, RunType, should_process_allocs, Backend};
                 let process_allocs = should_process_allocs();
 
                 let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level, #render_mode);
                 let f = |mut ctx: RenderContext| -> (RenderContext, Pixmap, AllocationStats) {
                     let mut pixmap = Pixmap::new(#width, #height);
-                    let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+                    let alloc_span = AllocationSpan::new();
                     {
                         #input_fn_name(&mut ctx);
                         ctx.flush();
@@ -264,7 +264,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                     (ctx, pixmap, alloc_span.end())
                 };
                 let (ctx, pixmap, alloc_stats) = f(ctx);
-                // Multithreaded allocations are not deterministic.
+                // Multithreaded allocations are not deterministic so cannot be tracked.
                 if process_allocs && #num_threads <= 1 {
                     process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, Backend::Cpu);
                 }
@@ -455,12 +455,12 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use crate::renderer::HybridRenderer;
             use vello_cpu::RenderMode;
             use vello_common::pixmap::Pixmap;
-            use crate::alloc_tracker::{ALLOCATION_TRACKER, AllocationSpan, process_alloc_stats, RunType, AllocationStats, should_process_allocs, Backend};
+            use crate::alloc_tracker::{AllocationSpan, process_alloc_stats, RunType, AllocationStats, should_process_allocs, Backend};
             let process_allocs = should_process_allocs();
 
             let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback", RenderMode::OptimizeSpeed);
             let f = |mut ctx: HybridRenderer| -> (HybridRenderer, AllocationStats) {
-                let alloc_span = AllocationSpan::new(&ALLOCATION_TRACKER);
+                let alloc_span = AllocationSpan::new();
                 {
                     #input_fn_name(&mut ctx);
                     ctx.flush();
