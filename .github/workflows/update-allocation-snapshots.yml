@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   update:
-    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/update-allocation-snapshots')
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -117,7 +117,7 @@ jobs:
   aggregate:
     needs: update
     runs-on: ubuntu-latest
-    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/update-allocation-snapshots')
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -199,7 +199,7 @@ jobs:
   notify:
     needs: aggregate
     runs-on: ubuntu-latest
-    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '/update-allocation-snapshots')
+    if: github.event.issue.pull_request != null && startsWith(github.event.comment.body, '@bot update-allocation-snapshots')
     steps:
       - name: Extract PR metadata
         id: pr
