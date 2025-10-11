@@ -250,7 +250,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                 use vello_cpu::{RenderContext, RenderMode};
                 use vello_common::pixmap::Pixmap;
                 use crate::alloc_tracker::{AllocationSpan, AllocationStats, process_alloc_stats, RunType, should_process_allocs, Backend};
-                let process_allocs = should_process_allocs();
+                let process_allocs = should_process_allocs(#num_threads);
 
                 let mut ctx = get_ctx::<RenderContext>(#width, #height, #transparent, #num_threads, #level, #render_mode);
                 let f = |mut ctx: RenderContext| -> (RenderContext, Pixmap, AllocationStats) {
@@ -264,14 +264,13 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
                     (ctx, pixmap, alloc_span.end())
                 };
                 let (ctx, pixmap, alloc_stats) = f(ctx);
-                // Multithreaded allocations are not deterministic so cannot be tracked.
-                if process_allocs && #num_threads <= 1 {
+                if process_allocs {
                     process_alloc_stats(RunType::Cold, alloc_stats, #input_fn_name_str, Backend::Cpu);
                 }
                 if !#no_ref {
                     check_ref(pixmap, #input_fn_name_str, #fn_name_str, #tolerance, #diff_pixels, #is_reference, #reference_image_name);
                 }
-                if process_allocs && #num_threads <= 1 {
+                if process_allocs {
                     let (_, pixmap, alloc_stats) = f(ctx);
                     process_alloc_stats(RunType::Warm, alloc_stats, #input_fn_name_str, Backend::Cpu);
                 }
@@ -456,7 +455,7 @@ pub(crate) fn vello_test_inner(attr: TokenStream, item: TokenStream) -> TokenStr
             use vello_cpu::RenderMode;
             use vello_common::pixmap::Pixmap;
             use crate::alloc_tracker::{AllocationSpan, process_alloc_stats, RunType, AllocationStats, should_process_allocs, Backend};
-            let process_allocs = should_process_allocs();
+            let process_allocs = should_process_allocs(1);
 
             let mut ctx = get_ctx::<HybridRenderer>(#width, #height, #transparent, 0, "fallback", RenderMode::OptimizeSpeed);
             let f = |mut ctx: HybridRenderer| -> (HybridRenderer, AllocationStats) {

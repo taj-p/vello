@@ -147,6 +147,7 @@ pub(crate) fn process_alloc_stats(
     // Do nothing on wasm32.
 }
 
+#[derive(Debug)]
 pub(crate) enum RunType {
     Cold,
     Warm,
@@ -158,7 +159,12 @@ pub(crate) fn should_process_allocs() -> bool {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub(crate) fn should_process_allocs() -> bool {
+pub(crate) fn should_process_allocs(num_threads: u16) -> bool {
+    // Running with more than one thread is not supported.
+    if num_threads > 1 {
+        return false;
+    }
+
     let save_allocs = std::env::var("SAVE_ALLOCS").map_or(false, |v| v == "1");
     let test_allocs = std::env::var("TEST_ALLOCS").map_or(false, |v| v == "1");
     if !save_allocs && !test_allocs {
@@ -187,7 +193,7 @@ pub(crate) fn should_process_allocs() -> bool {
     test_threads_ok |= std::env::var("RUST_TEST_THREADS").map_or(false, |v| v == "1");
     assert!(
         test_threads_ok,
-        "Saving allocation stats requires running with -- --test-threads=1",
+        "Saving/testing allocation stats requires running with -- --test-threads=1",
     );
     return true;
 }
@@ -219,10 +225,6 @@ pub(crate) fn process_alloc_stats(
     backend: Backend,
 ) {
     use std::io::Write;
-
-    if !should_process_allocs() {
-        return;
-    }
 
     let dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../vello_sparse_tests/snapshots");
@@ -267,7 +269,7 @@ pub(crate) fn process_alloc_stats(
 
         assert!(
             alloc_stats.approx_eq(expected_stats, 0, 100),
-            "{alloc_stats:?}\n should be approximately equal to\n{expected_stats:?}"
+            "{alloc_stats:?}\n should be approximately equal to\n{expected_stats:?}\nRunType: {run_type:?}"
         );
         return;
     }
