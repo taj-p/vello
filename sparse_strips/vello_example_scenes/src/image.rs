@@ -172,7 +172,7 @@ impl ExampleScene for ImageScene {
 impl ImageScene {
     /// Read the flower image
     pub fn read_flower_image() -> Pixmap {
-        let image_data = include_bytes!("../../../examples/assets/splash-flower.jpg");
+        let image_data = include_bytes!("../../../examples/assets/thumbnail.jpg");
         Self::read_image(image_data)
     }
 

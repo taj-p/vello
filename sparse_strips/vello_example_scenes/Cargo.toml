@@ -18,7 +18,7 @@ bytemuck = { workspace = true, features = [] }
 smallvec = { workspace = true }
 vello_hybrid = { workspace = true }
 vello_common = { workspace = true, features = ["pico_svg", "png"] }
-image = { workspace = true, features = ["jpeg"] }
+image = { workspace = true, features = ["jpeg", "png", "webp"] }
 vello_cpu = { workspace = true, optional = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
