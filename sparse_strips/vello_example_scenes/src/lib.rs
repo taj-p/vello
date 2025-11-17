@@ -5,6 +5,7 @@
 
 pub mod blend;
 pub mod clip;
+pub mod filter;
 pub mod gradient;
 pub mod image;
 pub mod path;
@@ -38,6 +39,12 @@ pub trait RenderingContext: Sized {
     fn set_fill_rule(&mut self, fill_rule: Fill);
     /// Set the current paint.
     fn set_paint(&mut self, paint: impl Into<PaintType>);
+    /// Set the current filter effect.
+    fn set_filter_effect(&mut self, filter: Filter);
+    /// Reset the current filter effect.
+    fn reset_filter_effect(&mut self);
+    /// Push a filter layer.
+    fn push_filter_layer(&mut self, filter: Filter);
     /// Set the current stroke style.
     fn set_stroke(&mut self, stroke: Stroke);
     /// Fill a path with the current paint.
@@ -87,6 +94,18 @@ impl RenderingContext for RenderContext {
 
     fn set_fill_rule(&mut self, fill_rule: Fill) {
         self.set_fill_rule(fill_rule);
+    }
+
+    fn set_filter_effect(&mut self, filter: Filter) {
+        self.set_filter_effect(filter);
+    }
+
+    fn reset_filter_effect(&mut self) {
+        self.reset_filter_effect();
+    }
+
+    fn push_filter_layer(&mut self, filter: Filter) {
+        self.push_filter_layer(filter);
     }
 
     fn set_stroke(&mut self, stroke: Stroke) {
@@ -146,6 +165,18 @@ impl RenderingContext for Scene {
 
     fn set_transform(&mut self, transform: Affine) {
         self.set_transform(transform);
+    }
+
+    fn set_filter_effect(&mut self, filter: Filter) {
+        self.set_filter_effect(filter);
+    }
+
+    fn reset_filter_effect(&mut self) {
+        self.reset_filter_effect();
+    }
+
+    fn push_filter_layer(&mut self, filter: Filter) {
+        self.push_filter_layer(filter);
     }
 
     fn set_paint(&mut self, paint: impl Into<PaintType>) {
@@ -291,6 +322,7 @@ pub fn get_example_scenes<T: RenderingContext + 'static>(
     scenes.push(AnyScene::new(text::TextScene::new("Hello, Vello!")));
     scenes.push(AnyScene::new(simple::SimpleScene::new()));
     scenes.push(AnyScene::new(clip::ClipScene::new()));
+    scenes.push(AnyScene::new(filter::FilterScene::new()));
     scenes.push(AnyScene::new(blend::BlendScene::new()));
     scenes.push(AnyScene::new(image::ImageScene::new(img_sources)));
     scenes.push(AnyScene::new(gradient::GradientExtendScene::new()));
@@ -315,6 +347,7 @@ pub fn get_example_scenes<T: RenderingContext + 'static>(
         AnyScene::new(svg::SvgScene::tiger()),
         AnyScene::new(text::TextScene::new("Hello, Vello!")),
         AnyScene::new(simple::SimpleScene::new()),
+        AnyScene::new(filter::FilterScene::new()),
         AnyScene::new(clip::ClipScene::new()),
         AnyScene::new(blend::BlendScene::new()),
         AnyScene::new(image::ImageScene::new(img_sources)),
