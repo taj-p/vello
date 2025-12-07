@@ -83,12 +83,14 @@ impl Scene {
     /// previous layers using the specified blend mode.
     ///
     /// Every drawing command after this call will be clipped by the shape
-    /// until the layer is popped.
+    /// until the layer is [popped](Self::pop_layer).
+    /// For layers which are only added for clipping, you should
+    /// use [`push_clip_layer`](Self::push_clip_layer) instead.
     ///
     /// **However, the transforms are *not* saved or modified by the layer stack.**
-    ///
-    /// Clip layers (`blend` = [`Mix::Clip`]) should have an alpha value of 1.0.
-    /// For an opacity group with non-unity alpha, specify [`Mix::Normal`].
+    /// That is, the `transform` argument to this function only applies a transform to the `clip` shape.
+    #[expect(deprecated, reason = "Provided by the user, need to handle correctly.")]
+    #[track_caller]
     pub fn push_layer(
         &mut self,
         blend: impl Into<BlendMode>,
@@ -98,7 +100,10 @@ impl Scene {
     ) {
         let blend = blend.into();
         if blend.mix == Mix::Clip && alpha != 1.0 {
-            log::warn!("Clip mix mode used with semitransparent alpha");
+            log::warn!(
+                "Clip mix mode used with semitransparent alpha.\
+                This is wrong, and you should be using `Mix::Normal` instead."
+            );
         }
         self.push_layer_inner(
             DrawBeginClip::new(blend, alpha.clamp(0.0, 1.0)),
@@ -108,15 +113,16 @@ impl Scene {
     }
 
     /// Pushes a new layer clipped by the specified shape and treated like a luminance
-    /// mask for previous layers.
+    /// mask for the current layer.
     ///
-    /// That is, content drawn between this and the next `pop_layer` call will serve
-    /// as a luminance mask
+    /// That is, content drawn between this and the matching `pop_layer` call will serve
+    /// as a luminance mask for the prior content in this layer.
     ///
     /// Every drawing command after this call will be clipped by the shape
-    /// until the layer is popped.
+    /// until the layer is [popped](Self::pop_layer).
     ///
     /// **However, the transforms are *not* saved or modified by the layer stack.**
+    /// That is, the `transform` argument to this function only applies a transform to the `clip` shape.
     ///
     /// # Transparency and premultiplication
     ///
@@ -135,6 +141,24 @@ impl Scene {
             transform,
             clip,
         );
+    }
+
+    /// Pushes a new layer clipped by the specified `clip` shape.
+    ///
+    /// The pushed layer is intended to not impact the "source" for blending; that is, any blends
+    /// within this layer will still include content from before this method was called in the "source"
+    /// of that blend operation.
+    /// Note that this is not currently implemented correctly -
+    /// see [#1198](https://github.com/linebender/vello/issues/1198).
+    /// As such, you should currently not include any blend layers until this layer is popped.
+    ///
+    /// Every drawing command after this call will be clipped by the shape
+    /// until the layer is [popped](Self::pop_layer).
+    ///
+    /// **However, the transforms are *not* saved or modified by the layer stack.**
+    /// That is, the `transform` argument to this function only applies a transform to the `clip` shape.
+    pub fn push_clip_layer(&mut self, transform: Affine, clip: &impl Shape) {
+        self.push_layer_inner(DrawBeginClip::clip(), transform, clip);
     }
 
     /// Helper for logic shared between [`Self::push_layer`] and [`Self::push_luminance_mask_layer`]
@@ -242,13 +266,12 @@ impl Scene {
         self.encoding.encode_transform(t);
         self.encoding.encode_fill_style(style);
         if self.encoding.encode_shape(shape, true) {
-            if let Some(brush_transform) = brush_transform {
-                if self
+            if let Some(brush_transform) = brush_transform
+                && self
                     .encoding
                     .encode_transform(Transform::from_kurbo(&(transform * brush_transform)))
-                {
-                    self.encoding.swap_last_path_tags();
-                }
+            {
+                self.encoding.swap_last_path_tags();
             }
             self.encoding.encode_brush(brush, 1.0);
             #[cfg(feature = "bump_estimate")]
@@ -322,13 +345,12 @@ impl Scene {
                     .encode_path_elements(dashed.into_iter(), false)
             };
             if encode_result {
-                if let Some(brush_transform) = brush_transform {
-                    if self
+                if let Some(brush_transform) = brush_transform
+                    && self
                         .encoding
                         .encode_transform(Transform::from_kurbo(&(transform * brush_transform)))
-                    {
-                        self.encoding.swap_last_path_tags();
-                    }
+                {
+                    self.encoding.swap_last_path_tags();
                 }
                 self.encoding.encode_brush(brush, 1.0);
             }
@@ -614,7 +636,7 @@ impl<'a> DrawGlyphs<'a> {
                                     [r, g, b, a]
                                 })
                                 .collect();
-                            ImageBrush::new(ImageData {
+                            ImageData {
                                 // TODO: The design of the Blob type forces the double boxing
                                 data: Blob::new(Arc::new(data)),
                                 // TODO: Use bgra8 to not transpose once it's supported.
@@ -623,7 +645,7 @@ impl<'a> DrawGlyphs<'a> {
                                 alpha_type: peniko::ImageAlphaType::Alpha,
                                 width: bitmap.width,
                                 height: bitmap.height,
-                            })
+                            }
                         }
                         bitmap::BitmapData::Png(data) => {
                             let mut decoder = png::Decoder::new(data);
@@ -646,14 +668,14 @@ impl<'a> DrawGlyphs<'a> {
                                 log::error!("Unexpected width and height");
                                 continue;
                             }
-                            ImageBrush::new(ImageData {
+                            ImageData {
                                 // TODO: The design of the Blob type forces the double boxing
                                 data: Blob::new(Arc::new(buf)),
                                 format: peniko::ImageFormat::Rgba8,
                                 alpha_type: peniko::ImageAlphaType::Alpha,
                                 width: bitmap.width,
                                 height: bitmap.height,
-                            })
+                            }
                         }
                         bitmap::BitmapData::Mask(mask) => {
                             // TODO: Is this code worth having?
@@ -678,20 +700,20 @@ impl<'a> DrawGlyphs<'a> {
                                 .flat_map(|alpha| [u8::MAX, u8::MAX, u8::MAX, alpha])
                                 .collect();
 
-                            ImageBrush::new(ImageData {
+                            ImageData {
                                 // TODO: The design of the Blob type forces the double boxing
                                 data: Blob::new(Arc::new(data)),
                                 format: peniko::ImageFormat::Rgba8,
                                 alpha_type: peniko::ImageAlphaType::Alpha,
                                 width: bitmap.width,
                                 height: bitmap.height,
-                            })
+                            }
                         }
                     };
-                    let image = image.multiply_alpha(self.brush_alpha);
+                    let image = ImageBrush::new(image).multiply_alpha(self.brush_alpha);
                     // Split into multiple statements because rustfmt breaks
                     let transform =
-                        run_transform.then_translate(Vec2::new(glyph.x.into(), glyph.y.into()));
+                        run_transform.pre_translate(Vec2::new(glyph.x.into(), glyph.y.into()));
 
                     // Logic copied from Skia without examination or careful understanding:
                     // https://github.com/google/skia/blob/61ac357e8e3338b90fb84983100d90768230797f/src/ports/SkTypeface_fontations.cpp#L664
@@ -872,7 +894,7 @@ impl ColorPainter for DrawColorGlyphs<'_> {
         };
         self.clip_depth += 1;
         self.scene
-            .push_layer(Mix::Clip, 1.0, self.last_transform().to_kurbo(), &path.0);
+            .push_clip_layer(self.last_transform().to_kurbo(), &path.0);
     }
 
     fn push_clip_box(&mut self, clip_box: skrifa::raw::types::BoundingBox<f32>) {
@@ -887,7 +909,7 @@ impl ColorPainter for DrawColorGlyphs<'_> {
         }
         self.clip_depth += 1;
         self.scene
-            .push_layer(Mix::Clip, 1.0, self.last_transform().to_kurbo(), &clip_box);
+            .push_clip_layer(self.last_transform().to_kurbo(), &clip_box);
     }
 
     fn pop_clip(&mut self) {

@@ -11,7 +11,7 @@ use alloc::vec::Vec;
 use fearless_simd::*;
 
 /// A strip.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Strip {
     /// The x coordinate of the strip, in user coordinates.
     pub x: u16,
@@ -44,7 +44,12 @@ impl Strip {
         }
     }
 
-    /// Returns the y coordinate of the strip, in strip units.
+    /// Return whether the strip is a sentinel strip.
+    pub fn is_sentinel(&self) -> bool {
+        self.x == u16::MAX
+    }
+
+    /// Return the y coordinate of the strip, in strip units.
     pub fn strip_y(&self) -> u16 {
         self.y / Tile::HEIGHT
     }
@@ -95,26 +100,8 @@ pub fn render(
     aliasing_threshold: Option<u8>,
     lines: &[Line],
 ) {
-    render_dispatch(
-        level,
-        tiles,
-        strip_buf,
-        alpha_buf,
-        fill_rule,
-        aliasing_threshold,
-        lines,
-    );
+    dispatch!(level, simd => render_impl(simd, tiles, strip_buf, alpha_buf, fill_rule, aliasing_threshold, lines));
 }
-
-simd_dispatch!(fn render_dispatch(
-    level,
-    tiles: &Tiles,
-    strip_buf: &mut Vec<Strip>,
-    alpha_buf: &mut Vec<u8>,
-    fill_rule: Fill,
-    aliasing_threshold: Option<u8>,
-    lines: &[Line],
-) = render_impl);
 
 fn render_impl<S: Simd>(
     s: S,
@@ -182,7 +169,7 @@ fn render_impl<S: Simd>(
                     for x in 0..Tile::WIDTH as usize {
                         let area = location_winding[x];
                         let coverage = area.abs();
-                        let mulled = p1.madd(coverage, p2);
+                        let mulled = coverage.madd(p2, p1);
                         // Note that we are not storing the location winding here but the actual
                         // alpha value as f32, so we reuse the variable as a temporary storage.
                         // Also note that we need the `min` here because the winding can be > 1
@@ -198,9 +185,9 @@ fn render_impl<S: Simd>(
                     #[expect(clippy::needless_range_loop, reason = "dimension clarity")]
                     for x in 0..Tile::WIDTH as usize {
                         let area = location_winding[x];
-                        let im1 = p1.madd(area, p1).floor();
-                        let coverage = area.madd(p2, im1).abs();
-                        let mulled = p1.madd(p3, coverage);
+                        let im1 = area.madd(p1, p1).floor();
+                        let coverage = p2.madd(im1, area).abs();
+                        let mulled = p3.madd(coverage, p1);
                         // TODO: It is possible that, unlike for `NonZero`, we don't need the `min`
                         // here.
                         location_winding[x] = mulled.min(p3);
@@ -232,8 +219,8 @@ fn render_impl<S: Simd>(
         // Push out the strip if we're moving to a next strip.
         if !prev_tile.same_loc(&tile) && !prev_tile.prev_loc(&tile) {
             debug_assert_eq!(
-                (prev_tile.x + 1) * Tile::WIDTH - strip.x,
-                ((alpha_buf.len() - strip.alpha_idx() as usize) / usize::from(Tile::HEIGHT)) as u16,
+                (prev_tile.x as u32 + 1) * Tile::WIDTH as u32 - strip.x as u32,
+                ((alpha_buf.len() - strip.alpha_idx() as usize) / usize::from(Tile::HEIGHT)) as u32,
                 "The number of columns written to the alpha buffer should equal the number of columns spanned by this strip."
             );
             strip_buf.push(strip);
@@ -359,9 +346,9 @@ fn render_impl<S: Simd>(
             let ymin = px_top_y.max(ymin);
             let ymax = px_bottom_y.min(ymax);
             let h = (ymax - ymin).max(0.0);
-            accumulated_winding = accumulated_winding.madd(sign, h);
+            accumulated_winding = h.madd(sign, accumulated_winding);
             for x_idx in 0..Tile::WIDTH {
-                location_winding[x_idx as usize] = location_winding[x_idx as usize].madd(sign, h);
+                location_winding[x_idx as usize] = h.madd(sign, location_winding[x_idx as usize]);
             }
 
             if line_right_x < 0. {
@@ -404,30 +391,29 @@ fn render_impl<S: Simd>(
             // situated. The resulting slope calculation for the edge the line is situated on
             // will be NaN, as `0 * inf` results in NaN. This is true for both the left and
             // right edge. In both cases, the call to `f32::max` will set this to `ymin`.
-            let line_px_left_y = line_top_y
-                .madd(px_left_x - line_top_x, y_slope)
+            let line_px_left_y = (px_left_x - line_top_x)
+                .madd(y_slope, line_top_y)
                 .max_precise(ymin)
                 .min_precise(ymax);
-            let line_px_right_y = line_top_y
-                .madd(px_right_x - line_top_x, y_slope)
+            let line_px_right_y = (px_right_x - line_top_x)
+                .madd(y_slope, line_top_y)
                 .max_precise(ymin)
                 .min_precise(ymax);
 
             // `x_slope` is always finite, as horizontal geometry is elided.
             let line_px_left_yx =
-                f32x4::splat(s, line_top_x).madd(line_px_left_y - line_top_y, x_slope);
+                (line_px_left_y - line_top_y).madd(x_slope, f32x4::splat(s, line_top_x));
             let line_px_right_yx =
-                f32x4::splat(s, line_top_x).madd(line_px_right_y - line_top_y, x_slope);
+                (line_px_right_y - line_top_y).madd(x_slope, f32x4::splat(s, line_top_x));
             let h = (line_px_right_y - line_px_left_y).abs();
 
             // The trapezoidal area enclosed between the line and the right edge of the pixel
             // square.
             let area = 0.5 * h * (2. * px_right_x - line_px_right_yx - line_px_left_yx);
-            location_winding[x_idx as usize] =
-                location_winding[x_idx as usize] + acc.madd(sign, area);
-            acc = acc.madd(sign, h);
+            location_winding[x_idx as usize] += area.madd(sign, acc);
+            acc = h.madd(sign, acc);
         }
 
-        accumulated_winding = accumulated_winding + acc;
+        accumulated_winding += acc;
     }
 }

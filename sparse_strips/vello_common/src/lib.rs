@@ -44,7 +44,7 @@
 // Targeting e.g. 32-bit means structs containing usize can give false positives for 64-bit.
 #![cfg_attr(target_pointer_width = "64", warn(clippy::trivially_copy_pass_by_ref))]
 // END LINEBENDER LINT SET
-#![cfg_attr(docsrs, feature(doc_auto_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![forbid(unsafe_code)]
 #![expect(
     clippy::cast_possible_truncation,
@@ -62,10 +62,12 @@ extern crate alloc;
 extern crate std;
 
 pub mod blurred_rounded_rect;
+pub mod clip;
 pub mod coarse;
 #[cfg(feature = "text")]
 pub mod colr;
 pub mod encode;
+pub mod filter_effects;
 pub mod flatten;
 pub(crate) mod flatten_simd;
 #[cfg(feature = "text")]
@@ -78,6 +80,7 @@ pub mod paint;
 pub mod pico_svg;
 pub mod pixmap;
 pub mod recording;
+pub mod render_graph;
 pub mod simd;
 pub mod strip;
 pub mod strip_generator;

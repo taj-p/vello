@@ -3,14 +3,10 @@
 
 use crate::peniko::{BlendMode, Compose, ImageQuality, Mix};
 use vello_common::encode::EncodedImage;
-use vello_common::fearless_simd::{Simd, SimdBase, f32x4, u8x32, u16x16, u16x32};
+use vello_common::fearless_simd::{Simd, SimdBase, f32x4, u8x32};
 use vello_common::math::FloatExt;
+use vello_common::util::Div255Ext;
 
-#[allow(
-    dead_code,
-    reason = "this is not used because the division by 255 is now done with SIMD, but\
-we still keep it around to document its properties."
-)]
 pub(crate) mod scalar {
     /// Perform an approximate division by 255.
     ///
@@ -79,39 +75,14 @@ impl<S: Simd> NormalizedMulExt for u8x32<S> {
     }
 }
 
-pub(crate) trait Div255Ext {
-    fn div_255(self) -> Self;
-}
-
-impl<S: Simd> Div255Ext for u16x32<S> {
-    #[inline(always)]
-    fn div_255(self) -> Self {
-        let p1 = Self::splat(self.simd, 255);
-        let p2 = self + p1;
-        p2.shr(8)
-    }
-}
-
-impl<S: Simd> Div255Ext for u16x16<S> {
-    #[inline(always)]
-    fn div_255(self) -> Self {
-        let p1 = Self::splat(self.simd, 255);
-        let p2 = self + p1;
-        p2.shr(8)
-    }
-}
-
-#[inline(always)]
-pub(crate) fn normalized_mul<S: Simd>(a: u8x32<S>, b: u8x32<S>) -> u16x32<S> {
-    (S::widen_u8x32(a.simd, a) * S::widen_u8x32(b.simd, b)).div_255()
-}
-
 pub(crate) trait BlendModeExt {
     fn is_default(&self) -> bool;
 }
 
 impl BlendModeExt for BlendMode {
     // peniko uses `Clip` instead of `Normal` as the default, hence this override.
+    // TODO: This default has changed, re-evaluate.
+    #[expect(deprecated, reason = "Provided by the user, need to handle correctly.")]
     fn is_default(&self) -> bool {
         matches!(self.mix, Mix::Normal | Mix::Clip) && self.compose == Compose::SrcOver
     }
@@ -128,7 +99,7 @@ impl EncodedImageExt for EncodedImage {
     }
 
     fn nearest_neighbor(&self) -> bool {
-        self.quality == ImageQuality::Low
+        self.sampler.quality == ImageQuality::Low
     }
 }
 

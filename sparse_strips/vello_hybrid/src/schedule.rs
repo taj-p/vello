@@ -182,7 +182,7 @@ use alloc::vec::Vec;
 use vello_common::coarse::MODE_HYBRID;
 use vello_common::peniko::{BlendMode, Compose, Mix};
 use vello_common::{
-    coarse::{Cmd, WideTile},
+    coarse::{Cmd, LayerKind, WideTile},
     encode::EncodedPaint,
     paint::{ImageSource, Paint},
     tile::Tile,
@@ -298,8 +298,8 @@ impl<'a> AnnotatedCmd<'a> {
     fn as_cmd<'b: 'a>(&'b self) -> Option<&'a Cmd> {
         match self {
             AnnotatedCmd::IdentityBorrowed(cmd) => Some(cmd),
-            AnnotatedCmd::PushBufWithTemporarySlot => Some(&Cmd::PushBuf),
-            AnnotatedCmd::PushBuf => Some(&Cmd::PushBuf),
+            AnnotatedCmd::PushBufWithTemporarySlot => Some(&Cmd::PushBuf(LayerKind::Regular(0))),
+            AnnotatedCmd::PushBuf => Some(&Cmd::PushBuf(LayerKind::Regular(0))),
             AnnotatedCmd::SrcOverNormalBlend => Some(&Cmd::Blend(BlendMode {
                 mix: Mix::Normal,
                 compose: Compose::SrcOver,
@@ -564,6 +564,10 @@ impl Scheduler {
     ///
     /// Returns `Some(command_idx)` if there is more work to be done. Returns `None` if the wide
     /// tile has been fully consumed.
+    #[expect(
+        deprecated,
+        reason = "Mix::Clip might be provided by the user, need to handle correctly."
+    )]
     fn do_tile<'a, R: RendererBackend>(
         &mut self,
         renderer: &mut R,
@@ -641,7 +645,8 @@ impl Scheduler {
                             .paint(payload, paint),
                     );
                 }
-                Cmd::PushBuf => {
+                Cmd::PushBuf(_layer_id) => {
+                    // TODO: Handle layer_id for filter effects when implemented.
                     // `wgpu` does not allow reading/writing from the same slot texture. This means
                     // that to represent the binary function `Blend(src_tile, dest_tile)` we need
                     // both slots being blended to be on the same texture. This is accomplished as
@@ -659,7 +664,7 @@ impl Scheduler {
                     {
                         let tos: &mut TileEl = state.stack.last_mut().unwrap();
                         if let TemporarySlot::Invalid(temp_slot) = tos.temporary_slot {
-                            let next_round = depth % 2 == 0;
+                            let next_round = depth.is_multiple_of(2);
                             let el_round = tos.round + usize::from(next_round);
                             let draw = self.draw_mut(el_round, temp_slot.get_texture());
                             draw.push(
@@ -718,7 +723,7 @@ impl Scheduler {
                 Cmd::PopBuf => {
                     let tos = state.stack.pop().unwrap();
                     let nos = state.stack.last_mut().unwrap();
-                    let next_round = depth % 2 == 0 && depth > 2;
+                    let next_round = depth.is_multiple_of(2) && depth > 2;
                     let round = nos.round.max(tos.round + usize::from(next_round));
                     nos.round = round;
                     // free slot after draw
@@ -745,7 +750,7 @@ impl Scheduler {
 
                     // Basically if we are writing onto the even texture, we need to go up a round
                     // to target it.
-                    let next_round = depth % 2 == 0 && depth > 2;
+                    let next_round = depth.is_multiple_of(2) && depth > 2;
                     let round = nos.round.max(tos.round + usize::from(next_round));
                     if let TemporarySlot::Valid(temp_slot) = nos.temporary_slot {
                         let draw = self.draw_mut(round, nos.dest_slot.get_texture());
@@ -785,7 +790,7 @@ impl Scheduler {
                     let tos = &state.stack[depth - 1];
                     let nos = &state.stack[depth - 2];
 
-                    let next_round = depth % 2 == 0 && depth > 2;
+                    let next_round = depth.is_multiple_of(2) && depth > 2;
                     let round = nos.round.max(tos.round + usize::from(next_round));
 
                     // If nos has a temporary slot, copy it to `dest_slot` first
@@ -838,7 +843,7 @@ impl Scheduler {
                     let tos = state.stack.last().unwrap();
                     let nos = &state.stack[state.stack.len() - 2];
 
-                    let next_round: bool = depth % 2 == 0 && depth > 2;
+                    let next_round: bool = depth.is_multiple_of(2) && depth > 2;
                     let round = nos.round.max(tos.round + usize::from(next_round));
 
                     if let TemporarySlot::Valid(temp_slot) = nos.temporary_slot {
@@ -1065,7 +1070,8 @@ fn prepare_cmds<'a>(cmds: &'a [Cmd]) -> Vec<AnnotatedCmd<'a>> {
     annotated_commands.push(AnnotatedCmd::PushBuf);
     for cmd in cmds {
         match cmd {
-            Cmd::PushBuf => {
+            Cmd::PushBuf(_layer_id) => {
+                // TODO: Handle layer_id for filter effects when implemented.
                 pointer_to_push_buf_stack.push(annotated_commands.len());
             }
             Cmd::PopBuf => {

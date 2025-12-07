@@ -18,13 +18,14 @@ use alloc::vec::Vec;
 use vello_common::blurred_rounded_rect::BlurredRoundedRectangle;
 use vello_common::encode::{EncodeExt, EncodedPaint};
 use vello_common::fearless_simd::Level;
+use vello_common::filter_effects::Filter;
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Stroke};
 use vello_common::mask::Mask;
 #[cfg(feature = "text")]
 use vello_common::paint::ImageSource;
 use vello_common::paint::{Paint, PaintType};
 use vello_common::peniko::color::palette::css::BLACK;
-use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
+use vello_common::peniko::{BlendMode, Fill};
 use vello_common::pixmap::Pixmap;
 use vello_common::recording::{PushLayerCommand, Recordable, Recorder, Recording, RenderCommand};
 use vello_common::strip::Strip;
@@ -36,19 +37,37 @@ use vello_common::{
     glyph::{GlyphRenderer, GlyphRunBuilder, GlyphType, PreparedGlyph},
 };
 
-/// A render context.
+/// A render context for CPU-based 2D graphics rendering.
+///
+/// This is the main entry point for drawing operations. It maintains the current
+/// rendering state (transforms, paint, stroke, etc.) and dispatches drawing commands
+/// to the underlying rasterization engine.
 #[derive(Debug)]
 pub struct RenderContext {
+    /// Width of the render target in pixels.
     pub(crate) width: u16,
+    /// Height of the render target in pixels.
     pub(crate) height: u16,
+    /// Current paint (color, gradient, or image) to be applied to drawn shapes.
     pub(crate) paint: PaintType,
+    /// Transform applied to the paint, independent of geometry transform.
     pub(crate) paint_transform: Affine,
+    /// The current mask in place.
+    pub(crate) mask: Option<Mask>,
+    /// Current stroke settings (width, join, cap style, etc.).
     pub(crate) stroke: Stroke,
+    /// Current transformation matrix applied to all geometry.
     pub(crate) transform: Affine,
+    /// Current fill rule (`NonZero` or `EvenOdd`) for filling paths.
     pub(crate) fill_rule: Fill,
+    /// Current blend mode for drawing operations.
+    pub(crate) blend_mode: BlendMode,
+    /// Temporary path buffer to avoid repeated allocations.
     pub(crate) temp_path: BezPath,
+    /// Optional threshold for aliasing.
     pub(crate) aliasing_threshold: Option<u8>,
     pub(crate) encoded_paints: Vec<EncodedPaint>,
+    pub(crate) filter: Option<Filter>,
     #[cfg_attr(
         not(feature = "text"),
         allow(dead_code, reason = "used when the `text` feature is enabled")
@@ -83,10 +102,11 @@ impl Default for RenderSettings {
         Self {
             level: Level::try_detect().unwrap_or(Level::fallback()),
             #[cfg(feature = "multithreading")]
-            num_threads: std::thread::available_parallelism()
+            num_threads: (std::thread::available_parallelism()
                 .unwrap()
                 .get()
-                .saturating_sub(1) as u16,
+                .saturating_sub(1) as u16)
+                .min(8),
             #[cfg(not(feature = "multithreading"))]
             num_threads: 0,
             render_mode: RenderMode::OptimizeSpeed,
@@ -139,13 +159,16 @@ impl RenderContext {
             dispatcher,
             transform,
             aliasing_threshold,
+            blend_mode: BlendMode::default(),
             paint,
             render_settings: settings,
+            mask: None,
             paint_transform,
             fill_rule,
             stroke,
             temp_path,
             encoded_paints,
+            filter: None,
             #[cfg(feature = "text")]
             glyph_caches: Some(Default::default()),
         }
@@ -170,39 +193,68 @@ impl RenderContext {
 
     /// Fill a path.
     pub fn fill_path(&mut self, path: &BezPath) {
-        let paint = self.encode_current_paint();
-        self.dispatcher.fill_path(
-            path,
-            self.fill_rule,
-            self.transform,
-            paint,
-            self.aliasing_threshold,
-        );
+        self.with_optional_filter(|ctx| {
+            let paint = ctx.encode_current_paint();
+            ctx.dispatcher.fill_path(
+                path,
+                ctx.fill_rule,
+                ctx.transform,
+                paint,
+                ctx.blend_mode,
+                ctx.aliasing_threshold,
+                ctx.mask.clone(),
+            );
+        });
     }
 
     /// Stroke a path.
     pub fn stroke_path(&mut self, path: &BezPath) {
-        let paint = self.encode_current_paint();
-        self.dispatcher.stroke_path(
-            path,
-            &self.stroke,
-            self.transform,
-            paint,
-            self.aliasing_threshold,
-        );
+        self.with_optional_filter(|ctx| {
+            let paint = ctx.encode_current_paint();
+            ctx.dispatcher.stroke_path(
+                path,
+                &ctx.stroke,
+                ctx.transform,
+                paint,
+                ctx.blend_mode,
+                ctx.aliasing_threshold,
+                ctx.mask.clone(),
+            );
+        });
     }
 
     /// Fill a rectangle.
     pub fn fill_rect(&mut self, rect: &Rect) {
-        self.rect_to_temp_path(rect);
-        let paint = self.encode_current_paint();
-        self.dispatcher.fill_path(
-            &self.temp_path,
-            self.fill_rule,
-            self.transform,
-            paint,
-            self.aliasing_threshold,
-        );
+        self.with_optional_filter(|ctx| {
+            ctx.rect_to_temp_path(rect);
+            let paint = ctx.encode_current_paint();
+            ctx.dispatcher.fill_path(
+                &ctx.temp_path,
+                ctx.fill_rule,
+                ctx.transform,
+                paint,
+                ctx.blend_mode,
+                ctx.aliasing_threshold,
+                ctx.mask.clone(),
+            );
+        });
+    }
+
+    /// Stroke a rectangle.
+    pub fn stroke_rect(&mut self, rect: &Rect) {
+        self.with_optional_filter(|ctx| {
+            ctx.rect_to_temp_path(rect);
+            let paint = ctx.encode_current_paint();
+            ctx.dispatcher.stroke_path(
+                &ctx.temp_path,
+                &ctx.stroke,
+                ctx.transform,
+                paint,
+                ctx.blend_mode,
+                ctx.aliasing_threshold,
+                ctx.mask.clone(),
+            );
+        });
     }
 
     fn rect_to_temp_path(&mut self, rect: &Rect) {
@@ -252,20 +304,9 @@ impl RenderContext {
             Fill::NonZero,
             self.transform,
             paint,
+            self.blend_mode,
             self.aliasing_threshold,
-        );
-    }
-
-    /// Stroke a rectangle.
-    pub fn stroke_rect(&mut self, rect: &Rect) {
-        self.rect_to_temp_path(rect);
-        let paint = self.encode_current_paint();
-        self.dispatcher.stroke_path(
-            &self.temp_path,
-            &self.stroke,
-            self.transform,
-            paint,
-            self.aliasing_threshold,
+            self.mask.clone(),
         );
     }
 
@@ -286,6 +327,7 @@ impl RenderContext {
         blend_mode: Option<BlendMode>,
         opacity: Option<f32>,
         mask: Option<Mask>,
+        filter: Option<Filter>,
     ) {
         let mask = mask.and_then(|m| {
             if m.width() != self.width || m.height() != self.height {
@@ -295,7 +337,7 @@ impl RenderContext {
             }
         });
 
-        let blend_mode = blend_mode.unwrap_or(BlendMode::new(Mix::Normal, Compose::SrcOver));
+        let blend_mode = blend_mode.unwrap_or_default();
         let opacity = opacity.unwrap_or(1.0);
 
         self.dispatcher.push_layer(
@@ -306,22 +348,41 @@ impl RenderContext {
             opacity,
             self.aliasing_threshold,
             mask,
+            filter,
         );
     }
 
     /// Push a new clip layer.
+    ///
+    /// See the explanation in the [clipping](https://github.com/linebender/vello/tree/main/sparse_strips/vello_cpu/examples)
+    /// example for how this method differs from `push_clip_path`.
     pub fn push_clip_layer(&mut self, path: &BezPath) {
-        self.push_layer(Some(path), None, None, None);
+        self.push_layer(Some(path), None, None, None, None);
     }
 
     /// Push a new blend layer.
     pub fn push_blend_layer(&mut self, blend_mode: BlendMode) {
-        self.push_layer(None, Some(blend_mode), None, None);
+        self.push_layer(None, Some(blend_mode), None, None, None);
     }
 
     /// Push a new opacity layer.
     pub fn push_opacity_layer(&mut self, opacity: f32) {
-        self.push_layer(None, None, Some(opacity), None);
+        self.push_layer(None, None, Some(opacity), None, None);
+    }
+
+    /// Push a new mask layer. The mask needs to have the same dimensions as the
+    /// render context. The mask will not be affected by the current transform
+    /// in place.
+    ///
+    /// See the explanation in the [masking](https://github.com/linebender/vello/tree/main/sparse_strips/masking/examples)
+    /// example for how this method differs from `set_mask`.
+    pub fn push_mask_layer(&mut self, mask: Mask) {
+        self.push_layer(None, None, None, Some(mask), None);
+    }
+
+    /// Push a filter layer that affects all subsequent drawing operations.
+    pub fn push_filter_layer(&mut self, filter: Filter) {
+        self.push_layer(None, None, None, None, Some(filter));
     }
 
     /// Set the aliasing threshold.
@@ -337,15 +398,6 @@ impl RenderContext {
     /// this functionality is simply provided for compatibility.
     pub fn set_aliasing_threshold(&mut self, aliasing_threshold: Option<u8>) {
         self.aliasing_threshold = aliasing_threshold;
-    }
-
-    /// Push a new mask layer.
-    ///
-    /// Note that the mask, if provided, needs to have the same size as the render context. Otherwise,
-    /// it will be ignored. In addition to that, the mask will not be affected by the current
-    /// transformation matrix in place.
-    pub fn push_mask_layer(&mut self, mask: Mask) {
-        self.push_layer(None, None, None, Some(mask));
     }
 
     /// Pop the last-pushed layer.
@@ -373,6 +425,16 @@ impl RenderContext {
         &self.paint
     }
 
+    /// Set the blend mode that should be used when drawing objects.
+    pub fn set_blend_mode(&mut self, blend_mode: BlendMode) {
+        self.blend_mode = blend_mode;
+    }
+
+    /// Get the currently active blend mode.
+    pub fn blend_mode(&self) -> BlendMode {
+        self.blend_mode
+    }
+
     /// Set the current paint transform.
     ///
     /// The paint transform is applied to the paint after the transform of the geometry the paint
@@ -397,6 +459,21 @@ impl RenderContext {
         self.fill_rule = fill_rule;
     }
 
+    /// Set the mask to use for path-painting operations. The mask needs to
+    /// have the same dimensions as the render context. The mask will not be
+    /// affected by the current transform in place.
+    ///
+    /// See the explanation in the [masking](https://github.com/linebender/vello/tree/main/sparse_strips/masking/examples)
+    /// example for how this method differs from `push_mask_layer`.
+    pub fn set_mask(&mut self, mask: Mask) {
+        self.mask = Some(mask);
+    }
+
+    /// Reset the mask that is used for path-painting operations.
+    pub fn reset_mask(&mut self) {
+        self.mask = None;
+    }
+
     /// Get the current fill rule.
     pub fn fill_rule(&self) -> &Fill {
         &self.fill_rule
@@ -417,14 +494,50 @@ impl RenderContext {
         self.transform = Affine::IDENTITY;
     }
 
+    /// Apply filter to the current paint (affects next drawn elements).
+    ///
+    /// This sets a filter that will be applied to the next drawn element.
+    /// To apply a filter to multiple elements, use `push_filter_layer` instead.
+    pub fn set_filter_effect(&mut self, filter: Filter) {
+        self.filter = Some(filter);
+    }
+
+    /// Reset the current filter effect.
+    pub fn reset_filter_effect(&mut self) {
+        self.filter = None;
+    }
+
     /// Reset the render context.
     pub fn reset(&mut self) {
         self.dispatcher.reset();
         self.encoded_paints.clear();
+        self.mask = None;
         self.reset_transform();
         self.reset_paint_transform();
         #[cfg(feature = "text")]
         self.glyph_caches.as_mut().unwrap().maintain();
+        self.blend_mode = BlendMode::default();
+    }
+
+    /// Push a new clip path to the clip stack.
+    ///
+    /// See the explanation in the [clipping](https://github.com/linebender/vello/tree/main/sparse_strips/vello_cpu/examples)
+    /// example for how this method differs from `push_clip_layer`.
+    pub fn push_clip_path(&mut self, path: &BezPath) {
+        self.dispatcher.push_clip_path(
+            path,
+            self.fill_rule,
+            self.transform,
+            self.aliasing_threshold,
+        );
+    }
+
+    /// Pop a clip path from the clip stack.
+    ///
+    /// Note that unlike `push_clip_layer`, it is permissible to have pending
+    /// pushed clip paths before finishing the rendering operation.
+    pub fn pop_clip_path(&mut self) {
+        self.dispatcher.pop_clip_path();
     }
 
     /// Flush any pending operations.
@@ -487,6 +600,20 @@ impl RenderContext {
     pub fn render_settings(&self) -> &RenderSettings {
         &self.render_settings
     }
+
+    /// Execute a drawing operation, optionally wrapping it in a filter layer.
+    fn with_optional_filter<F>(&mut self, mut f: F)
+    where
+        F: FnMut(&mut Self),
+    {
+        if let Some(filter) = self.filter.clone() {
+            self.push_filter_layer(filter);
+            f(self);
+            self.pop_layer();
+        } else {
+            f(self);
+        }
+    }
 }
 
 #[cfg(feature = "text")]
@@ -500,13 +627,17 @@ impl GlyphRenderer for RenderContext {
                     Fill::NonZero,
                     prepared_glyph.transform,
                     paint,
+                    self.blend_mode,
                     self.aliasing_threshold,
+                    self.mask.clone(),
                 );
             }
             GlyphType::Bitmap(glyph) => {
                 // We need to change the state of the render context
                 // to render the bitmap, but don't want to pollute the context,
                 // so simulate a `save` and `restore` operation.
+
+                use vello_common::peniko::ImageSampler;
                 let old_transform = self.transform;
                 let old_paint = self.paint.clone();
 
@@ -520,10 +651,13 @@ impl GlyphRenderer for RenderContext {
                 };
 
                 let image = vello_common::paint::Image {
-                    source: ImageSource::Pixmap(Arc::new(glyph.pixmap)),
-                    x_extend: crate::peniko::Extend::Pad,
-                    y_extend: crate::peniko::Extend::Pad,
-                    quality,
+                    image: ImageSource::Pixmap(Arc::new(glyph.pixmap)),
+                    sampler: ImageSampler {
+                        x_extend: crate::peniko::Extend::Pad,
+                        y_extend: crate::peniko::Extend::Pad,
+                        quality,
+                        alpha: 1.0,
+                    },
                 };
 
                 self.set_paint(image);
@@ -536,6 +670,8 @@ impl GlyphRenderer for RenderContext {
             }
             GlyphType::Colr(glyph) => {
                 // Same as for bitmap glyphs, save the state and restore it later on.
+
+                use vello_common::peniko::ImageSampler;
                 let old_transform = self.transform;
                 let old_paint = self.paint.clone();
                 let context_color = match old_paint {
@@ -567,12 +703,15 @@ impl GlyphRenderer for RenderContext {
                 };
 
                 let image = vello_common::paint::Image {
-                    source: ImageSource::Pixmap(Arc::new(glyph_pixmap)),
-                    x_extend: crate::peniko::Extend::Pad,
-                    y_extend: crate::peniko::Extend::Pad,
-                    // Since the pixmap will already have the correct size, no need to
-                    // use a different image quality here.
-                    quality: crate::peniko::ImageQuality::Low,
+                    image: ImageSource::Pixmap(Arc::new(glyph_pixmap)),
+                    sampler: ImageSampler {
+                        x_extend: crate::peniko::Extend::Pad,
+                        y_extend: crate::peniko::Extend::Pad,
+                        // Since the pixmap will already have the correct size, no need to
+                        // use a different image quality here.
+                        quality: crate::peniko::ImageQuality::Low,
+                        alpha: 1.0,
+                    },
                 };
 
                 self.set_paint(image);
@@ -595,7 +734,9 @@ impl GlyphRenderer for RenderContext {
                     &self.stroke,
                     prepared_glyph.transform,
                     paint,
+                    self.blend_mode,
                     self.aliasing_threshold,
+                    self.mask.clone(),
                 );
             }
             GlyphType::Bitmap(_) | GlyphType::Colr(_) => {
@@ -728,13 +869,26 @@ impl Recordable for RenderContext {
                 RenderCommand::SetStroke(stroke) => {
                     self.set_stroke(stroke.clone());
                 }
+                RenderCommand::SetFilterEffect(filter) => {
+                    self.set_filter_effect(filter.clone());
+                }
+                RenderCommand::ResetFilterEffect => {
+                    self.reset_filter_effect();
+                }
                 RenderCommand::PushLayer(PushLayerCommand {
                     clip_path,
                     blend_mode,
                     opacity,
                     mask,
+                    filter,
                 }) => {
-                    self.push_layer(clip_path.as_ref(), *blend_mode, *opacity, mask.clone());
+                    self.push_layer(
+                        clip_path.as_ref(),
+                        *blend_mode,
+                        *opacity,
+                        mask.clone(),
+                        filter.clone(),
+                    );
                 }
                 RenderCommand::PopLayer => {
                     self.pop_layer();
@@ -787,6 +941,7 @@ impl RenderContext {
                         self.transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -797,6 +952,7 @@ impl RenderContext {
                         self.transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -808,6 +964,7 @@ impl RenderContext {
                         self.transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -819,6 +976,7 @@ impl RenderContext {
                         self.transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -830,6 +988,7 @@ impl RenderContext {
                         *glyph_transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -841,6 +1000,7 @@ impl RenderContext {
                         *glyph_transform,
                         self.aliasing_threshold,
                         &mut strip_storage,
+                        None,
                     );
                     strip_start_indices.push(start_index);
                 }
@@ -892,7 +1052,7 @@ impl RenderContext {
         );
         let paint = self.encode_current_paint();
         self.dispatcher
-            .generate_wide_cmd(&adjusted_strips[start..end], paint);
+            .generate_wide_cmd(&adjusted_strips[start..end], paint, self.blend_mode);
     }
 
     /// Prepare cached strips for rendering by adjusting indices.

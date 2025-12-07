@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use crate::renderer::Renderer;
-use vello_common::color::palette::css::{BLUE, GREEN, PURPLE, RED, YELLOW};
+use vello_common::color::palette::css::{BLUE, GREEN, LIME, PURPLE, RED, YELLOW};
 use vello_common::kurbo::{Affine, Circle, Point, Rect, Shape};
 use vello_common::peniko::{BlendMode, Color, Compose, Mix};
 use vello_dev_macros::vello_test;
@@ -130,15 +130,10 @@ fn repeatedly_compose_to_bottom_layer(ctx: &mut impl Renderer) {
 
 #[vello_test(width = 100, height = 100, transparent)]
 fn complex_composed_layers(ctx: &mut impl Renderer) {
-    ctx.push_layer(
-        None,
-        Some(BlendMode {
-            mix: Mix::Normal,
-            compose: Compose::SrcOver,
-        }),
-        None,
-        None,
-    );
+    ctx.push_blend_layer(BlendMode {
+        mix: Mix::Normal,
+        compose: Compose::SrcOver,
+    });
 
     ctx.set_paint(Color::from_rgb8(240, 240, 240));
     ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
@@ -154,47 +149,32 @@ fn complex_composed_layers(ctx: &mut impl Renderer) {
     ctx.fill_path(&Circle::new(Point::new(70.0, 70.0), 25.0).to_path(0.1));
 
     // Layer 1: Simulate clip to center area using compositing
-    ctx.push_layer(None, None, None, None);
+    ctx.push_layer(None, None, None, None, None);
     {
         // Draw the "clip" shape first
         ctx.set_paint(Color::WHITE);
         ctx.fill_path(&Circle::new(Point::new(50.0, 50.0), 40.0).to_path(0.1));
 
         // Now use SrcIn to clip content to that shape
-        ctx.push_layer(
-            None,
-            Some(BlendMode::new(Mix::Normal, Compose::SrcIn)),
-            None,
-            None,
-        );
+        ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::SrcIn));
         {
             // Layer 2: Semi-transparent purple overlay
-            ctx.push_layer(None, None, Some(0.7), None);
+            ctx.push_layer(None, None, Some(0.7), None, None);
             ctx.set_paint(PURPLE);
             ctx.fill_rect(&Rect::new(0.0, 0.0, 100.0, 100.0));
             ctx.pop_layer();
 
             // Layer 3: XOR blend mode with smaller clip simulation
-            ctx.push_layer(None, None, None, None);
+            ctx.push_layer(None, None, None, None, None);
             {
                 // Draw the "clip" rectangle
                 ctx.set_paint(Color::WHITE);
                 ctx.fill_rect(&Rect::new(25.0, 25.0, 75.0, 75.0));
 
                 // Use SrcIn to clip the XOR content
-                ctx.push_layer(
-                    None,
-                    Some(BlendMode::new(Mix::Normal, Compose::SrcIn)),
-                    None,
-                    None,
-                );
+                ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::SrcIn));
                 {
-                    ctx.push_layer(
-                        None,
-                        Some(BlendMode::new(Mix::Normal, Compose::Xor)),
-                        None,
-                        None,
-                    );
+                    ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::Xor));
 
                     // Draw overlapping circles with XOR
                     ctx.set_paint(RED);
@@ -209,37 +189,22 @@ fn complex_composed_layers(ctx: &mut impl Renderer) {
             ctx.pop_layer();
 
             // Layer 4: Nested opacity with Plus blend
-            ctx.push_layer(None, None, Some(0.5), None);
-            ctx.push_layer(
-                None,
-                Some(BlendMode::new(Mix::Normal, Compose::Plus)),
-                None,
-                None,
-            );
+            ctx.push_layer(None, None, Some(0.5), None, None);
+            ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::Plus));
             {
                 ctx.set_paint(YELLOW);
                 ctx.fill_path(&Circle::new(Point::new(50.0, 60.0), 15.0).to_path(0.1));
 
                 // Layer 5: "Clip" simulation with SrcIn
-                ctx.push_layer(None, None, None, None);
+                ctx.push_layer(None, None, None, None, None);
                 {
                     ctx.set_paint(Color::WHITE);
                     ctx.fill_path(&Circle::new(Point::new(50.0, 50.0), 30.0).to_path(0.1));
 
                     // Use SrcIn twice (once for the clip, once for the original SrcIn)
-                    ctx.push_layer(
-                        None,
-                        Some(BlendMode::new(Mix::Normal, Compose::SrcIn)),
-                        None,
-                        None,
-                    );
+                    ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::SrcIn));
                     {
-                        ctx.push_layer(
-                            None,
-                            Some(BlendMode::new(Mix::Normal, Compose::SrcIn)),
-                            None,
-                            None,
-                        );
+                        ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::SrcIn));
                         {
                             ctx.set_paint(GREEN);
                             ctx.fill_rect(&Rect::new(35.0, 35.0, 65.0, 65.0));
@@ -254,12 +219,7 @@ fn complex_composed_layers(ctx: &mut impl Renderer) {
             ctx.pop_layer();
 
             // Layer 6: Final overlay with DestOut to create a hole
-            ctx.push_layer(
-                None,
-                Some(BlendMode::new(Mix::Normal, Compose::DestOut)),
-                None,
-                None,
-            );
+            ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::DestOut));
             ctx.set_paint(Color::BLACK);
             ctx.fill_path(&Circle::new(Point::new(50.0, 50.0), 10.0).to_path(0.1));
             ctx.pop_layer();
@@ -402,4 +362,84 @@ fn mix_compose_combined_test_matrix(ctx: &mut impl Renderer) {
             ctx.pop_layer();
         }
     }
+}
+
+fn compose_non_isolated(ctx: &mut impl Renderer, compose: Compose) {
+    // Just to isolate from the white background.
+    ctx.push_blend_layer(BlendMode::new(Mix::Normal, Compose::SrcOver));
+
+    let rect1 = Rect::new(10.5, 10.5, 70.5, 70.5);
+    ctx.set_paint(BLUE.with_alpha(0.5));
+    ctx.fill_rect(&rect1);
+    ctx.set_blend_mode(BlendMode::new(Mix::Normal, compose));
+    let rect2 = Rect::new(30.5, 30.5, 90.5, 90.5);
+    ctx.set_paint(LIME.with_alpha(0.5));
+    ctx.fill_rect(&rect2);
+
+    ctx.pop_layer();
+}
+
+#[vello_test]
+fn compose_non_isolated_src_over(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::SrcOver);
+}
+
+#[vello_test]
+fn compose_non_isolated_xor(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::Xor);
+}
+
+#[vello_test]
+fn compose_non_isolated_clear(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::Clear);
+}
+
+#[vello_test]
+fn compose_non_isolated_copy(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::Copy);
+}
+
+#[vello_test]
+fn compose_non_isolated_dest(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::Dest);
+}
+
+#[vello_test]
+fn compose_non_isolated_dest_over(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::DestOver);
+}
+
+#[vello_test]
+fn compose_non_isolated_src_in(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::SrcIn);
+}
+
+#[vello_test]
+fn compose_non_isolated_src_out(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::SrcOut);
+}
+
+#[vello_test]
+fn compose_non_isolated_dest_in(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::DestIn);
+}
+
+#[vello_test]
+fn compose_non_isolated_dest_out(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::DestOut);
+}
+
+#[vello_test]
+fn compose_non_isolated_src_atop(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::SrcAtop);
+}
+
+#[vello_test]
+fn compose_non_isolated_dest_atop(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::DestAtop);
+}
+
+#[vello_test]
+fn compose_non_isolated_plus(ctx: &mut impl Renderer) {
+    compose_non_isolated(ctx, Compose::Plus);
 }

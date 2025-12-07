@@ -1,7 +1,7 @@
 [package]
 name = "vello_common"
 # When updating, also update the version in the workspace dependency in the root Cargo.toml
-version = "0.0.1"
+version = "0.0.4"
 description = "Core data structures and utilities shared across the Vello rendering, including geometry processing and tiling logic."
 categories = ["rendering", "graphics"]
 keywords = ["2d", "vector-graphics"]
@@ -20,7 +20,7 @@ targets = []
 bytemuck = { workspace = true, features = [] }
 peniko = { workspace = true, features = ["bytemuck"] }
 fearless_simd = { workspace = true }
-hashbrown = { version = "0.15", optional = true }
+hashbrown = { version = "0.15" }
 png = { workspace = true, optional = true }
 roxmltree = { version = "0.20.0", optional = true }
 skrifa = { workspace = true, optional = true }
@@ -42,7 +42,7 @@ png = ["std", "dep:png"]
 # Enable multi-threaded rendering.
 multithreading = ["std"]
 # Add support for text rendering
-text = ["dep:skrifa", "dep:hashbrown"]
+text = ["dep:skrifa"]
 
 # Development only features
 
