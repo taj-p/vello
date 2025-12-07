@@ -92,23 +92,16 @@ impl ImageSource {
         let do_alpha_multiply = image.alpha_type != peniko::ImageAlphaType::AlphaPremultiplied;
 
         assert!(
-            brush.image.width <= u16::MAX as u32 && brush.image.height <= u16::MAX as u32,
+            image.width <= u16::MAX as u32 && image.height <= u16::MAX as u32,
             "The image is too big. Its width and height can be no larger than {} pixels.",
             u16::MAX,
         );
-        let width = brush.image.width.try_into().unwrap();
-        let height = brush.image.height.try_into().unwrap();
-        let ImageSampler {
-            x_extend,
-            y_extend,
-            quality,
-            alpha: global_alpha,
-        } = brush.sampler;
+        let width = image.width.try_into().unwrap();
+        let height = image.height.try_into().unwrap();
 
         // TODO: SIMD
         #[expect(clippy::cast_possible_truncation, reason = "This cannot overflow.")]
-        let pixels = brush
-            .image
+        let pixels = image
             .data
             .data()
             .chunks_exact(4)

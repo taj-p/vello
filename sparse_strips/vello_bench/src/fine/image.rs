@@ -145,7 +145,7 @@ mod transform {
 }
 
 fn get_colr_image(extend: peniko::Extend, quality: ImageQuality) -> Image {
-    let data = [0x00];
+    let data = include_bytes!("../../../../vello_tests/snapshots/big_colr.png");
 
     let pixmap = Pixmap::from_png(&data[..]).unwrap();
     Image {
@@ -160,7 +160,7 @@ fn get_colr_image(extend: peniko::Extend, quality: ImageQuality) -> Image {
 }
 
 fn get_small_image(extend: peniko::Extend, quality: ImageQuality) -> Image {
-    let data = [0x00];
+    let data = include_bytes!("../../../vello_sparse_tests/tests/assets/rgb_image_2x2.png");
 
     let pixmap = Pixmap::from_png(&data[..]).unwrap();
     Image {

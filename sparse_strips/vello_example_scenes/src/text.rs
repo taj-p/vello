@@ -277,17 +277,15 @@ fn render_glyph_run(
     let run = glyph_run.run();
     let font = run.font();
     let font_size = run.font_size();
-    // We haven't updated Parley to use the new Peniko version.
-    // It's not worth it to make this example work.
-    //let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
+    let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
 
-    //let style = glyph_run.style();
-    //ctx.set_paint(style.brush.color.into());
-    //ctx.glyph_run(font)
-    //    .font_size(font_size)
-    //    .normalized_coords(normalized_coords)
-    //    .hint(true)
-    //    .fill_glyphs(glyphs);
+    let style = glyph_run.style();
+    ctx.set_paint(style.brush.color);
+    ctx.glyph_run(font)
+        .font_size(font_size)
+        .normalized_coords(normalized_coords)
+        .hint(true)
+        .fill_glyphs(glyphs);
 }
 
 fn render_glyph_run_record(
@@ -312,13 +310,13 @@ fn render_glyph_run_record(
     let run = glyph_run.run();
     let font = run.font();
     let font_size = run.font_size();
-    //let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
+    let normalized_coords = bytemuck::cast_slice(run.normalized_coords());
 
     let style = glyph_run.style();
     ctx.set_paint(style.brush.color);
-    //ctx.glyph_run(font)
-    //    .font_size(font_size)
-    //    .normalized_coords(normalized_coords)
-    //    .hint(true)
-    //    .fill_glyphs(glyphs);
+    ctx.glyph_run(font)
+        .font_size(font_size)
+        .normalized_coords(normalized_coords)
+        .hint(true)
+        .fill_glyphs(glyphs);
 }
