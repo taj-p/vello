@@ -662,31 +662,32 @@ impl<const MODE: u8> Wide<MODE> {
             // Update render graph node with final bounding box
             if let Some(node_id) = self.filter_node_stack.pop() {
                 // Get the transform from the FilterLayer node and scale the expansion by it
-                if let Some(node) = render_graph.nodes.get_mut(node_id)
-                    && let RenderNodeKind::FilterLayer {
+                if let Some(node) = render_graph.nodes.get_mut(node_id) {
+                    if let RenderNodeKind::FilterLayer {
                         wtile_bbox,
                         transform,
                         ..
                     } = &mut node.kind
-                {
-                    // Calculate expansion in user space, then scale by transform to get pixel-space expansion
-                    // This ensures scaled filters (e.g., zoomed drop shadows) have correct bounds
-                    let expansion = filter.bounds_expansion();
-                    let (scale_x, scale_y) = extract_scales(transform);
-                    let expanded_bbox = layer.wtile_bbox.expand_by_pixels(
-                        (expansion.left as f32 * scale_x).ceil() as u16,
-                        (expansion.top as f32 * scale_y).ceil() as u16,
-                        (expansion.right as f32 * scale_x).ceil() as u16,
-                        (expansion.bottom as f32 * scale_y).ceil() as u16,
-                        self.width_tiles(),
-                        self.height_tiles(),
-                    );
-                    let clip_bbox = self.get_bbox();
-                    let final_bbox = expanded_bbox.intersect(clip_bbox);
+                    {
+                        // Calculate expansion in user space, then scale by transform to get pixel-space expansion
+                        // This ensures scaled filters (e.g., zoomed drop shadows) have correct bounds
+                        let expansion = filter.bounds_expansion();
+                        let (scale_x, scale_y) = extract_scales(transform);
+                        let expanded_bbox = layer.wtile_bbox.expand_by_pixels(
+                            (expansion.left as f32 * scale_x).ceil() as u16,
+                            (expansion.top as f32 * scale_y).ceil() as u16,
+                            (expansion.right as f32 * scale_x).ceil() as u16,
+                            (expansion.bottom as f32 * scale_y).ceil() as u16,
+                            self.width_tiles(),
+                            self.height_tiles(),
+                        );
+                        let clip_bbox = self.get_bbox();
+                        let final_bbox = expanded_bbox.intersect(clip_bbox);
 
-                    // Update both the local layer and the render graph node
-                    layer.wtile_bbox = final_bbox;
-                    *wtile_bbox = final_bbox;
+                        // Update both the local layer and the render graph node
+                        layer.wtile_bbox = final_bbox;
+                        *wtile_bbox = final_bbox;
+                    }
                 }
                 // Record this node in execution order (children before parents)
                 render_graph.record_node_for_execution(node_id);
