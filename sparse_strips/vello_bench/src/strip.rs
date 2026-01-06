@@ -29,7 +29,8 @@ pub fn render_strips(c: &mut Criterion) {
                         &mut strip_buf,
                         &mut alpha_buf,
                         Fill::NonZero,
-                        None,
+                        None, // aliasing_threshold
+                        None, // paint_luminance (no gamma correction)
                         &lines,
                     );
                     std::hint::black_box((&strip_buf, &alpha_buf));

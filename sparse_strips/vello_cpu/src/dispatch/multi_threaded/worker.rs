@@ -62,6 +62,7 @@ impl Worker {
                     paint,
                     fill_rule,
                     aliasing_threshold,
+                    paint_luminance,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
                     let path = &render_task.allocation_group.path
@@ -72,6 +73,7 @@ impl Worker {
                         fill_rule,
                         transform,
                         aliasing_threshold,
+                        paint_luminance,
                         &mut self.strip_storage,
                     );
                     let end = self.strip_storage.strips.len() as u32;
@@ -93,6 +95,7 @@ impl Worker {
                     paint,
                     stroke,
                     aliasing_threshold,
+                    paint_luminance,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
                     let path = &render_task.allocation_group.path
@@ -103,6 +106,7 @@ impl Worker {
                         &stroke,
                         transform,
                         aliasing_threshold,
+                        paint_luminance,
                         &mut self.strip_storage,
                     );
                     let end = self.strip_storage.strips.len() as u32;
@@ -136,6 +140,7 @@ impl Worker {
                             fill_rule,
                             transform,
                             aliasing_threshold,
+                            None, // Clip paths don't need gamma correction
                             &mut self.strip_storage,
                         );
 

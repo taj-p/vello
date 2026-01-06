@@ -78,12 +78,17 @@ impl StripGenerator {
     }
 
     /// Generate the strips for a filled path.
+    ///
+    /// If `paint_luminance` is `Some(luminance)`, alpha values will be gamma-corrected
+    /// based on the paint luminance (0-255) to compensate for sRGB blending.
+    /// This should be enabled for text/glyph rendering.
     pub fn generate_filled_path(
         &mut self,
         path: impl IntoIterator<Item = PathEl>,
         fill_rule: Fill,
         transform: Affine,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         strip_storage: &mut StripStorage,
     ) {
         flatten::fill(
@@ -93,16 +98,21 @@ impl StripGenerator {
             &mut self.line_buf,
             &mut self.flatten_ctx,
         );
-        self.make_strips(strip_storage, fill_rule, aliasing_threshold);
+        self.make_strips(strip_storage, fill_rule, aliasing_threshold, paint_luminance);
     }
 
     /// Generate the strips for a stroked path.
+    ///
+    /// If `paint_luminance` is `Some(luminance)`, alpha values will be gamma-corrected
+    /// based on the paint luminance (0-255) to compensate for sRGB blending.
+    /// This should be enabled for text/glyph rendering.
     pub fn generate_stroked_path(
         &mut self,
         path: impl IntoIterator<Item = PathEl>,
         stroke: &Stroke,
         transform: Affine,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         strip_storage: &mut StripStorage,
     ) {
         flatten::stroke(
@@ -114,7 +124,7 @@ impl StripGenerator {
             &mut self.flatten_ctx,
             &mut self.stroke_ctx,
         );
-        self.make_strips(strip_storage, Fill::NonZero, aliasing_threshold);
+        self.make_strips(strip_storage, Fill::NonZero, aliasing_threshold, paint_luminance);
     }
 
     /// Reset the strip generator.
@@ -128,6 +138,7 @@ impl StripGenerator {
         strip_storage: &mut StripStorage,
         fill_rule: Fill,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         self.tiles
             .make_tiles(&self.line_buf, self.width, self.height);
@@ -144,6 +155,7 @@ impl StripGenerator {
             &mut strip_storage.alphas,
             fill_rule,
             aliasing_threshold,
+            paint_luminance,
             &self.line_buf,
         );
     }
@@ -167,6 +179,7 @@ mod tests {
             Fill::NonZero,
             Affine::IDENTITY,
             None,
+            None, // No gamma correction for regular path rendering
             &mut storage,
         );
 

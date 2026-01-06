@@ -81,7 +81,8 @@ fn main() {
             &mut strip_buf,
             &mut alpha_buf,
             args.fill_rule,
-            None,
+            None, // aliasing_threshold
+            None, // paint_luminance (no gamma correction)
             &line_buf,
         );
     }

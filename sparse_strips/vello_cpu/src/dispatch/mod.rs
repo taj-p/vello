@@ -26,6 +26,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     );
     fn stroke_path(
         &mut self,
@@ -34,6 +35,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     );
     fn push_layer(
         &mut self,

@@ -130,7 +130,8 @@ impl GlyphRenderer for GlyphBenchRenderer {
                     outline_glyph.path,
                     Fill::NonZero,
                     glyph.transform,
-                    Some(128),
+                    Some(128), // aliasing_threshold
+                    Some(0),   // paint_luminance (black text)
                     &mut self.strip_storage,
                 );
             }

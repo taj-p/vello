@@ -178,3 +178,22 @@ impl PremulColor {
 
 /// A kind of paint that can be used for filling and stroking shapes.
 pub type PaintType = peniko::Brush<Image, Gradient>;
+
+/// Compute the luminance of a paint for gamma correction.
+///
+/// Returns a value from 0 (black) to 255 (white) representing the paint's
+/// relative luminance. For solid colors, this uses the standard ITU-R BT.709 formula.
+/// For gradients and images, defaults to black (0) which is the most common text color.
+pub fn compute_paint_luminance(paint: &PaintType) -> u8 {
+    match paint {
+        PaintType::Solid(color) => {
+            // Standard relative luminance formula (ITU-R BT.709)
+            // L = 0.2126 * R + 0.7152 * G + 0.0722 * B
+            let [r, g, b, _] = color.components;
+            let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            (luminance.clamp(0.0, 1.0) * 255.0) as u8
+        }
+        // For non-solid paints, default to black (most common for text)
+        _ => 0,
+    }
+}

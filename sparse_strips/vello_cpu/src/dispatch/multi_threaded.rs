@@ -387,6 +387,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let start = self.allocation_group.path.len() as u32;
         self.allocation_group.path.extend(path);
@@ -397,6 +398,7 @@ impl Dispatcher for MultiThreadedDispatcher {
             paint,
             fill_rule,
             aliasing_threshold,
+            paint_luminance,
         });
     }
 
@@ -407,6 +409,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let start = self.allocation_group.path.len() as u32;
         self.allocation_group.path.extend(path);
@@ -417,6 +420,7 @@ impl Dispatcher for MultiThreadedDispatcher {
             paint,
             stroke: stroke.clone(),
             aliasing_threshold,
+            paint_luminance,
         });
     }
 
@@ -652,6 +656,7 @@ pub(crate) enum RenderTaskType {
         paint: Paint,
         fill_rule: Fill,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     },
     WideCommand {
         strip_buf: Box<[Strip]>,
@@ -664,6 +669,7 @@ pub(crate) enum RenderTaskType {
         paint: Paint,
         stroke: Stroke,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     },
     PushLayer {
         clip_path: Option<(Range<u32>, Affine)>,
@@ -766,7 +772,8 @@ mod tests {
                 Fill::NonZero,
                 Affine::IDENTITY,
                 Paint::Solid(PremulColor::from_alpha_color(BLUE)),
-                None,
+                None, // aliasing_threshold
+                None, // paint_luminance
             );
             dispatcher.flush();
         }

@@ -22,7 +22,7 @@ use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Stroke};
 use vello_common::mask::Mask;
 #[cfg(feature = "text")]
 use vello_common::paint::ImageSource;
-use vello_common::paint::{Paint, PaintType};
+use vello_common::paint::{Paint, PaintType, compute_paint_luminance};
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
 use vello_common::pixmap::Pixmap;
@@ -178,6 +178,7 @@ impl RenderContext {
             self.transform,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -190,6 +191,7 @@ impl RenderContext {
             self.transform,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -203,6 +205,7 @@ impl RenderContext {
             self.transform,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -254,6 +257,7 @@ impl RenderContext {
             self.transform,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -267,6 +271,7 @@ impl RenderContext {
             self.transform,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -488,6 +493,7 @@ impl RenderContext {
     pub fn render_settings(&self) -> &RenderSettings {
         &self.render_settings
     }
+
 }
 
 #[cfg(feature = "text")]
@@ -496,12 +502,14 @@ impl GlyphRenderer for RenderContext {
         match prepared_glyph.glyph_type {
             GlyphType::Outline(glyph) => {
                 let paint = self.encode_current_paint();
+                let luminance = compute_paint_luminance(&self.paint);
                 self.dispatcher.fill_path(
                     glyph.path,
                     Fill::NonZero,
                     prepared_glyph.transform,
                     paint,
                     self.aliasing_threshold,
+                    Some(luminance),
                 );
             }
             GlyphType::Bitmap(glyph) => {
@@ -601,12 +609,14 @@ impl GlyphRenderer for RenderContext {
         match prepared_glyph.glyph_type {
             GlyphType::Outline(glyph) => {
                 let paint = self.encode_current_paint();
+                let luminance = compute_paint_luminance(&self.paint);
                 self.dispatcher.stroke_path(
                     glyph.path,
                     &self.stroke,
                     prepared_glyph.transform,
                     paint,
                     self.aliasing_threshold,
+                    Some(luminance),
                 );
             }
             GlyphType::Bitmap(_) | GlyphType::Colr(_) => {
@@ -797,6 +807,7 @@ impl RenderContext {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);
@@ -807,6 +818,7 @@ impl RenderContext {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);
@@ -818,6 +830,7 @@ impl RenderContext {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);
@@ -829,6 +842,7 @@ impl RenderContext {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);
@@ -840,6 +854,7 @@ impl RenderContext {
                         self.fill_rule,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);
@@ -851,6 +866,7 @@ impl RenderContext {
                         &self.stroke,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                     );
                     strip_start_indices.push(start_index);

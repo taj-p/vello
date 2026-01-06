@@ -97,6 +97,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let wide = &mut self.wide;
 
@@ -105,6 +106,7 @@ impl Dispatcher for SingleThreadedDispatcher {
             fill_rule,
             transform,
             aliasing_threshold,
+            paint_luminance,
             &mut self.strip_storage,
         );
 
@@ -118,6 +120,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let wide = &mut self.wide;
 
@@ -126,6 +129,7 @@ impl Dispatcher for SingleThreadedDispatcher {
             stroke,
             transform,
             aliasing_threshold,
+            paint_luminance,
             &mut self.strip_storage,
         );
 
@@ -148,6 +152,7 @@ impl Dispatcher for SingleThreadedDispatcher {
                 fill_rule,
                 clip_transform,
                 aliasing_threshold,
+                None, // Clip paths don't need gamma correction
                 &mut self.strip_storage,
             );
 
@@ -213,7 +218,8 @@ mod tests {
             Fill::NonZero,
             Affine::IDENTITY,
             Paint::Solid(PremulColor::from_alpha_color(BLUE)),
-            None,
+            None, // aliasing_threshold
+            None, // paint_luminance
         );
 
         // Ensure there is data to clear.

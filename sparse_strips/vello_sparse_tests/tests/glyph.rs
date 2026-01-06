@@ -9,10 +9,10 @@ use crate::util::layout_glyphs_apple_color_emoji;
 use crate::util::{layout_glyphs_noto_cbtf, layout_glyphs_noto_colr, layout_glyphs_roboto};
 use std::iter;
 use std::sync::Arc;
-use vello_common::color::palette::css::{BLACK, BLUE, GREEN, REBECCA_PURPLE};
+use vello_common::color::palette::css::{BLACK, BLUE, GREEN, REBECCA_PURPLE, WHITE};
 use vello_common::glyph::Glyph;
-use vello_common::kurbo::Affine;
-use vello_common::peniko::{Blob, FontData};
+use vello_common::kurbo::{Affine, Rect};
+use vello_common::peniko::{Blob, Color, FontData};
 use vello_dev_macros::vello_test;
 
 #[vello_test(width = 300, height = 70)]
@@ -243,6 +243,86 @@ fn glyphs_small_unhinted(ctx: &mut impl Renderer) {
         .fill_glyphs(glyphs.into_iter());
 }
 
+#[vello_test(width = 85, height = 50)]
+fn glyphs_small(ctx: &mut impl Renderer) {
+    let font_size: f32 = 6.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(BLACK);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(true)
+        .fill_glyphs(glyphs.into_iter());
+}
+
+#[vello_test(width = 85, height = 50)]
+fn glyphs_small_unhinted(ctx: &mut impl Renderer) {
+    let font_size: f32 = 6.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(BLACK);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(false)
+        .fill_glyphs(glyphs.into_iter());
+}
+
+#[vello_test(width = 60, height = 35)]
+fn glyphs_very_small(ctx: &mut impl Renderer) {
+    let font_size: f32 = 4.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(BLACK);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(true)
+        .fill_glyphs(glyphs.into_iter());
+}
+
+#[vello_test(width = 60, height = 35)]
+fn glyphs_very_small_unhinted(ctx: &mut impl Renderer) {
+    let font_size: f32 = 4.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(BLACK);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(false)
+        .fill_glyphs(glyphs.into_iter());
+}
+
+// Tests for white text on black background demonstrate gamma correction for light-on-dark text
+
+#[vello_test(width = 60, height = 35)]
+fn glyphs_very_small_white_on_black(ctx: &mut impl Renderer) {
+    ctx.set_paint(BLACK);
+    ctx.fill_rect(&Rect::new(0.0, 0.0, 60.0, 35.0));
+
+    let font_size: f32 = 4.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(WHITE);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(true)
+        .fill_glyphs(glyphs.into_iter());
+}
+
+#[vello_test(width = 60, height = 35)]
+fn glyphs_very_small_white_on_black_unhinted(ctx: &mut impl Renderer) {
+    ctx.set_paint(BLACK);
+    ctx.fill_rect(&Rect::new(0.0, 0.0, 60.0, 35.0));
+
+    let font_size: f32 = 4.0;
+    let (font, glyphs) = layout_glyphs_roboto(LOREM_IPSUM, font_size);
+    ctx.set_transform(Affine::translate((0., f64::from(font_size))));
+    ctx.set_paint(WHITE);
+    ctx.glyph_run(&font)
+        .font_size(font_size)
+        .hint(false)
+        .fill_glyphs(glyphs.into_iter());
+}
+
 #[vello_test(width = 250, height = 70, skip_hybrid)]
 fn glyphs_bitmap_noto(ctx: &mut impl Renderer) {
     let font_size: f32 = 50_f32;
@@ -342,3 +422,10 @@ fn glyphs_colr_test_glyphs(ctx: &mut impl Renderer) {
         }
     }
 }
+
+const LOREM_IPSUM: &str = "Lorem ipsum dolor sit amet,\n\
+     consectetur adipiscing elit.\n\
+     Sed do eiusmod tempor incididunt\n\
+     ut labore et dolore magna aliqua.\n\
+     Ut enim ad minim veniam, quis\n\
+     nostrud exercitation ullamco.";
