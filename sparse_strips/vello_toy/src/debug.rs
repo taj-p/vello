@@ -83,6 +83,7 @@ fn main() {
             &mut alpha_buf,
             args.fill_rule,
             None,
+            None,
             &line_buf,
         );
     }

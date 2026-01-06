@@ -23,7 +23,7 @@ use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Stroke};
 use vello_common::mask::Mask;
 #[cfg(feature = "text")]
 use vello_common::paint::ImageSource;
-use vello_common::paint::{Paint, PaintType};
+use vello_common::paint::{Paint, PaintType, compute_paint_luminance};
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Fill};
 use vello_common::pixmap::Pixmap;
@@ -76,6 +76,9 @@ pub struct RenderContext {
     dispatcher: Box<dyn Dispatcher>,
     #[cfg(feature = "text")]
     pub(crate) glyph_caches: Option<vello_common::glyph::GlyphCaches>,
+    /// Cached paint luminance for the current glyph run.
+    #[cfg(feature = "text")]
+    glyph_run_luminance: Option<u8>,
 }
 
 /// Settings to apply to the render context.
@@ -171,6 +174,8 @@ impl RenderContext {
             filter: None,
             #[cfg(feature = "text")]
             glyph_caches: Some(Default::default()),
+            #[cfg(feature = "text")]
+            glyph_run_luminance: None,
         }
     }
 
@@ -202,6 +207,7 @@ impl RenderContext {
                 paint,
                 ctx.blend_mode,
                 ctx.aliasing_threshold,
+                None,
                 ctx.mask.clone(),
                 &ctx.encoded_paints,
             );
@@ -219,6 +225,7 @@ impl RenderContext {
                 paint,
                 ctx.blend_mode,
                 ctx.aliasing_threshold,
+                None,
                 ctx.mask.clone(),
                 &ctx.encoded_paints,
             );
@@ -237,6 +244,7 @@ impl RenderContext {
                 paint,
                 ctx.blend_mode,
                 ctx.aliasing_threshold,
+                None,
                 ctx.mask.clone(),
                 &ctx.encoded_paints,
             );
@@ -255,6 +263,7 @@ impl RenderContext {
                 paint,
                 ctx.blend_mode,
                 ctx.aliasing_threshold,
+                None,
                 ctx.mask.clone(),
                 &ctx.encoded_paints,
             );
@@ -310,6 +319,7 @@ impl RenderContext {
             paint,
             self.blend_mode,
             self.aliasing_threshold,
+            None,
             self.mask.clone(),
             &self.encoded_paints,
         );
@@ -318,6 +328,7 @@ impl RenderContext {
     /// Creates a builder for drawing a run of glyphs that have the same attributes.
     #[cfg(feature = "text")]
     pub fn glyph_run(&mut self, font: &crate::peniko::FontData) -> GlyphRunBuilder<'_, Self> {
+        self.glyph_run_luminance = Some(compute_paint_luminance(&self.paint));
         GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
@@ -634,6 +645,7 @@ impl GlyphRenderer for RenderContext {
                     paint,
                     self.blend_mode,
                     self.aliasing_threshold,
+                    self.glyph_run_luminance,
                     self.mask.clone(),
                     &self.encoded_paints,
                 );
@@ -742,6 +754,7 @@ impl GlyphRenderer for RenderContext {
                     paint,
                     self.blend_mode,
                     self.aliasing_threshold,
+                    self.glyph_run_luminance,
                     self.mask.clone(),
                     &self.encoded_paints,
                 );
@@ -947,6 +960,7 @@ impl RenderContext {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -958,6 +972,7 @@ impl RenderContext {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -970,6 +985,7 @@ impl RenderContext {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -982,6 +998,7 @@ impl RenderContext {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -994,6 +1011,7 @@ impl RenderContext {
                         self.fill_rule,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                         None,
                     );
@@ -1006,6 +1024,7 @@ impl RenderContext {
                         &self.stroke,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                         None,
                     );

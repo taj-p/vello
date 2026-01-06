@@ -13,6 +13,7 @@ use vello_common::strip_generator::{GenerationMode, StripGenerator, StripStorage
 pub(crate) struct Worker {
     strip_generator: StripGenerator,
     strip_storage: StripStorage,
+    gamma_corrector: vello_common::strip::GammaCorrector,
     thread_id: u8,
 }
 
@@ -20,10 +21,12 @@ impl Worker {
     pub(crate) fn new(width: u16, height: u16, thread_id: u8, level: Level) -> Self {
         let strip_generator = StripGenerator::new(width, height, level);
         let strip_storage = StripStorage::default();
+        let gamma_corrector = vello_common::strip::GammaCorrector::new(0);
 
         Self {
             strip_generator,
             strip_storage,
+            gamma_corrector,
             thread_id,
         }
     }
@@ -68,17 +71,24 @@ impl Worker {
                     fill_rule,
                     blend_mode,
                     aliasing_threshold,
+                    paint_luminance,
                     mask,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
                     let path = &render_task.allocation_group.path
                         [path_range.start as usize..path_range.end as usize];
 
+                    let gamma_corrector = paint_luminance.map(|lum| {
+                        self.gamma_corrector.update_if_needed(lum);
+                        &self.gamma_corrector
+                    });
+
                     self.strip_generator.generate_filled_path(
                         path.iter().copied(),
                         fill_rule,
                         transform,
                         aliasing_threshold,
+                        gamma_corrector,
                         &mut self.strip_storage,
                         path_clip,
                     );
@@ -104,17 +114,24 @@ impl Worker {
                     blend_mode,
                     stroke,
                     aliasing_threshold,
+                    paint_luminance,
                     mask,
                 } => {
                     let start = self.strip_storage.strips.len() as u32;
                     let path = &render_task.allocation_group.path
                         [path_range.start as usize..path_range.end as usize];
 
+                    let gamma_corrector = paint_luminance.map(|lum| {
+                        self.gamma_corrector.update_if_needed(lum);
+                        &self.gamma_corrector
+                    });
+
                     self.strip_generator.generate_stroked_path(
                         path.iter().copied(),
                         &stroke,
                         transform,
                         aliasing_threshold,
+                        gamma_corrector,
                         &mut self.strip_storage,
                         path_clip,
                     );
@@ -151,6 +168,7 @@ impl Worker {
                             fill_rule,
                             transform,
                             aliasing_threshold,
+                            None,
                             &mut self.strip_storage,
                             path_clip,
                         );

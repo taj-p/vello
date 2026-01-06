@@ -107,6 +107,7 @@ impl ClipContext {
             fill_rule,
             transform,
             aliasing_threshold,
+            None,
             &mut self.temp_storage,
             existing_clip,
         );

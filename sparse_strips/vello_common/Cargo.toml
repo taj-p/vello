@@ -51,5 +51,8 @@ text = ["dep:skrifa"]
 # and is likely to be removed/moved.
 pico_svg = ["dep:roxmltree"]
 
+[build-dependencies]
+peniko = { workspace = true }
+
 [lints]
 workspace = true

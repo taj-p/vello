@@ -13,6 +13,7 @@ use vello_common::glyph::{Glyph, GlyphCaches, GlyphRunBuilder};
 use vello_common::glyph::{GlyphRenderer, GlyphType};
 use vello_common::kurbo::Affine;
 use vello_common::peniko::Fill;
+use vello_common::strip::GammaCorrector;
 use vello_common::strip_generator::{StripGenerator, StripStorage};
 
 pub fn glyph(c: &mut Criterion) {
@@ -29,6 +30,7 @@ pub fn glyph(c: &mut Criterion) {
         ),
         strip_storage: StripStorage::default(),
         glyph_caches: Default::default(),
+        gamma_corrector: GammaCorrector::new(0),
     };
 
     const TEXT: &str = "The quick brown fox jumps over the lazy dog 0123456789";
@@ -113,6 +115,7 @@ struct GlyphBenchRenderer {
     strip_generator: StripGenerator,
     strip_storage: StripStorage,
     glyph_caches: Option<GlyphCaches>,
+    gamma_corrector: GammaCorrector,
 }
 
 impl GlyphBenchRenderer {
@@ -131,6 +134,7 @@ impl GlyphRenderer for GlyphBenchRenderer {
                     Fill::NonZero,
                     glyph.transform,
                     Some(128),
+                    Some(&self.gamma_corrector),
                     &mut self.strip_storage,
                     None,
                 );

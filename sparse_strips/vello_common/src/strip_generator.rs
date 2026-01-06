@@ -87,12 +87,16 @@ impl StripGenerator {
     }
 
     /// Generate the strips for a filled path.
+    ///
+    /// If `gamma_corrector` is `Some`, alpha values will be gamma-corrected
+    /// using the provided corrector to compensate for sRGB blending.
     pub fn generate_filled_path(
         &mut self,
         path: impl IntoIterator<Item = PathEl>,
         fill_rule: Fill,
         transform: Affine,
         aliasing_threshold: Option<u8>,
+        gamma_corrector: Option<&strip::GammaCorrector>,
         strip_storage: &mut StripStorage,
         clip_path: Option<PathDataRef<'_>>,
     ) {
@@ -104,16 +108,26 @@ impl StripGenerator {
             &mut self.flatten_ctx,
         );
 
-        self.generate_with_clip(aliasing_threshold, strip_storage, fill_rule, clip_path);
+        self.generate_with_clip(
+            aliasing_threshold,
+            gamma_corrector,
+            strip_storage,
+            fill_rule,
+            clip_path,
+        );
     }
 
     /// Generate the strips for a stroked path.
+    ///
+    /// If `gamma_corrector` is `Some`, alpha values will be gamma-corrected
+    /// using the provided corrector to compensate for sRGB blending.
     pub fn generate_stroked_path(
         &mut self,
         path: impl IntoIterator<Item = PathEl>,
         stroke: &Stroke,
         transform: Affine,
         aliasing_threshold: Option<u8>,
+        gamma_corrector: Option<&strip::GammaCorrector>,
         strip_storage: &mut StripStorage,
         clip_path: Option<PathDataRef<'_>>,
     ) {
@@ -126,12 +140,19 @@ impl StripGenerator {
             &mut self.flatten_ctx,
             &mut self.stroke_ctx,
         );
-        self.generate_with_clip(aliasing_threshold, strip_storage, Fill::NonZero, clip_path);
+        self.generate_with_clip(
+            aliasing_threshold,
+            gamma_corrector,
+            strip_storage,
+            Fill::NonZero,
+            clip_path,
+        );
     }
 
     fn generate_with_clip(
         &mut self,
         aliasing_threshold: Option<u8>,
+        gamma_corrector: Option<&strip::GammaCorrector>,
         strip_storage: &mut StripStorage,
         fill_rule: Fill,
         clip_path: Option<PathDataRef<'_>>,
@@ -154,6 +175,7 @@ impl StripGenerator {
                 &mut self.temp_storage.alphas,
                 fill_rule,
                 aliasing_threshold,
+                gamma_corrector,
                 &self.line_buf,
             );
             let path_data = PathDataRef {
@@ -170,6 +192,7 @@ impl StripGenerator {
                 &mut strip_storage.alphas,
                 fill_rule,
                 aliasing_threshold,
+                gamma_corrector,
                 &self.line_buf,
             );
         }
@@ -200,6 +223,7 @@ mod tests {
             rect.to_path(0.1),
             Fill::NonZero,
             Affine::IDENTITY,
+            None,
             None,
             &mut storage,
             None,

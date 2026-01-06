@@ -13,7 +13,7 @@ use vello_common::filter_effects::Filter;
 use vello_common::glyph::{GlyphRenderer, GlyphRunBuilder, GlyphType, PreparedGlyph};
 use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
 use vello_common::mask::Mask;
-use vello_common::paint::{Paint, PaintType};
+use vello_common::paint::{Paint, PaintType, compute_paint_luminance};
 use vello_common::peniko::FontData;
 use vello_common::peniko::color::palette::css::BLACK;
 use vello_common::peniko::{BlendMode, Compose, Fill, Mix};
@@ -110,6 +110,8 @@ pub struct Scene {
     pub(crate) strip_storage: StripStorage,
     /// Cache for rasterized glyphs to improve text rendering performance.
     pub(crate) glyph_caches: Option<vello_common::glyph::GlyphCaches>,
+    /// Cached paint luminance for the current glyph run.
+    glyph_run_luminance: Option<u8>,
     /// Dependency graph for managing layer rendering order and filter effects.
     pub(crate) render_graph: RenderGraph,
 }
@@ -141,6 +143,7 @@ impl Scene {
             fill_rule: render_state.fill_rule,
             blend_mode: render_state.blend_mode,
             glyph_caches: Some(Default::default()),
+            glyph_run_luminance: None,
             render_graph,
         }
     }
@@ -202,6 +205,7 @@ impl Scene {
             self.fill_rule,
             paint,
             self.aliasing_threshold,
+            None,
         );
     }
 
@@ -218,6 +222,7 @@ impl Scene {
         fill_rule: Fill,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let wide = &mut self.wide;
         self.strip_generator.generate_filled_path(
@@ -225,6 +230,7 @@ impl Scene {
             fill_rule,
             transform,
             aliasing_threshold,
+            paint_luminance,
             &mut self.strip_storage,
             self.clip_context.get(),
         );
@@ -267,7 +273,7 @@ impl Scene {
         }
 
         let paint = self.encode_current_paint();
-        self.stroke_path_with(path, self.transform, paint, self.aliasing_threshold);
+        self.stroke_path_with(path, self.transform, paint, self.aliasing_threshold, None);
     }
 
     /// Build strips for a stroked path with the given properties.
@@ -282,6 +288,7 @@ impl Scene {
         transform: Affine,
         paint: Paint,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
     ) {
         let wide = &mut self.wide;
 
@@ -290,6 +297,7 @@ impl Scene {
             &self.stroke,
             transform,
             aliasing_threshold,
+            paint_luminance,
             &mut self.strip_storage,
             self.clip_context.get(),
         );
@@ -331,6 +339,7 @@ impl Scene {
 
     /// Creates a builder for drawing a run of glyphs that have the same attributes.
     pub fn glyph_run(&mut self, font: &FontData) -> GlyphRunBuilder<'_, Self> {
+        self.glyph_run_luminance = Some(compute_paint_luminance(&self.paint));
         GlyphRunBuilder::new(font.clone(), self.transform, self)
     }
 
@@ -356,6 +365,7 @@ impl Scene {
                 self.fill_rule,
                 self.transform,
                 self.aliasing_threshold,
+                None,
                 &mut self.strip_storage,
                 self.clip_context.get(),
             );
@@ -503,6 +513,7 @@ impl GlyphRenderer for Scene {
                     Fill::NonZero,
                     paint,
                     self.aliasing_threshold,
+                    self.glyph_run_luminance,
                 );
             }
             GlyphType::Bitmap(_) => {}
@@ -519,6 +530,7 @@ impl GlyphRenderer for Scene {
                     prepared_glyph.transform,
                     paint,
                     self.aliasing_threshold,
+                    self.glyph_run_luminance,
                 );
             }
             GlyphType::Bitmap(_) => {}
@@ -653,6 +665,7 @@ impl Scene {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -664,6 +677,7 @@ impl Scene {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -675,6 +689,7 @@ impl Scene {
                         self.fill_rule,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -686,6 +701,7 @@ impl Scene {
                         &self.stroke,
                         self.transform,
                         self.aliasing_threshold,
+                        None,
                         &mut strip_storage,
                         None,
                     );
@@ -697,6 +713,7 @@ impl Scene {
                         self.fill_rule,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                         None,
                     );
@@ -708,6 +725,7 @@ impl Scene {
                         &self.stroke,
                         *glyph_transform,
                         self.aliasing_threshold,
+                        None, // TODO: Store paint or paint luminance with recording.
                         &mut strip_storage,
                         None,
                     );

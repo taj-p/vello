@@ -37,6 +37,8 @@ pub(crate) struct SingleThreadedDispatcher {
     strip_generator: StripGenerator,
     /// Storage for alpha coverage data from strip generation.
     strip_storage: StripStorage,
+    /// Gamma corrector to compensate for sRGB blending.
+    gamma_corrector: vello_common::strip::GammaCorrector,
     /// SIMD level for fearless SIMD dispatch.
     level: Level,
     /// Counter for generating unique layer IDs.
@@ -77,6 +79,7 @@ impl SingleThreadedDispatcher {
             clip_context,
             strip_generator,
             strip_storage,
+            gamma_corrector: vello_common::strip::GammaCorrector::new(0),
             level,
             layer_id_next: 0,
             render_graph,
@@ -413,10 +416,16 @@ impl Dispatcher for SingleThreadedDispatcher {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         encoded_paints: &[EncodedPaint],
     ) {
         let wide = &mut self.wide;
+
+        let gamma_corrector = paint_luminance.map(|lum| {
+            self.gamma_corrector.update_if_needed(lum);
+            &self.gamma_corrector
+        });
 
         // Convert path to coverage strips.
         self.strip_generator.generate_filled_path(
@@ -424,6 +433,7 @@ impl Dispatcher for SingleThreadedDispatcher {
             fill_rule,
             transform,
             aliasing_threshold,
+            gamma_corrector,
             &mut self.strip_storage,
             self.clip_context.get(),
         );
@@ -447,10 +457,16 @@ impl Dispatcher for SingleThreadedDispatcher {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         encoded_paints: &[EncodedPaint],
     ) {
         let wide = &mut self.wide;
+
+        let gamma_corrector = paint_luminance.map(|lum| {
+            self.gamma_corrector.update_if_needed(lum);
+            &self.gamma_corrector
+        });
 
         // Convert stroked path to coverage strips.
         self.strip_generator.generate_stroked_path(
@@ -458,6 +474,7 @@ impl Dispatcher for SingleThreadedDispatcher {
             stroke,
             transform,
             aliasing_threshold,
+            gamma_corrector,
             &mut self.strip_storage,
             self.clip_context.get(),
         );
@@ -494,6 +511,7 @@ impl Dispatcher for SingleThreadedDispatcher {
                 fill_rule,
                 transform,
                 aliasing_threshold,
+                None,
                 &mut self.strip_storage,
                 self.clip_context.get(),
             );
@@ -673,6 +691,7 @@ mod tests {
             Affine::IDENTITY,
             Paint::Solid(PremulColor::from_alpha_color(BLUE)),
             BlendMode::default(),
+            None,
             None,
             None,
             &[],

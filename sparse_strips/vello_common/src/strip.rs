@@ -10,6 +10,10 @@ use crate::util::f32_to_u8;
 use alloc::vec::Vec;
 use fearless_simd::*;
 
+mod gamma {
+    include!(concat!(env!("OUT_DIR"), "/gamma_luts.rs"));
+}
+
 /// A strip.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Strip {
@@ -91,6 +95,9 @@ impl Strip {
 }
 
 /// Render the tiles stored in `tiles` into the strip and alpha buffer.
+///
+/// If `gamma_corrector` is `Some`, alpha values will be gamma-corrected using the
+/// provided corrector to compensate for sRGB blending.
 pub fn render(
     level: Level,
     tiles: &Tiles,
@@ -98,9 +105,80 @@ pub fn render(
     alpha_buf: &mut Vec<u8>,
     fill_rule: Fill,
     aliasing_threshold: Option<u8>,
+    gamma_corrector: Option<&GammaCorrector>,
     lines: &[Line],
 ) {
-    dispatch!(level, simd => render_impl(simd, tiles, strip_buf, alpha_buf, fill_rule, aliasing_threshold, lines));
+    dispatch!(level, simd => render_impl(simd, tiles, strip_buf, alpha_buf, fill_rule, aliasing_threshold, gamma_corrector, lines));
+}
+
+/// Precomputed gamma correction LUT for a given luminance.
+///
+/// Interpolates between the two nearest anchor LUTs once at construction to
+/// enable single array lookup in `correct()`.
+///
+/// The corrector tracks the current luminance it's configured for and can be
+/// updated in-place to avoid allocations when the luminance changes.
+#[derive(Debug)]
+pub struct GammaCorrector {
+    lut: [u8; 256],
+    current_luminance: u8,
+}
+
+impl GammaCorrector {
+    /// Create a new gamma corrector for the given luminance.
+    pub fn new(luminance: u8) -> Self {
+        let mut corrector = Self {
+            lut: [0u8; 256],
+            current_luminance: luminance,
+        };
+        corrector.update_lut(luminance);
+        corrector
+    }
+
+    /// Update the LUT in-place if the luminance has changed.
+    pub fn update_if_needed(&mut self, luminance: u8) {
+        if self.current_luminance == luminance {
+            return;
+        }
+        self.update_lut(luminance);
+        self.current_luminance = luminance;
+    }
+
+    /// Update the LUT for the given luminance.
+    fn update_lut(&mut self, luminance: u8) {
+        let lo_idx = Self::find_anchor_index(luminance);
+        let hi_idx = (lo_idx + 1).min(7);
+        let lo_lum = gamma::ANCHOR_LUMINANCES[lo_idx];
+        let hi_lum = gamma::ANCHOR_LUMINANCES[hi_idx];
+
+        let lo_lut = &gamma::GAMMA_LUTS[lo_idx];
+        let hi_lut = &gamma::GAMMA_LUTS[hi_idx];
+
+        if lo_lum == hi_lum {
+            self.lut.copy_from_slice(lo_lut);
+        } else {
+            let t = ((luminance - lo_lum) as u16 * 255) / (hi_lum - lo_lum) as u16;
+            for i in 0..256 {
+                let lo_val = lo_lut[i] as u16;
+                let hi_val = hi_lut[i] as u16;
+                self.lut[i] = ((lo_val * (255 - t) + hi_val * t + 127) / 255) as u8;
+            }
+        }
+    }
+
+    /// Find the anchor LUT index for a given luminance using fixed-point math.
+    /// Formula: `floor((L*7+6)/255)` computed as `((L*7+6) * 0x8081) >> 23`.
+    ///
+    /// Extracted into separate function to enable exhaustive testing.
+    #[inline(always)]
+    fn find_anchor_index(luminance: u8) -> usize {
+        (((luminance as u32 * 7 + 6) * 0x8081) >> 23) as usize
+    }
+
+    #[inline(always)]
+    fn correct(&self, alpha: u8) -> u8 {
+        self.lut[alpha as usize]
+    }
 }
 
 fn render_impl<S: Simd>(
@@ -110,6 +188,7 @@ fn render_impl<S: Simd>(
     alpha_buf: &mut Vec<u8>,
     fill_rule: Fill,
     aliasing_threshold: Option<u8>,
+    gamma_corrector: Option<&GammaCorrector>,
     lines: &[Line],
 ) {
     if tiles.is_empty() {
@@ -208,7 +287,11 @@ fn render_impl<S: Simd>(
                 );
             }
 
-            alpha_buf.extend_from_slice(u8_vals.as_slice());
+            if let Some(ref corrector) = gamma_corrector {
+                alpha_buf.extend(u8_vals.as_slice().iter().map(|&v| corrector.correct(v)));
+            } else {
+                alpha_buf.extend_from_slice(u8_vals.as_slice());
+            }
 
             #[expect(clippy::needless_range_loop, reason = "dimension clarity")]
             for x in 0..Tile::WIDTH as usize {
@@ -415,5 +498,115 @@ fn render_impl<S: Simd>(
         }
 
         accumulated_winding += acc;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::GammaCorrector;
+
+    /// Compute expected gamma-corrected alpha.
+    fn expected_alpha(luminance: u8, alpha: u8) -> u8 {
+        fn srgb_to_linear(x: f64) -> f64 {
+            if x <= 0.04045 {
+                x / 12.92
+            } else {
+                ((x + 0.055) / 1.055).powf(2.4)
+            }
+        }
+        fn linear_to_srgb(x: f64) -> f64 {
+            if x <= 0.0031308 {
+                x * 12.92
+            } else {
+                1.055 * x.powf(1.0 / 2.4) - 0.055
+            }
+        }
+
+        let src = luminance as f64 / 255.0;
+        let dst = 1.0 - src;
+        let a = alpha as f64 / 255.0;
+
+        if alpha == 0 {
+            return 0;
+        }
+        if alpha == 255 {
+            return 255;
+        }
+
+        let diff = src - dst;
+        if diff.abs() < 0.004 {
+            return alpha;
+        }
+
+        let lin_src = srgb_to_linear(src);
+        let lin_dst = srgb_to_linear(dst);
+        let lin_blend = lin_src * a + lin_dst * (1.0 - a);
+        let srgb_blend = linear_to_srgb(lin_blend);
+        let corrected = (srgb_blend - dst) / diff;
+
+        (corrected.clamp(0.0, 1.0) * 255.0 + 0.5) as u8
+    }
+
+    /// Verify the fixed-point anchor index formula is correct for all luminance values.
+    ///
+    /// The formula `((L*7+6) * 0x8081) >> 23` computes `floor((L*7+6)/255)` which gives
+    /// the correct anchor index for luminance L.
+    #[test]
+    fn fixed_point_anchor_index_is_correct() {
+        const ANCHORS: [u8; 8] = [0, 36, 72, 109, 145, 182, 218, 255];
+
+        for luminance in 0..=255u8 {
+            let fixed_point_idx = super::GammaCorrector::find_anchor_index(luminance);
+
+            let expected_idx = ANCHORS
+                .iter()
+                .enumerate()
+                .filter(|&(_, anchor)| *anchor <= luminance)
+                .map(|(i, _)| i)
+                .last()
+                .unwrap();
+
+            assert_eq!(
+                fixed_point_idx, expected_idx,
+                "Fixed-point index {} != expected {} for luminance {}",
+                fixed_point_idx, expected_idx, luminance
+            );
+        }
+    }
+
+    /// Verify interpolated values are within ≤2 of the mathematically correct values.
+    ///
+    /// We use 8 anchor LUTs and interpolate between them for a 32× size reduction
+    /// (2KB vs 64KB). This test verifies the maximum error is ≤2 for all 65536
+    /// (luminance, alpha) combinations.
+    #[test]
+    fn interpolation_error_is_at_most_two() {
+        const MAX_ALLOWED_ERROR: i16 = 2;
+
+        let mut max_error_seen: i16 = 0;
+        let mut worst_case = (0u8, 0u8, 0i16);
+
+        for lum in 0..=255u8 {
+            let corrector = GammaCorrector::new(lum);
+            for alpha in 0..=255u8 {
+                let actual = corrector.correct(alpha) as i16;
+                let expected = expected_alpha(lum, alpha) as i16;
+
+                let error = (actual - expected).abs();
+                if error > max_error_seen {
+                    max_error_seen = error;
+                    worst_case = (lum, alpha, error);
+                }
+            }
+        }
+
+        assert!(
+            max_error_seen <= MAX_ALLOWED_ERROR,
+            "Interpolation error {} exceeds maximum allowed {} at lum={}, alpha={}",
+            worst_case.2,
+            MAX_ALLOWED_ERROR,
+            worst_case.0,
+            worst_case.1
+        );
     }
 }

@@ -30,6 +30,7 @@ pub fn render_strips(c: &mut Criterion) {
                         &mut alpha_buf,
                         Fill::NonZero,
                         None,
+                        None,
                         &lines,
                     );
                     std::hint::black_box((&strip_buf, &alpha_buf));

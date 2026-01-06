@@ -34,6 +34,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         encoded_paints: &[EncodedPaint],
     );
@@ -45,6 +46,7 @@ pub(crate) trait Dispatcher: Debug + Send + Sync {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         encoded_paints: &[EncodedPaint],
     );

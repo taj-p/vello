@@ -434,6 +434,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         _encoded_paints: &[EncodedPaint],
     ) {
@@ -447,6 +448,7 @@ impl Dispatcher for MultiThreadedDispatcher {
             fill_rule,
             blend_mode,
             aliasing_threshold,
+            paint_luminance,
             mask,
         });
     }
@@ -459,6 +461,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         paint: Paint,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
         _encoded_paints: &[EncodedPaint],
     ) {
@@ -472,6 +475,7 @@ impl Dispatcher for MultiThreadedDispatcher {
             stroke: stroke.clone(),
             blend_mode,
             aliasing_threshold,
+            paint_luminance,
             mask,
         });
     }
@@ -769,6 +773,7 @@ pub(crate) enum RenderTaskType {
         fill_rule: Fill,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
     },
     WideCommand {
@@ -784,6 +789,7 @@ pub(crate) enum RenderTaskType {
         stroke: Stroke,
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
+        paint_luminance: Option<u8>,
         mask: Option<Mask>,
     },
     PushLayer {
@@ -892,6 +898,7 @@ mod tests {
                 Affine::IDENTITY,
                 Paint::Solid(PremulColor::from_alpha_color(BLUE)),
                 BlendMode::default(),
+                None,
                 None,
                 None,
                 &[],
