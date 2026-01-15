@@ -17,7 +17,7 @@ workspace = true
 bytemuck = { workspace = true, features = [] }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
-js-sys = "0.3.83"
+js-sys = "0.3.74"
 log = { workspace = true }
 vello_common = { workspace = true, features = ["pico_svg"] }
 vello_cpu = { workspace = true }
