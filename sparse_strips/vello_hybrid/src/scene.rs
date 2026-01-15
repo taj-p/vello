@@ -228,7 +228,14 @@ impl Scene {
             &mut self.strip_storage,
             self.clip_context.get(),
         );
-        wide.generate(&self.strip_storage.strips, paint, self.blend_mode, 0, None);
+        wide.generate(
+            &self.strip_storage.strips,
+            paint,
+            self.blend_mode,
+            0,
+            None,
+            &self.encoded_paints,
+        );
     }
 
     /// Push a new clip path to the clip stack.
@@ -287,7 +294,14 @@ impl Scene {
             self.clip_context.get(),
         );
 
-        wide.generate(&self.strip_storage.strips, paint, self.blend_mode, 0, None);
+        wide.generate(
+            &self.strip_storage.strips,
+            paint,
+            self.blend_mode,
+            0,
+            None,
+            &self.encoded_paints,
+        );
     }
 
     /// Set the aliasing threshold.
@@ -378,6 +392,8 @@ impl Scene {
     }
 
     /// Push a new filter layer.
+    ///
+    /// Note that filters are currently ignored in `vello_hybrid`.
     pub fn push_filter_layer(&mut self, filter: Filter) {
         self.push_layer(None, None, None, None, Some(filter));
     }
@@ -751,6 +767,7 @@ impl Scene {
             self.blend_mode,
             0,
             None,
+            &self.encoded_paints,
         );
     }
 

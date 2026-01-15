@@ -1,7 +1,7 @@
 [package]
 name = "vello_cpu"
 # When moving past 0.0.x, also update caveats in the README
-version = "0.0.4"
+version = "0.0.5"
 description = "A CPU-based renderer for Vello, optimized for SIMD and multithreaded execution."
 categories = ["rendering", "graphics"]
 keywords = ["2d", "vector-graphics"]
@@ -19,14 +19,15 @@ targets = []
 [dependencies]
 bytemuck = { workspace = true }
 vello_common = { workspace = true }
-hashbrown = { version = "0.15" }
+hashbrown = { workspace = true }
 crossbeam-channel = { workspace = true, optional = true }
 ordered-channel = { workspace = true, optional = true, features = ["crossbeam-channel"] }
 rayon = { workspace = true, optional = true }
 thread_local = { workspace = true, optional = true }
 
 [features]
-default = ["std", "png", "text"]
+# If adding new features, also add to `src/lib.rs`
+default = ["std", "png", "text", "u8_pipeline"]
 # Get floating point functions from the standard library (likely using your target’s libc).
 std = ["vello_common/std"]
 # Use floating point implementations from libm.
@@ -44,6 +45,11 @@ multithreading = [
 ]
 # Add support for text rendering
 text = ["vello_common/text"]
+
+# Speed focussed rendering using u8 math
+u8_pipeline = []
+# Quality focussed rendering using f32 math
+f32_pipeline = []
 
 [lints]
 workspace = true

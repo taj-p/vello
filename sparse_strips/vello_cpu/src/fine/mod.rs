@@ -20,17 +20,18 @@ use crate::fine::common::rounded_blurred_rect::BlurredRoundedRectFiller;
 use crate::layer_manager::LayerManager;
 use crate::peniko::{BlendMode, ImageQuality};
 use crate::region::Region;
-use crate::util::{BlendModeExt, EncodedImageExt};
+use crate::util::EncodedImageExt;
 use alloc::vec;
 use alloc::vec::Vec;
 use core::fmt::Debug;
 use core::iter;
-use vello_common::coarse::{Cmd, WideTile};
+use vello_common::coarse::{Cmd, CommandAttrs, WideTile};
 use vello_common::encode::{
     EncodedBlurredRoundedRectangle, EncodedGradient, EncodedImage, EncodedKind, EncodedPaint,
 };
 use vello_common::fearless_simd::{
-    Simd, SimdBase, SimdFloat, SimdInto, f32x4, f32x8, f32x16, u8x16, u8x32, u32x4, u32x8,
+    Bytes, Simd, SimdBase, SimdFloat, SimdInt, SimdInto, f32x4, f32x8, f32x16, u8x16, u8x32, u32x4,
+    u32x8,
 };
 use vello_common::filter_effects::Filter;
 use vello_common::kurbo::Affine;
@@ -135,16 +136,22 @@ pub(crate) fn u8_to_f32<S: Simd>(val: u8x16<S>) -> f32x16<S> {
     let zip1 = simd.zip_high_u8x16(val, zeroes);
     let zip2 = simd.zip_low_u8x16(val, zeroes);
 
-    let p1 = simd.zip_low_u8x16(zip2, zeroes).reinterpret_u32().cvt_f32();
+    let p1 = simd
+        .zip_low_u8x16(zip2, zeroes)
+        .bitcast::<u32x4<S>>()
+        .to_float::<f32x4<S>>();
     let p2 = simd
         .zip_high_u8x16(zip2, zeroes)
-        .reinterpret_u32()
-        .cvt_f32();
-    let p3 = simd.zip_low_u8x16(zip1, zeroes).reinterpret_u32().cvt_f32();
+        .bitcast::<u32x4<S>>()
+        .to_float::<f32x4<S>>();
+    let p3 = simd
+        .zip_low_u8x16(zip1, zeroes)
+        .bitcast::<u32x4<S>>()
+        .to_float::<f32x4<S>>();
     let p4 = simd
         .zip_high_u8x16(zip1, zeroes)
-        .reinterpret_u32()
-        .cvt_f32();
+        .bitcast::<u32x4<S>>()
+        .to_float::<f32x4<S>>();
 
     simd.combine_f32x8(simd.combine_f32x4(p1, p2), simd.combine_f32x4(p3, p4))
 }
@@ -189,7 +196,7 @@ impl<S: Simd> CompositeType<u8, S> for u8x32<S> {
 
     #[inline(always)]
     fn from_color(simd: S, color: [u8; 4]) -> Self {
-        u32x8::block_splat(u32x4::splat(simd, u32::from_ne_bytes(color))).reinterpret_u8()
+        u32x8::block_splat(u32x4::splat(simd, u32::from_ne_bytes(color))).to_bytes()
     }
 }
 
@@ -320,6 +327,22 @@ pub trait FineKernel<S: Simd>: Send + Sync + 'static {
     ///
     /// Uses bilinear filtering for smoother appearance than nearest-neighbor.
     fn medium_quality_image_painter<'a>(
+        simd: S,
+        image: &'a EncodedImage,
+        pixmap: &'a Pixmap,
+        start_x: u16,
+        start_y: u16,
+    ) -> impl Painter + 'a {
+        simd.vectorize(
+            #[inline(always)]
+            || FilteredImagePainter::new(simd, image, pixmap, start_x, start_y),
+        )
+    }
+
+    /// Create a painter for rendering axis-aligned images with `Medium` quality filtering.
+    ///
+    /// Optimized painter for images with bilinear filtering and no skewing component.
+    fn plain_medium_quality_image_painter<'a>(
         simd: S,
         image: &'a EncodedImage,
         pixmap: &'a Pixmap,
@@ -508,28 +531,37 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
     ///
     /// This is the main dispatch method that processes different command types including
     /// fills, clips, blends, filters, masks, and buffer operations.
-    pub(crate) fn run_cmd(&mut self, cmd: &Cmd, alphas: &[u8], paints: &[EncodedPaint]) {
+    pub(crate) fn run_cmd(
+        &mut self,
+        cmd: &Cmd,
+        alphas: &[u8],
+        paints: &[EncodedPaint],
+        attrs: &CommandAttrs,
+    ) {
         match cmd {
             Cmd::Fill(f) => {
+                let fill_attrs = &attrs.fill[f.attrs_idx as usize];
                 self.fill(
                     usize::from(f.x),
                     usize::from(f.width),
-                    &f.paint,
-                    f.blend_mode,
+                    &fill_attrs.paint,
+                    fill_attrs.blend_mode,
                     paints,
                     None,
-                    f.mask.as_ref(),
+                    fill_attrs.mask.as_ref(),
                 );
             }
             Cmd::AlphaFill(s) => {
+                let fill_attrs = &attrs.fill[s.attrs_idx as usize];
+                let alpha_idx = fill_attrs.alpha_idx(s.alpha_offset) as usize;
                 self.fill(
                     usize::from(s.x),
                     usize::from(s.width),
-                    &s.paint,
-                    s.blend_mode,
+                    &fill_attrs.paint,
+                    fill_attrs.blend_mode,
                     paints,
-                    Some(&alphas[s.alpha_idx..]),
-                    s.mask.as_ref(),
+                    Some(&alphas[alpha_idx..]),
+                    fill_attrs.mask.as_ref(),
                 );
             }
             Cmd::Filter(_filter, _) => {
@@ -550,11 +582,9 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                 self.clip(cf.x as usize, cf.width as usize, None);
             }
             Cmd::ClipStrip(cs) => {
-                self.clip(
-                    cs.x as usize,
-                    cs.width as usize,
-                    Some(&alphas[cs.alpha_idx..]),
-                );
+                let clip_attrs = &attrs.clip[cs.attrs_idx as usize];
+                let alpha_idx = clip_attrs.alpha_idx(cs.alpha_offset) as usize;
+                self.clip(cs.x as usize, cs.width as usize, Some(&alphas[alpha_idx..]));
             }
             Cmd::Blend(b) => self.blend(*b),
             Cmd::Mask(m) => {
@@ -636,7 +666,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
     ) {
         let blend_buf = &mut self.blend_buf.last_mut().unwrap()[x * TILE_HEIGHT_COMPONENTS..]
             [..TILE_HEIGHT_COMPONENTS * width];
-        let default_blend = blend_mode.is_default();
+        let default_blend = blend_mode == BlendMode::default();
 
         match fill {
             Paint::Solid(color) => {
@@ -684,8 +714,8 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                 // We need to have this as a macro because closures cannot take generic arguments, and
                 // we would have to repeatedly provide all arguments if we made it a function.
                 macro_rules! fill_complex_paint {
-                    ($has_opacities:expr, $filler:expr) => {
-                        if $has_opacities || alphas.is_some() {
+                    ($may_have_opacities:expr, $filler:expr) => {
+                        if $may_have_opacities || alphas.is_some() {
                             T::apply_painter(self.simd, color_buf, $filler);
 
                             if default_blend && mask.is_none() {
@@ -739,7 +769,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                                 );
 
                                 fill_complex_paint!(
-                                    g.has_opacities,
+                                    g.may_have_opacities,
                                     T::gradient_painter(self.simd, g, f32_buf)
                                 );
                             }
@@ -754,7 +784,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                                 );
 
                                 fill_complex_paint!(
-                                    g.has_opacities,
+                                    g.may_have_opacities,
                                     T::gradient_painter(self.simd, g, f32_buf)
                                 );
                             }
@@ -770,12 +800,12 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
 
                                 if r.has_undefined() {
                                     fill_complex_paint!(
-                                        g.has_opacities,
+                                        g.may_have_opacities,
                                         T::gradient_painter_with_undefined(self.simd, g, f32_buf)
                                     );
                                 } else {
                                     fill_complex_paint!(
-                                        g.has_opacities,
+                                        g.may_have_opacities,
                                         T::gradient_painter(self.simd, g, f32_buf)
                                     );
                                 }
@@ -788,17 +818,36 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                         };
 
                         match (i.has_skew(), i.nearest_neighbor()) {
-                            (_, false) => {
+                            (false, false) => {
+                                // Axis-aligned with filtering - use optimized plain painters
                                 if i.sampler.quality == ImageQuality::Medium {
                                     fill_complex_paint!(
-                                        i.has_opacities,
+                                        i.may_have_opacities,
+                                        T::plain_medium_quality_image_painter(
+                                            self.simd, i, pixmap, start_x, start_y
+                                        )
+                                    );
+                                } else {
+                                    fill_complex_paint!(
+                                        i.may_have_opacities,
+                                        T::high_quality_image_painter(
+                                            self.simd, i, pixmap, start_x, start_y
+                                        )
+                                    );
+                                }
+                            }
+                            (true, false) => {
+                                // Skewed with filtering - use generic filtered painters
+                                if i.sampler.quality == ImageQuality::Medium {
+                                    fill_complex_paint!(
+                                        i.may_have_opacities,
                                         T::medium_quality_image_painter(
                                             self.simd, i, pixmap, start_x, start_y
                                         )
                                     );
                                 } else {
                                     fill_complex_paint!(
-                                        i.has_opacities,
+                                        i.may_have_opacities,
                                         T::high_quality_image_painter(
                                             self.simd, i, pixmap, start_x, start_y
                                         )
@@ -807,7 +856,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                             }
                             (false, true) => {
                                 fill_complex_paint!(
-                                    i.has_opacities,
+                                    i.may_have_opacities,
                                     T::plain_nn_image_painter(
                                         self.simd, i, pixmap, start_x, start_y
                                     )
@@ -815,7 +864,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                             }
                             (true, true) => {
                                 fill_complex_paint!(
-                                    i.has_opacities,
+                                    i.may_have_opacities,
                                     T::nn_image_painter(self.simd, i, pixmap, start_x, start_y)
                                 );
                             }
@@ -835,7 +884,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
         let (source_buffer, rest) = self.blend_buf.split_last_mut().unwrap();
         let target_buffer = rest.last_mut().unwrap();
 
-        if blend_mode.is_default() {
+        if blend_mode == BlendMode::default() {
             T::alpha_composite_buffer(self.simd, target_buffer, source_buffer, None);
         } else {
             T::blend(
@@ -978,7 +1027,7 @@ mod macros {
                         for chunk in buf.chunks_exact_mut(16) {
                             let next = self.next().unwrap();
                             let converted = u8x16::<S>::from_f32(next.simd, next);
-                            chunk.copy_from_slice(&converted.val);
+                            chunk.copy_from_slice(converted.as_slice());
                         }
                     })
                 }
@@ -987,7 +1036,7 @@ mod macros {
                     self.simd.vectorize(#[inline(always)] || {
                         for chunk in buf.chunks_exact_mut(16) {
                             let next = self.next().unwrap();
-                            chunk.copy_from_slice(&next.val);
+                            chunk.copy_from_slice(next.as_slice());
                         }
                     })
                 }
@@ -1006,7 +1055,7 @@ mod macros {
                     self.simd.vectorize(#[inline(always)] || {
                         for chunk in buf.chunks_exact_mut(16) {
                             let next = self.next().unwrap();
-                            chunk.copy_from_slice(&next.val);
+                            chunk.copy_from_slice(next.as_slice());
                         }
                     })
                 }
@@ -1019,7 +1068,7 @@ mod macros {
                         for chunk in buf.chunks_exact_mut(16) {
                             let next = self.next().unwrap();
                             let converted = f32x16::<S>::from_u8(next.simd, next);
-                            chunk.copy_from_slice(&converted.val);
+                            chunk.copy_from_slice(converted.as_slice());
                         }
                     })
                 }

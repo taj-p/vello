@@ -4,20 +4,23 @@
 //! Generating and processing wide tiles.
 
 use crate::color::palette::css::TRANSPARENT;
+use crate::encode::EncodedPaint;
 use crate::filter_effects::Filter;
-use crate::kurbo::Affine;
+use crate::kurbo::{Affine, Rect};
 use crate::mask::Mask;
 use crate::paint::{Paint, PremulColor};
 use crate::peniko::{BlendMode, Compose, Mix};
 use crate::render_graph::{DependencyKind, LayerId, RenderGraph, RenderNodeKind};
-use crate::util::extract_scales;
 use crate::{strip::Strip, tile::Tile};
 use alloc::vec;
 use alloc::{boxed::Box, vec::Vec};
+#[cfg(debug_assertions)]
+use alloc::{format, string::String};
 use core::ops::Range;
 use hashbrown::HashMap;
 #[cfg(not(feature = "std"))]
 use peniko::kurbo::common::FloatFuncs as _;
+
 #[derive(Debug)]
 struct Layer {
     /// The layer's ID.
@@ -69,6 +72,8 @@ pub struct Wide<const MODE: u8 = MODE_CPU> {
     pub height: u16,
     /// The wide tiles in the container.
     pub tiles: Vec<WideTile<MODE>>,
+    /// Shared command properties, referenced by index from fill and clip commands.
+    pub attrs: CommandAttrs,
     /// The stack of layers.
     layer_stack: Vec<Layer>,
     /// The stack of active clip regions.
@@ -77,6 +82,10 @@ pub struct Wide<const MODE: u8 = MODE_CPU> {
     /// Initialized with node 0 (the root node representing the final output).
     /// As layers with filters are pushed, their node IDs are added to this stack.
     filter_node_stack: Vec<usize>,
+    /// Count of nested filtered layers with clip paths.
+    /// When > 0, command generation uses full viewport bounds instead of clip bounds
+    /// to ensure filter effects can process the full layer before applying the clip.
+    clipped_filter_layer_depth: u32,
 }
 
 /// A clip region.
@@ -86,7 +95,8 @@ struct Clip {
     pub clip_bbox: WideTilesBbox,
     /// The rendered path in sparse strip representation
     pub strips: Box<[Strip]>,
-    #[cfg(feature = "multithreading")]
+    /// The index of the thread that owns the alpha buffer.
+    /// Always 0 in single-threaded mode.
     pub thread_idx: u8,
 }
 
@@ -237,15 +247,15 @@ impl WideTilesBbox {
     /// Pixel values are converted to tile coordinates (rounding up) and clamped to the
     /// valid range `[0, max_x)` × `[0, max_y)`. The result is a new bounding box in
     /// wide tile coordinates.
-    pub fn expand_by_pixels(
-        &self,
-        left_px: u16,
-        top_px: u16,
-        right_px: u16,
-        bottom_px: u16,
-        max_x: u16,
-        max_y: u16,
-    ) -> Self {
+    pub fn expand_by_pixels(&self, expansion: Rect, max_x: u16, max_y: u16) -> Self {
+        // The expansion rect is centered at origin:
+        // - Negative coordinates (x0, y0) represent left/top expansion
+        // - Positive coordinates (x1, y1) represent right/bottom expansion
+        let left_px = (-expansion.x0).max(0.0).ceil() as u16;
+        let top_px = (-expansion.y0).max(0.0).ceil() as u16;
+        let right_px = expansion.x1.max(0.0).ceil() as u16;
+        let bottom_px = expansion.y1.max(0.0).ceil() as u16;
+
         // Convert pixel expansion to tile expansion (round up)
         let left_tiles = left_px.div_ceil(WideTile::WIDTH);
         let top_tiles = top_px.div_ceil(Tile::HEIGHT);
@@ -295,10 +305,12 @@ impl<const MODE: u8> Wide<MODE> {
             tiles,
             width,
             height,
+            attrs: CommandAttrs::default(),
             layer_stack: vec![],
             clip_stack: vec![],
             // Start with root node 0.
             filter_node_stack: vec![0],
+            clipped_filter_layer_depth: 0,
         }
     }
 
@@ -313,10 +325,15 @@ impl<const MODE: u8> Wide<MODE> {
             tile.bg = PremulColor::from_alpha_color(TRANSPARENT);
             tile.cmds.clear();
             tile.layer_ids.truncate(1);
+            tile.layer_cmd_ranges.clear();
+            tile.layer_cmd_ranges
+                .insert(0, LayerCommandRanges::default());
         }
+        self.attrs.clear();
         self.layer_stack.clear();
         self.clip_stack.clear();
         self.filter_node_stack.truncate(1);
+        self.clipped_filter_layer_depth = 0;
     }
 
     /// Return the number of horizontal tiles.
@@ -393,16 +410,26 @@ impl<const MODE: u8> Wide<MODE> {
         blend_mode: BlendMode,
         thread_idx: u8,
         mask: Option<Mask>,
+        encoded_paints: &[EncodedPaint],
     ) {
         if strip_buf.is_empty() {
             return;
         }
 
-        // Prevent unused warning.
-        let _ = thread_idx;
+        let alpha_base_idx = strip_buf[0].alpha_idx();
+
+        // Create shared attributes for all commands from this path
+        let attrs_idx = self.attrs.fill.len() as u32;
+        self.attrs.fill.push(FillAttrs {
+            thread_idx,
+            paint,
+            blend_mode,
+            mask,
+            alpha_base_idx,
+        });
 
         // Get current clip bounding box or full viewport if no clip is active
-        let bbox = self.get_bbox();
+        let bbox = self.active_bbox();
 
         // Save current_layer_id to avoid borrowing issues
         let current_layer_id = self.get_current_layer_id();
@@ -466,12 +493,8 @@ impl<const MODE: u8> Wide<MODE> {
                 let cmd = CmdAlphaFill {
                     x: x_wtile_rel,
                     width,
-                    alpha_idx: (col * u32::from(Tile::HEIGHT)) as usize,
-                    #[cfg(feature = "multithreading")]
-                    thread_idx,
-                    paint: paint.clone(),
-                    blend_mode,
-                    mask: mask.clone(),
+                    alpha_offset: col * u32::from(Tile::HEIGHT) - alpha_base_idx,
+                    attrs_idx,
                 };
                 x += width;
                 col += u32::from(width);
@@ -498,6 +521,27 @@ impl<const MODE: u8> Wide<MODE> {
                     .min(bbox.x1())
                     .min(WideTile::MAX_WIDE_TILE_COORD);
 
+                // Compute fill hint based on paint type
+                let fill_attrs = &self.attrs.fill[attrs_idx as usize];
+                let fill_hint = if fill_attrs.mask.is_none() {
+                    match &fill_attrs.paint {
+                        Paint::Solid(s) if s.is_opaque() => FillHint::OpaqueSolid(*s),
+                        Paint::Indexed(idx) => {
+                            if let Some(EncodedPaint::Image(img)) = encoded_paints.get(idx.index())
+                                && !img.may_have_opacities
+                                && img.sampler.alpha == 1.0
+                            {
+                                FillHint::OpaqueImage
+                            } else {
+                                FillHint::None
+                            }
+                        }
+                        _ => FillHint::None,
+                    }
+                } else {
+                    FillHint::None
+                };
+
                 // Generate fill commands for each wide tile in the fill region
                 for wtile_x in wfxt0..wfxt1 {
                     let x_wtile_rel = x % WideTile::WIDTH;
@@ -511,10 +555,9 @@ impl<const MODE: u8> Wide<MODE> {
                     self.get_mut(wtile_x, strip_y).fill(
                         x_wtile_rel,
                         width,
-                        blend_mode,
-                        paint.clone(),
+                        attrs_idx,
                         current_layer_id,
-                        mask.clone(),
+                        fill_hint,
                     );
                     // TODO: This bbox update might be redundant since filled regions are always
                     // bounded by strip regions (which already update the bbox). Consider removing
@@ -602,6 +645,13 @@ impl<const MODE: u8> Wide<MODE> {
         // When this flag is true, we generate explicit drawing commands instead of just counters.
         let in_clipped_filter_layer = has_filter && has_clip;
 
+        // Increment the depth counter so that active_bbox() returns the full viewport
+        // instead of the clipped bbox. This ensures command generation covers all tiles,
+        // allowing the filter to process the entire layer before the clip is applied.
+        if in_clipped_filter_layer {
+            self.clipped_filter_layer_depth += 1;
+        }
+
         let layer = Layer {
             layer_id,
             clip: has_clip,
@@ -668,21 +718,17 @@ impl<const MODE: u8> Wide<MODE> {
                         transform,
                         ..
                     } = &mut node.kind
-                    {
-                        // Calculate expansion in user space, then scale by transform to get pixel-space expansion
-                        // This ensures scaled filters (e.g., zoomed drop shadows) have correct bounds
-                        let expansion = filter.bounds_expansion();
-                        let (scale_x, scale_y) = extract_scales(transform);
-                        let expanded_bbox = layer.wtile_bbox.expand_by_pixels(
-                            (expansion.left as f32 * scale_x).ceil() as u16,
-                            (expansion.top as f32 * scale_y).ceil() as u16,
-                            (expansion.right as f32 * scale_x).ceil() as u16,
-                            (expansion.bottom as f32 * scale_y).ceil() as u16,
-                            self.width_tiles(),
-                            self.height_tiles(),
-                        );
-                        let clip_bbox = self.get_bbox();
-                        let final_bbox = expanded_bbox.intersect(clip_bbox);
+                {
+                    // Calculate expansion in device/pixel space, accounting for the full transform.
+                    // This ensures that rotated filters (e.g., drop shadows) have correct bounds.
+                    let expansion = filter.bounds_expansion(transform);
+                    let expanded_bbox = layer.wtile_bbox.expand_by_pixels(
+                        expansion,
+                        self.width_tiles(),
+                        self.height_tiles(),
+                    );
+                    let clip_bbox = self.active_bbox();
+                    let final_bbox = expanded_bbox.intersect(clip_bbox);
 
                         // Update both the local layer and the render graph node
                         layer.wtile_bbox = final_bbox;
@@ -728,6 +774,12 @@ impl<const MODE: u8> Wide<MODE> {
                     t.pop_buf();
                 }
             }
+        }
+
+        let in_clipped_filter_layer = layer.filter.is_some() && layer.clip;
+        // Decrement the depth counter after popping a filtered layer with clip
+        if in_clipped_filter_layer {
+            self.clipped_filter_layer_depth -= 1;
         }
     }
 
@@ -775,9 +827,21 @@ impl<const MODE: u8> Wide<MODE> {
             WideTilesBbox::new([wtile_x0, wtile_y0, wtile_x1, wtile_y1])
         };
 
-        let parent_bbox = self.get_bbox();
-        // Calculate the intersection of the parent clip bounding box and the path bounding box.
-        let clip_bbox = parent_bbox.intersect(path_bbox);
+        let parent_bbox = self.active_bbox();
+        // Determine which tiles need clip processing:
+        // - For clipped filter layers: active_bbox() returns the full viewport, so parent_bbox
+        //   already covers all tiles. We need to process all of them because the filter needs
+        //   the entire layer rendered, and tiles outside the clip path must get `PushZeroClip`
+        //   commands to properly suppress their content after filtering.
+        // - For normal clips: Intersect with the path bounds to only process tiles that are
+        //   actually affected by the clip path, avoiding unnecessary work.
+        let clip_bbox = if self.clipped_filter_layer_depth > 0 {
+            // Use parent_bbox as-is (full viewport) to process all tiles
+            parent_bbox
+        } else {
+            // Optimize by processing only the intersection of parent and path bounds
+            parent_bbox.intersect(path_bbox)
+        };
 
         let mut cur_wtile_x = clip_bbox.x0();
         let mut cur_wtile_y = clip_bbox.y0();
@@ -849,25 +913,30 @@ impl<const MODE: u8> Wide<MODE> {
             cur_wtile_y += 1;
         }
 
-        // Prevent unused warning.
-        let _ = thread_idx;
-
         self.clip_stack.push(Clip {
             clip_bbox,
             strips,
-            #[cfg(feature = "multithreading")]
             thread_idx,
         });
     }
 
     /// Get the bounding box of the current clip region or the entire viewport if no clip regions are active.
-    fn get_bbox(&self) -> WideTilesBbox {
-        if let Some(top) = self.clip_stack.last() {
-            top.clip_bbox
-        } else {
-            // Convert pixel dimensions to wide tile coordinates
-            WideTilesBbox::new([0, 0, self.width_tiles(), self.height_tiles()])
+    fn active_bbox(&self) -> WideTilesBbox {
+        // When in a clipped filter layer, use full viewport to allow
+        // filter to process the complete layer before applying clip as mask
+        if self.clipped_filter_layer_depth > 0 {
+            return self.full_viewport_bbox();
         }
+
+        self.clip_stack
+            .last()
+            .map(|top| top.clip_bbox)
+            .unwrap_or_else(|| self.full_viewport_bbox())
+    }
+
+    /// Returns the bounding box covering the entire viewport in wide tile coordinates.
+    fn full_viewport_bbox(&self) -> WideTilesBbox {
+        WideTilesBbox::new([0, 0, self.width_tiles(), self.height_tiles()])
     }
 
     /// Removes the most recently added clip region.
@@ -887,10 +956,21 @@ impl<const MODE: u8> Wide<MODE> {
         let Clip {
             clip_bbox,
             strips,
-            #[cfg(feature = "multithreading")]
             thread_idx,
         } = self.clip_stack.pop().unwrap();
         let n_strips = strips.len();
+
+        if n_strips == 0 {
+            return;
+        }
+
+        // Compute base alpha index and create shared clip attributes
+        let alpha_base_idx = strips[0].alpha_idx();
+        let clip_attrs_idx = self.attrs.clip.len() as u32;
+        self.attrs.clip.push(ClipAttrs {
+            thread_idx,
+            alpha_base_idx,
+        });
 
         let mut cur_wtile_x = clip_bbox.x0();
         let mut cur_wtile_y = clip_bbox.y0();
@@ -978,16 +1058,15 @@ impl<const MODE: u8> Wide<MODE> {
                 }
 
                 // Calculate the portion of the strip that affects this tile
-                let x_rel = u32::from(x % WideTile::WIDTH);
+                let x_rel = x % WideTile::WIDTH;
                 let width = clipped_x1.min((wtile_x + 1) * WideTile::WIDTH) - x;
 
                 // Create clip strip command for rendering the partial coverage
                 let cmd = CmdClipAlphaFill {
                     x: x_rel,
-                    width: u32::from(width),
-                    alpha_idx: col as usize * Tile::HEIGHT as usize,
-                    #[cfg(feature = "multithreading")]
-                    thread_idx,
+                    width,
+                    alpha_offset: col * u32::from(Tile::HEIGHT) - alpha_base_idx,
+                    attrs_idx: clip_attrs_idx,
                 };
                 x += width;
                 col += u32::from(width);
@@ -1017,9 +1096,9 @@ impl<const MODE: u8> Wide<MODE> {
                 // whole tile, as such clips are skipped by the `push_clip` function. See
                 // <https://github.com/linebender/vello/blob/de0659e4df9842c8857153841a2b4ba6f1020bb0/sparse_strips/vello_common/src/coarse.rs#L504-L516>
                 if width > 0 && width < WideTile::WIDTH {
-                    let x_rel = u32::from(clipped_x1 % WideTile::WIDTH);
+                    let x_rel = clipped_x1 % WideTile::WIDTH;
                     self.get_mut(cur_wtile_x, cur_wtile_y)
-                        .clip_fill(x_rel, u32::from(width));
+                        .clip_fill(x_rel, width);
                 }
 
                 // If the next strip is a sentinel, skip the fill
@@ -1053,8 +1132,7 @@ impl<const MODE: u8> Wide<MODE> {
                         // that any tile in-between is fully covered and thus no clipping is
                         // necessary at all. See also the `push_clip` function, where we don't
                         // push a new buffer for such tiles.
-                        self.get_mut(cur_wtile_x, cur_wtile_y)
-                            .clip_fill(0, u32::from(width2));
+                        self.get_mut(cur_wtile_x, cur_wtile_y).clip_fill(0, width2);
                     }
                 }
             }
@@ -1149,67 +1227,79 @@ impl<const MODE: u8> WideTile<MODE> {
     /// Generates fill commands unless the tile is in a zero-clip region (fully clipped out).
     /// For clipped filter layers, commands are always generated since filters need the full
     /// layer content rendered before applying the clip as a mask.
+    ///
+    /// The `fill_hint` parameter is pre-computed by the caller based on paint type:
+    /// - `OpaqueSolid(color)`: Paint is an opaque solid color, can replace background
+    /// - `OpaqueImage`: Paint is an opaque image, can clear previous commands
+    /// - `None`: No optimization available
     pub(crate) fn fill(
         &mut self,
         x: u16,
         width: u16,
-        blend_mode: BlendMode,
-        paint: Paint,
+        attrs_idx: u32,
         current_layer_id: LayerId,
-        mask: Option<Mask>,
+        fill_hint: FillHint,
     ) {
         if !self.is_zero_clip() || self.in_clipped_filter_layer {
             match MODE {
                 MODE_CPU => {
-                    let bg = if let Paint::Solid(s) = &paint {
-                        // Note that we could be more aggressive in optimizing a whole-tile opaque fill
-                        // even with a clip stack. It would be valid to elide all drawing commands from
-                        // the enclosing clip push up to the fill. Further, we could extend the clip
-                        // push command to include a background color, rather than always starting with
-                        // a transparent buffer. Lastly, a sequence of push(bg); strip/fill; pop could
-                        // be replaced with strip/fill with the color (the latter is true even with a
-                        // non-opaque color).
-                        //
-                        // However, the extra cost of tracking such optimizations may outweigh the
-                        // benefit, especially in hybrid mode with GPU painting.
-                        let can_override = x == 0
-                            && width == WideTile::WIDTH
-                            && s.is_opaque()
-                            && mask.is_none()
-                            && self.n_clip == 0
-                            && self.n_bufs == 0;
-                        can_override.then_some(*s)
-                    } else {
-                        // TODO: Implement for indexed paints.
-                        None
-                    };
+                    // Check if we can apply overdraw elimination optimization.
+                    // This requires filling the entire tile width with no clip/buffer stack.
+                    //
+                    // Note that we could be more aggressive in optimizing a whole-tile opaque fill
+                    // even with a clip stack. It would be valid to elide all drawing commands from
+                    // the enclosing clip push up to the fill. Further, we could extend the clip
+                    // push command to include a background color, rather than always starting with
+                    // a transparent buffer. Lastly, a sequence of push(bg); strip/fill; pop could
+                    // be replaced with strip/fill with the color (the latter is true even with a
+                    // non-opaque color).
+                    //
+                    // However, the extra cost of tracking such optimizations may outweigh the
+                    // benefit, especially in hybrid mode with GPU painting.
+                    let can_override =
+                        x == 0 && width == WideTile::WIDTH && self.n_clip == 0 && self.n_bufs == 0;
 
-                    if let Some(bg) = bg {
-                        self.cmds.clear();
-                        self.bg = bg;
-                        // Clear layer ranges when we clear commands
-                        if let Some(ranges) = self.layer_cmd_ranges.get_mut(&current_layer_id) {
-                            ranges.clear();
+                    if can_override {
+                        match fill_hint {
+                            FillHint::OpaqueSolid(color) => {
+                                self.cmds.clear();
+                                self.bg = color;
+                                if let Some(ranges) =
+                                    self.layer_cmd_ranges.get_mut(&current_layer_id)
+                                {
+                                    ranges.clear();
+                                }
+                                return;
+                            }
+                            FillHint::OpaqueImage => {
+                                // Opaque image: clear previous commands but still emit the fill.
+                                self.cmds.clear();
+                                self.bg = PremulColor::from_alpha_color(TRANSPARENT);
+                                if let Some(ranges) =
+                                    self.layer_cmd_ranges.get_mut(&current_layer_id)
+                                {
+                                    ranges.clear();
+                                }
+                                // Fall through to emit the fill command below, as opposed to
+                                // solid paints where we have a return statement.
+                            }
+                            FillHint::None => {}
                         }
-                    } else {
-                        self.record_fill_cmd(current_layer_id, self.cmds.len());
-                        self.cmds.push(Cmd::Fill(CmdFill {
-                            x,
-                            width,
-                            paint,
-                            blend_mode,
-                            mask,
-                        }));
                     }
+
+                    self.record_fill_cmd(current_layer_id, self.cmds.len());
+                    self.cmds.push(Cmd::Fill(CmdFill {
+                        x,
+                        width,
+                        attrs_idx,
+                    }));
                 }
                 MODE_HYBRID => {
                     self.record_fill_cmd(current_layer_id, self.cmds.len());
                     self.cmds.push(Cmd::Fill(CmdFill {
                         x,
                         width,
-                        paint,
-                        blend_mode,
-                        mask,
+                        attrs_idx,
                     }));
                 }
                 _ => unreachable!(),
@@ -1293,7 +1383,7 @@ impl<const MODE: u8> WideTile<MODE> {
     }
 
     /// Applies a clip fill operation at the specified position and width.
-    pub fn clip_fill(&mut self, x: u32, width: u32) {
+    pub fn clip_fill(&mut self, x: u16, width: u16) {
         if (!self.is_zero_clip()) && !matches!(self.cmds.last(), Some(Cmd::PushBuf(_))) {
             self.cmds.push(Cmd::ClipFill(CmdClipFill { x, width }));
         }
@@ -1400,6 +1490,56 @@ impl<const MODE: u8> WideTile<MODE> {
     }
 }
 
+/// Debug utilities for wide tiles.
+///
+/// These methods are only available in debug builds (`debug_assertions`).
+/// They provide introspection into the command buffer for debugging and logging purposes.
+#[cfg(debug_assertions)]
+impl<const MODE: u8> WideTile<MODE> {
+    /// Lists all commands in this wide tile with their indices and names.
+    ///
+    /// Returns a formatted string with each command on a new line, showing its index
+    /// and human-readable name. This is useful for debugging and understanding the
+    /// command sequence.
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// let commands = wide_tile.list_commands();
+    /// println!("{}", commands);
+    /// // Output:
+    /// // 0: PushBuf(Regular)
+    /// // 1: FillPath
+    /// // 2: PushZeroClip
+    /// // 3: FillPath
+    /// // 4: PopBuf
+    /// ```
+    #[allow(dead_code, reason = "useful for debugging")]
+    pub fn list_commands(&self) -> String {
+        self.cmds
+            .iter()
+            .enumerate()
+            .map(|(i, cmd)| format!("{}: {}", i, cmd.name()))
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+}
+
+/// Optimization hint for fill operations, computed in `Wide::generate` and passed to `WideTile::fill`.
+///
+/// This enum communicates whether a fill operation can benefit from overdraw elimination:
+/// - For opaque solid colors: we can set the background color directly and skip the fill
+/// - For opaque images: we can clear previous commands but still need to emit the fill
+#[derive(Debug, Clone, Copy)]
+pub enum FillHint {
+    /// No optimization possible, emit fill command normally.
+    None,
+    /// Paint is an opaque solid color - can replace background if conditions are met.
+    OpaqueSolid(PremulColor),
+    /// Paint is an opaque image - can clear previous commands if conditions are met.
+    OpaqueImage,
+}
+
 /// Distinguishes between different types of layers and their storage strategies.
 ///
 /// Each layer kind determines how the layer's content is stored and processed:
@@ -1484,23 +1624,179 @@ pub enum Cmd {
     Mask(Mask),
 }
 
-/// Fill a consecutive horizontal region of a wide tile.
-///
-/// This command fills a rectangular region with the specified paint.
-/// The region starts at x-coordinate `x` and extends for `width` pixels
-/// horizontally, spanning the full height of the wide tile.
+#[cfg(debug_assertions)]
+impl Cmd {
+    /// Returns a human-readable name for this command.
+    ///
+    /// This is useful for debugging, logging, and displaying command information
+    /// in a user-friendly format. To get detailed paint information, use `name_with_attrs`
+    /// which can look up the paint from the command attributes.
+    ///
+    /// **Note:** This method is only available in debug builds (`debug_assertions`).
+    pub fn name(&self) -> &'static str {
+        match self {
+            Self::Fill(_) => "FillPath",
+            Self::AlphaFill(_) => "AlphaFillPath",
+            Self::PushBuf(layer_kind) => match layer_kind {
+                LayerKind::Regular(_) => "PushBuf(Regular)",
+                LayerKind::Filtered(_) => "PushBuf(Filtered)",
+                LayerKind::Clip(_) => "PushBuf(Clip)",
+            },
+            Self::PopBuf => "PopBuf",
+            Self::ClipFill(_) => "ClipPathFill",
+            Self::ClipStrip(_) => "ClipPathStrip",
+            Self::PushZeroClip(_) => "PushZeroClip",
+            Self::PopZeroClip => "PopZeroClip",
+            Self::Filter(_, _) => "Filter",
+            Self::Blend(_) => "Blend",
+            Self::Opacity(_) => "Opacity",
+            Self::Mask(_) => "Mask",
+        }
+    }
+
+    /// Returns a human-readable name for this command with detailed paint information.
+    ///
+    /// This variant looks up paint details from the command attributes for fill commands.
+    ///
+    /// **Note:** This method is only available in debug builds (`debug_assertions`).
+    pub fn name_with_attrs(
+        &self,
+        fill_attrs: &[FillAttrs],
+        encoded_paints: &[EncodedPaint],
+    ) -> String {
+        match self {
+            Self::Fill(cmd) => {
+                if let Some(attrs) = fill_attrs.get(cmd.attrs_idx as usize) {
+                    format!("FillPath({})", paint_name(&attrs.paint, encoded_paints))
+                } else {
+                    format!("FillPath(attrs_idx={})", cmd.attrs_idx)
+                }
+            }
+            Self::AlphaFill(cmd) => {
+                if let Some(attrs) = fill_attrs.get(cmd.attrs_idx as usize) {
+                    format!(
+                        "AlphaFillPath({})",
+                        paint_name(&attrs.paint, encoded_paints)
+                    )
+                } else {
+                    format!("AlphaFillPath(attrs_idx={})", cmd.attrs_idx)
+                }
+            }
+            _ => self.name().into(),
+        }
+    }
+}
+
+/// Returns a human-readable description of a paint.
+#[cfg(debug_assertions)]
+fn paint_name(paint: &Paint, encoded_paints: &[EncodedPaint]) -> String {
+    match paint {
+        Paint::Solid(color) => {
+            let rgba = color.as_premul_rgba8();
+            format!(
+                "Solid(#{:02x}{:02x}{:02x}{:02x})",
+                rgba.r, rgba.g, rgba.b, rgba.a
+            )
+        }
+        Paint::Indexed(idx) => {
+            let index = idx.index();
+            if let Some(encoded) = encoded_paints.get(index) {
+                let kind = match encoded {
+                    EncodedPaint::Gradient(g) => match &g.kind {
+                        crate::encode::EncodedKind::Linear(_) => "LinearGradient",
+                        crate::encode::EncodedKind::Radial(_) => "RadialGradient",
+                        crate::encode::EncodedKind::Sweep(_) => "SweepGradient",
+                    },
+                    EncodedPaint::Image(_) => "Image",
+                    EncodedPaint::BlurredRoundedRect(_) => "BlurredRoundedRect",
+                };
+                format!("{}[{}]", kind, index)
+            } else {
+                format!("Indexed({})", index)
+            }
+        }
+    }
+}
+
+/// Shared attributes for alpha fill commands.
 #[derive(Debug, Clone, PartialEq)]
-pub struct CmdFill {
-    /// The horizontal start position relative to the wide tile's left edge, in pixels.
-    pub x: u16,
-    /// The width of the filled region in pixels.
-    pub width: u16,
+pub struct FillAttrs {
+    /// The index of the thread that owns the alpha buffer
+    /// containing the mask values at `alpha_idx`.
+    /// Always 0 in single-threaded mode.
+    pub thread_idx: u8,
     /// The paint (color, gradient, etc.) to fill the region with.
+    // TODO: Store premultiplied colors as indexed paints as well, to reduce
+    // memory overhead? Or get rid of indexed paints and inline all paints?
     pub paint: Paint,
     /// The blend mode to apply before drawing the contents.
     pub blend_mode: BlendMode,
     /// A mask to apply to the command.
     pub mask: Option<Mask>,
+    /// Base index into the alpha buffer for this path's commands.
+    /// Commands store a relative offset that is added to this base.
+    alpha_base_idx: u32,
+}
+
+impl FillAttrs {
+    /// Compute the absolute alpha buffer index from a relative offset.
+    pub fn alpha_idx(&self, offset: u32) -> u32 {
+        self.alpha_base_idx + offset
+    }
+}
+
+/// Shared attributes for clip alpha fill commands.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ClipAttrs {
+    /// The index of the thread that owns the alpha buffer
+    /// containing the mask values at `alpha_idx`.
+    /// Always 0 in single-threaded mode.
+    pub thread_idx: u8,
+    /// Base index into the alpha buffer for this clip path's commands.
+    /// Commands store a relative offset that is added to this base.
+    alpha_base_idx: u32,
+}
+
+impl ClipAttrs {
+    /// Compute the absolute alpha buffer index from a relative offset.
+    pub fn alpha_idx(&self, offset: u32) -> u32 {
+        self.alpha_base_idx + offset
+    }
+}
+
+/// Container for shared command attributes.
+///
+/// This struct holds the shared attributes for fill and clip commands,
+/// allowing them to be passed together to functions that need both.
+#[derive(Debug, Default, Clone)]
+pub struct CommandAttrs {
+    /// Shared attributes for fill commands, indexed by `attrs_idx` in `CmdFill`/`CmdAlphaFill`.
+    pub fill: Vec<FillAttrs>,
+    /// Shared attributes for clip commands, indexed by `attrs_idx` in `CmdClipAlphaFill`.
+    pub clip: Vec<ClipAttrs>,
+}
+
+impl CommandAttrs {
+    /// Clear all attributes.
+    pub fn clear(&mut self) {
+        self.fill.clear();
+        self.clip.clear();
+    }
+}
+
+/// Fill a consecutive horizontal region of a wide tile.
+///
+/// This command fills a rectangular region with the specified paint.
+/// The region starts at x-coordinate `x` and extends for `width` pixels
+/// horizontally, spanning the full height of the wide tile.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct CmdFill {
+    /// The horizontal start position relative to the wide tile's left edge, in pixels.
+    pub x: u16,
+    /// The width of the filled region in pixels.
+    pub width: u16,
+    /// Index into the command attributes array.
+    pub attrs_idx: u32,
 }
 
 /// Fill a consecutive horizontal region with an alpha mask.
@@ -1508,24 +1804,17 @@ pub struct CmdFill {
 /// Similar to `CmdFill`, but modulates the paint by an alpha mask stored
 /// in a separate buffer. This is used for anti-aliased edges and partial
 /// coverage from path rasterization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CmdAlphaFill {
     /// The horizontal start position relative to the wide tile's left edge, in pixels.
     pub x: u16,
     /// The width of the filled region in pixels.
     pub width: u16,
-    /// The start index into the alpha buffer for the mask values.
-    pub alpha_idx: usize,
-    /// The index of the thread that owns the alpha buffer
-    /// containing the mask values at `alpha_idx`.
-    #[cfg(feature = "multithreading")]
-    pub thread_idx: u8,
-    /// The paint (color, gradient, etc.) to fill the region with.
-    pub paint: Paint,
-    /// A blend mode to apply before drawing the contents.
-    pub blend_mode: BlendMode,
-    /// A mask to apply to the command.
-    pub mask: Option<Mask>,
+    /// Relative offset to the alpha buffer location.
+    /// Use `FillAttrs::alpha_idx(alpha_offset)` to compute the absolute index.
+    pub alpha_offset: u32,
+    /// Index into the command attributes array.
+    pub attrs_idx: u32,
 }
 
 /// Fill operation within a clipping region.
@@ -1536,9 +1825,9 @@ pub struct CmdAlphaFill {
 #[derive(Debug, PartialEq, Eq)]
 pub struct CmdClipFill {
     /// The horizontal start position relative to the wide tile's left edge, in pixels.
-    pub x: u32,
+    pub x: u16,
     /// The width of the region to copy in pixels.
-    pub width: u32,
+    pub width: u16,
 }
 
 /// Alpha-masked fill operation within a clipping region.
@@ -1549,15 +1838,14 @@ pub struct CmdClipFill {
 #[derive(Debug, PartialEq, Eq)]
 pub struct CmdClipAlphaFill {
     /// The horizontal start position relative to the wide tile's left edge, in pixels.
-    pub x: u32,
+    pub x: u16,
     /// The width of the region to composite in pixels.
-    pub width: u32,
-    /// The index of the thread that owns the alpha buffer
-    /// containing the mask values at `alpha_idx`.
-    #[cfg(feature = "multithreading")]
-    pub thread_idx: u8,
-    /// The start index into the alpha buffer for the mask values.
-    pub alpha_idx: usize,
+    pub width: u16,
+    /// Relative offset to the alpha buffer location.
+    /// Use `ClipAttrs::alpha_idx(alpha_offset)` to compute the absolute index.
+    pub alpha_offset: u32,
+    /// Index into the clip attributes array.
+    pub attrs_idx: u32,
 }
 
 trait BlendModeExt {
@@ -1606,11 +1894,8 @@ impl LayerCommandRanges {
 
 #[cfg(test)]
 mod tests {
-    use crate::coarse::{LayerKind, MODE_CPU, Wide, WideTile};
-    use crate::color::AlphaColor;
-    use crate::color::palette::css::TRANSPARENT;
+    use crate::coarse::{FillHint, LayerKind, MODE_CPU, Wide, WideTile};
     use crate::kurbo::Affine;
-    use crate::paint::{Paint, PremulColor};
     use crate::peniko::{BlendMode, Compose, Mix};
     use crate::render_graph::RenderGraph;
     use crate::strip::Strip;
@@ -1629,22 +1914,8 @@ mod tests {
     fn basic_layer() {
         let mut wide = WideTile::<MODE_CPU>::new(0, 0);
         wide.push_buf(LayerKind::Regular(0));
-        wide.fill(
-            0,
-            10,
-            BlendMode::default(),
-            Paint::Solid(PremulColor::from_alpha_color(TRANSPARENT)),
-            0,
-            None,
-        );
-        wide.fill(
-            10,
-            10,
-            BlendMode::default(),
-            Paint::Solid(PremulColor::from_alpha_color(TRANSPARENT)),
-            0,
-            None,
-        );
+        wide.fill(0, 10, 0, 0, FillHint::None);
+        wide.fill(10, 10, 0, 0, FillHint::None);
         wide.pop_buf();
 
         assert_eq!(wide.cmds.len(), 4);
@@ -1652,15 +1923,12 @@ mod tests {
 
     #[test]
     fn dont_inline_blend_with_two_fills() {
-        let paint = Paint::Solid(PremulColor::from_alpha_color(AlphaColor::from_rgba8(
-            30, 30, 30, 255,
-        )));
         let blend_mode = BlendMode::new(Mix::Lighten, Compose::SrcOver);
 
         let mut wide = WideTile::<MODE_CPU>::new(0, 0);
         wide.push_buf(LayerKind::Regular(0));
-        wide.fill(0, 10, BlendMode::default(), paint.clone(), 0, None);
-        wide.fill(10, 10, BlendMode::default(), paint.clone(), 0, None);
+        wide.fill(0, 10, 0, 0, FillHint::None);
+        wide.fill(10, 10, 0, 0, FillHint::None);
         wide.blend(blend_mode);
         wide.pop_buf();
 
@@ -1669,14 +1937,11 @@ mod tests {
 
     #[test]
     fn dont_inline_destructive_blend() {
-        let paint = Paint::Solid(PremulColor::from_alpha_color(AlphaColor::from_rgba8(
-            30, 30, 30, 255,
-        )));
         let blend_mode = BlendMode::new(Mix::Lighten, Compose::Clear);
 
         let mut wide = WideTile::<MODE_CPU>::new(0, 0);
         wide.push_buf(LayerKind::Regular(0));
-        wide.fill(0, 10, BlendMode::default(), paint.clone(), 0, None);
+        wide.fill(0, 10, 0, 0, FillHint::None);
         wide.blend(blend_mode);
         wide.pop_buf();
 

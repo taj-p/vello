@@ -3,7 +3,7 @@
 
 use crate::RenderMode;
 use crate::dispatch::Dispatcher;
-use crate::fine::{F32Kernel, Fine, FineKernel, U8Kernel};
+use crate::fine::{Fine, FineKernel};
 use crate::kurbo::{Affine, BezPath, Stroke};
 use crate::layer_manager::LayerManager;
 use crate::peniko::{BlendMode, Fill};
@@ -12,7 +12,7 @@ use vello_common::clip::ClipContext;
 use vello_common::coarse::{Cmd, LayerKind, MODE_CPU, Wide, WideTilesBbox};
 use vello_common::color::palette::css::TRANSPARENT;
 use vello_common::encode::EncodedPaint;
-use vello_common::fearless_simd::{Level, Simd, dispatch};
+use vello_common::fearless_simd::{Level, Simd};
 use vello_common::filter_effects::Filter;
 use vello_common::mask::Mask;
 use vello_common::paint::{Paint, PremulColor};
@@ -87,6 +87,7 @@ impl SingleThreadedDispatcher {
     ///
     /// This dispatches to the appropriate SIMD implementation based on the
     /// configured level, using f32 for intermediate calculations.
+    #[cfg(feature = "f32_pipeline")]
     fn rasterize_f32(
         &self,
         buffer: &mut [u8],
@@ -94,6 +95,8 @@ impl SingleThreadedDispatcher {
         height: u16,
         encoded_paints: &[EncodedPaint],
     ) {
+        use crate::fine::F32Kernel;
+        use vello_common::fearless_simd::dispatch;
         dispatch!(self.level, simd => self.rasterize_with::<_, F32Kernel>(simd, buffer, width, height, encoded_paints));
     }
 
@@ -101,6 +104,7 @@ impl SingleThreadedDispatcher {
     ///
     /// This dispatches to the appropriate SIMD implementation based on the
     /// configured level, using u8 for intermediate calculations to maximize speed.
+    #[cfg(feature = "u8_pipeline")]
     fn rasterize_u8(
         &self,
         buffer: &mut [u8],
@@ -108,6 +112,8 @@ impl SingleThreadedDispatcher {
         height: u16,
         encoded_paints: &[EncodedPaint],
     ) {
+        use crate::fine::U8Kernel;
+        use vello_common::fearless_simd::dispatch;
         dispatch!(self.level, simd => self.rasterize_with::<_, U8Kernel>(simd, buffer, width, height, encoded_paints));
     }
 
@@ -214,6 +220,10 @@ impl SingleThreadedDispatcher {
                     // Apply the filter effect to the completed layer.
                     fine.filter_layer(&mut pixmap, filter, layer_manager, *transform);
 
+                    // Save the filtered pixmap to disk for debugging.
+                    // #[cfg(all(debug_assertions, feature = "std", feature = "png"))]
+                    // save_filtered_layer_debug(&pixmap, *layer_id);
+
                     // Store the filtered result for use by dependent layers.
                     layer_manager.register_layer(*layer_id, *wtile_bbox, pixmap);
                 }
@@ -286,7 +296,12 @@ impl SingleThreadedDispatcher {
         while cmd_idx < ranges.render_range.end {
             let cmd: &Cmd = &wtile.cmds[cmd_idx];
 
-            fine.run_cmd(cmd, &self.strip_storage.alphas, encoded_paints);
+            fine.run_cmd(
+                cmd,
+                &self.strip_storage.alphas,
+                encoded_paints,
+                &self.wide.attrs,
+            );
 
             // Special handling for filtered layer composition.
             // Filtered layers have already been rendered and stored in layer_manager.
@@ -311,6 +326,7 @@ impl SingleThreadedDispatcher {
                             &wtile.cmds[cmd_idx + 1],
                             &self.strip_storage.alphas,
                             encoded_paints,
+                            &self.wide.attrs,
                         );
                         cmd_idx += 1;
 
@@ -366,7 +382,12 @@ impl SingleThreadedDispatcher {
             // Clear to background and process all commands in order.
             fine.clear(wtile.bg);
             for cmd in &wtile.cmds {
-                fine.run_cmd(cmd, &self.strip_storage.alphas, encoded_paints);
+                fine.run_cmd(
+                    cmd,
+                    &self.strip_storage.alphas,
+                    encoded_paints,
+                    &self.wide.attrs,
+                );
             }
 
             fine.pack(region);
@@ -393,6 +414,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
+        encoded_paints: &[EncodedPaint],
     ) {
         let wide = &mut self.wide;
 
@@ -407,7 +429,14 @@ impl Dispatcher for SingleThreadedDispatcher {
         );
 
         // Generate coarse-level commands from strips (layer_id 0 = root layer).
-        wide.generate(&self.strip_storage.strips, paint, blend_mode, 0, mask);
+        wide.generate(
+            &self.strip_storage.strips,
+            paint,
+            blend_mode,
+            0,
+            mask,
+            encoded_paints,
+        );
     }
 
     fn stroke_path(
@@ -419,6 +448,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
+        encoded_paints: &[EncodedPaint],
     ) {
         let wide = &mut self.wide;
 
@@ -433,7 +463,14 @@ impl Dispatcher for SingleThreadedDispatcher {
         );
 
         // Generate coarse-level commands from strips (layer_id 0 = root layer).
-        wide.generate(&self.strip_storage.strips, paint, blend_mode, 0, mask);
+        wide.generate(
+            &self.strip_storage.strips,
+            paint,
+            blend_mode,
+            0,
+            mask,
+            encoded_paints,
+        );
     }
 
     fn push_layer(
@@ -510,7 +547,7 @@ impl Dispatcher for SingleThreadedDispatcher {
         self.layer_id_next = 0;
     }
 
-    fn flush(&mut self) {
+    fn flush(&mut self, _encoded_paints: &[EncodedPaint]) {
         // No-op for single-threaded dispatcher (no work queue to flush).
     }
 
@@ -522,7 +559,22 @@ impl Dispatcher for SingleThreadedDispatcher {
         height: u16,
         encoded_paints: &[EncodedPaint],
     ) {
-        // Select precision based on render mode.
+        // If only the u8 pipeline is enabled, then use it
+        #[cfg(all(feature = "u8_pipeline", not(feature = "f32_pipeline")))]
+        {
+            let _ = render_mode;
+            self.rasterize_u8(buffer, width, height, encoded_paints);
+        }
+
+        // If only the f32 pipeline is enabled, then use it
+        #[cfg(all(feature = "f32_pipeline", not(feature = "u8_pipeline")))]
+        {
+            let _ = render_mode;
+            self.rasterize_f32(buffer, width, height, encoded_paints);
+        }
+
+        // If both pipelines are enabled, select precision based on render mode parameter.
+        #[cfg(all(feature = "u8_pipeline", feature = "f32_pipeline"))]
         match render_mode {
             RenderMode::OptimizeSpeed => {
                 // Use u8 precision for faster rendering.
@@ -533,11 +585,25 @@ impl Dispatcher for SingleThreadedDispatcher {
                 self.rasterize_f32(buffer, width, height, encoded_paints);
             }
         }
+
+        #[cfg(all(not(feature = "u8_pipeline"), not(feature = "f32_pipeline")))]
+        {
+            // This case never gets hit because there is a compile_error in the root.
+            // But have this code disables some warnings and makes the compile error easier to read
+            let _ = (buffer, render_mode, width, height, encoded_paints);
+        }
     }
 
-    fn generate_wide_cmd(&mut self, strip_buf: &[Strip], paint: Paint, blend_mode: BlendMode) {
+    fn generate_wide_cmd(
+        &mut self,
+        strip_buf: &[Strip],
+        paint: Paint,
+        blend_mode: BlendMode,
+        encoded_paints: &[EncodedPaint],
+    ) {
         // Generate coarse-level commands from pre-computed strips (layer_id 0 = root layer).
-        self.wide.generate(strip_buf, paint, blend_mode, 0, None);
+        self.wide
+            .generate(strip_buf, paint, blend_mode, 0, None, encoded_paints);
     }
 
     fn strip_storage_mut(&mut self) -> &mut StripStorage {
@@ -562,6 +628,25 @@ impl Dispatcher for SingleThreadedDispatcher {
 
     fn pop_clip_path(&mut self) {
         self.clip_context.pop_clip();
+    }
+}
+
+/// Saves a filtered pixmap to disk for debugging purposes.
+/// Only available in debug builds with `std` and `png` features enabled.
+#[allow(
+    dead_code,
+    reason = "useful debug utility, can be enabled by uncommenting the call site"
+)]
+#[cfg(all(debug_assertions, feature = "std", feature = "png"))]
+fn save_filtered_layer_debug(pixmap: &Pixmap, layer_id: u32) {
+    use std::path::PathBuf;
+
+    let diffs_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../vello_sparse_tests/diffs");
+    let _ = std::fs::create_dir_all(&diffs_path);
+    let filename = diffs_path.join(alloc::format!("filtered_layer_{}.png", layer_id));
+
+    if let Ok(png_data) = pixmap.clone().into_png() {
+        let _ = std::fs::write(&filename, &png_data);
     }
 }
 
@@ -590,6 +675,7 @@ mod tests {
             BlendMode::default(),
             None,
             None,
+            &[],
         );
 
         // Ensure there is data to clear.

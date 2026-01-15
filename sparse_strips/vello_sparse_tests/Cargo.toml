@@ -17,7 +17,7 @@ path = "tests/mod.rs"
 [dependencies]
 vello_api = { workspace = true }
 vello_common = { workspace = true, features = ["std"] }
-vello_cpu = { workspace = true, features = ["multithreading", "std"] }
+vello_cpu = { workspace = true, features = ["multithreading", "std", "f32_pipeline"] }
 vello_hybrid = { workspace = true }
 wgpu = { workspace = true, default-features = true }
 pollster = { workspace = true }
@@ -25,12 +25,14 @@ vello_dev_macros = { workspace = true }
 bytemuck = { workspace = true }
 oxipng = { workspace = true, features = ["freestanding", "parallel"] }
 image = { workspace = true, features = ["png"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 skrifa = { workspace = true }
 smallvec = { workspace = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen-test = "0.3.50"
-web-sys = { version = "0.3.77", features = [
+wasm-bindgen-test = "0.3.56"
+web-sys = { version = "0.3.83", features = [
     "HtmlCanvasElement",
     "WebGl2RenderingContext",
     "Document",
@@ -43,8 +45,8 @@ web-sys = { version = "0.3.77", features = [
     "Url",
     "Response",
 ] }
-wasm-bindgen = "0.2.100"
-wasm-bindgen-futures = "0.4.50"
+wasm-bindgen = "0.2.106"
+wasm-bindgen-futures = "0.4.56"
 # Required for introspecting the built WASM binary.
 wasmparser = "0.235.0"
 

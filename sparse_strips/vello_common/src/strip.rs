@@ -138,7 +138,7 @@ fn render_impl<S: Simd>(
     let mut accumulated_winding = f32x4::splat(s, 0.0);
 
     /// A special tile to keep the logic below simple.
-    const SENTINEL: Tile = Tile::new(u16::MAX, u16::MAX, 0, false);
+    const SENTINEL: Tile = Tile::new(u16::MAX, u16::MAX, 0, 0);
 
     // The strip we're building.
     let mut strip = Strip::new(
@@ -208,7 +208,7 @@ fn render_impl<S: Simd>(
                 );
             }
 
-            alpha_buf.extend_from_slice(&u8_vals.val);
+            alpha_buf.extend_from_slice(u8_vals.as_slice());
 
             #[expect(clippy::needless_range_loop, reason = "dimension clarity")]
             for x in 0..Tile::WIDTH as usize {

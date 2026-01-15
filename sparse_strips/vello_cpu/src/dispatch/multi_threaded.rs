@@ -5,7 +5,7 @@ use crate::RenderMode;
 use crate::dispatch::Dispatcher;
 use crate::dispatch::multi_threaded::cost::{COST_THRESHOLD, estimate_render_task_cost};
 use crate::dispatch::multi_threaded::worker::Worker;
-use crate::fine::{F32Kernel, Fine, FineKernel, U8Kernel};
+use crate::fine::{Fine, FineKernel};
 use crate::kurbo::{Affine, BezPath, PathEl, Stroke};
 use crate::peniko::{BlendMode, Fill};
 use crate::region::Regions;
@@ -163,6 +163,7 @@ impl MultiThreadedDispatcher {
         dispatcher
     }
 
+    #[cfg(feature = "f32_pipeline")]
     fn rasterize_f32(
         &self,
         buffer: &mut [u8],
@@ -170,9 +171,11 @@ impl MultiThreadedDispatcher {
         height: u16,
         encoded_paints: &[EncodedPaint],
     ) {
+        use crate::fine::F32Kernel;
         dispatch!(self.level, simd => self.rasterize_with::<_, F32Kernel>(simd, buffer, width, height, encoded_paints));
     }
 
+    #[cfg(feature = "u8_pipeline")]
     fn rasterize_u8(
         &self,
         buffer: &mut [u8],
@@ -180,6 +183,7 @@ impl MultiThreadedDispatcher {
         height: u16,
         encoded_paints: &[EncodedPaint],
     ) {
+        use crate::fine::U8Kernel;
         dispatch!(self.level, simd => self.rasterize_with::<_, U8Kernel>(simd, buffer, width, height, encoded_paints));
     }
 
@@ -266,7 +270,11 @@ impl MultiThreadedDispatcher {
             allocation_group,
         };
         task_sender.send(task).unwrap();
-        self.run_coarse(true);
+        // TODO: Pass encoded_paints here to enable overdraw elimination for opaque indexed
+        // paints. Currently we pass an empty slice, so indexed paints render correctly but miss
+        // the FillHint::OpaqueImage optimization. The challenge is that encoded_paints is a
+        // borrowed reference that may not be valid by the time coarse processing runs asynchronously.
+        self.run_coarse(true, &[]);
     }
 
     // Currently, we do coarse rasterization in two phases:
@@ -281,7 +289,7 @@ impl MultiThreadedDispatcher {
     // new strips that will be generated.
     //
     // This is why we have the `abort_empty`flag.
-    fn run_coarse(&mut self, abort_empty: bool) {
+    fn run_coarse(&mut self, abort_empty: bool, encoded_paints: &[EncodedPaint]) {
         let result_receiver = self.coarse_task_receiver.as_mut().unwrap();
 
         loop {
@@ -303,6 +311,7 @@ impl MultiThreadedDispatcher {
                                 blend_mode,
                                 thread_id,
                                 mask,
+                                encoded_paints,
                             ),
                             CoarseTaskType::RenderWideCommand {
                                 strips,
@@ -316,6 +325,7 @@ impl MultiThreadedDispatcher {
                                 blend_mode,
                                 thread_id,
                                 mask,
+                                encoded_paints,
                             ),
                             CoarseTaskType::PushLayer {
                                 thread_id,
@@ -390,15 +400,15 @@ impl MultiThreadedDispatcher {
                 fine.clear(wtile.bg);
                 for cmd in &wtile.cmds {
                     let thread_idx = match cmd {
-                        Cmd::AlphaFill(a) => Some(a.thread_idx),
-                        Cmd::ClipStrip(a) => Some(a.thread_idx),
+                        Cmd::AlphaFill(a) => Some(wide.attrs.fill[a.attrs_idx as usize].thread_idx),
+                        Cmd::ClipStrip(a) => Some(wide.attrs.clip[a.attrs_idx as usize].thread_idx),
                         _ => None,
                     };
 
                     let alphas = thread_idx
                         .map(|i| alpha_slots[i as usize].as_slice())
                         .unwrap_or(&[]);
-                    fine.run_cmd(cmd, alphas, encoded_paints);
+                    fine.run_cmd(cmd, alphas, encoded_paints, &wide.attrs);
                 }
 
                 fine.pack(region);
@@ -425,6 +435,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
+        _encoded_paints: &[EncodedPaint],
     ) {
         let start = self.allocation_group.path.len() as u32;
         self.allocation_group.path.extend(path);
@@ -449,6 +460,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         blend_mode: BlendMode,
         aliasing_threshold: Option<u8>,
         mask: Option<Mask>,
+        _encoded_paints: &[EncodedPaint],
     ) {
         let start = self.allocation_group.path.len() as u32;
         self.allocation_group.path.extend(path);
@@ -537,7 +549,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         self.init();
     }
 
-    fn flush(&mut self) {
+    fn flush(&mut self, encoded_paints: &[EncodedPaint]) {
         if self.flushed {
             return;
         }
@@ -547,7 +559,7 @@ impl Dispatcher for MultiThreadedDispatcher {
         // Note that dropping the sender will signal to the workers that no more new paths
         // can arrive.
         drop(sender);
-        self.run_coarse(false);
+        self.run_coarse(false, encoded_paints);
 
         self.alpha_storage.with_inner(|alphas| {
             // The main thread stores the alphas that are produced by playing a recording.
@@ -569,6 +581,21 @@ impl Dispatcher for MultiThreadedDispatcher {
     ) {
         assert!(self.flushed, "attempted to rasterize before flushing");
 
+        // Only u8 pipeline enabled
+        #[cfg(all(feature = "u8_pipeline", not(feature = "f32_pipeline")))]
+        {
+            let _ = render_mode;
+            self.rasterize_u8(buffer, width, height, encoded_paints);
+        }
+        // Only f32 pipeline enabled
+        #[cfg(all(feature = "f32_pipeline", not(feature = "u8_pipeline")))]
+        {
+            let _ = render_mode;
+            self.rasterize_f32(buffer, width, height, encoded_paints);
+        }
+
+        // Both pipelines enabled
+        #[cfg(all(feature = "f32_pipeline", feature = "u8_pipeline"))]
         match render_mode {
             RenderMode::OptimizeSpeed => self.rasterize_u8(buffer, width, height, encoded_paints),
             RenderMode::OptimizeQuality => {
@@ -577,7 +604,13 @@ impl Dispatcher for MultiThreadedDispatcher {
         }
     }
 
-    fn generate_wide_cmd(&mut self, strip_buf: &[Strip], paint: Paint, blend_mode: BlendMode) {
+    fn generate_wide_cmd(
+        &mut self,
+        strip_buf: &[Strip],
+        paint: Paint,
+        blend_mode: BlendMode,
+        _encoded_paints: &[EncodedPaint],
+    ) {
         // Note that we are essentially round-tripping here: The wide container is inside of the
         // main thread, but we first send a render task to a child thread which basically just
         // forwards it back to the main thread again. We cannot apply the wide command directly
@@ -861,8 +894,9 @@ mod tests {
                 BlendMode::default(),
                 None,
                 None,
+                &[],
             );
-            dispatcher.flush();
+            dispatcher.flush(&[]);
         }
 
         assert_eq!(dispatcher.allocations.paths.entries.len(), 1);

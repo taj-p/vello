@@ -8,20 +8,31 @@ Subheadings to categorize changes are `added, changed, deprecated, removed, fixe
 
 # Changelog
 
-The latest published Vello release is [0.6.0](#060---2025-10-03) which was released on 2025-10-03.
-You can find its changes [documented below](#060---2025-10-03).
+The latest published Vello release is [0.7.0](#070---2026-01-13) which was released on 2026-01-13.
+You can find its changes [documented below](#070---2026-01-13).
 
 ## [Unreleased]
+
+This release has an [MSRV][] of 1.88.
+
+## [0.7.0][] - 2026-01-13
 
 This release has an [MSRV][] of 1.88.
 
 ### Changed
 
 - Breaking change: wgpu has been updated to wgpu 27. ([#1280][] by [@theoparis][])  
+  This has been chosen to match the version used by the upcoming Bevy 0.18.
+  (Note that we do not guarantee that our latest release will always match Bevy's wgpu version.)
+- Breaking change: Allow setting `Scene` layer clip shape drawing style, adding even-odd filled path clipping and stroked path clipping to the various scene layer methods (`Scene::{push_layer, push_luminance_mask_layer, push_clip_layer}`). ([#1332][] by [@waywardmonkeys][], [#1342][] by [@tomcur][])  
+  When pushing a layer, you should use `Fill::NonZero` as the clip draw style to achieve the same behavior as previous versions.
+- Breaking change: Updated Peniko to [v0.6.0](https://github.com/linebender/peniko/releases/tag/v0.6.0). ([#1349][] by [@DJMcNab][])
+  - This also updates Kurbo to [v0.13.0](https://github.com/linebender/kurbo/releases/tag/v0.13.0).
 
 ### Fixed
 
 - Bitmap emoji displayed at an incorrect position when scaled. ([#1273][] by [@ArthurCose][])
+- Miter joins for path segments with near-parallel endpoint tangents no longer cause rendering artifacts. ([#1323][] by [@Cupnfish][] and [@tomcur][])
 
 ## [0.6.0][] - 2025-10-03
 
@@ -30,7 +41,7 @@ This release has an [MSRV][] of 1.86.
 ### Added
 
 - `register_texture`, a helper for using `wgpu` textures in a Vello `Renderer`. ([#1161][] by [@DJMcNab][])
-- `push_luminance_mask_layer`, content within which is used as a luminance mask. ([#1183][] by [@DJMcNab][]).  
+- `push_luminance_mask_layer`, content within which is used as a luminance mask. ([#1183][] by [@DJMcNab][])  
    This is a breaking change to Vello Encoding.
 - `push_clip_layer`, which replaces the previous `push_layer` using `Mix::Clip`, and has fewer footguns. ([#1192][] by [@DJMcNab][])  
   This is not a breaking change, as `Mix::Clip` is still supported (although it is deprecated).
@@ -270,6 +281,7 @@ This release has an [MSRV][] of 1.75.
 [@ArthurCose]: https://github.com/ArthurCose
 [@armansito]: https://github.com/armansito
 [@cfagot]: https://github.com/cfagot
+[@Cupnfish]: https://github.com/Cupnfish
 [@DasLixou]: https://github.com/DasLixou
 [@dfrg]: https://github.com/drfg
 [@DJMcNab]: https://github.com/DJMcNab
@@ -380,10 +392,15 @@ This release has an [MSRV][] of 1.75.
 [#1229]: https://github.com/linebender/vello/pull/1229
 [#1273]: https://github.com/linebender/vello/pull/1273
 [#1280]: https://github.com/linebender/vello/pull/1280
+[#1323]: https://github.com/linebender/vello/pull/1323
+[#1332]: https://github.com/linebender/vello/pull/1332
+[#1342]: https://github.com/linebender/vello/pull/1342
+[#1349]: https://github.com/linebender/vello/pull/1349
 
+[Unreleased]: https://github.com/linebender/vello/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/linebender/vello/compare/v0.6.0...v0.7.0
 <!-- Note that this still comparing against 0.5.0, because 0.5.1 is a cherry-picked patch -->
-[Unreleased]: https://github.com/linebender/vello/compare/v0.5.0...HEAD
-[0.6.0]: https://github.com/linebender/vello/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/linebender/vello/compare/v0.5.0...v0.6.0
 [0.5.1]: https://github.com/linebender/vello/compare/v0.5.0...v0.5.1
 <!-- Note that this still comparing against 0.4.0, because 0.4.1 is a cherry-picked patch -->
 [0.5.0]: https://github.com/linebender/vello/compare/v0.4.0...v0.5.0

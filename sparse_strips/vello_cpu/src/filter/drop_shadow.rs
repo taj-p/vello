@@ -15,8 +15,8 @@
 
 use super::FilterEffect;
 use super::gaussian_blur::{MAX_KERNEL_SIZE, apply_blur, plan_decimated_blur};
+use super::shift::offset_pixels;
 use crate::layer_manager::LayerManager;
-use vello_common::color::palette::css::TRANSPARENT;
 use vello_common::color::{AlphaColor, Srgb};
 use vello_common::filter_effects::EdgeMode;
 use vello_common::peniko::color::PremulRgba8;
@@ -130,137 +130,6 @@ fn apply_drop_shadow(
     compose_shadow_direct(&shadow_pixmap, pixmap, color);
 }
 
-/// Shift all pixels in a pixmap by the given offset.
-///
-/// This implements the offset operation in-place by copying pixels to their new positions.
-/// The iteration order is carefully chosen based on shift direction to avoid overwriting
-/// source pixels before they're read. Areas that become exposed (due to the shift) are
-/// filled with transparent black. Pixels that would move outside the bounds are discarded.
-fn offset_pixels(pixmap: &mut Pixmap, dx: f32, dy: f32) {
-    let dx_pixels = dx.round() as i32;
-    let dy_pixels = dy.round() as i32;
-
-    // Early return if no offset
-    if dx_pixels == 0 && dy_pixels == 0 {
-        return;
-    }
-
-    let width = pixmap.width();
-    let height = pixmap.height();
-    let transparent = TRANSPARENT.premultiply().to_rgba8();
-
-    // Process pixels in the correct order to avoid overwriting source data.
-    // Key insight: iterate away from the direction of movement.
-    // This allows us to move pixels in-place without a temporary buffer.
-    //
-    // Use match to eliminate Box<dyn Iterator> allocation overhead and enable
-    // better compiler optimization through static dispatch.
-    match (dx_pixels >= 0, dy_pixels >= 0) {
-        (true, true) => {
-            // Shift right+down: iterate bottom-to-top, right-to-left
-            for y in (0..height).rev() {
-                for x in (0..width).rev() {
-                    process_offset_pixel(
-                        pixmap,
-                        x,
-                        y,
-                        dx_pixels,
-                        dy_pixels,
-                        width,
-                        height,
-                        transparent,
-                    );
-                }
-            }
-        }
-        (true, false) => {
-            // Shift right+up: iterate top-to-bottom, right-to-left
-            for y in 0..height {
-                for x in (0..width).rev() {
-                    process_offset_pixel(
-                        pixmap,
-                        x,
-                        y,
-                        dx_pixels,
-                        dy_pixels,
-                        width,
-                        height,
-                        transparent,
-                    );
-                }
-            }
-        }
-        (false, true) => {
-            // Shift left+down: iterate bottom-to-top, left-to-right
-            for y in (0..height).rev() {
-                for x in 0..width {
-                    process_offset_pixel(
-                        pixmap,
-                        x,
-                        y,
-                        dx_pixels,
-                        dy_pixels,
-                        width,
-                        height,
-                        transparent,
-                    );
-                }
-            }
-        }
-        (false, false) => {
-            // Shift left+up: iterate top-to-bottom, left-to-right
-            for y in 0..height {
-                for x in 0..width {
-                    process_offset_pixel(
-                        pixmap,
-                        x,
-                        y,
-                        dx_pixels,
-                        dy_pixels,
-                        width,
-                        height,
-                        transparent,
-                    );
-                }
-            }
-        }
-    }
-}
-
-/// Process a single pixel during offset operation.
-///
-/// This moves the pixel to its new position (if in bounds) and clears the source
-/// position if it's in the exposed region.
-#[inline(always)]
-fn process_offset_pixel(
-    pixmap: &mut Pixmap,
-    x: u16,
-    y: u16,
-    dx_pixels: i32,
-    dy_pixels: i32,
-    width: u16,
-    height: u16,
-    transparent: PremulRgba8,
-) {
-    let new_x = x as i32 + dx_pixels;
-    let new_y = y as i32 + dy_pixels;
-
-    if new_x >= 0 && new_x < width as i32 && new_y >= 0 && new_y < height as i32 {
-        let pixel = pixmap.sample(x, y);
-        pixmap.set_pixel(new_x as u16, new_y as u16, pixel);
-    }
-
-    // Clear the source pixel if it's in the exposed region
-    let should_clear = (dx_pixels > 0 && x < dx_pixels as u16)
-        || (dx_pixels < 0 && x >= (width as i32 + dx_pixels) as u16)
-        || (dy_pixels > 0 && y < dy_pixels as u16)
-        || (dy_pixels < 0 && y >= (height as i32 + dy_pixels) as u16);
-
-    if should_clear {
-        pixmap.set_pixel(x, y, transparent);
-    }
-}
-
 /// Apply shadow color and composite with original.
 ///
 /// The shadow has already been offset and blurred, so this simply applies
@@ -339,4 +208,148 @@ fn u8_to_norm(value: u8) -> f32 {
 #[inline]
 fn norm_to_u8(value: f32) -> u8 {
     (value * 255.0).round() as u8
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use vello_common::color::Srgb;
+
+    /// Test `u8_to_norm` conversion.
+    #[test]
+    fn test_u8_to_norm() {
+        assert_eq!(u8_to_norm(0), 0.0);
+        assert!((u8_to_norm(255) - 1.0).abs() < 1e-6);
+    }
+
+    /// Test `norm_to_u8` conversion.
+    #[test]
+    fn test_norm_to_u8() {
+        assert_eq!(norm_to_u8(0.0), 0);
+        assert_eq!(norm_to_u8(1.0), 255);
+        assert_eq!(norm_to_u8(0.5), 128); // 0.5 * 255 = 127.5 → 128
+    }
+
+    /// Test round-trip conversion u8 → norm → u8.
+    #[test]
+    fn test_conversion_roundtrip() {
+        for value in [0, 1, 50, 127, 128, 200, 254, 255] {
+            let normalized = u8_to_norm(value);
+            let back = norm_to_u8(normalized);
+            assert_eq!(back, value);
+        }
+    }
+
+    /// Test Porter-Duff source-over with fully opaque source.
+    #[test]
+    fn test_compose_src_over_opaque_source() {
+        let src = PremulRgba8 {
+            r: 255,
+            g: 0,
+            b: 0,
+            a: 255,
+        }; // Opaque red
+        let dst = PremulRgba8 {
+            r: 0,
+            g: 255,
+            b: 0,
+            a: 255,
+        }; // Opaque green
+
+        let result = compose_src_over(src, dst);
+        // Opaque source should completely cover destination
+        assert_eq!(result.r, 255);
+        assert_eq!(result.g, 0);
+        assert_eq!(result.b, 0);
+        assert_eq!(result.a, 255);
+    }
+
+    /// Test Porter-Duff source-over with transparent source.
+    #[test]
+    fn test_compose_src_over_transparent_source() {
+        let src = PremulRgba8 {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0,
+        };
+        let dst = PremulRgba8 {
+            r: 0,
+            g: 255,
+            b: 0,
+            a: 255,
+        };
+
+        let result = compose_src_over(src, dst);
+        // Transparent source should leave destination unchanged
+        assert_eq!(result.r, 0);
+        assert_eq!(result.g, 255);
+        assert_eq!(result.b, 0);
+        assert_eq!(result.a, 255);
+    }
+
+    /// Test Porter-Duff source-over with semi-transparent source.
+    #[test]
+    fn test_compose_src_over_semi_transparent() {
+        let src = PremulRgba8 {
+            r: 128,
+            g: 0,
+            b: 0,
+            a: 128,
+        }; // 50% red (premul)
+        let dst = PremulRgba8 {
+            r: 0,
+            g: 128,
+            b: 0,
+            a: 128,
+        }; // 50% green (premul)
+
+        let result = compose_src_over(src, dst);
+        // Result should blend src + dst*(1-src_alpha)
+        // r: 128 + 0*(1-0.5) = 128
+        // g: 0 + 128*0.5 = 64
+        // a: 128 + 128*0.5 = 192
+        assert_eq!(
+            result,
+            PremulRgba8 {
+                r: 128,
+                g: 64,
+                b: 0,
+                a: 192,
+            }
+        );
+    }
+
+    /// Test `compose_shadow_direct` applies color correctly.
+    #[test]
+    fn test_compose_shadow_color() {
+        let mut shadow_pixmap = Pixmap::new(2, 2);
+        let mut dst_pixmap = Pixmap::new(2, 2);
+
+        // Shadow has alpha=255 at (0,0)
+        shadow_pixmap.set_pixel(
+            0,
+            0,
+            PremulRgba8 {
+                r: 0,
+                g: 0,
+                b: 0,
+                a: 255,
+            },
+        );
+
+        let shadow_color = AlphaColor {
+            components: [1.0, 0.0, 0.0, 1.0], // Red
+            cs: std::marker::PhantomData::<Srgb>,
+        };
+
+        compose_shadow_direct(&shadow_pixmap, &mut dst_pixmap, shadow_color);
+
+        // Shadow at (0,0) should be red
+        let result = dst_pixmap.sample(0, 0);
+        assert_eq!(result.r, 255);
+        assert_eq!(result.g, 0);
+        assert_eq!(result.b, 0);
+        assert_eq!(result.a, 255);
+    }
 }

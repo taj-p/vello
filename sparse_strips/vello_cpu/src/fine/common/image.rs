@@ -193,15 +193,8 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
         // center of the location we are sampling, and sample those points
         // using a cubic filter to weight each location's contribution.
 
-        // Note that this `fract` has different behavior for negative numbers than the normal,
-        // one.
-        #[inline(always)]
-        fn fract<S: Simd>(val: f32x4<S>) -> f32x4<S> {
-            val - val.floor()
-        }
-
-        let x_fract = fract(x_positions + 0.5);
-        let y_fract = fract(y_positions + 0.5);
+        let x_fract = fract_floor(x_positions + 0.5);
+        let y_fract = fract_floor(y_positions + 0.5);
 
         let mut interpolated_color = f32x16::splat(self.simd, 0.0);
 
@@ -327,6 +320,15 @@ impl<S: Simd> Iterator for FilteredImagePainter<'_, S> {
 
 f32x16_painter!(FilteredImagePainter<'_, S>);
 
+/// Computes the positive fractional part of a value: `val - val.floor()`.
+///
+/// Unlike `f32::fract()`, this always returns a value in [0, 1),
+/// even for negative inputs.
+#[inline(always)]
+pub(crate) fn fract_floor<S: Simd>(val: f32x4<S>) -> f32x4<S> {
+    val - val.floor()
+}
+
 /// Common data used by different image painters
 #[derive(Debug)]
 pub(crate) struct ImagePainterData<'a, S: Simd> {
@@ -385,7 +387,7 @@ pub(crate) fn sample<S: Simd>(
     x_positions: f32x4<S>,
     y_positions: f32x4<S>,
 ) -> u8x16<S> {
-    let idx = x_positions.cvt_u32() + y_positions.cvt_u32() * data.width_u32;
+    let idx = x_positions.to_int::<u32x4<S>>() + y_positions.to_int::<u32x4<S>>() * data.width_u32;
 
     u32x4::from_slice(
         simd,
@@ -396,7 +398,7 @@ pub(crate) fn sample<S: Simd>(
             data.pixmap.sample_idx(idx[3]).to_u32(),
         ],
     )
-    .reinterpret_u8()
+    .to_bytes()
 }
 
 #[inline(always)]
@@ -435,7 +437,7 @@ pub(crate) fn extend<S: Simd>(
             // our `max` is always an integer number, u and s must also be an integer number
             // and thus `m_bits` must be 0.
             // Note that this is a wrapping sub!
-            let biased_bits = m_bits - bias_in_ulps.cvt_u32();
+            let biased_bits = m_bits - bias_in_ulps.to_int::<u32x4<S>>();
             f32x4::from_bytes(biased_bits.to_bytes())
                 // In certain edge cases, we might still end up with a higher number.
                 .min(max - 1.0)

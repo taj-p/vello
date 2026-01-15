@@ -71,7 +71,7 @@ fn main() {
     }
 
     if stages.iter().any(|s| s.requires_tiling()) {
-        tiles.make_tiles(&line_buf, args.width, args.height);
+        tiles.make_tiles_analytic_aa(&line_buf, args.width, args.height);
         tiles.sort_tiles();
     }
 
@@ -94,6 +94,7 @@ fn main() {
             BlendMode::new(Mix::Normal, Compose::SrcOver),
             0,
             None,
+            &[],
         );
     }
 
@@ -310,7 +311,9 @@ fn draw_wide_tiles(document: &mut Document, wide_tiles: &[WideTile], alphas: &[u
                 Cmd::AlphaFill(s) => {
                     for x in 0..s.width {
                         for y in 0..Tile::HEIGHT {
-                            let alpha = alphas[s.alpha_idx
+                            // Since we only draw one path, we can use alpha offset
+                            // directly, since the absolute offset is 0.
+                            let alpha = alphas[s.alpha_offset as usize
                                 + usize::from(x) * usize::from(Tile::HEIGHT)
                                 + usize::from(y)];
 
