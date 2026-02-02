@@ -376,7 +376,7 @@ impl Scheduler {
             round: 0,
             total_slots,
             free,
-            rounds_queue: Default::default(),
+            rounds_queue: VecDeque::new(),
         }
     }
 
@@ -515,6 +515,7 @@ impl Scheduler {
     }
 
     // Find the appropriate round for rendering.
+    #[inline(always)]
     fn get_round(&mut self, el_round: usize) -> &mut Round {
         let rel_round = el_round.saturating_sub(self.round);
         if self.rounds_queue.len() == rel_round {
@@ -579,12 +580,11 @@ impl Scheduler {
         for annotated_cmd in cmds {
             // Note: this starts at 1 (for the final target)
             let depth = state.stack.len();
-            let cmd = annotated_cmd.as_cmd();
-            if cmd.is_none() {
+            let Some(cmd) = annotated_cmd.as_cmd() else {
                 continue;
-            }
+            };
 
-            match cmd.unwrap() {
+            match cmd {
                 Cmd::Fill(fill) => {
                     let el = state.stack.last_mut().unwrap();
                     let draw = self.draw_mut(el.round, el.get_draw_texture(depth));
@@ -898,6 +898,7 @@ impl Scheduler {
     }
 
     /// Process a paint and return (`payload`, `paint`)
+    #[inline(always)]
     fn process_paint(
         paint: &Paint,
         scene: &Scene,
@@ -1056,7 +1057,7 @@ fn has_non_zero_alpha(rgba: u32) -> bool {
 fn prepare_cmds<'a>(cmds: &'a [Cmd]) -> Vec<AnnotatedCmd<'a>> {
     // Reserve room for three extra items such that we can prevent repeated blends into the surface.
     let mut annotated_commands: Vec<AnnotatedCmd<'a>> = Vec::with_capacity(cmds.len() + 3);
-    let mut pointer_to_push_buf_stack: Vec<usize> = Default::default();
+    let mut pointer_to_push_buf_stack: Vec<usize> = Vec::new();
     // We pretend that the surface might be blended into. This will be removed if no blends occur to
     // the surface.
     pointer_to_push_buf_stack.push(0);
