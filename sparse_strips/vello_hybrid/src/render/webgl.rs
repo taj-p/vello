@@ -807,8 +807,8 @@ impl WebGlPrograms {
     ) {
         let max_texture_dimension_2d = self.resources.max_texture_dimension_2d;
 
-        self.maybe_resize_alphas_tex(max_texture_dimension_2d, alphas.len());
-        self.maybe_resize_encoded_paints_tex(max_texture_dimension_2d, paint_idxs);
+        self.maybe_resize_alphas_tex(gl, max_texture_dimension_2d, alphas.len());
+        self.maybe_resize_encoded_paints_tex(gl, max_texture_dimension_2d, paint_idxs);
         self.maybe_update_config_buffer(gl, max_texture_dimension_2d, render_size);
 
         self.upload_alpha_texture(gl, alphas);
@@ -880,7 +880,15 @@ impl WebGlPrograms {
     }
 
     /// Update the alpha texture size if needed.
-    fn maybe_resize_alphas_tex(&mut self, max_texture_dimension_2d: u32, alphas_len: usize) {
+    ///
+    /// When the texture needs to grow, allocates GPU storage via `texImage2D`
+    /// with no data. Per-frame data upload then uses the cheaper `texSubImage2D`.
+    fn maybe_resize_alphas_tex(
+        &mut self,
+        gl: &WebGl2RenderingContext,
+        max_texture_dimension_2d: u32,
+        alphas_len: usize,
+    ) {
         let required_alpha_height = (alphas_len as u32)
             // There are 16 1-byte alpha values per texel.
             .div_ceil(max_texture_dimension_2d << 4);
@@ -893,14 +901,36 @@ impl WebGlPrograms {
                 "Alpha texture height exceeds max texture dimensions"
             );
 
-            // Track the new height.
+            // Allocate the texture at the new size (no data upload).
+            gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+            gl.bind_texture(
+                WebGl2RenderingContext::TEXTURE_2D,
+                Some(&self.resources.alphas_texture),
+            );
+            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_array_buffer_view(
+                WebGl2RenderingContext::TEXTURE_2D,
+                0,
+                WebGl2RenderingContext::RGBA32UI as i32,
+                max_texture_dimension_2d as i32,
+                required_alpha_height as i32,
+                0,
+                WebGl2RenderingContext::RGBA_INTEGER,
+                WebGl2RenderingContext::UNSIGNED_INT,
+                None,
+            )
+            .unwrap();
+
             self.resources.alpha_texture_height = required_alpha_height;
         }
     }
 
     /// Update the encoded paints texture size if needed.
+    ///
+    /// When the texture needs to grow, allocates GPU storage via `texImage2D`
+    /// with no data. Per-frame data upload then uses the cheaper `texSubImage2D`.
     fn maybe_resize_encoded_paints_tex(
         &mut self,
+        gl: &WebGl2RenderingContext,
         max_texture_dimension_2d: u32,
         paint_idxs: &[u32],
     ) {
@@ -917,14 +947,37 @@ impl WebGlPrograms {
                 (max_texture_dimension_2d * required_encoded_paints_height) << 4;
             self.encoded_paints_data
                 .resize(required_encoded_paints_size as usize, 0);
+
+            // Allocate the texture at the new size (no data upload).
+            gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+            gl.bind_texture(
+                WebGl2RenderingContext::TEXTURE_2D,
+                Some(&self.resources.encoded_paints_texture),
+            );
+            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_array_buffer_view(
+                WebGl2RenderingContext::TEXTURE_2D,
+                0,
+                WebGl2RenderingContext::RGBA32UI as i32,
+                max_texture_dimension_2d as i32,
+                required_encoded_paints_height as i32,
+                0,
+                WebGl2RenderingContext::RGBA_INTEGER,
+                WebGl2RenderingContext::UNSIGNED_INT,
+                None,
+            )
+            .unwrap();
+
             self.resources.encoded_paints_texture_height = required_encoded_paints_height;
         }
     }
 
     /// Update the gradient texture size if needed.
+    ///
+    /// When the texture needs to grow, allocates GPU storage via `texImage2D`
+    /// with no data. Per-frame data upload then uses the cheaper `texSubImage2D`.
     fn maybe_resize_gradient_tex(
         &mut self,
-        _gl: &WebGl2RenderingContext,
+        gl: &WebGl2RenderingContext,
         max_texture_dimension_2d: u32,
         gradient_cache: &GradientRampCache,
     ) {
@@ -943,6 +996,25 @@ impl WebGlPrograms {
                 required_gradient_height <= max_texture_dimension_2d,
                 "Gradient texture height exceeds max texture dimensions"
             );
+
+            // Allocate the texture at the new size (no data upload).
+            gl.active_texture(WebGl2RenderingContext::TEXTURE0);
+            gl.bind_texture(
+                WebGl2RenderingContext::TEXTURE_2D,
+                Some(&self.resources.gradient_texture),
+            );
+            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_array_buffer_view(
+                WebGl2RenderingContext::TEXTURE_2D,
+                0,
+                WebGl2RenderingContext::RGBA8 as i32,
+                max_texture_dimension_2d as i32,
+                required_gradient_height as i32,
+                0,
+                WebGl2RenderingContext::RGBA,
+                WebGl2RenderingContext::UNSIGNED_BYTE,
+                None,
+            )
+            .unwrap();
 
             self.resources.gradient_texture_height = required_gradient_height;
         }
@@ -1064,6 +1136,9 @@ impl WebGlPrograms {
     }
 
     /// Upload alpha data to the texture.
+    ///
+    /// Uses `texSubImage2D` to update the already-allocated texture storage,
+    /// avoiding the per-frame reallocation cost of `texImage2D`.
     fn upload_alpha_texture(&mut self, gl: &WebGl2RenderingContext, alphas: &mut Vec<u8>) {
         if alphas.is_empty() {
             return;
@@ -1084,20 +1159,25 @@ impl WebGlPrograms {
             Some(&self.resources.alphas_texture),
         );
 
-        // Pack alpha values into RGBA uint32 texture
+        // Pack alpha values into RGBA uint32 texture.
+        // SAFETY: The `Uint32Array` is a zero-copy view into WASM linear memory.
+        // It is consumed synchronously by the immediately following WebGL call
+        // and is not held past that point. No Rust allocations occur between
+        // creating the view and the WebGL call, so the WASM memory cannot grow
+        // and invalidate the view.
         let alpha_data_as_u32 = bytemuck::cast_slice::<u8, u32>(alphas);
-        let packed_array = js_sys::Uint32Array::from(alpha_data_as_u32);
+        let js_view = unsafe { js_sys::Uint32Array::view(alpha_data_as_u32) };
 
-        gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_array_buffer_view(
+        gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_array_buffer_view(
             WebGl2RenderingContext::TEXTURE_2D,
             0,
-            WebGl2RenderingContext::RGBA32UI as i32,
+            0,
+            0,
             alpha_texture_width as i32,
             alpha_texture_height as i32,
-            0,
             WebGl2RenderingContext::RGBA_INTEGER,
             WebGl2RenderingContext::UNSIGNED_INT,
-            Some(&packed_array),
+            Some(&js_view),
         )
         .unwrap();
 
@@ -1106,6 +1186,9 @@ impl WebGlPrograms {
     }
 
     /// Upload encoded paints to the texture.
+    ///
+    /// Uses `texSubImage2D` to update the already-allocated texture storage,
+    /// avoiding the per-frame reallocation cost of `texImage2D`.
     fn upload_encoded_paints_texture(
         &mut self,
         gl: &WebGl2RenderingContext,
@@ -1123,27 +1206,31 @@ impl WebGlPrograms {
                 Some(&self.resources.encoded_paints_texture),
             );
 
-            // Pack encoded paints into RGBA uint32 texture
+            // Pack encoded paints into RGBA uint32 texture.
+            // SAFETY: See `upload_alpha_texture` — same invariant applies.
             let encoded_paints_data_as_u32 =
                 bytemuck::cast_slice::<u8, u32>(&self.encoded_paints_data);
-            let packed_array = js_sys::Uint32Array::from(encoded_paints_data_as_u32);
+            let js_view = unsafe { js_sys::Uint32Array::view(encoded_paints_data_as_u32) };
 
-            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_array_buffer_view(
+            gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_array_buffer_view(
                 WebGl2RenderingContext::TEXTURE_2D,
                 0,
-                WebGl2RenderingContext::RGBA32UI as i32,
+                0,
+                0,
                 encoded_paints_texture_width as i32,
                 encoded_paints_texture_height as i32,
-                0,
                 WebGl2RenderingContext::RGBA_INTEGER,
                 WebGl2RenderingContext::UNSIGNED_INT,
-                Some(&packed_array),
+                Some(&js_view),
             )
             .unwrap();
         }
     }
 
     /// Upload gradient data to the texture.
+    ///
+    /// Uses `texSubImage2D` to update the already-allocated texture storage,
+    /// avoiding the per-frame reallocation cost of `texImage2D`.
     fn upload_gradient_texture(
         &mut self,
         gl: &WebGl2RenderingContext,
@@ -1167,13 +1254,13 @@ impl WebGlPrograms {
             Some(&self.resources.gradient_texture),
         );
 
-        gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+        gl.tex_sub_image_2d_with_i32_and_i32_and_u32_and_type_and_opt_u8_array(
             WebGl2RenderingContext::TEXTURE_2D,
             0,
-            WebGl2RenderingContext::RGBA8 as i32,
+            0,
+            0,
             gradient_texture_width as i32,
             gradient_texture_height as i32,
-            0,
             WebGl2RenderingContext::RGBA,
             WebGl2RenderingContext::UNSIGNED_BYTE,
             Some(&luts),
@@ -1195,6 +1282,12 @@ impl WebGlPrograms {
     }
 
     /// Upload strip data to GPU.
+    ///
+    /// Uses `bufferData` with `DYNAMIC_DRAW` every frame to enable buffer
+    /// orphaning: the driver discards the old storage (which the GPU may still
+    /// be reading) and allocates fresh storage, avoiding synchronization stalls.
+    /// Combined with an unsafe zero-copy view into WASM linear memory to avoid
+    /// the wasm-bindgen data copy.
     fn upload_strips(&mut self, gl: &WebGl2RenderingContext, strips: &[GpuStrip]) {
         if strips.is_empty() {
             return;
@@ -1204,15 +1297,26 @@ impl WebGlPrograms {
             WebGl2RenderingContext::ARRAY_BUFFER,
             Some(&self.resources.strips_buffer),
         );
-        let strips_data = bytemuck::cast_slice(strips);
-        gl.buffer_data_with_u8_array(
+        let strips_data: &[u8] = bytemuck::cast_slice(strips);
+
+        // SAFETY: The `Uint8Array` is a zero-copy view into WASM linear memory.
+        // It is consumed synchronously by the immediately following WebGL call
+        // and is not held past that point. No Rust allocations occur between
+        // creating the view and the WebGL call, so the WASM memory cannot grow
+        // and invalidate the view.
+        let js_view = unsafe { js_sys::Uint8Array::view(strips_data) };
+
+        gl.buffer_data_with_array_buffer_view(
             WebGl2RenderingContext::ARRAY_BUFFER,
-            strips_data,
+            &js_view,
             WebGl2RenderingContext::DYNAMIC_DRAW,
         );
     }
 
     /// Upload blit rect instance data to GPU.
+    ///
+    /// Uses `bufferData` with `DYNAMIC_DRAW` every frame to enable buffer
+    /// orphaning — see `upload_strips` for rationale.
     fn upload_blit_rects(&mut self, gl: &WebGl2RenderingContext, blit_rects: &[GpuBlitRect]) {
         if blit_rects.is_empty() {
             return;
@@ -1222,10 +1326,14 @@ impl WebGlPrograms {
             WebGl2RenderingContext::ARRAY_BUFFER,
             Some(&self.resources.blit_buffer),
         );
-        let blit_data = bytemuck::cast_slice(blit_rects);
-        gl.buffer_data_with_u8_array(
+        let blit_data: &[u8] = bytemuck::cast_slice(blit_rects);
+
+        // SAFETY: See `upload_strips` — same invariant applies.
+        let js_view = unsafe { js_sys::Uint8Array::view(blit_data) };
+
+        gl.buffer_data_with_array_buffer_view(
             WebGl2RenderingContext::ARRAY_BUFFER,
-            blit_data,
+            &js_view,
             WebGl2RenderingContext::DYNAMIC_DRAW,
         );
     }
@@ -2111,11 +2219,15 @@ impl WebGlRendererContext<'_> {
             WebGl2RenderingContext::ARRAY_BUFFER,
             Some(&self.programs.resources.clear_slot_indices_buffer),
         );
-        let slot_indices_data = bytemuck::cast_slice(slot_indices);
-        self.gl.buffer_data_with_u8_array(
+        let slot_indices_data: &[u8] = bytemuck::cast_slice(slot_indices);
+
+        // SAFETY: See `upload_strips` — same invariant applies.
+        let js_view = unsafe { js_sys::Uint8Array::view(slot_indices_data) };
+
+        self.gl.buffer_data_with_array_buffer_view(
             WebGl2RenderingContext::ARRAY_BUFFER,
-            slot_indices_data,
-            WebGl2RenderingContext::STATIC_DRAW,
+            &js_view,
+            WebGl2RenderingContext::DYNAMIC_DRAW,
         );
 
         // Bind framebuffer and setup viewport.
