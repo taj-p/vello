@@ -66,7 +66,7 @@ pub(crate) struct BlitRect {
     pub rect_h: u16,
     /// Source image reference (resolved to atlas coords at render time).
     pub image_id: ImageId,
-/// Image-space origin: where the rect's top-left maps to in image coordinates.
+    /// Image-space origin: where the rect's top-left maps to in image coordinates.
     ///
     /// This accounts for both the paint transform translation and non-zero rect
     /// origins. For a rect at `(x0, y0)` with a paint transform that translates
@@ -326,7 +326,7 @@ pub struct Scene {
     strips_dirty_rects: DirtyRects,
     /// SIMD level for dirty rect intersection checks.
     level: Level,
-/// Whether blit rect batching is enabled. When `false`, every blit rect
+    /// Whether blit rect batching is enabled. When `false`, every blit rect
     /// creates a new flush point regardless of overlap. Useful for testing that
     /// the dirty rect tracking is correct.
     blit_batching_enabled: bool,
@@ -366,7 +366,7 @@ impl Scene {
             in_blit_mode: false,
             strips_dirty_rects: DirtyRects::new(),
             level: settings.level,
-blit_batching_enabled: true,
+            blit_batching_enabled: true,
         }
     }
 
@@ -470,6 +470,23 @@ blit_batching_enabled: true,
         }
     }
 
+    /// Roll back pending blit rects into the strip pipeline.
+    ///
+    /// Activates all reserved blit placeholders in `Wide` (converting
+    /// `Cmd::Reserved` to `Cmd::Fill`) and clears the blit pipeline state
+    /// so that the strip pipeline handles rendering instead.
+    fn rollback_pending_blits(&mut self) {
+        if self.all_blits.is_empty() {
+            return;
+        }
+        self.wide.activate_all_reserved();
+        self.all_blits.clear();
+        self.flush_points.clear();
+        self.all_cmd_ends.clear();
+        self.in_blit_mode = false;
+        self.strips_dirty_rects.clear();
+    }
+
     /// Check whether a blit rect can be batched into the previous [`FlushPoint`]
     /// without creating a new pipeline switch.
     ///
@@ -479,7 +496,7 @@ blit_batching_enabled: true,
     ///   strip operations recorded since that flush point.
     #[inline(always)]
     fn can_batch_blit(&self, dst_x: i16, dst_y: i16, dst_w: u16, dst_h: u16) -> bool {
-if !self.blit_batching_enabled {
+        if !self.blit_batching_enabled {
             return false;
         }
         if self.in_blit_mode {
@@ -600,24 +617,24 @@ if !self.blit_batching_enabled {
         self.flush_blits();
 
         {
-        let strip_storage = &mut self.strip_storage.borrow_mut();
+            let strip_storage = &mut self.strip_storage.borrow_mut();
 
-        self.strip_generator.generate_stroked_path(
-            path,
-            &self.stroke,
-            transform,
-            aliasing_threshold,
-            strip_storage,
-            self.clip_context.get(),
-        );
+            self.strip_generator.generate_stroked_path(
+                path,
+                &self.stroke,
+                transform,
+                aliasing_threshold,
+                strip_storage,
+                self.clip_context.get(),
+            );
 
             self.wide.generate(
-            &strip_storage.strips,
-            paint,
-            self.blend_mode,
-            0,
-            None,
-            &self.encoded_paints,
+                &strip_storage.strips,
+                paint,
+                self.blend_mode,
+                0,
+                None,
+                &self.encoded_paints,
             );
         }
 
@@ -700,10 +717,10 @@ if !self.blit_batching_enabled {
                 if img.sampler.x_extend != Extend::Pad || img.sampler.y_extend != Extend::Pad || img.sampler.alpha != 1.0 {
                     return false;
                 }
-match &img.image {
-                ImageSource::OpaqueId(id) => *id,
-                _ => return false,
-            }
+                match &img.image {
+                    ImageSource::OpaqueId(id) => *id,
+                    _ => return false,
+                }
             }
             _ => return false,
         };
@@ -817,10 +834,35 @@ match &img.image {
             rect_w,
             rect_h,
             image_id,
-img_origin_x,
+            img_origin_x,
             img_origin_y,
         });
         self.flush_points.last_mut().unwrap().blits_end = self.all_blits.len();
+
+        // Pre-encode the paint and register a blit fill reservation in Wide.
+        // This inserts no commands -- it just increments per-tile counters. If
+        // a blend layer is later pushed, `activate_all_reserved` converts the
+        // lazy reservations into real `Cmd::Fill` commands at the correct z-order.
+        {
+            use vello_common::coarse::{BlitFillMeta, FillAttrs};
+            let paint = self.encode_current_paint();
+            let attrs_idx = self.wide.attrs.fill.len() as u32;
+            self.wide
+                .attrs
+                .fill
+                .push(FillAttrs::new(0, paint, self.blend_mode, None, 0));
+            let px_x0 = dst_x.max(0) as u16;
+            let px_y0 = dst_y.max(0) as u16;
+            let px_x1 = (dst_x as i32 + dst_w as i32).max(0).min(self.width as i32) as u16;
+            let px_y1 = (dst_y as i32 + dst_h as i32).max(0).min(self.height as i32) as u16;
+            self.wide.register_blit_fill(BlitFillMeta {
+                attrs_idx,
+                x0: px_x0,
+                y0: px_y0,
+                x1: px_x1,
+                y1: px_y1,
+            });
+        }
 
         true
     }
@@ -837,7 +879,6 @@ img_origin_x,
 
     /// Push a new layer with the given properties.
     ///
-    /// Only `clip_path` is supported for now.
     // TODO: Implement filter integration.
     pub fn push_layer(
         &mut self,
@@ -847,6 +888,11 @@ img_origin_x,
         mask: Option<Mask>,
         filter: Option<Filter>,
     ) {
+        const DEFAULT_BLEND: BlendMode = BlendMode::new(Mix::Normal, Compose::SrcOver);
+        let needs_backdrop = blend_mode.is_some_and(|bm| bm != DEFAULT_BLEND);
+        if needs_backdrop {
+            self.rollback_pending_blits();
+        }
         self.flush_blits();
         self.push_dirty_viewport();
         if filter.is_some() {

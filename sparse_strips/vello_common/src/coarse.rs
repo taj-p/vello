@@ -63,6 +63,24 @@ pub const MODE_CPU: u8 = 0;
 /// generation specific for `vello_hybrid`.
 pub const MODE_HYBRID: u8 = 1;
 
+/// Metadata for a blit rect's fill commands, stored centrally on [`Wide`].
+///
+/// Only used during rollback ([`Wide::activate_all_reserved`]) to compute
+/// per-tile `Cmd::Fill` data from the screen-space rect.
+#[derive(Debug, Clone, Copy)]
+pub struct BlitFillMeta {
+    /// Index into `attrs.fill` for this blit's paint/blend.
+    pub attrs_idx: u32,
+    /// Left edge of the screen-space pixel rect (clamped to viewport).
+    pub x0: u16,
+    /// Top edge of the screen-space pixel rect (clamped to viewport).
+    pub y0: u16,
+    /// Right edge of the screen-space pixel rect (clamped to viewport).
+    pub x1: u16,
+    /// Bottom edge of the screen-space pixel rect (clamped to viewport).
+    pub y1: u16,
+}
+
 /// A container for wide tiles.
 #[derive(Debug)]
 pub struct Wide<const MODE: u8 = MODE_CPU> {
@@ -86,6 +104,11 @@ pub struct Wide<const MODE: u8 = MODE_CPU> {
     /// When > 0, command generation uses full viewport bounds instead of clip bounds
     /// to ensure filter effects can process the full layer before applying the clip.
     clipped_filter_layer_depth: u32,
+    /// Centrally stored blit fill metadata. Each entry corresponds to one blit rect.
+    ///
+    /// Used by [`activate_all_reserved`](Self::activate_all_reserved) during rollback
+    /// to compute per-tile `Cmd::Fill` data from the blit's screen-space rect.
+    pub(crate) pending_blit_fills: Vec<BlitFillMeta>,
 }
 
 /// A clip region.
@@ -311,6 +334,7 @@ impl<const MODE: u8> Wide<MODE> {
             // Start with root node 0.
             filter_node_stack: vec![0],
             clipped_filter_layer_depth: 0,
+            pending_blit_fills: vec![],
         }
     }
 
@@ -324,6 +348,7 @@ impl<const MODE: u8> Wide<MODE> {
         for tile in &mut self.tiles {
             tile.bg = PremulColor::from_alpha_color(TRANSPARENT);
             tile.cmds.clear();
+            tile.pending_reserved = 0;
             tile.layer_ids.truncate(1);
             tile.layer_cmd_ranges.clear();
             tile.layer_cmd_ranges
@@ -334,6 +359,85 @@ impl<const MODE: u8> Wide<MODE> {
         self.clip_stack.clear();
         self.filter_node_stack.truncate(1);
         self.clipped_filter_layer_depth = 0;
+        self.pending_blit_fills.clear();
+    }
+
+    /// Register a blit rect for lazy reservation.
+    ///
+    /// Stores the blit's fill metadata centrally and increments the
+    /// `pending_reserved` counter on every overlapping wide tile. No commands
+    /// are pushed -- that happens lazily in [`WideTile::flush_pending_reserved`]
+    /// when a strip operation later touches the tile, or eagerly in
+    /// [`activate_all_reserved`](Self::activate_all_reserved) during rollback.
+    pub fn register_blit_fill(&mut self, meta: BlitFillMeta) {
+        let wtile_x0 = meta.x0 / WideTile::WIDTH;
+        let wtile_x1 = meta.x1.div_ceil(WideTile::WIDTH).min(self.width_tiles());
+        let wtile_y0 = meta.y0 / Tile::HEIGHT;
+        let wtile_y1 = meta.y1.div_ceil(Tile::HEIGHT).min(self.height_tiles());
+
+        for wy in wtile_y0..wtile_y1 {
+            for wx in wtile_x0..wtile_x1 {
+                self.get_mut(wx, wy).pending_reserved += 1;
+            }
+        }
+        self.pending_blit_fills.push(meta);
+    }
+
+    /// Activate all reserved blit placeholders, converting them to real
+    /// `Cmd::Fill` commands. Called during rollback when a blend layer needs
+    /// the blit content in the strip pipeline's compositing model.
+    ///
+    /// Phase 1: Flush any remaining `pending_reserved` counters as `Cmd::Reserved`
+    /// markers (tiles that never received a strip command).
+    ///
+    /// Phase 2: Iterate each blit rect from the central metadata. For each
+    /// overlapping tile, find the next `Cmd::Reserved` (via a per-tile cursor)
+    /// and replace it with a computed `Cmd::Fill`.
+    pub fn activate_all_reserved(&mut self) {
+        // Phase 1: materialize remaining counters.
+        for tile in &mut self.tiles {
+            tile.flush_pending_reserved();
+        }
+
+        // Phase 2: replace Reserved markers with computed Fills.
+        let blit_fills = core::mem::take(&mut self.pending_blit_fills);
+        let width_tiles = self.width_tiles();
+        let height_tiles = self.height_tiles();
+        let n_tiles = usize::from(width_tiles) * usize::from(height_tiles);
+        let mut cursors: Vec<usize> = vec![0; n_tiles];
+
+        for meta in &blit_fills {
+            let wtile_x0 = meta.x0 / WideTile::WIDTH;
+            let wtile_x1 = meta.x1.div_ceil(WideTile::WIDTH).min(width_tiles);
+            let wtile_y0 = meta.y0 / Tile::HEIGHT;
+            let wtile_y1 = meta.y1.div_ceil(Tile::HEIGHT).min(height_tiles);
+
+            for wy in wtile_y0..wtile_y1 {
+                for wx in wtile_x0..wtile_x1 {
+                    let tile_idx = usize::from(wy) * usize::from(width_tiles) + usize::from(wx);
+                    let tile = &mut self.tiles[tile_idx];
+                    let cursor = &mut cursors[tile_idx];
+                    let tile_px_x = wx * WideTile::WIDTH;
+
+                    // Find the next Reserved marker starting from cursor.
+                    while *cursor < tile.cmds.len() {
+                        if matches!(tile.cmds[*cursor], Cmd::Reserved) {
+                            let local_x0 = meta.x0.max(tile_px_x);
+                            let local_x1 = meta.x1.min(tile_px_x + WideTile::WIDTH);
+                            tile.cmds[*cursor] = Cmd::Fill(CmdFill {
+                                x: local_x0 - tile_px_x,
+                                width: local_x1 - local_x0,
+                                attrs_idx: meta.attrs_idx,
+                            });
+                            *cursor += 1;
+                            break;
+                        }
+                        *cursor += 1;
+                    }
+                }
+            }
+        }
+        // blit_fills was taken via mem::take, self.pending_blit_fills is already empty.
     }
 
     /// Return the number of horizontal tiles.
@@ -498,7 +602,9 @@ impl<const MODE: u8> Wide<MODE> {
                 };
                 x += width;
                 col += u32::from(width);
-                self.get_mut(wtile_x, strip_y).strip(cmd, current_layer_id);
+                let tile = self.get_mut(wtile_x, strip_y);
+                tile.flush_pending_reserved();
+                tile.strip(cmd, current_layer_id);
                 self.update_current_layer_bbox(wtile_x, strip_y);
             }
 
@@ -552,7 +658,9 @@ impl<const MODE: u8> Wide<MODE> {
                             * WideTile::WIDTH,
                     ) - x;
                     x += width;
-                    self.get_mut(wtile_x, strip_y).fill(
+                    let tile = self.get_mut(wtile_x, strip_y);
+                    tile.flush_pending_reserved();
+                    tile.fill(
                         x_wtile_rel,
                         width,
                         attrs_idx,
@@ -676,6 +784,7 @@ impl<const MODE: u8> Wide<MODE> {
             for x in 0..self.width_tiles() {
                 for y in 0..self.height_tiles() {
                     let tile = self.get_mut(x, y);
+                    tile.flush_pending_reserved();
                     tile.push_buf(layer_kind);
                     // Mark tiles that are in a clipped filter layer so they generate
                     // explicit clip commands for proper filter processing.
@@ -906,7 +1015,9 @@ impl<const MODE: u8> Wide<MODE> {
             let wtile_x1 = (x + width).div_ceil(WideTile::WIDTH).min(clip_bbox.x1());
             if cur_wtile_x < wtile_x1 {
                 for wtile_x in cur_wtile_x..wtile_x1 {
-                    self.get_mut(wtile_x, cur_wtile_y).push_clip(layer_id);
+                    let tile = self.get_mut(wtile_x, cur_wtile_y);
+                    tile.flush_pending_reserved();
+                    tile.push_clip(layer_id);
                 }
                 cur_wtile_x = wtile_x1;
             }
@@ -1184,6 +1295,12 @@ pub struct WideTile<const MODE: u8 = MODE_CPU> {
     /// When set, clip operations generate explicit commands instead of just
     /// tracking counters, allowing filters to process clipped content correctly.
     pub in_clipped_filter_layer: bool,
+    /// Number of pending blit reservations not yet materialized as `Cmd::Reserved`.
+    ///
+    /// Incremented by [`Wide::register_blit_fill`] when a blit rect overlaps this
+    /// tile. When a strip command is about to be pushed, the tile materializes
+    /// this many `Cmd::Reserved` markers first to maintain correct z-order.
+    pub pending_reserved: u16,
     /// Maps layer Id to command ranges for this tile.
     pub layer_cmd_ranges: HashMap<LayerId, LayerCommandRanges>,
     /// Vector of layer IDs this tile participates in.
@@ -1225,8 +1342,24 @@ impl<const MODE: u8> WideTile<MODE> {
             n_clip: 0,
             n_bufs: 0,
             in_clipped_filter_layer: false,
+            pending_reserved: 0,
             layer_cmd_ranges,
             layer_ids: vec![LayerKind::Regular(0)],
+        }
+    }
+
+    /// Materialize pending blit reservations as empty `Cmd::Reserved` markers.
+    ///
+    /// Called before pushing a real command to maintain correct z-order.
+    /// Each marker holds no data -- the actual fill parameters are computed
+    /// lazily from the central [`BlitFillMeta`] list during rollback.
+    #[inline(always)]
+    pub fn flush_pending_reserved(&mut self) {
+        if self.pending_reserved > 0 {
+            for _ in 0..self.pending_reserved {
+                self.cmds.push(Cmd::Reserved);
+            }
+            self.pending_reserved = 0;
         }
     }
 
@@ -1626,6 +1759,12 @@ pub enum Cmd {
     ///
     /// Modulates the alpha channel of the buffer using the provided mask.
     Mask(Mask),
+    /// Reserved placeholder for the blit rollback mechanism.
+    ///
+    /// Inserted lazily to hold z-order position for a blit rect that may need
+    /// to be rolled back into the strip pipeline. Acts as a noop during rendering.
+    /// Replaced with `Fill` by [`Wide::activate_all_reserved`] on rollback.
+    Reserved,
 }
 
 #[cfg(debug_assertions)]
@@ -1655,6 +1794,7 @@ impl Cmd {
             Self::Blend(_) => "Blend",
             Self::Opacity(_) => "Opacity",
             Self::Mask(_) => "Mask",
+            Self::Reserved => "Reserved",
         }
     }
 
@@ -1743,6 +1883,26 @@ pub struct FillAttrs {
 }
 
 impl FillAttrs {
+    /// Create new fill attributes.
+    ///
+    /// `alpha_base_idx` is the base index into the alpha buffer for this path's
+    /// commands. For blit rect reservations that don't use alpha masks, pass `0`.
+    pub fn new(
+        thread_idx: u8,
+        paint: Paint,
+        blend_mode: BlendMode,
+        mask: Option<Mask>,
+        alpha_base_idx: u32,
+    ) -> Self {
+        Self {
+            thread_idx,
+            paint,
+            blend_mode,
+            mask,
+            alpha_base_idx,
+        }
+    }
+
     /// Compute the absolute alpha buffer index from a relative offset.
     pub fn alpha_idx(&self, offset: u32) -> u32 {
         self.alpha_base_idx + offset
