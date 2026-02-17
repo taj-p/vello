@@ -7,7 +7,7 @@ use alloc::vec;
 use alloc::vec::Vec;
 use core::cell::RefCell;
 use vello_common::clip::ClipContext;
-use vello_common::coarse::{MODE_HYBRID, Wide};
+use vello_common::coarse::{BlendModeExt, MODE_HYBRID, Wide, WideTilesBbox};
 use vello_common::encode::{EncodeExt, EncodedPaint};
 use vello_common::fearless_simd::Level;
 use vello_common::filter_effects::Filter;
@@ -77,6 +77,12 @@ pub(crate) struct BlitRect {
     /// origin). Positive values shift the sampled region deeper into the image.
     pub img_origin_x: f32,
     pub img_origin_y: f32,
+    /// Whether this blit rect has been rolled back into the strip pipeline.
+    ///
+    /// Set to `true` during selective rollback at `pop_layer` time. Rolled-back
+    /// blit rects are skipped by the renderers since their content is now
+    /// handled by `Cmd::Fill` commands in the strip pipeline.
+    pub rolled_back: bool,
 }
 
 /// A fence marking a strips-to-blits transition for pipeline interleaving.
@@ -330,6 +336,11 @@ pub struct Scene {
     /// creates a new flush point regardless of overlap. Useful for testing that
     /// the dirty rect tracking is correct.
     blit_batching_enabled: bool,
+    /// Stack tracking whether each pushed layer needs blit rollback at pop time.
+    ///
+    /// Pushed in `push_layer` when `needs_backdrop` is true. Popped in
+    /// `pop_layer` to decide whether (and how) to roll back blit rects.
+    layer_needs_rollback: Vec<bool>,
 }
 
 impl Scene {
@@ -367,6 +378,7 @@ impl Scene {
             strips_dirty_rects: DirtyRects::new(),
             level: settings.level,
             blit_batching_enabled: true,
+            layer_needs_rollback: vec![],
         }
     }
 
@@ -836,6 +848,7 @@ impl Scene {
             image_id,
             img_origin_x,
             img_origin_y,
+            rolled_back: false,
         });
         self.flush_points.last_mut().unwrap().blits_end = self.all_blits.len();
 
@@ -890,9 +903,9 @@ impl Scene {
     ) {
         const DEFAULT_BLEND: BlendMode = BlendMode::new(Mix::Normal, Compose::SrcOver);
         let needs_backdrop = blend_mode.is_some_and(|bm| bm != DEFAULT_BLEND);
-        if needs_backdrop {
-            self.rollback_pending_blits();
-        }
+        // Defer rollback to pop_layer so we can selectively rollback only
+        // blits that overlap the blend layer's bounding box.
+        self.layer_needs_rollback.push(needs_backdrop);
         self.flush_blits();
         self.push_dirty_viewport();
         if filter.is_some() {
@@ -967,10 +980,51 @@ impl Scene {
     }
 
     /// Pop the last pushed layer.
+    ///
+    /// If the layer used a non-default blend mode, selectively rolls back
+    /// blit rects that overlap the blend layer's bounding box. Blits outside
+    /// the bbox remain in the fast-path pipeline.
     pub fn pop_layer(&mut self) {
         self.flush_blits();
         self.push_dirty_viewport();
-        self.wide.pop_layer(&mut self.render_graph);
+        let needs_rollback = self.layer_needs_rollback.pop().unwrap_or(false);
+        let (blend_mode, layer_bbox) = self.wide.pop_layer(&mut self.render_graph);
+        if needs_rollback && !self.all_blits.is_empty() {
+            if blend_mode.is_destructive() {
+                self.rollback_pending_blits();
+            } else {
+                self.rollback_blits_in_bbox(layer_bbox);
+            }
+        }
+    }
+
+    /// Selectively roll back blit rects that overlap the given wide-tile
+    /// bounding box.
+    ///
+    /// Activates `Cmd::Reserved` markers in the strip pipeline for
+    /// overlapping blits and tombstones the corresponding `BlitRect`
+    /// entries so the renderers skip them.
+    fn rollback_blits_in_bbox(&mut self, bbox: WideTilesBbox) {
+        if self.all_blits.is_empty() || bbox.is_inverted() {
+            return;
+        }
+        let activated = self.wide.activate_reserved_in_bbox(bbox);
+        for (i, &was_activated) in activated.iter().enumerate() {
+            if was_activated {
+                self.all_blits[i].rolled_back = true;
+            }
+        }
+        // If every blit was rolled back, collapse the blit pipeline state
+        // so the renderer treats the scene as a single contiguous strip pass.
+        // This avoids empty flush-point segments that might split the command
+        // stream at an unexpected boundary.
+        if self.all_blits.iter().all(|b| b.rolled_back) {
+            self.all_blits.clear();
+            self.flush_points.clear();
+            self.all_cmd_ends.clear();
+            self.in_blit_mode = false;
+            self.strips_dirty_rects.clear();
+        }
     }
 
     /// Set the blend mode for subsequent rendering operations.
@@ -1059,6 +1113,7 @@ impl Scene {
         self.flush_points.clear();
         self.in_blit_mode = false;
         self.strips_dirty_rects.clear();
+        self.layer_needs_rollback.clear();
 
         let render_state = Self::default_render_state();
         self.transform = render_state.transform;

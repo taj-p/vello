@@ -12,10 +12,10 @@
 mod gpu_tests {
     use std::sync::Mutex;
 
-    use vello_common::color::palette::css::{BLUE, RED, WHITE};
+    use vello_common::color::palette::css::{BLUE, GREEN, RED, WHITE};
     use vello_common::kurbo::{Affine, BezPath, Cap, Join, Rect, Shape, Stroke};
     use vello_common::paint::{Image, ImageSource};
-    use vello_common::peniko::ImageSampler;
+    use vello_common::peniko::{BlendMode, Compose, ImageSampler, Mix};
     use vello_common::pixmap::Pixmap;
     use vello_hybrid::Scene;
 
@@ -519,5 +519,195 @@ mod gpu_tests {
             });
             scene.fill_rect(&Rect::new(160.0, 160.0, 170.0, 170.0));
         });
+    }
+
+    // ---- Selective blit rollback tests ----
+
+    /// Helper: render a scene that has a blit *outside* a blend layer and a
+    /// different colour *inside* the blend layer. Verifies the blit pixel
+    /// matches expectations (i.e., it was NOT rolled back and survived the
+    /// fast-path blit pipeline).
+    fn render_selective_rollback_scene(
+        gpu: &mut GpuContext,
+        image_id: vello_common::paint::ImageId,
+        blend_mode: BlendMode,
+    ) -> Pixmap {
+        let mut scene = Scene::new(WIDTH, HEIGHT);
+
+        // White background.
+        scene.set_paint(WHITE);
+        scene.fill_rect(&Rect::new(0.0, 0.0, WIDTH as f64, HEIGHT as f64));
+
+        // Blit at top-left (OUTSIDE blend layer bbox).
+        scene.set_paint(Image {
+            image: ImageSource::OpaqueId(image_id),
+            sampler: ImageSampler::default(),
+        });
+        scene.fill_rect(&Rect::new(0.0, 0.0, 10.0, 10.0));
+
+        // Blend layer at bottom-right -- does not overlap the blit.
+        scene.push_layer(None, Some(blend_mode), None, None, None);
+        scene.set_paint(RED);
+        scene.fill_rect(&Rect::new(100.0, 100.0, 190.0, 190.0));
+        scene.pop_layer();
+
+        gpu.render_scene(&scene)
+    }
+
+    /// Blit outside a non-destructive blend layer should survive in the
+    /// fast-path pipeline (selective rollback leaves it alone).
+    #[test]
+    fn selective_rollback_blit_outside_blend_layer() {
+        let _guard = GPU_MUTEX.lock().unwrap();
+        let test_image = make_test_image();
+        let mut gpu = GpuContext::new(WIDTH, HEIGHT);
+        let image_id = gpu.upload_image(&test_image);
+
+        let blend = BlendMode::new(Mix::Screen, Compose::SrcOver);
+        let pixmap = render_selective_rollback_scene(&mut gpu, image_id, blend);
+
+        // The blit at (0,0) should be the test image colour, proving it
+        // was NOT rolled back.
+        let px = pixmap.data()[0];
+        assert_eq!(
+            [px.r, px.g, px.b, px.a],
+            [0, 128, 255, 255],
+            "Blit outside blend layer should survive selective rollback, got {:?}",
+            px
+        );
+    }
+
+    /// When a blit overlaps the blend layer, it must be rolled back into the
+    /// strip pipeline so the blend composites correctly.
+    #[test]
+    fn selective_rollback_blit_inside_blend_layer() {
+        let _guard = GPU_MUTEX.lock().unwrap();
+        let test_image = make_test_image();
+        let mut gpu = GpuContext::new(WIDTH, HEIGHT);
+        let image_id = gpu.upload_image(&test_image);
+
+        let mut scene = Scene::new(WIDTH, HEIGHT);
+
+        // White background.
+        scene.set_paint(WHITE);
+        scene.fill_rect(&Rect::new(0.0, 0.0, WIDTH as f64, HEIGHT as f64));
+
+        // Blit at position that WILL overlap the blend layer.
+        scene.set_paint(Image {
+            image: ImageSource::OpaqueId(image_id),
+            sampler: ImageSampler::default(),
+        });
+        scene.fill_rect(&Rect::new(100.0, 100.0, 110.0, 110.0));
+
+        // Blend layer covering the blit.
+        let blend = BlendMode::new(Mix::Screen, Compose::SrcOver);
+        scene.push_layer(None, Some(blend), None, None, None);
+        scene.set_paint(RED);
+        scene.fill_rect(&Rect::new(95.0, 95.0, 115.0, 115.0));
+        scene.pop_layer();
+
+        let pixmap = gpu.render_scene(&scene);
+
+        // The pixel at (100,100) should NOT be the raw test image colour
+        // because it was blended with the red layer using Screen mode.
+        // Screen(backdrop, src) = backdrop + src - backdrop*src.
+        // The test image is (0, 128, 255) and the src is (255, 0, 0).
+        // Screen: (255, 128, 255) -- the red channel becomes 255, others stay.
+        let px = pixmap.data()[100 * WIDTH as usize + 100];
+        assert_ne!(
+            [px.r, px.g, px.b],
+            [0, 128, 255],
+            "Blit inside blend layer should be rolled back and blended, got {:?}",
+            px
+        );
+        // The red channel should be non-zero (from the Screen blend with red).
+        assert!(
+            px.r > 0,
+            "Screen blend with red should produce non-zero red channel, got {:?}",
+            px
+        );
+    }
+
+    /// Destructive blend mode (Clear) triggers full rollback of all blits.
+    /// Clear wipes everything to transparent, so the blit at (0,0) should
+    /// be cleared along with the rest of the viewport.
+    #[test]
+    fn destructive_blend_full_rollback() {
+        let _guard = GPU_MUTEX.lock().unwrap();
+        let test_image = make_test_image();
+        let mut gpu = GpuContext::new(WIDTH, HEIGHT);
+        let image_id = gpu.upload_image(&test_image);
+
+        let blend = BlendMode::new(Mix::Normal, Compose::Clear);
+        let pixmap = render_selective_rollback_scene(&mut gpu, image_id, blend);
+
+        // Clear is destructive: it sets ALL tiles to transparent, including
+        // the blit at (0,0). Verify the pixel is transparent.
+        let px = pixmap.data()[0];
+        assert_eq!(
+            [px.r, px.g, px.b, px.a],
+            [0, 0, 0, 0],
+            "Clear blend should make all pixels transparent, got {:?}",
+            px
+        );
+    }
+
+    /// Multiple blits: one inside and one outside a blend layer. The outside
+    /// blit should survive in the blit pipeline, the inside one should be
+    /// rolled back.
+    #[test]
+    fn selective_rollback_mixed_blits() {
+        let _guard = GPU_MUTEX.lock().unwrap();
+        let test_image = make_test_image();
+        let mut gpu = GpuContext::new(WIDTH, HEIGHT);
+        let image_id = gpu.upload_image(&test_image);
+
+        let mut scene = Scene::new(WIDTH, HEIGHT);
+
+        // White background.
+        scene.set_paint(WHITE);
+        scene.fill_rect(&Rect::new(0.0, 0.0, WIDTH as f64, HEIGHT as f64));
+
+        // Blit A: top-left (outside blend layer).
+        scene.set_paint(Image {
+            image: ImageSource::OpaqueId(image_id),
+            sampler: ImageSampler::default(),
+        });
+        scene.fill_rect(&Rect::new(0.0, 0.0, 10.0, 10.0));
+
+        // Blit B: bottom-right (will overlap blend layer).
+        scene.set_paint(Image {
+            image: ImageSource::OpaqueId(image_id),
+            sampler: ImageSampler::default(),
+        });
+        scene.fill_rect(&Rect::new(150.0, 150.0, 160.0, 160.0));
+
+        // Blend layer covering blit B but not blit A.
+        let blend = BlendMode::new(Mix::Multiply, Compose::SrcOver);
+        scene.push_layer(None, Some(blend), None, None, None);
+        scene.set_paint(GREEN);
+        scene.fill_rect(&Rect::new(140.0, 140.0, 190.0, 190.0));
+        scene.pop_layer();
+
+        let pixmap = gpu.render_scene(&scene);
+
+        // Blit A at (0,0) should be the raw test image colour (not rolled back).
+        let px_a = pixmap.data()[0];
+        assert_eq!(
+            [px_a.r, px_a.g, px_a.b, px_a.a],
+            [0, 128, 255, 255],
+            "Blit A outside blend should survive, got {:?}",
+            px_a
+        );
+
+        // Blit B at (150,150) should be blended with green via Multiply
+        // (not the raw test image colour).
+        let px_b = pixmap.data()[150 * WIDTH as usize + 150];
+        assert_ne!(
+            [px_b.r, px_b.g, px_b.b],
+            [0, 128, 255],
+            "Blit B inside blend should be modified by Multiply, got {:?}",
+            px_b
+        );
     }
 }

@@ -589,6 +589,9 @@ impl WebGlRenderer {
         self.gpu_blit_rects.reserve(blit_rects.len());
 
         for blit in blit_rects {
+            if blit.rolled_back {
+                continue;
+            }
             if let Some(resource) = self.image_cache.get(blit.image_id) {
                 if let Some(gpu_blit) = resolve_blit_rect(blit, resource) {
                     self.gpu_blit_rects.push(gpu_blit);

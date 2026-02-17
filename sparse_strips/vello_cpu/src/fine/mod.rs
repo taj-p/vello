@@ -643,7 +643,7 @@ impl<S: Simd, T: FineKernel<S>> Fine<S, T> {
                 // These commands are handled by the dispatcher and should not reach fine rasterization
                 unreachable!();
             }
-            Cmd::Reserved => {} // Noop placeholder for blit rollback.
+            Cmd::Reserved(_) => {} // Noop placeholder for blit rollback.
         }
     }
 

@@ -608,7 +608,7 @@ impl Dispatcher for SingleThreadedDispatcher {
 
     fn pop_layer(&mut self) {
         // Pop the current layer and update render graph.
-        self.wide.pop_layer(&mut self.render_graph);
+        let _ = self.wide.pop_layer(&mut self.render_graph);
     }
 
     fn reset(&mut self) {

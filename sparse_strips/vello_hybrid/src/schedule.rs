@@ -1033,7 +1033,7 @@ impl Scheduler {
                         );
                     }
                 }
-                Cmd::Reserved => {} // Noop placeholder for blit rollback.
+                Cmd::Reserved(_) => {} // Noop placeholder for blit rollback.
                 _ => unimplemented!(),
             }
         }

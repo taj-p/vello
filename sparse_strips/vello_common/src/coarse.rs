@@ -238,7 +238,7 @@ impl WideTilesBbox {
 
     /// Check if the bbox is still in its inverted state (no updates yet).
     #[inline(always)]
-    pub(crate) fn is_inverted(self) -> bool {
+    pub fn is_inverted(self) -> bool {
         self.bbox[0] == u16::MAX && self.bbox[1] == u16::MAX
     }
 
@@ -370,6 +370,7 @@ impl<const MODE: u8> Wide<MODE> {
     /// when a strip operation later touches the tile, or eagerly in
     /// [`activate_all_reserved`](Self::activate_all_reserved) during rollback.
     pub fn register_blit_fill(&mut self, meta: BlitFillMeta) {
+        let blit_idx = self.pending_blit_fills.len() as u32;
         let wtile_x0 = meta.x0 / WideTile::WIDTH;
         let wtile_x1 = meta.x1.div_ceil(WideTile::WIDTH).min(self.width_tiles());
         let wtile_y0 = meta.y0 / Tile::HEIGHT;
@@ -377,7 +378,11 @@ impl<const MODE: u8> Wide<MODE> {
 
         for wy in wtile_y0..wtile_y1 {
             for wx in wtile_x0..wtile_x1 {
-                self.get_mut(wx, wy).pending_reserved += 1;
+                let tile = self.get_mut(wx, wy);
+                if tile.pending_reserved == 0 {
+                    tile.pending_reserved_start = blit_idx;
+                }
+                tile.pending_reserved += 1;
             }
         }
         self.pending_blit_fills.push(meta);
@@ -390,9 +395,8 @@ impl<const MODE: u8> Wide<MODE> {
     /// Phase 1: Flush any remaining `pending_reserved` counters as `Cmd::Reserved`
     /// markers (tiles that never received a strip command).
     ///
-    /// Phase 2: Iterate each blit rect from the central metadata. For each
-    /// overlapping tile, find the next `Cmd::Reserved` (via a per-tile cursor)
-    /// and replace it with a computed `Cmd::Fill`.
+    /// Phase 2: Scan every tile's commands and replace each `Cmd::Reserved(idx)`
+    /// with a computed `Cmd::Fill` using the corresponding [`BlitFillMeta`].
     pub fn activate_all_reserved(&mut self) {
         // Phase 1: materialize remaining counters.
         for tile in &mut self.tiles {
@@ -400,44 +404,109 @@ impl<const MODE: u8> Wide<MODE> {
         }
 
         // Phase 2: replace Reserved markers with computed Fills.
-        let blit_fills = core::mem::take(&mut self.pending_blit_fills);
+        for tile in &mut self.tiles {
+            let tile_px_x = tile.x * WideTile::WIDTH;
+            for cmd in &mut tile.cmds {
+                if let Cmd::Reserved(idx) = *cmd {
+                    let meta = &self.pending_blit_fills[idx as usize];
+                    let local_x0 = meta.x0.max(tile_px_x);
+                    let local_x1 = meta.x1.min(tile_px_x + WideTile::WIDTH);
+                    *cmd = Cmd::Fill(CmdFill {
+                        x: local_x0 - tile_px_x,
+                        width: local_x1 - local_x0,
+                        attrs_idx: meta.attrs_idx,
+                    });
+                }
+            }
+        }
+        self.pending_blit_fills.clear();
+    }
+
+    /// Selectively activate reserved blit placeholders that overlap the given
+    /// wide-tile bounding box, converting them to `Cmd::Fill` commands.
+    ///
+    /// Returns a bitmask (one bit per blit fill index) of which entries were
+    /// activated. The caller uses this to tombstone the corresponding
+    /// `BlitRect` entries in the blit pipeline.
+    ///
+    /// Reserved markers outside the bbox are left as noops so their
+    /// corresponding blit rects remain in the fast-path pipeline.
+    pub fn activate_reserved_in_bbox(&mut self, bbox: WideTilesBbox) -> Vec<bool> {
+        let n_fills = self.pending_blit_fills.len();
+        let mut activated = vec![false; n_fills];
+
+        // Phase 1: materialize remaining counters on ALL tiles (not just bbox),
+        // because a blit outside the bbox may have pending counters on tiles
+        // inside the bbox.
+        for tile in &mut self.tiles {
+            tile.flush_pending_reserved();
+        }
+
+        // Determine which blit fills overlap the bbox (in pixel coordinates).
+        let bbox_px_x0 = bbox.x0() * WideTile::WIDTH;
+        let bbox_px_y0 = bbox.y0() * Tile::HEIGHT;
+        let bbox_px_x1 = bbox.x1() * WideTile::WIDTH;
+        let bbox_px_y1 = bbox.y1() * Tile::HEIGHT;
+
+        for (fill_idx, meta) in self.pending_blit_fills.iter().enumerate() {
+            // Check pixel-level overlap between the blit rect and the bbox.
+            let overlaps = meta.x0 < bbox_px_x1
+                && meta.x1 > bbox_px_x0
+                && meta.y0 < bbox_px_y1
+                && meta.y1 > bbox_px_y0;
+            activated[fill_idx] = overlaps;
+        }
+
+        // Phase 2: scan tiles within the bbox and replace matching Reserved markers.
         let width_tiles = self.width_tiles();
         let height_tiles = self.height_tiles();
-        let n_tiles = usize::from(width_tiles) * usize::from(height_tiles);
-        let mut cursors: Vec<usize> = vec![0; n_tiles];
+        let x0 = bbox.x0().min(width_tiles);
+        let x1 = bbox.x1().min(width_tiles);
+        let y0 = bbox.y0().min(height_tiles);
+        let y1 = bbox.y1().min(height_tiles);
 
-        for meta in &blit_fills {
-            let wtile_x0 = meta.x0 / WideTile::WIDTH;
-            let wtile_x1 = meta.x1.div_ceil(WideTile::WIDTH).min(width_tiles);
-            let wtile_y0 = meta.y0 / Tile::HEIGHT;
-            let wtile_y1 = meta.y1.div_ceil(Tile::HEIGHT).min(height_tiles);
+        for wy in y0..y1 {
+            for wx in x0..x1 {
+                let tile_idx = usize::from(wy) * usize::from(width_tiles) + usize::from(wx);
+                let tile = &mut self.tiles[tile_idx];
+                let tile_px_x = tile.x * WideTile::WIDTH;
 
-            for wy in wtile_y0..wtile_y1 {
-                for wx in wtile_x0..wtile_x1 {
-                    let tile_idx = usize::from(wy) * usize::from(width_tiles) + usize::from(wx);
-                    let tile = &mut self.tiles[tile_idx];
-                    let cursor = &mut cursors[tile_idx];
-                    let tile_px_x = wx * WideTile::WIDTH;
-
-                    // Find the next Reserved marker starting from cursor.
-                    while *cursor < tile.cmds.len() {
-                        if matches!(tile.cmds[*cursor], Cmd::Reserved) {
+                for cmd in &mut tile.cmds {
+                    if let Cmd::Reserved(idx) = *cmd {
+                        if activated[idx as usize] {
+                            let meta = &self.pending_blit_fills[idx as usize];
                             let local_x0 = meta.x0.max(tile_px_x);
                             let local_x1 = meta.x1.min(tile_px_x + WideTile::WIDTH);
-                            tile.cmds[*cursor] = Cmd::Fill(CmdFill {
+                            *cmd = Cmd::Fill(CmdFill {
                                 x: local_x0 - tile_px_x,
                                 width: local_x1 - local_x0,
                                 attrs_idx: meta.attrs_idx,
                             });
-                            *cursor += 1;
-                            break;
                         }
-                        *cursor += 1;
                     }
                 }
             }
         }
-        // blit_fills was taken via mem::take, self.pending_blit_fills is already empty.
+
+        // Remove activated entries from pending_blit_fills so future activations
+        // won't try to re-process them.
+        // We can't remove entries (that would invalidate indices in existing
+        // Reserved markers), so we mark them with a sentinel instead.
+        for (i, is_activated) in activated.iter().enumerate() {
+            if *is_activated {
+                // Zero out the meta so it's clearly "consumed". The x0==x1
+                // condition prevents any future overlap check from matching.
+                self.pending_blit_fills[i] = BlitFillMeta {
+                    attrs_idx: 0,
+                    x0: 0,
+                    y0: 0,
+                    x1: 0,
+                    y1: 0,
+                };
+            }
+        }
+
+        activated
     }
 
     /// Return the number of horizontal tiles.
@@ -813,7 +882,11 @@ impl<const MODE: u8> Wide<MODE> {
     /// - Generating filter commands for each tile
     /// - Popping any associated clip
     /// - Applying mask, opacity, and blend mode operations if needed
-    pub fn pop_layer(&mut self, render_graph: &mut RenderGraph) {
+    ///
+    /// Returns the layer's blend mode and wide-tile bounding box (covering
+    /// tiles that received drawing commands). The caller can use this to
+    /// selectively roll back blit rects that overlap the blend region.
+    pub fn pop_layer(&mut self, render_graph: &mut RenderGraph) -> (BlendMode, WideTilesBbox) {
         // This method basically unwinds everything we did in `push_layer`.
         let mut layer = self.layer_stack.pop().unwrap();
 
@@ -898,6 +971,8 @@ impl<const MODE: u8> Wide<MODE> {
         if in_clipped_filter_layer {
             self.clipped_filter_layer_depth -= 1;
         }
+
+        (layer.blend_mode, layer.wtile_bbox)
     }
 
     /// Adds a clipping region defined by the provided strips.
@@ -1301,6 +1376,11 @@ pub struct WideTile<const MODE: u8 = MODE_CPU> {
     /// tile. When a strip command is about to be pushed, the tile materializes
     /// this many `Cmd::Reserved` markers first to maintain correct z-order.
     pub pending_reserved: u16,
+    /// Index of the first pending blit fill in [`Wide::pending_blit_fills`].
+    ///
+    /// Valid when `pending_reserved > 0`. The pending reservations correspond to
+    /// blit fill indices `pending_reserved_start..pending_reserved_start + pending_reserved`.
+    pub pending_reserved_start: u32,
     /// Maps layer Id to command ranges for this tile.
     pub layer_cmd_ranges: HashMap<LayerId, LayerCommandRanges>,
     /// Vector of layer IDs this tile participates in.
@@ -1343,21 +1423,23 @@ impl<const MODE: u8> WideTile<MODE> {
             n_bufs: 0,
             in_clipped_filter_layer: false,
             pending_reserved: 0,
+            pending_reserved_start: 0,
             layer_cmd_ranges,
             layer_ids: vec![LayerKind::Regular(0)],
         }
     }
 
-    /// Materialize pending blit reservations as empty `Cmd::Reserved` markers.
+    /// Materialize pending blit reservations as `Cmd::Reserved` markers.
     ///
     /// Called before pushing a real command to maintain correct z-order.
-    /// Each marker holds no data -- the actual fill parameters are computed
-    /// lazily from the central [`BlitFillMeta`] list during rollback.
+    /// Each marker carries the index into [`Wide::pending_blit_fills`] so that
+    /// selective rollback can identify which blit rect each marker belongs to.
     #[inline(always)]
     pub fn flush_pending_reserved(&mut self) {
         if self.pending_reserved > 0 {
-            for _ in 0..self.pending_reserved {
-                self.cmds.push(Cmd::Reserved);
+            let start = self.pending_reserved_start;
+            for i in 0..u32::from(self.pending_reserved) {
+                self.cmds.push(Cmd::Reserved(start + i));
             }
             self.pending_reserved = 0;
         }
@@ -1764,7 +1846,10 @@ pub enum Cmd {
     /// Inserted lazily to hold z-order position for a blit rect that may need
     /// to be rolled back into the strip pipeline. Acts as a noop during rendering.
     /// Replaced with `Fill` by [`Wide::activate_all_reserved`] on rollback.
-    Reserved,
+    ///
+    /// The `u32` payload is the index into [`Wide::pending_blit_fills`], linking
+    /// each marker back to its source blit rect for selective activation.
+    Reserved(u32),
 }
 
 #[cfg(debug_assertions)]
@@ -1794,7 +1879,7 @@ impl Cmd {
             Self::Blend(_) => "Blend",
             Self::Opacity(_) => "Opacity",
             Self::Mask(_) => "Mask",
-            Self::Reserved => "Reserved",
+            Self::Reserved(_) => "Reserved",
         }
     }
 
@@ -2012,7 +2097,8 @@ pub struct CmdClipAlphaFill {
     pub attrs_idx: u32,
 }
 
-trait BlendModeExt {
+/// Extension trait for blend mode properties used by the coarse rasterizer.
+pub trait BlendModeExt {
     /// Whether a blend mode might cause destructive changes in the backdrop.
     /// This disallows certain optimizations (like for example inlining a blend mode
     /// or only applying a blend mode to the current clipping area).
