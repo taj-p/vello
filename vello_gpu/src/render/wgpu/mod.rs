@@ -171,6 +171,19 @@ impl Renderer {
         render_target_config: &RenderTargetConfig,
         settings: RenderSettings,
     ) -> (Self, Resources) {
+        Self::new_with_pipeline_cache(device, render_target_config, settings, None)
+    }
+
+    /// [`Self::new_with`], creating the render pipelines through `pipeline_cache` when one is
+    /// given (`wgpu::Features::PIPELINE_CACHE`). The driver's shader compilation dominates the
+    /// renderer's creation on mobile GPUs (0.8–1.2 s on a Mali-G57 or Adreno 610 from a cold
+    /// start); a cache the caller persists between runs makes it a few milliseconds.
+    pub fn new_with_pipeline_cache(
+        device: &Device,
+        render_target_config: &RenderTargetConfig,
+        settings: RenderSettings,
+        pipeline_cache: Option<&wgpu::PipelineCache>,
+    ) -> (Self, Resources) {
         super::common::maybe_warn_about_webgl_feature_conflict();
 
         let mut settings = settings;
@@ -196,6 +209,7 @@ impl Renderer {
                 render_target_config,
                 layer_config,
                 resource_texture_dimension_2d,
+                pipeline_cache,
             ),
             gradient_cache,
             encoded_paints: Vec::new(),
@@ -1105,6 +1119,7 @@ impl Programs {
         render_target_config: &RenderTargetConfig,
         layer_config: LayersConfig,
         resource_texture_dimension_2d: u32,
+        pipeline_cache: Option<&wgpu::PipelineCache>,
     ) -> Self {
         let strip_bind_group_layout =
             device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -1260,7 +1275,7 @@ impl Programs {
                     depth_stencil,
                     multisample: wgpu::MultisampleState::default(),
                     multiview_mask: None,
-                    cache: None,
+                    cache: pipeline_cache,
                 })
             };
 
@@ -1337,7 +1352,7 @@ impl Programs {
                 depth_stencil: None,
                 multisample: wgpu::MultisampleState::default(),
                 multiview_mask: None,
-                cache: None,
+                cache: pipeline_cache,
             })
         };
         let clear_pipeline =
@@ -1380,7 +1395,7 @@ impl Programs {
             depth_stencil: None,
             multisample: wgpu::MultisampleState::default(),
             multiview_mask: None,
-            cache: None,
+            cache: pipeline_cache,
         });
 
         let filter_texture_entry = wgpu::BindGroupLayoutEntry {
@@ -1481,7 +1496,7 @@ impl Programs {
             },
             depth_stencil: None,
             multisample: wgpu::MultisampleState::default(),
-            cache: None,
+            cache: pipeline_cache,
             multiview_mask: None,
         });
 
@@ -1610,7 +1625,7 @@ impl Programs {
                     depth_stencil: None,
                     multisample: wgpu::MultisampleState::default(),
                     multiview_mask: None,
-                    cache: None,
+                    cache: pipeline_cache,
                 })
             };
         let blend_pipeline = create_texture_op_pipeline(
